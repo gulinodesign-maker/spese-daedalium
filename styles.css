@@ -25,13 +25,19 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 
 body{
   min-height: 100vh;
-  background:
-    radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.18), transparent 60%),
-    radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.18), transparent 62%),
-    radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.18), transparent 60%),
-    radial-gradient(900px 700px at 90% 100%, rgba(216,189,151,0.22), transparent 60%),
-    linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,1));
+  background-image:
+    radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.14), transparent 62%),
+    radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.14), transparent 64%),
+    radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.14), transparent 62%),
+    radial-gradient(900px 700px at 90% 100%, rgba(216,189,151,0.18), transparent 62%),
+    linear-gradient(to bottom, rgba(255,255,255,0.92), rgba(255,255,255,0.92)),
+    url("./assets/bg-daedalium.png");
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: 10% 0%, 90% 8%, 20% 100%, 90% 100%, center, center;
+  background-size: auto, auto, auto, auto, cover, cover;
+  background-attachment: scroll;
 }
+
 
 /* Topbar */
 .topbar{
@@ -594,12 +600,17 @@ input[type="date"]{
 
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
-  background:
-    radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.24), transparent 62%),
-    radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.22), transparent 62%),
-    radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.22), transparent 62%),
-    radial-gradient(900px 700px at 92% 92%, rgba(216,189,151,0.26), transparent 62%),
-    linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,1));
+  background-image:
+    radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.22), transparent 62%),
+    radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.20), transparent 62%),
+    radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.20), transparent 62%),
+    radial-gradient(900px 700px at 92% 92%, rgba(216,189,151,0.24), transparent 62%),
+    linear-gradient(to bottom, rgba(255,255,255,0.88), rgba(255,255,255,0.88)),
+    url("./assets/bg-daedalium.png");
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: 12% 8%, 92% 14%, 18% 96%, 92% 92%, center, center;
+  background-size: auto, auto, auto, auto, cover, cover;
+  background-attachment: scroll;
 }
 
 /* Card launcher: più premium, con highlight e shimmer */
@@ -716,4 +727,48 @@ body[data-page="home"]{
 .home-icon:active{ transform: scale(0.98); box-shadow: none !important; }
 .home-icon .glyph{
   box-shadow: 0 14px 38px rgba(15,23,42,0.12);
+}
+
+
+
+/* HOME: icone 1.5x + gruppo più in alto */
+.home-icon .glyph{
+  width: 93px !important;
+  height: 93px !important;
+  border-radius: 28px !important;
+  font-size: 42px !important;
+}
+.home-icon .label{
+  font-size: 16px !important;
+}
+
+/* Alza il gruppo (card) più in alto */
+.home-page .home-spacer:first-of-type{ flex: 0.35 !important; }
+.home-page .home-spacer:last-of-type{ flex: 1.15 !important; }
+
+/* Card un filo più compatta con icone grandi */
+.home-card{
+  width: min(460px, 94vw) !important;
+  padding: 14px !important;
+}
+.home-grid{ gap: 12px !important; }
+
+
+
+/* HOME: Build visibile su iPhone (spostata più in alto) */
+#page-home .build{
+  padding-bottom: 0 !important;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+
+
+/* Background haze (migliora leggibilità sui card senza coprire lo sfondo) */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.55));
 }

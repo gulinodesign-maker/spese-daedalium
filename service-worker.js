@@ -1,7 +1,7 @@
 /* Spese Daedalium - Service Worker (PWA) */
-const CACHE_NAME = "spese-daedalium-v8";
+const CACHE_NAME = "spese-daedalium-1.012";
 const ASSETS = [
-  "./",
+"./",
   "./index.html",
   "./styles.css",
   "./app.js",
@@ -11,7 +11,8 @@ const ASSETS = [
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/icons/icon-180.png",
-  "./assets/icons/icon-32.png"
+  "./assets/icons/icon-32.png",
+  "./assets/bg-daedalium.png",
 ];
 
 self.addEventListener("install", (event) => {

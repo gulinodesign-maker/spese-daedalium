@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.007";
+const BUILD_VERSION = "1.012";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -755,3 +755,24 @@ async function init(){
 }
 
 init();
+
+
+/* Service Worker: forza update su iOS (cache-bust via query) */
+async function registerSW(){
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    // Query param = BUILD_VERSION -> forza fetch del file SW anche con cache aggressiva
+    const reg = await navigator.serviceWorker.register(`./service-worker.js?v=${BUILD_VERSION}`);
+    // prova subito un update (utile su iOS)
+    if (reg && reg.update) reg.update();
+    // se cambia controller, ricarica una volta per prendere i file nuovi
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+  } catch (_) {}
+}
+registerSW();
+
