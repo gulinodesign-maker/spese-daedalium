@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.002";
+const BUILD_VERSION = "1.003";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -505,30 +505,42 @@ function escapeHtml(s){
 }
 
 /* Wire buttons */
-function setupPeriodButtons(){
-  $("#btnApplyPeriodSpese").addEventListener("click", async () => {
-    const from = $("#fromDate").value;
-    const to = $("#toDate").value;
-    if (!from || !to) return toast("Periodo non valido");
-    setPeriod(from,to);
-    await loadData();
-  });
 
-  $("#btnApplyPeriodRiep").addEventListener("click", async () => {
-    const from = $("#fromDate2").value;
-    const to = $("#toDate2").value;
-    if (!from || !to) return toast("Periodo non valido");
-    setPeriod(from,to);
-    await loadData();
-  });
 
-  $("#btnApplyPeriodGraph").addEventListener("click", async () => {
-    const from = $("#fromDate3").value;
-    const to = $("#toDate3").value;
-    if (!from || !to) return toast("Periodo non valido");
-    setPeriod(from,to);
-    await loadData();
-  });
+function bindPeriodAuto(fromSel, toSel){
+  const fromEl = document.querySelector(fromSel);
+  const toEl = document.querySelector(toSel);
+  if (!fromEl || !toEl) return;
+
+  let timer = null;
+
+  const schedule = () => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const from = fromEl.value;
+      const to = toEl.value;
+
+      // valida che entrambe le date siano presenti
+      if (!from || !to) return;
+
+      // opzionale: evita periodi invertiti
+      if (from > to) {
+        toast("Periodo non valido");
+        return;
+      }
+
+      // aggiorna periodo globale e ricarica dati (stesso flusso di prima)
+      setPeriod(from, to);
+      try {
+        await loadData();
+      } catch (e) {
+        toast(e.message);
+      }
+    }, 220); // debounce leggero
+  };
+
+  fromEl.addEventListener("change", schedule);
+  toEl.addEventListener("change", schedule);
 }
 
 async function init(){
@@ -539,13 +551,17 @@ async function init(){
   const [from,to] = monthRangeISO(new Date());
   setPeriod(from,to);
 
+  // Periodo automatico (niente tasto Applica)
+  bindPeriodAuto("#fromDate", "#toDate");
+  bindPeriodAuto("#fromDate2", "#toDate2");
+  bindPeriodAuto("#fromDate3", "#toDate3");
+
   $("#spesaData").value = todayISO();
 
   $("#btnSaveSpesa").addEventListener("click", async () => {
     try { await saveSpesa(); } catch(e){ toast(e.message); }
   });
 
-  setupPeriodButtons();
 
   // pre-carico dati (non cambia flusso API)
   try {
