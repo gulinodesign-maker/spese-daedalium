@@ -21,7 +21,7 @@
 }
 
 *{ box-sizing:border-box; }
-html,body{ margin:0; padding:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--text); background:var(--bg); }
+html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--text); background:var(--bg); }
 
 body{
   min-height: 100vh;
@@ -88,6 +88,7 @@ body{
   white-space: nowrap;
   color: rgba(15,23,42,0.8);
 }
+.top-pill[hidden]{ display:none !important; }
 
 /* Hamburger */
 .icon-btn{
@@ -158,13 +159,19 @@ body{
 
 .field{ display:flex; flex-direction:column; gap:6px; width:100%; }
 .field label{ font-size: 12px; opacity:0.86; }
+.field{ min-width:0; overflow:hidden; }
 .field input, .field select, .field textarea{
+  display:block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12px 12px;
   border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.78);
   outline: none;
+  font-size: 16px; /* evita zoom iOS */
 }
 .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 
@@ -172,10 +179,16 @@ body{
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.78);
   backdrop-filter: blur(12px);
-  border-radius: 14px;
-  padding: 10px 12px;
+  border-radius: 16px;
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 16px;
   cursor:pointer;
-  font-weight: 800;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
 }
 .btn.primary{
@@ -187,12 +200,28 @@ body{
   background: linear-gradient(to bottom, rgba(201,119,43,0.18), rgba(255,255,255,0.78));
 }
 
+
+/* iOS date input overflow fix */
+input[type="date"]{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 12px 12px;
+}
 /* Period picker rows */
 .period-row{
+  align-items: end;
+
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
   gap: 10px;
 }
+.period-row > .field{ min-width:0; }
+.period-row input[type="date"]{ min-width:0; }
 
 /* Spese list (mobile-friendly) */
 .list{
@@ -242,10 +271,16 @@ body{
 .delbtn{
   border: 1px solid rgba(201,119,43,0.40);
   background: rgba(255,255,255,0.78);
-  border-radius: 14px;
-  padding: 8px 10px;
+  border-radius: 16px;
+  padding: 10px 12px;
+  min-height: 44px;
+  min-width: 44px;
+  font-size: 15px;
   cursor:pointer;
   font-weight: 900;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* Riepilogo KPIs */
@@ -295,7 +330,7 @@ body{
 .catgrid{
   margin-top: 8px;
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
   gap: 6px 10px;
   font-size: 12px;
   opacity: 0.90;
@@ -354,22 +389,16 @@ body{
   color: rgba(15,23,42,0.85);
 }
 
-/* HOME overlay launcher */
-.home-overlay{
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(255,255,255,0.35);
-  backdrop-filter: blur(18px);
-}
-.home-shell{
-  position: relative;
-  height: 100%;
-  padding: calc(18px + var(--safe-top)) 16px calc(18px + var(--safe-bottom)) 16px;
+/* HOME page launcher */
+.home-page{
+  min-height: calc(100vh - 68px - var(--safe-top)); /* 68px ~ header area */
   display:flex;
+  flex-direction:column;
   align-items:center;
-  justify-content:center;
+  padding: 0 2px;
 }
+.home-spacer{ flex: 1; }
+
 .home-card{
   width: min(420px, 92vw);
   border: 1px solid var(--border);
@@ -384,7 +413,7 @@ body{
 }
 .home-grid{
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
   gap: 14px;
 }
 .home-icon{
@@ -429,14 +458,12 @@ body{
 
 /* Build text bottom center */
 .build{
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(10px + var(--safe-bottom));
+  padding-bottom: calc(10px + var(--safe-bottom));
   font-size: 11px;
   font-weight: 800;
   opacity: 0.70;
   color: rgba(15,23,42,0.80);
+  text-align: center;
 }
 
 /* Toast */
@@ -460,4 +487,45 @@ body{
 
 @media (min-width: 900px){
   .kpi-stack{ grid-template-columns: 1fr 1fr 1fr; }
+}
+
+
+/* Riepilogo: KPI più grandi e leggibili */
+.kpi-top .kpi-label{ font-size: 12px; opacity: 0.78; }
+.kpi-top .kpi-value{ font-size: 32px; line-height: 1.08; }
+
+/* Totali per categoria: lista semplice */
+.catlist{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+.catitem{
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.62);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+  padding: 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+.catitem-left{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
+.catitem-name{
+  font-weight: 950;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+.catitem-total{
+  font-weight: 950;
+  font-size: 15px;
 }

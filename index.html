@@ -23,40 +23,44 @@
     </div>
   </header>
 
-  <!-- HOME / Launcher (overlay full-screen) -->
-  <div class="home-overlay" id="homeOverlay" aria-label="Home" hidden>
-    <div class="home-shell">
-      <div class="home-card">
-        <div class="home-grid" role="navigation" aria-label="Sezioni">
-          <button class="home-icon primary" data-go="inserisci" type="button" aria-label="Inserisci">
-            <div class="glyph" aria-hidden="true">＋</div>
-            <div class="label">Inserisci</div>
-          </button>
-
-          <button class="home-icon" data-go="spese" type="button" aria-label="Spese">
-            <div class="glyph" aria-hidden="true">≡</div>
-            <div class="label">Spese</div>
-          </button>
-
-          <button class="home-icon" data-go="riepilogo" type="button" aria-label="Riepilogo">
-            <div class="glyph" aria-hidden="true">▦</div>
-            <div class="label">Riepilogo</div>
-          </button>
-
-          <button class="home-icon" data-go="grafico" type="button" aria-label="Grafico">
-            <div class="glyph" aria-hidden="true">◔</div>
-            <div class="label">Grafico</div>
-          </button>
-        </div>
-      </div>
-
-      <div class="build" id="buildText">Build</div>
-    </div>
-  </div>
-
   <main class="wrap">
+    <!-- HOME (launcher) -->
+    <section id="page-home" class="page">
+      <div class="home-page">
+        <div class="home-spacer"></div>
+
+        <div class="home-card" aria-label="Launcher">
+          <div class="home-grid" role="navigation" aria-label="Sezioni">
+            <button class="home-icon primary" data-go="inserisci" type="button" aria-label="Inserisci">
+              <div class="glyph" aria-hidden="true">＋</div>
+              <div class="label">Inserisci</div>
+            </button>
+
+            <button class="home-icon" data-go="spese" type="button" aria-label="Spese">
+              <div class="glyph" aria-hidden="true">≡</div>
+              <div class="label">Spese</div>
+            </button>
+
+            <button class="home-icon" data-go="riepilogo" type="button" aria-label="Riepilogo">
+              <div class="glyph" aria-hidden="true">▦</div>
+              <div class="label">Riepilogo</div>
+            </button>
+
+            <button class="home-icon" data-go="grafico" type="button" aria-label="Grafico">
+              <div class="glyph" aria-hidden="true">◔</div>
+              <div class="label">Grafico</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="home-spacer"></div>
+
+        <div class="build" id="buildText">Build</div>
+      </div>
+    </section>
+
     <!-- 1) INSERISCI -->
-    <section id="page-inserisci" class="page">
+    <section id="page-inserisci" class="page" hidden>
       <div class="card">
         <div class="hd"><h2>Inserisci spesa</h2></div>
         <div class="bd">
@@ -137,7 +141,7 @@
             </div>
           </div>
 
-          <div class="kpi-stack" style="margin-top:12px;">
+          <div class="kpi-stack kpi-top" style="margin-top:12px;">
             <div class="kpi-card">
               <div class="kpi-label">Totale spese</div>
               <div class="kpi-value" id="kpiTotSpese">€ 0,00</div>
@@ -155,7 +159,7 @@
           <div style="height:12px;"></div>
 
           <div class="subhead">Totali per categoria</div>
-          <div id="byCat"></div>
+          <div id="byCat" class="catlist"></div>
         </div>
       </div>
     </section>

@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.000";
+const BUILD_VERSION = "1.001";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -12,7 +12,7 @@ const state = {
   spese: [],
   report: null,
   period: { from: "", to: "" },
-  page: "inserisci",
+  page: "home",
 };
 
 const COLORS = {
@@ -99,26 +99,24 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   return json.data;
 }
 
-/* HOME overlay (launcher) */
-function openHome(){
-  const ov = $("#homeOverlay");
-  if (ov) ov.hidden = false;
-}
-function closeHome(){
-  const ov = $("#homeOverlay");
-  if (ov) ov.hidden = true;
-}
-
-/* NAV pages (4 sezioni) */
+/* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
   state.page = page;
+
   document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
   if (el) el.hidden = false;
 
-  // pill periodo
+  // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
-  if (chip) chip.textContent = `${state.period.from} → ${state.period.to}`;
+  if (chip){
+    if (page === "home") {
+      chip.hidden = true;
+    } else {
+      chip.hidden = false;
+      chip.textContent = `${state.period.from} → ${state.period.to}`;
+    }
+  }
 
   // render on demand
   if (page === "spese") renderSpese();
@@ -128,7 +126,7 @@ function showPage(page){
 
 function setupHeader(){
   const hb = $("#hamburgerBtn");
-  if (hb) hb.addEventListener("click", openHome);
+  if (hb) hb.addEventListener("click", () => showPage("home"));
 }
 
 function setupHome(){
@@ -136,12 +134,11 @@ function setupHome(){
   const build = $("#buildText");
   if (build) build.textContent = `Build ${BUILD_VERSION}`;
 
-  // icone -> aprono le pagine e chiudono la home
-  document.querySelectorAll("#homeOverlay [data-go]").forEach(btn => {
+  // icone -> aprono le pagine
+  document.querySelectorAll("#page-home [data-go]").forEach(btn => {
     btn.addEventListener("click", () => {
       const page = btn.getAttribute("data-go");
       showPage(page);
-      closeHome();
     });
   });
 }
@@ -162,8 +159,9 @@ function setPeriod(from, to){
     if (t) t.value = to;
   }
 
+  // aggiorna chip solo se non siamo in home
   const chip = $("#periodChip");
-  if (chip) chip.textContent = `${from} → ${to}`;
+  if (chip && state.page !== "home") chip.textContent = `${from} → ${to}`;
 }
 
 /* DATA LOAD */
@@ -283,6 +281,7 @@ function renderRiepilogo(){
   $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
   $("#kpiImponibile").textContent = euro(r.totals.imponibile);
 
+  // Lista semplice: 5 righe (categoria + totale lordo)
   const container = $("#byCat");
   if (!container) return;
 
@@ -291,23 +290,15 @@ function renderRiepilogo(){
 
   container.innerHTML = "";
   for (const k of order){
-    const o = by[k] || { count:0, importoLordo:0, imponibile:0, iva:0, ivaDetraibile:0 };
+    const o = by[k] || { importoLordo: 0 };
     const row = document.createElement("div");
-    row.className = "catrow";
+    row.className = "catitem";
     row.innerHTML = `
-      <div class="catrow-top">
-        <div class="catname">
-          <span class="badge" style="background:${hexToRgba(COLORS[k] || "#d8bd97", 0.20)}">${categoriaLabel(k)}</span>
-          <span style="font-size:12px; opacity:.7; font-weight:900;">(${o.count})</span>
-        </div>
-        <div style="font-weight:950;">${euro(o.importoLordo)}</div>
+      <div class="catitem-left">
+        <span class="badge" style="background:${hexToRgba(COLORS[k] || "#d8bd97", 0.20)}">${categoriaLabel(k)}</span>
+        <div class="catitem-name">Totale</div>
       </div>
-      <div class="catgrid">
-        <div>Imponibile: <b>${euro(o.imponibile)}</b></div>
-        <div>IVA: <b>${euro(o.iva)}</b></div>
-        <div>IVA detraibile: <b>${euro(o.ivaDetraibile)}</b></div>
-        <div></div>
-      </div>
+      <div class="catitem-total">${euro(o.importoLordo)}</div>
     `;
     container.appendChild(row);
   }
@@ -488,6 +479,7 @@ async function init(){
 
   setupPeriodButtons();
 
+  // pre-carico dati (non cambia flusso API)
   try {
     await loadMotivazioni();
     await loadData();
@@ -495,9 +487,8 @@ async function init(){
     toast(e.message);
   }
 
-  // avvio: mostra la HOME launcher
-  showPage("inserisci");
-  openHome();
+  // avvio: mostra la HOME
+  showPage("home");
 }
 
 init();
