@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.003";
+const BUILD_VERSION = "1.004";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -12,6 +12,7 @@ const state = {
   spese: [],
   report: null,
   period: { from: "", to: "" },
+  periodPreset: "this_month",
   page: "home",
 };
 
@@ -122,6 +123,130 @@ function monthRangeISO(date = new Date()){
   return [toISO(start), toISO(end)];
 }
 
+
+// Period preset (scroll picker iOS) — nessuna API extra
+let periodSyncLock = 0;
+let presetSyncLock = 0;
+
+function addDaysISO(iso, delta){
+  const [y,m,d] = iso.split("-").map(n=>parseInt(n,10));
+  const dt = new Date(y, (m-1), d);
+  dt.setDate(dt.getDate() + delta);
+  return toISO(dt);
+}
+
+function monthRangeFromYM(ym){
+  const [yy,mm] = ym.split("-").map(n=>parseInt(n,10));
+  const start = new Date(yy, mm-1, 1);
+  const end = new Date(yy, mm, 0);
+  return [toISO(start), toISO(end)];
+}
+
+function recentMonths(n=8){
+  const out = [];
+  const d = new Date();
+  d.setDate(1);
+  for (let i=0;i<n;i++){
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    out.push(`${y}-${m}`);
+    d.setMonth(d.getMonth()-1);
+  }
+  return out;
+}
+
+function buildPeriodPresetOptions(){
+  const opts = [
+    { value:"this_month", label:"Questo mese" },
+    { value:"last_month", label:"Mese scorso" },
+    { value:"last_7", label:"Ultimi 7 giorni" },
+    { value:"last_30", label:"Ultimi 30 giorni" },
+    { value:"ytd", label:"Anno corrente" },
+    { value:"all", label:"Tutto" },
+  ];
+  for (const ym of recentMonths(8)){
+    opts.push({ value:`month:${ym}`, label: ym });
+  }
+  opts.push({ value:"custom", label:"Personalizzato" });
+  return opts;
+}
+
+function fillPresetSelect(selectEl){
+  if (!selectEl) return;
+  const opts = buildPeriodPresetOptions();
+  selectEl.innerHTML = "";
+  for (const o of opts){
+    const opt = document.createElement("option");
+    opt.value = o.value;
+    opt.textContent = o.label;
+    selectEl.appendChild(opt);
+  }
+}
+
+function setPresetValue(value){
+  state.periodPreset = value;
+  presetSyncLock += 1;
+  try {
+    const sels = ["#periodPreset1","#periodPreset2","#periodPreset3"]
+      .map(s => document.querySelector(s))
+      .filter(Boolean);
+    for (const s of sels) s.value = value;
+  } finally {
+    presetSyncLock -= 1;
+  }
+}
+
+function presetToRange(value){
+  const today = todayISO();
+  if (value === "this_month") return monthRangeISO(new Date());
+  if (value === "last_month"){
+    const d = new Date();
+    d.setMonth(d.getMonth()-1);
+    return monthRangeISO(d);
+  }
+  if (value === "last_7") return [addDaysISO(today, -6), today];
+  if (value === "last_30") return [addDaysISO(today, -29), today];
+  if (value === "ytd"){
+    const y = new Date().getFullYear();
+    return [`${y}-01-01`, today];
+  }
+  if (value === "all") return ["2000-01-01", today];
+  if (value && value.startsWith("month:")){
+    const ym = value.split(":")[1];
+    return monthRangeFromYM(ym);
+  }
+  return null;
+}
+
+function bindPresetSelect(sel){
+  const el = document.querySelector(sel);
+  if (!el) return;
+  fillPresetSelect(el);
+  el.value = state.periodPreset || "this_month";
+
+  el.addEventListener("change", async () => {
+    if (presetSyncLock > 0) return;
+    const v = el.value;
+    const range = presetToRange(v);
+    setPresetValue(v);
+    if (!range) return;
+    const [from,to] = range;
+
+    setPeriod(from,to);
+
+  // Preset periodo (scroll iOS)
+  bindPresetSelect("#periodPreset1");
+  bindPresetSelect("#periodPreset2");
+  bindPresetSelect("#periodPreset3");
+  setPresetValue(state.periodPreset || "this_month");
+    try {
+      await loadData();
+    } catch (e) {
+      toast(e.message);
+    }
+  });
+}
+
 function categoriaLabel(cat){
   return ({
     CONTANTI: "Contanti",
@@ -215,19 +340,22 @@ function setupHome(){
 function setPeriod(from, to){
   state.period = { from, to };
 
-  // sync inputs (3 copie)
-  const map = [
-    ["#fromDate", "#toDate"],
-    ["#fromDate2", "#toDate2"],
-    ["#fromDate3", "#toDate3"],
-  ];
-  for (const [fSel,tSel] of map){
-    const f = $(fSel), t = $(tSel);
-    if (f) f.value = from;
-    if (t) t.value = to;
+  periodSyncLock += 1;
+  try {
+    const map = [
+      ["#fromDate", "#toDate"],
+      ["#fromDate2", "#toDate2"],
+      ["#fromDate3", "#toDate3"],
+    ];
+    for (const [fSel,tSel] of map){
+      const f = $(fSel), t = $(tSel);
+      if (f) f.value = from;
+      if (t) t.value = to;
+    }
+  } finally {
+    periodSyncLock -= 1;
   }
 
-  // aggiorna chip solo se non siamo in home
   const chip = $("#periodChip");
   if (chip && state.page !== "home") chip.textContent = `${from} → ${to}`;
 }
@@ -268,7 +396,44 @@ function resetInserisci(){
   $("#spesaImporto").value = "";
   $("#spesaMotivazione").value = "";
   $("#spesaCategoria").value = "";
-  $("#spesaData").value = todayISO(); // lascia oggi
+  $("#spesaData").value = todayISO();
+
+
+  // Motivazione: se l'utente scrive una variante già esistente, usa la versione canonica
+  const mot = $("#spesaMotivazione");
+  if (mot) {
+    mot.addEventListener("blur", () => {
+      const v = collapseSpaces((mot.value || "").trim());
+      if (!v) return;
+      const canonical = findCanonicalMotivazione(v);
+      if (canonical) mot.value = canonical;
+      else mot.value = v; // pulizia spazi multipli
+    });
+  } // lascia oggi
+}
+
+
+function collapseSpaces(s){
+  return String(s || "").replace(/\s+/g, " ");
+}
+
+// Normalizza SOLO per confronto (non altera la stringa salvata se già esistente)
+function normalizeMotivazioneForCompare(s){
+  let x = collapseSpaces(String(s || "").trim()).toLowerCase();
+  // rimuove accenti SOLO per confronto (compatibile iOS)
+  try {
+    x = x.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  } catch (_) {}
+  return x;
+}
+
+function findCanonicalMotivazione(input){
+  const needle = normalizeMotivazioneForCompare(input);
+  for (const m of (state.motivazioni || [])){
+    const val = m?.motivazione ?? "";
+    if (normalizeMotivazioneForCompare(val) === needle) return val;
+  }
+  return null;
 }
 
 async function saveSpesa(){
@@ -283,8 +448,12 @@ async function saveSpesa(){
   if (!categoria) return toast("Categoria obbligatoria");
 
   // se motivazione nuova => salva per futuro
-  const exists = state.motivazioni.some(m => (m.motivazione || "").toLowerCase() === motivazione.toLowerCase());
-  if (!exists) {
+  const canonical = findCanonicalMotivazione(motivazione);
+  // Se esiste già (anche con spazi/case/accenti diversi), non salvare duplicati
+  if (canonical) {
+    // facoltativo: sostituisce il testo con la versione "canonica"
+    $("#spesaMotivazione").value = canonical;
+  } else {
     try {
       await api("motivazioni", { method:"POST", body:{ motivazione } });
       await loadMotivazioni();
@@ -515,28 +684,29 @@ function bindPeriodAuto(fromSel, toSel){
   let timer = null;
 
   const schedule = () => {
+    if (periodSyncLock > 0) return; // update programmatici: ignora
     if (timer) clearTimeout(timer);
     timer = setTimeout(async () => {
+      if (periodSyncLock > 0) return;
       const from = fromEl.value;
       const to = toEl.value;
 
-      // valida che entrambe le date siano presenti
       if (!from || !to) return;
-
-      // opzionale: evita periodi invertiti
       if (from > to) {
         toast("Periodo non valido");
         return;
       }
 
-      // aggiorna periodo globale e ricarica dati (stesso flusso di prima)
+      // periodo manuale: diventa "Personalizzato"
+      setPresetValue("custom");
+
       setPeriod(from, to);
       try {
         await loadData();
       } catch (e) {
         toast(e.message);
       }
-    }, 220); // debounce leggero
+    }, 220);
   };
 
   fromEl.addEventListener("change", schedule);
@@ -551,12 +721,31 @@ async function init(){
   const [from,to] = monthRangeISO(new Date());
   setPeriod(from,to);
 
+  // Preset periodo (scroll iOS)
+  bindPresetSelect("#periodPreset1");
+  bindPresetSelect("#periodPreset2");
+  bindPresetSelect("#periodPreset3");
+  setPresetValue(state.periodPreset || "this_month");
+
   // Periodo automatico (niente tasto Applica)
   bindPeriodAuto("#fromDate", "#toDate");
   bindPeriodAuto("#fromDate2", "#toDate2");
   bindPeriodAuto("#fromDate3", "#toDate3");
 
   $("#spesaData").value = todayISO();
+
+
+  // Motivazione: se l'utente scrive una variante già esistente, usa la versione canonica
+  const mot = $("#spesaMotivazione");
+  if (mot) {
+    mot.addEventListener("blur", () => {
+      const v = collapseSpaces((mot.value || "").trim());
+      if (!v) return;
+      const canonical = findCanonicalMotivazione(v);
+      if (canonical) mot.value = canonical;
+      else mot.value = v; // pulizia spazi multipli
+    });
+  }
 
   $("#btnSaveSpesa").addEventListener("click", async () => {
     try { await saveSpesa(); } catch(e){ toast(e.message); }
