@@ -763,3 +763,60 @@ body[data-page="home"]{
   font-size: 14px;
   opacity: 0.92;
 }
+
+
+
+/* HOME: stile "single-layer" (niente quadrati dentro quadrati) */
+.home-grid{
+  gap: 12px;
+}
+.home-icon{
+  border-radius: 22px;
+  border: 1px solid rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.62);
+  box-shadow: 0 18px 46px rgba(15,23,42,0.10);
+  padding: 18px 12px 16px;
+}
+.home-icon::after{
+  /* toglie highlight extra sulla tile */
+  display:none !important;
+}
+.home-emoji{
+  font-size: 38px;
+  line-height: 1;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 10px 18px rgba(15,23,42,0.10));
+}
+.home-icon .label{
+  font-size: 15px;
+  font-weight: 950;
+}
+
+/* colori soft per tile (un solo livello) */
+.home-icon.primary{
+  border-color: rgba(201,119,43,0.22);
+  background:
+    radial-gradient(120% 100% at 20% 0%, rgba(201,119,43,0.14), transparent 62%),
+    rgba(255,255,255,0.62);
+}
+.home-icon[data-go="spese"]{
+  border-color: rgba(43,124,180,0.18);
+  background:
+    radial-gradient(120% 100% at 20% 0%, rgba(43,124,180,0.14), transparent 62%),
+    rgba(255,255,255,0.62);
+}
+.home-icon[data-go="riepilogo"]{
+  border-color: rgba(216,189,151,0.22);
+  background:
+    radial-gradient(120% 100% at 20% 0%, rgba(216,189,151,0.16), transparent 62%),
+    rgba(255,255,255,0.62);
+}
+.home-icon[data-go="grafico"]{
+  border-color: rgba(31,41,55,0.12);
+  background:
+    radial-gradient(120% 100% at 20% 0%, rgba(31,41,55,0.10), transparent 64%),
+    rgba(255,255,255,0.62);
+}
+
+/* neutralizza eventuali vecchi stili del glyph se rimangono */
+.home-icon .glyph{ display:none !important; }
