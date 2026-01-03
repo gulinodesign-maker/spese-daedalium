@@ -14,8 +14,9 @@
         <h1>Spese Daedalium</h1>
       </div>
       <div class="pills">
+        <div class="pill active" data-tab="home">Home</div>
         <div class="pill" data-tab="dashboard">Periodo</div>
-        <div class="pill active" data-tab="nuova">Inserisci</div>
+        <div class="pill" data-tab="nuova">Inserisci</div>
         <div class="pill" data-tab="spese">Spese</div>
         <div class="pill" data-tab="motivazioni">Motivi</div>
       </div>
@@ -23,6 +24,56 @@
   </div>
 
   <div class="wrap">
+    <!-- HOME -->
+    <section id="tab-home">
+      <div class="card">
+        <div class="bd">
+          <div class="home-hero">
+            <div class="home-title">Cosa vuoi fare?</div>
+            <div class="home-sub">Tocca un pulsante per entrare.</div>
+          </div>
+
+          <div class="home-grid">
+            <button class="home-btn" data-go="dashboard" type="button">
+              <div class="home-btn-title">Periodo</div>
+              <div class="home-btn-sub">Imposta date e riepilogo</div>
+            </button>
+
+            <button class="home-btn primary" data-go="nuova" type="button">
+              <div class="home-btn-title">Inserisci</div>
+              <div class="home-btn-sub">Registra una spesa</div>
+            </button>
+
+            <button class="home-btn" data-go="spese" type="button">
+              <div class="home-btn-title">Spese</div>
+              <div class="home-btn-sub">Vedi elenco e cancella</div>
+            </button>
+
+            <button class="home-btn" data-go="motivazioni" type="button">
+              <div class="home-btn-title">Motivi</div>
+              <div class="home-btn-sub">Gestisci suggerimenti</div>
+            </button>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="card">
+            <div class="hd"><h2>IVA da dedurre</h2></div>
+            <div class="bd">
+              <div class="kpi">
+                <div class="label">Totale IVA detraibile</div>
+                <div class="value" id="kpiIvaDetraibileTop">€ 0,00</div>
+              </div>
+              <div style="margin-top:8px; font-size:12px; opacity:.75;">
+                Periodo: <span id="periodLabel">—</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- PERIODO -->
     <section id="tab-dashboard" style="display:none;" class="grid cols-2">
       <div class="card">
@@ -76,23 +127,8 @@
       </div>
     </section>
 
-    <!-- INSERIMENTO (VERTICALE iPhone) -->
-    <section id="tab-nuova">
-      <div class="card">
-        <div class="hd"><h2>IVA da dedurre</h2></div>
-        <div class="bd">
-          <div class="kpi">
-            <div class="label">Totale IVA detraibile</div>
-            <div class="value" id="kpiIvaDetraibileTop">€ 0,00</div>
-          </div>
-          <div style="margin-top:8px; font-size:12px; opacity:.75;">
-            Periodo: <span id="periodLabel">—</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="height:12px;"></div>
-
+    <!-- INSERIMENTO -->
+    <section id="tab-nuova" style="display:none;">
       <div class="card">
         <div class="hd"><h2>Nuova spesa</h2></div>
         <div class="bd">

@@ -89,6 +89,20 @@ function setupTabs(){
   });
 }
 
+
+function setupHomeButtons(){
+  document.querySelectorAll("[data-go]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.getAttribute("data-go");
+      const pill = document.querySelector(`.pill[data-tab="${tab}"]`);
+      if (pill) pill.click();
+    });
+  });
+}
+
+
+}
+
 async function loadMotivazioni(){
   const data = await api("motivazioni");
   state.motivazioni = data;
@@ -356,6 +370,7 @@ async function refreshAll(){
 
 async function init(){
   setupTabs();
+  setupHomeButtons();
 
   const [from, to] = monthRangeISO(new Date());
   setRange(from, to);
