@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spese Daedalium</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-left">
+        <img class="logo" src="./assets/logo.jpg" alt="Daedalium logo" />
+        <h1>Spese Daedalium</h1>
+      </div>
+      <div class="pills">
+        <div class="pill" data-tab="dashboard">Periodo</div>
+        <div class="pill active" data-tab="nuova">Inserisci</div>
+        <div class="pill" data-tab="spese">Spese</div>
+        <div class="pill" data-tab="motivazioni">Motivi</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- PERIODO -->
+    <section id="tab-dashboard" style="display:none;" class="grid cols-2">
+      <div class="card">
+        <div class="hd"><h2>Periodo</h2></div>
+        <div class="bd">
+          <div class="row">
+            <div class="field w-50">
+              <label>Da</label>
+              <input type="date" id="fromDate" />
+            </div>
+            <div class="field w-50">
+              <label>A</label>
+              <input type="date" id="toDate" />
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn" id="btnThisMonth">Questo mese</button>
+            <button class="btn" id="btnLastMonth">Mese scorso</button>
+            <button class="btn" id="btnThisYear">Anno corrente</button>
+            <button class="btn primary" id="btnRefresh">Aggiorna</button>
+            <button class="btn warn" id="btnExportCsv">Export CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h2>Totali</h2></div>
+        <div class="bd grid cols-2">
+          <div class="kpi">
+            <div class="label">Spese</div>
+            <div class="value" id="kpiTotSpese">€ 0,00</div>
+          </div>
+          <div class="kpi">
+            <div class="label">IVA detraibile</div>
+            <div class="value" id="kpiIvaDetraibile">€ 0,00</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Imponibile</div>
+            <div class="value" id="kpiImponibile">€ 0,00</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Voci</div>
+            <div class="value" id="kpiCount">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="hd"><h2>Per tipologia</h2></div>
+        <div class="bd" id="byCat"></div>
+      </div>
+    </section>
+
+    <!-- INSERIMENTO (VERTICALE iPhone) -->
+    <section id="tab-nuova">
+      <div class="card">
+        <div class="hd"><h2>IVA da dedurre</h2></div>
+        <div class="bd">
+          <div class="kpi">
+            <div class="label">Totale IVA detraibile</div>
+            <div class="value" id="kpiIvaDetraibileTop">€ 0,00</div>
+          </div>
+          <div style="margin-top:8px; font-size:12px; opacity:.75;">
+            Periodo: <span id="periodLabel">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:12px;"></div>
+
+      <div class="card">
+        <div class="hd"><h2>Nuova spesa</h2></div>
+        <div class="bd">
+          <div class="field">
+            <label>Importo (€)</label>
+            <input type="number" id="spesaImporto" step="0.01" min="0" placeholder="Es. 12.50" inputmode="decimal" />
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Motivazione</label>
+            <select id="spesaMotivazione"></select>
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Data</label>
+            <input type="date" id="spesaData" />
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Tipologia</label>
+            <select id="spesaCategoria">
+              <option value="">Seleziona…</option>
+              <option value="CONTANTI">Contanti</option>
+              <option value="TASSA_SOGGIORNO">Tassa soggiorno</option>
+              <option value="IVA_22">IVA 22%</option>
+              <option value="IVA_10">IVA 10%</option>
+              <option value="IVA_4">IVA 4%</option>
+            </select>
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Note (opzionale)</label>
+            <textarea id="spesaNote" placeholder="Facoltativo"></textarea>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <button class="btn primary" id="btnSaveSpesa" style="flex:1;">Salva</button>
+            <button class="btn" id="btnResetSpesa">Reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ELENCO SPESE -->
+    <section id="tab-spese" style="display:none;">
+      <div class="card">
+        <div class="hd"><h2>Spese</h2></div>
+        <div class="bd" style="overflow:auto;">
+          <table class="table" id="speseTable">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tipologia</th>
+                <th>Motivazione</th>
+                <th>Lordo</th>
+                <th>IVA</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MOTIVAZIONI -->
+    <section id="tab-motivazioni" style="display:none;">
+      <div class="grid cols-2">
+        <div class="card">
+          <div class="hd"><h2>Nuovo motivo</h2></div>
+          <div class="bd">
+            <div class="field">
+              <label>Motivazione</label>
+              <input type="text" id="newMotivazione" placeholder="Es. Colazione, Pulizie…" />
+            </div>
+            <div class="row" style="margin-top:10px;">
+              <button class="btn primary" id="btnAddMotivazione">Aggiungi</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd"><h2>Motivi</h2></div>
+          <div class="bd" style="overflow:auto;">
+            <table class="table" id="motTable">
+              <thead>
+                <tr>
+                  <th>Motivazione</th>
+                  <th style="width:160px;"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
