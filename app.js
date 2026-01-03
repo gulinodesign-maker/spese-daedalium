@@ -239,11 +239,7 @@ function bindPresetSelect(sel){
   bindPresetSelect("#periodPreset2");
   bindPresetSelect("#periodPreset3");
   setPresetValue(state.periodPreset || "this_month");
-    try {
-      await loadData();
-    } catch (e) {
-      toast(e.message);
-    }
+    try { await loadData(); } catch (e) { toast(e.message); }
   });
 }
 
@@ -398,7 +394,6 @@ function resetInserisci(){
   $("#spesaCategoria").value = "";
   $("#spesaData").value = todayISO();
 
-
   // Motivazione: se l'utente scrive una variante già esistente, usa la versione canonica
   const mot = $("#spesaMotivazione");
   if (mot) {
@@ -420,7 +415,7 @@ function collapseSpaces(s){
 // Normalizza SOLO per confronto (non altera la stringa salvata se già esistente)
 function normalizeMotivazioneForCompare(s){
   let x = collapseSpaces(String(s || "").trim()).toLowerCase();
-  // rimuove accenti SOLO per confronto (compatibile iOS)
+  // rimuove accenti SOLO per confronto
   try {
     x = x.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   } catch (_) {}
@@ -449,10 +444,9 @@ async function saveSpesa(){
 
   // se motivazione nuova => salva per futuro
   const canonical = findCanonicalMotivazione(motivazione);
-  // Se esiste già (anche con spazi/case/accenti diversi), non salvare duplicati
+  // Se esiste già (spazi/case/accenti diversi), non salvare duplicati
   if (canonical) {
-    // facoltativo: sostituisce il testo con la versione "canonica"
-    $("#spesaMotivazione").value = canonical;
+    $("#spesaMotivazione").value = canonical; // versione canonica
   } else {
     try {
       await api("motivazioni", { method:"POST", body:{ motivazione } });
@@ -697,15 +691,10 @@ function bindPeriodAuto(fromSel, toSel){
         return;
       }
 
-      // periodo manuale: diventa "Personalizzato"
       setPresetValue("custom");
-
       setPeriod(from, to);
-      try {
-        await loadData();
-      } catch (e) {
-        toast(e.message);
-      }
+
+      try { await loadData(); } catch (e) { toast(e.message); }
     }, 220);
   };
 
@@ -733,7 +722,6 @@ async function init(){
   bindPeriodAuto("#fromDate3", "#toDate3");
 
   $("#spesaData").value = todayISO();
-
 
   // Motivazione: se l'utente scrive una variante già esistente, usa la versione canonica
   const mot = $("#spesaMotivazione");
