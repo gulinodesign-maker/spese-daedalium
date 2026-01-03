@@ -1,5 +1,10 @@
 /* global API_BASE_URL, API_KEY */
 
+/**
+ * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
+ */
+const BUILD_VERSION = "1.000";
+
 const $ = (sel) => document.querySelector(sel);
 
 const state = {
@@ -94,30 +99,50 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   return json.data;
 }
 
-/* NAV */
+/* HOME overlay (launcher) */
+function openHome(){
+  const ov = $("#homeOverlay");
+  if (ov) ov.hidden = false;
+}
+function closeHome(){
+  const ov = $("#homeOverlay");
+  if (ov) ov.hidden = true;
+}
+
+/* NAV pages (4 sezioni) */
 function showPage(page){
   state.page = page;
   document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
   if (el) el.hidden = false;
 
-  document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
-  const btn = document.querySelector(`.navbtn[data-page="${page}"]`);
-  if (btn) btn.classList.add("active");
-
-  // aggiorna pill periodo
+  // pill periodo
   const chip = $("#periodChip");
   if (chip) chip.textContent = `${state.period.from} → ${state.period.to}`;
 
-  // quando entri in pagine dati, assicurati che siano renderizzate
+  // render on demand
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
 }
 
-function setupNav(){
-  document.querySelectorAll(".navbtn").forEach(btn => {
-    btn.addEventListener("click", () => showPage(btn.getAttribute("data-page")));
+function setupHeader(){
+  const hb = $("#hamburgerBtn");
+  if (hb) hb.addEventListener("click", openHome);
+}
+
+function setupHome(){
+  // stampa build
+  const build = $("#buildText");
+  if (build) build.textContent = `Build ${BUILD_VERSION}`;
+
+  // icone -> aprono le pagine e chiudono la home
+  document.querySelectorAll("#homeOverlay [data-go]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.getAttribute("data-go");
+      showPage(page);
+      closeHome();
+    });
   });
 }
 
@@ -139,12 +164,6 @@ function setPeriod(from, to){
 
   const chip = $("#periodChip");
   if (chip) chip.textContent = `${from} → ${to}`;
-}
-
-function readPeriodFromInputs(prefix){
-  const from = $(`#fromDate${prefix}`)?.value || "";
-  const to = $(`#toDate${prefix}`)?.value || "";
-  return { from, to };
 }
 
 /* DATA LOAD */
@@ -172,7 +191,7 @@ async function loadData(){
   state.report = report;
   state.spese = spese;
 
-  // update renders for current page
+  // refresh current page
   if (state.page === "spese") renderSpese();
   if (state.page === "riepilogo") renderRiepilogo();
   if (state.page === "grafico") renderGrafico();
@@ -211,7 +230,7 @@ async function saveSpesa(){
   toast("Salvato");
   resetInserisci();
 
-  // aggiorna dati (se la spesa rientra nel periodo)
+  // aggiorna dati
   try { await loadData(); } catch(_) {}
 }
 
@@ -304,7 +323,6 @@ function renderGrafico(){
   const values = order.map(k => Number(by[k]?.importoLordo || 0));
   const total = values.reduce((a,b)=>a+b,0);
 
-  // Draw pie
   drawPie("pieCanvas", order.map((k,i)=>({
     key: k,
     label: categoriaLabel(k),
@@ -312,7 +330,6 @@ function renderGrafico(){
     color: COLORS[k] || "#999999"
   })));
 
-  // Legend
   const leg = $("#pieLegend");
   if (!leg) return;
   leg.innerHTML = "";
@@ -338,7 +355,6 @@ function drawPie(canvasId, slices){
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  // handle high-DPI
   const cssSize = Math.min(320, Math.floor(window.innerWidth * 0.78));
   const dpr = window.devicePixelRatio || 1;
   canvas.style.width = cssSize + "px";
@@ -365,7 +381,6 @@ function drawPie(canvasId, slices){
 
   let ang = -Math.PI/2;
   if (total <= 0){
-    // empty state
     ctx.beginPath();
     ctx.arc(cx, cy, r-8, 0, Math.PI*2);
     ctx.fillStyle = "rgba(43,124,180,0.10)";
@@ -377,7 +392,6 @@ function drawPie(canvasId, slices){
     return;
   }
 
-  // slices
   slices.forEach(s => {
     const v = Math.max(0, Number(s.value||0));
     const a = (v/total) * Math.PI*2;
@@ -388,7 +402,6 @@ function drawPie(canvasId, slices){
     ctx.fillStyle = s.color;
     ctx.fill();
 
-    // subtle separator
     ctx.strokeStyle = "rgba(255,255,255,0.65)";
     ctx.lineWidth = 2;
     ctx.stroke();
@@ -396,7 +409,7 @@ function drawPie(canvasId, slices){
     ang += a;
   });
 
-  // inner hole for a cleaner iOS look
+  // inner hole
   ctx.beginPath();
   ctx.arc(cx, cy, r*0.58, 0, Math.PI*2);
   ctx.fillStyle = "rgba(255,255,255,0.78)";
@@ -424,7 +437,6 @@ function hexToRgba(hex, a){
   const b = parseInt(h.slice(4,6),16);
   return `rgba(${r},${g},${b},${a})`;
 }
-
 function escapeHtml(s){
   return String(s || "")
     .replaceAll("&","&amp;")
@@ -461,7 +473,8 @@ function setupPeriodButtons(){
 }
 
 async function init(){
-  setupNav();
+  setupHeader();
+  setupHome();
 
   // default period = this month
   const [from,to] = monthRangeISO(new Date());
@@ -482,7 +495,9 @@ async function init(){
     toast(e.message);
   }
 
+  // avvio: mostra la HOME launcher
   showPage("inserisci");
+  openHome();
 }
 
 init();
