@@ -7,75 +7,76 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div class="topbar">
+  <header class="topbar">
     <div class="brand">
       <div class="brand-left">
         <img class="logo" src="./assets/logo.jpg" alt="Daedalium logo" />
         <h1>Spese Daedalium</h1>
       </div>
-      <div class="pills">
-        <div class="pill active" data-tab="home">Home</div>
-        <div class="pill" data-tab="dashboard">Periodo</div>
-        <div class="pill" data-tab="nuova">Inserisci</div>
-        <div class="pill" data-tab="spese">Spese</div>
-        <div class="pill" data-tab="motivazioni">Motivi</div>
-      </div>
-    </div>
-  </div>
 
-  <div class="wrap">
-    <!-- HOME -->
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Drawer menu -->
+  <div class="backdrop" id="menuBackdrop" hidden></div>
+  <aside class="drawer" id="menuDrawer" hidden aria-label="Menu">
+    <div class="drawer-hd">
+      <div class="drawer-title">Menu</div>
+      <button class="icon-btn" id="menuCloseBtn" aria-label="Chiudi menu">✕</button>
+    </div>
+    <div class="drawer-bd">
+      <button class="drawer-item" data-go="home" type="button">Home</button>
+      <button class="drawer-item" data-go="dashboard" type="button">Periodo</button>
+      <button class="drawer-item" data-go="nuova" type="button">Inserisci</button>
+      <button class="drawer-item" data-go="spese" type="button">Spese</button>
+      <button class="drawer-item" data-go="motivazioni" type="button">Motivi</button>
+    </div>
+  </aside>
+
+  <main class="wrap">
+    <!-- HOME: tutte e 4 nello stesso riquadro -->
     <section id="tab-home">
       <div class="card">
         <div class="bd">
-          <div class="home-hero">
-            <div class="home-title">Cosa vuoi fare?</div>
-            <div class="home-sub">Tocca un pulsante per entrare.</div>
-          </div>
-
-          <div class="home-grid">
-            <button class="home-btn" data-go="dashboard" type="button">
-              <div class="home-btn-title">Periodo</div>
-              <div class="home-btn-sub">Imposta date e riepilogo</div>
-            </button>
-
-            <button class="home-btn primary" data-go="nuova" type="button">
-              <div class="home-btn-title">Inserisci</div>
-              <div class="home-btn-sub">Registra una spesa</div>
-            </button>
-
-            <button class="home-btn" data-go="spese" type="button">
-              <div class="home-btn-title">Spese</div>
-              <div class="home-btn-sub">Vedi elenco e cancella</div>
-            </button>
-
-            <button class="home-btn" data-go="motivazioni" type="button">
-              <div class="home-btn-title">Motivi</div>
-              <div class="home-btn-sub">Gestisci suggerimenti</div>
-            </button>
-          </div>
-
-          <div style="height:12px;"></div>
-
-          <div class="card">
-            <div class="hd"><h2>IVA da dedurre</h2></div>
-            <div class="bd">
-              <div class="kpi">
-                <div class="label">Totale IVA detraibile</div>
-                <div class="value" id="kpiIvaDetraibileTop">€ 0,00</div>
+          <div class="home-card-title">Seleziona una funzione</div>
+          <div class="appgrid" role="navigation" aria-label="Funzioni">
+            <button class="appicon" data-go="dashboard" type="button" aria-label="Periodo">
+              <div class="appicon-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7 3v2M17 3v2M4 8h16M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               </div>
-              <div style="margin-top:8px; font-size:12px; opacity:.75;">
-                Periodo: <span id="periodLabel">—</span>
-              </div>
-            </div>
-          </div>
+              <div class="appicon-label">Periodo</div>
+            </button>
 
+            <button class="appicon primary" data-go="nuova" type="button" aria-label="Inserisci">
+              <div class="appicon-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </div>
+              <div class="appicon-label">Inserisci</div>
+            </button>
+
+            <button class="appicon" data-go="spese" type="button" aria-label="Spese">
+              <div class="appicon-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+              <div class="appicon-label">Spese</div>
+            </button>
+
+            <button class="appicon" data-go="motivazioni" type="button" aria-label="Motivi">
+              <div class="appicon-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7 7h10v6a5 5 0 0 1-5 5H7V7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 10h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <div class="appicon-label">Motivi</div>
+            </button>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- PERIODO -->
-    <section id="tab-dashboard" style="display:none;" class="grid cols-2">
+    <section id="tab-dashboard" hidden class="grid cols-2">
       <div class="card">
         <div class="hd"><h2>Periodo</h2></div>
         <div class="bd">
@@ -89,12 +90,13 @@
               <input type="date" id="toDate" />
             </div>
           </div>
+
           <div class="row" style="margin-top:10px;">
-            <button class="btn" id="btnThisMonth">Questo mese</button>
-            <button class="btn" id="btnLastMonth">Mese scorso</button>
-            <button class="btn" id="btnThisYear">Anno corrente</button>
-            <button class="btn primary" id="btnRefresh">Aggiorna</button>
-            <button class="btn warn" id="btnExportCsv">Export CSV</button>
+            <button class="btn" id="btnThisMonth" type="button">Questo mese</button>
+            <button class="btn" id="btnLastMonth" type="button">Mese scorso</button>
+            <button class="btn" id="btnThisYear" type="button">Anno corrente</button>
+            <button class="btn primary" id="btnRefresh" type="button">Aggiorna</button>
+            <button class="btn warn" id="btnExportCsv" type="button">Export</button>
           </div>
         </div>
       </div>
@@ -128,7 +130,22 @@
     </section>
 
     <!-- INSERIMENTO -->
-    <section id="tab-nuova" style="display:none;">
+    <section id="tab-nuova" hidden>
+      <div class="card">
+        <div class="hd"><h2>IVA da dedurre</h2></div>
+        <div class="bd">
+          <div class="kpi">
+            <div class="label">Totale IVA detraibile</div>
+            <div class="value" id="kpiIvaDetraibileTop">€ 0,00</div>
+          </div>
+          <div style="margin-top:8px; font-size:12px; opacity:.75;">
+            Periodo: <span id="periodLabel">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:12px;"></div>
+
       <div class="card">
         <div class="hd"><h2>Nuova spesa</h2></div>
         <div class="bd">
@@ -166,15 +183,15 @@
           </div>
 
           <div class="row" style="margin-top:12px;">
-            <button class="btn primary" id="btnSaveSpesa" style="flex:1;">Salva</button>
-            <button class="btn" id="btnResetSpesa">Reset</button>
+            <button class="btn primary" id="btnSaveSpesa" style="flex:1;" type="button">Salva</button>
+            <button class="btn" id="btnResetSpesa" type="button">Reset</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ELENCO SPESE -->
-    <section id="tab-spese" style="display:none;">
+    <!-- SPESE -->
+    <section id="tab-spese" hidden>
       <div class="card">
         <div class="hd"><h2>Spese</h2></div>
         <div class="bd" style="overflow:auto;">
@@ -195,8 +212,8 @@
       </div>
     </section>
 
-    <!-- MOTIVAZIONI -->
-    <section id="tab-motivazioni" style="display:none;">
+    <!-- MOTIVI -->
+    <section id="tab-motivazioni" hidden>
       <div class="grid cols-2">
         <div class="card">
           <div class="hd"><h2>Nuovo motivo</h2></div>
@@ -206,7 +223,7 @@
               <input type="text" id="newMotivazione" placeholder="Es. Colazione, Pulizie…" />
             </div>
             <div class="row" style="margin-top:10px;">
-              <button class="btn primary" id="btnAddMotivazione">Aggiungi</button>
+              <button class="btn primary" id="btnAddMotivazione" type="button">Aggiungi</button>
             </div>
           </div>
         </div>
@@ -227,7 +244,7 @@
         </div>
       </div>
     </section>
-  </div>
+  </main>
 
   <div class="toast" id="toast"></div>
 

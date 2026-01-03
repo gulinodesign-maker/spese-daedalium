@@ -15,9 +15,62 @@ function euro(n){
 
 function toast(msg){
   const t = $("#toast");
+  if (!t) return;
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function showTab(tab){
+  document.querySelectorAll("section[id^='tab-']").forEach(s => {
+    s.hidden = true;
+  });
+  const el = document.querySelector(`#tab-${tab}`);
+  if (el) el.hidden = false;
+  closeMenu_();
+}
+
+function openMenu_(){
+  const b = $("#menuBackdrop");
+  const d = $("#menuDrawer");
+  if (b) b.hidden = false;
+  if (d) d.hidden = false;
+}
+function closeMenu_(){
+  const b = $("#menuBackdrop");
+  const d = $("#menuDrawer");
+  if (b) b.hidden = true;
+  if (d) d.hidden = true;
+}
+
+function setupNavigation(){
+  // Home icons + drawer menu items
+  document.querySelectorAll("[data-go]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.getAttribute("data-go");
+      showTab(tab);
+    });
+  });
+
+  const menuBtn = $("#menuBtn");
+  const closeBtn = $("#menuCloseBtn");
+  const backdrop = $("#menuBackdrop");
+
+  if (menuBtn) menuBtn.addEventListener("click", openMenu_);
+  if (closeBtn) closeBtn.addEventListener("click", closeMenu_);
+  if (backdrop) backdrop.addEventListener("click", closeMenu_);
+
+  // swipe to close drawer (destra -> sinistra non serve, qui basta trascinare verso destra)
+  const drawer = $("#menuDrawer");
+  if (drawer){
+    let startX = null;
+    drawer.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; }, {passive:true});
+    drawer.addEventListener("touchmove", (e) => {
+      if (startX === null) return;
+      const dx = e.touches[0].clientX - startX;
+      if (dx > 60) { closeMenu_(); startX = null; }
+    }, {passive:true});
+  }
 }
 
 function todayISO(){
@@ -28,6 +81,12 @@ function todayISO(){
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function toISO(d){
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
 function monthRangeISO(date = new Date()){
   const y = date.getFullYear();
   const m = date.getMonth();
@@ -39,16 +98,10 @@ function yearRangeISO(date = new Date()){
   const y = date.getFullYear();
   return [`${y}-01-01`, `${y}-12-31`];
 }
-function toISO(d){
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const dd = String(d.getDate()).padStart(2,"0");
-  return `${yyyy}-${mm}-${dd}`;
-}
 
 async function api(action, { method="GET", params={}, body=null } = {}){
   if (!API_BASE_URL || API_BASE_URL.includes("INCOLLA_QUI")) {
-    throw new Error("Config mancante: imposta API_BASE_URL in frontend/config.js");
+    throw new Error("Config mancante: imposta API_BASE_URL in config.js");
   }
 
   const url = new URL(API_BASE_URL);
@@ -59,6 +112,7 @@ async function api(action, { method="GET", params={}, body=null } = {}){
     if (v !== undefined && v !== null && String(v).length) url.searchParams.set(k, v);
   });
 
+  // Apps Script: PUT/DELETE via _method (POST)
   let realMethod = method;
   if (method === "PUT" || method === "DELETE") {
     url.searchParams.set("_method", method);
@@ -77,37 +131,11 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   return json.data;
 }
 
-function setupTabs(){
-  document.querySelectorAll(".pill").forEach(p => {
-    p.addEventListener("click", () => {
-      document.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
-      p.classList.add("active");
-      const tab = p.dataset.tab;
-      document.querySelectorAll("section[id^='tab-']").forEach(s => s.style.display = "none");
-      $(`#tab-${tab}`).style.display = "";
-    });
-  });
-}
-
-
-function setupHomeButtons(){
-  document.querySelectorAll("[data-go]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.getAttribute("data-go");
-      const pill = document.querySelector(`.pill[data-tab="${tab}"]`);
-      if (pill) pill.click();
-    });
-  });
-}
-
-
-}
-
 async function loadMotivazioni(){
   const data = await api("motivazioni");
   state.motivazioni = data;
 
-  const list = document.querySelector("#motivazioniList");
+  const list = $("#motivazioniList");
   if (list) {
     list.innerHTML = "";
     data.forEach(m => {
@@ -122,7 +150,9 @@ async function loadMotivazioni(){
 
 function renderMotivazioniTable(){
   const tbody = $("#motTable tbody");
+  if (!tbody) return;
   tbody.innerHTML = "";
+
   state.motivazioni.forEach(m => {
     const tr = document.createElement("tr");
 
@@ -132,6 +162,7 @@ function renderMotivazioniTable(){
     const td2 = document.createElement("td");
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn";
+    btnEdit.type = "button";
     btnEdit.textContent = "Modifica";
     btnEdit.addEventListener("click", async () => {
       const nuovo = prompt("Nuova motivazione:", m.motivazione);
@@ -143,6 +174,7 @@ function renderMotivazioniTable(){
 
     const btnDel = document.createElement("button");
     btnDel.className = "btn warn";
+    btnDel.type = "button";
     btnDel.style.marginLeft = "8px";
     btnDel.textContent = "Disattiva";
     btnDel.addEventListener("click", async () => {
@@ -162,7 +194,7 @@ function renderMotivazioniTable(){
 }
 
 async function addMotivazione(){
-  const v = $("#newMotivazione").value.trim();
+  const v = ($("#newMotivazione")?.value || "").trim();
   if (!v) return toast("Inserisci una motivazione");
   await api("motivazioni", { method:"POST", body:{ motivazione: v } });
   $("#newMotivazione").value = "";
@@ -182,26 +214,27 @@ async function saveSpesa(){
   const dataSpesa = $("#spesaData").value;
   const categoria = $("#spesaCategoria").value;
   const importoLordo = Number($("#spesaImporto").value);
-  const motivazione = $("#spesaMotivazione").value;
+  const motivazione = ($("#spesaMotivazione").value || "").trim();
   const note = $("#spesaNote").value;
 
   if (!dataSpesa) return toast("Data obbligatoria");
-  if (!categoria) return toast("Categoria obbligatoria");
+  if (!categoria) return toast("Tipologia obbligatoria");
   if (!motivazione) return toast("Motivazione obbligatoria");
   if (!isFinite(importoLordo) || importoLordo <= 0) return toast("Importo non valido");
 
   // se la motivazione non esiste, la memorizza automaticamente
-  const exists = state.motivazioni.some(m => m.motivazione.toLowerCase() === motivazione.toLowerCase());
+  const exists = state.motivazioni.some(m => (m.motivazione || "").toLowerCase() === motivazione.toLowerCase());
   if (!exists) {
     try {
       await api("motivazioni", { method:"POST", body:{ motivazione } });
-    } catch(e){}
+      await loadMotivazioni();
+    } catch (_) {}
   }
 
   await api("spese", { method:"POST", body:{ dataSpesa, categoria, motivazione, importoLordo, note } });
   toast("Spesa salvata");
   resetSpesaForm();
-  await refreshAll();
+  await loadReportAndSpese();
 }
 
 function badgeCategoria(cat){
@@ -217,6 +250,7 @@ function badgeCategoria(cat){
 
 function renderSpeseTable(){
   const tbody = $("#speseTable tbody");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   state.spese.forEach(s => {
@@ -243,12 +277,13 @@ function renderSpeseTable(){
     const tdX = document.createElement("td");
     const btn = document.createElement("button");
     btn.className = "btn warn";
+    btn.type = "button";
     btn.textContent = "Elimina";
     btn.addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Spesa eliminata");
-      await refreshAll();
+      await loadReportAndSpese();
     });
     tdX.appendChild(btn);
 
@@ -266,6 +301,21 @@ function renderSpeseTable(){
 function setRange(from, to){
   $("#fromDate").value = from;
   $("#toDate").value = to;
+}
+
+function updateTopIvaCard(){
+  const r = state.report;
+  if (!r) return;
+
+  const top = $("#kpiIvaDetraibileTop");
+  if (top) top.textContent = euro(r.totals.ivaDetraibile);
+
+  const periodLabel = $("#periodLabel");
+  if (periodLabel){
+    const f = $("#fromDate")?.value || r.from || "";
+    const t = $("#toDate")?.value || r.to || "";
+    periodLabel.textContent = (f && t) ? `${f} → ${t}` : "—";
+  }
 }
 
 async function loadReportAndSpese(){
@@ -288,29 +338,16 @@ async function loadReportAndSpese(){
 
 function renderKPI(){
   const r = state.report;
+  if (!r) return;
   $("#kpiTotSpese").textContent = euro(r.totals.importoLordo);
   $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
   $("#kpiImponibile").textContent = euro(r.totals.imponibile);
   $("#kpiCount").textContent = String(r.totals.count);
-  updateTopIvaCard();
-}
-
-function updateTopIvaCard(){
-  const r = state.report;
-  if (!r) return;
-  const top = document.querySelector("#kpiIvaDetraibileTop");
-  if (top) top.textContent = euro(r.totals.ivaDetraibile);
-
-  const periodLabel = document.querySelector("#periodLabel");
-  if (periodLabel){
-    const f = document.querySelector("#fromDate")?.value || r.from || "";
-    const t = document.querySelector("#toDate")?.value || r.to || "";
-    periodLabel.textContent = (f && t) ? `${f} → ${t}` : "—";
-  }
 }
 
 function renderByCat(){
   const container = $("#byCat");
+  if (!container || !state.report) return;
   const by = state.report.byCategoria || {};
   const keys = Object.keys(by);
 
@@ -325,8 +362,8 @@ function renderByCat(){
       <div class="card" style="margin-bottom:10px;">
         <div class="bd">
           <div class="row" style="justify-content:space-between;">
-            <div><span class="badge">${badgeCategoria(k)}</span> <span style="font-size:12px; opacity:.75;">(${o.count} voci)</span></div>
-            <div style="font-weight:750;">${euro(o.importoLordo)}</div>
+            <div><span class="badge">${badgeCategoria(k)}</span> <span style="font-size:12px; opacity:.75;">(${o.count})</span></div>
+            <div style="font-weight:900;">${euro(o.importoLordo)}</div>
           </div>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px; font-size:12px;">
             <div>Imponibile: <b>${euro(o.imponibile)}</b></div>
@@ -360,17 +397,12 @@ function exportCsv(){
   a.download = "spese.csv";
   a.click();
   URL.revokeObjectURL(url);
-  toast("CSV esportato");
-}
-
-async function refreshAll(){
-  await loadMotivazioni();
-  await loadReportAndSpese();
+  toast("Export pronto");
 }
 
 async function init(){
-  setupTabs();
-  setupHomeButtons();
+  setupNavigation();
+  showTab("home");
 
   const [from, to] = monthRangeISO(new Date());
   setRange(from, to);
@@ -384,7 +416,7 @@ async function init(){
   $("#btnThisMonth").addEventListener("click", async () => {
     const [f,t] = monthRangeISO(new Date());
     setRange(f,t);
-    try { await loadReportAndSpese(); toast("Periodo: questo mese"); } catch(e){ toast(e.message); }
+    try { await loadReportAndSpese(); toast("Periodo aggiornato"); } catch(e){ toast(e.message); }
   });
 
   $("#btnLastMonth").addEventListener("click", async () => {
@@ -392,13 +424,13 @@ async function init(){
     d.setMonth(d.getMonth()-1);
     const [f,t] = monthRangeISO(d);
     setRange(f,t);
-    try { await loadReportAndSpese(); toast("Periodo: mese scorso"); } catch(e){ toast(e.message); }
+    try { await loadReportAndSpese(); toast("Periodo aggiornato"); } catch(e){ toast(e.message); }
   });
 
   $("#btnThisYear").addEventListener("click", async () => {
     const [f,t] = yearRangeISO(new Date());
     setRange(f,t);
-    try { await loadReportAndSpese(); toast("Periodo: anno corrente"); } catch(e){ toast(e.message); }
+    try { await loadReportAndSpese(); toast("Periodo aggiornato"); } catch(e){ toast(e.message); }
   });
 
   $("#btnExportCsv").addEventListener("click", exportCsv);
@@ -414,8 +446,8 @@ async function init(){
   $("#btnResetSpesa").addEventListener("click", resetSpesaForm);
 
   try {
-    await refreshAll();
-    toast("Pronto");
+    await loadMotivazioni();
+    await loadReportAndSpese();
   } catch (e) {
     toast(e.message);
   }
