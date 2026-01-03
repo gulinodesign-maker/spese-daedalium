@@ -702,121 +702,18 @@ body[data-page="home"]{
 
 
 
-/* HOME: elimina effetto "scatole dentro scatole" (icona = un solo tile) */
+/* HOME: rimuovi rettangoli dei bottoni (restano solo le icone) */
 .home-icon{
-  padding: 18px 12px 14px;
-  min-height: 120px;
-  border-radius: 22px;
-  border: 1px solid rgba(15,23,42,0.10);
-  background: rgba(255,255,255,0.68);
-  backdrop-filter: blur(16px);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 10px 6px 8px !important;
+  min-height: unset !important;
+}
+.home-icon::after{ display:none !important; }
+.home-icon:active{ transform: scale(0.98); box-shadow: none !important; }
+.home-icon .glyph{
   box-shadow: 0 14px 38px rgba(15,23,42,0.12);
 }
-.home-icon::after{
-  opacity: 0.45;
-}
-
-/* togli il riquadro interno del glyph */
-.home-icon .glyph{
-  width: auto !important;
-  height: auto !important;
-  border-radius: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  padding: 0 !important;
-  font-size: 34px !important;
-  line-height: 1 !important;
-  color: rgba(15,23,42,0.90) !important;
-}
-.home-icon .glyph::before{ display:none !important; }
-
-/* Colori soft per tile (uno solo) */
-.home-icon.primary{
-  border-color: rgba(201,119,43,0.35);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(201,119,43,0.16), transparent 60%),
-    linear-gradient(to bottom, rgba(255,255,255,0.78), rgba(255,255,255,0.58));
-}
-.home-icon[data-go="spese"]{
-  border-color: rgba(43,124,180,0.28);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(43,124,180,0.16), transparent 60%),
-    linear-gradient(to bottom, rgba(255,255,255,0.78), rgba(255,255,255,0.58));
-}
-.home-icon[data-go="riepilogo"]{
-  border-color: rgba(216,189,151,0.38);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(216,189,151,0.22), transparent 60%),
-    linear-gradient(to bottom, rgba(255,255,255,0.78), rgba(255,255,255,0.58));
-}
-.home-icon[data-go="grafico"]{
-  border-color: rgba(31,41,55,0.18);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(31,41,55,0.12), transparent 62%),
-    linear-gradient(to bottom, rgba(255,255,255,0.78), rgba(255,255,255,0.58));
-}
-
-/* label un po' più pulita */
-.home-icon .label{
-  margin-top: 2px;
-  font-size: 14px;
-  opacity: 0.92;
-}
-
-
-
-/* HOME: stile "single-layer" (niente quadrati dentro quadrati) */
-.home-grid{
-  gap: 12px;
-}
-.home-icon{
-  border-radius: 22px;
-  border: 1px solid rgba(15,23,42,0.08);
-  background: rgba(255,255,255,0.62);
-  box-shadow: 0 18px 46px rgba(15,23,42,0.10);
-  padding: 18px 12px 16px;
-}
-.home-icon::after{
-  /* toglie highlight extra sulla tile */
-  display:none !important;
-}
-.home-emoji{
-  font-size: 38px;
-  line-height: 1;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 10px 18px rgba(15,23,42,0.10));
-}
-.home-icon .label{
-  font-size: 15px;
-  font-weight: 950;
-}
-
-/* colori soft per tile (un solo livello) */
-.home-icon.primary{
-  border-color: rgba(201,119,43,0.22);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(201,119,43,0.14), transparent 62%),
-    rgba(255,255,255,0.62);
-}
-.home-icon[data-go="spese"]{
-  border-color: rgba(43,124,180,0.18);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(43,124,180,0.14), transparent 62%),
-    rgba(255,255,255,0.62);
-}
-.home-icon[data-go="riepilogo"]{
-  border-color: rgba(216,189,151,0.22);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(216,189,151,0.16), transparent 62%),
-    rgba(255,255,255,0.62);
-}
-.home-icon[data-go="grafico"]{
-  border-color: rgba(31,41,55,0.12);
-  background:
-    radial-gradient(120% 100% at 20% 0%, rgba(31,41,55,0.10), transparent 64%),
-    rgba(255,255,255,0.62);
-}
-
-/* neutralizza eventuali vecchi stili del glyph se rimangono */
-.home-icon .glyph{ display:none !important; }
