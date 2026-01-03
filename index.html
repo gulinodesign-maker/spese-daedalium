@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
   <title>Spese Daedalium</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -13,141 +13,15 @@
         <img class="logo" src="./assets/logo.jpg" alt="Daedalium logo" />
         <h1>Spese Daedalium</h1>
       </div>
-
-      <button class="icon-btn" id="menuBtn" aria-label="Menu">
-        <span class="hamburger" aria-hidden="true"></span>
-      </button>
+      <div class="top-pill" id="periodChip" title="Periodo attivo"></div>
     </div>
   </header>
 
-  <!-- Drawer menu -->
-  <div class="backdrop" id="menuBackdrop" hidden></div>
-  <aside class="drawer" id="menuDrawer" hidden aria-label="Menu">
-    <div class="drawer-hd">
-      <div class="drawer-title">Menu</div>
-      <button class="icon-btn" id="menuCloseBtn" aria-label="Chiudi menu">✕</button>
-    </div>
-    <div class="drawer-bd">
-      <button class="drawer-item" data-go="home" type="button">Home</button>
-      <button class="drawer-item" data-go="dashboard" type="button">Periodo</button>
-      <button class="drawer-item" data-go="nuova" type="button">Inserisci</button>
-      <button class="drawer-item" data-go="spese" type="button">Spese</button>
-      <button class="drawer-item" data-go="motivazioni" type="button">Motivi</button>
-    </div>
-  </aside>
-
   <main class="wrap">
-    <!-- HOME: tutte e 4 nello stesso riquadro -->
-    <section id="tab-home">
+    <!-- 1) INSERISCI -->
+    <section id="page-inserisci" class="page">
       <div class="card">
-        <div class="bd">
-          <div class="home-card-title">Seleziona una funzione</div>
-          <div class="appgrid" role="navigation" aria-label="Funzioni">
-            <button class="appicon" data-go="dashboard" type="button" aria-label="Periodo">
-              <div class="appicon-glyph" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M7 3v2M17 3v2M4 8h16M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              </div>
-              <div class="appicon-label">Periodo</div>
-            </button>
-
-            <button class="appicon primary" data-go="nuova" type="button" aria-label="Inserisci">
-              <div class="appicon-glyph" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-              </div>
-              <div class="appicon-label">Inserisci</div>
-            </button>
-
-            <button class="appicon" data-go="spese" type="button" aria-label="Spese">
-              <div class="appicon-glyph" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              </div>
-              <div class="appicon-label">Spese</div>
-            </button>
-
-            <button class="appicon" data-go="motivazioni" type="button" aria-label="Motivi">
-              <div class="appicon-glyph" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><path d="M7 7h10v6a5 5 0 0 1-5 5H7V7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 10h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              </div>
-              <div class="appicon-label">Motivi</div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PERIODO -->
-    <section id="tab-dashboard" hidden class="grid cols-2">
-      <div class="card">
-        <div class="hd"><h2>Periodo</h2></div>
-        <div class="bd">
-          <div class="row">
-            <div class="field w-50">
-              <label>Da</label>
-              <input type="date" id="fromDate" />
-            </div>
-            <div class="field w-50">
-              <label>A</label>
-              <input type="date" id="toDate" />
-            </div>
-          </div>
-
-          <div class="row" style="margin-top:10px;">
-            <button class="btn" id="btnThisMonth" type="button">Questo mese</button>
-            <button class="btn" id="btnLastMonth" type="button">Mese scorso</button>
-            <button class="btn" id="btnThisYear" type="button">Anno corrente</button>
-            <button class="btn primary" id="btnRefresh" type="button">Aggiorna</button>
-            <button class="btn warn" id="btnExportCsv" type="button">Export</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="hd"><h2>Totali</h2></div>
-        <div class="bd grid cols-2">
-          <div class="kpi">
-            <div class="label">Spese</div>
-            <div class="value" id="kpiTotSpese">€ 0,00</div>
-          </div>
-          <div class="kpi">
-            <div class="label">IVA detraibile</div>
-            <div class="value" id="kpiIvaDetraibile">€ 0,00</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Imponibile</div>
-            <div class="value" id="kpiImponibile">€ 0,00</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Voci</div>
-            <div class="value" id="kpiCount">0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="grid-column: 1 / -1;">
-        <div class="hd"><h2>Per tipologia</h2></div>
-        <div class="bd" id="byCat"></div>
-      </div>
-    </section>
-
-    <!-- INSERIMENTO -->
-    <section id="tab-nuova" hidden>
-      <div class="card">
-        <div class="hd"><h2>IVA da dedurre</h2></div>
-        <div class="bd">
-          <div class="kpi">
-            <div class="label">Totale IVA detraibile</div>
-            <div class="value" id="kpiIvaDetraibileTop">€ 0,00</div>
-          </div>
-          <div style="margin-top:8px; font-size:12px; opacity:.75;">
-            Periodo: <span id="periodLabel">—</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="height:12px;"></div>
-
-      <div class="card">
-        <div class="hd"><h2>Nuova spesa</h2></div>
+        <div class="hd"><h2>Inserisci spesa</h2></div>
         <div class="bd">
           <div class="field">
             <label>Importo (€)</label>
@@ -156,7 +30,7 @@
 
           <div class="field" style="margin-top:10px;">
             <label>Motivazione</label>
-            <input list="motivazioniList" id="spesaMotivazione" placeholder="Es. Colazione, Pulizie…" />
+            <input list="motivazioniList" id="spesaMotivazione" placeholder="Scrivi o scegli…" />
             <datalist id="motivazioniList"></datalist>
           </div>
 
@@ -166,7 +40,7 @@
           </div>
 
           <div class="field" style="margin-top:10px;">
-            <label>Tipologia</label>
+            <label>Categoria</label>
             <select id="spesaCategoria">
               <option value="">Seleziona…</option>
               <option value="CONTANTI">Contanti</option>
@@ -177,74 +51,126 @@
             </select>
           </div>
 
-          <div class="field" style="margin-top:10px;">
-            <label>Note (opzionale)</label>
-            <textarea id="spesaNote" placeholder="Facoltativo"></textarea>
-          </div>
-
-          <div class="row" style="margin-top:12px;">
+          <div class="row" style="margin-top:14px;">
             <button class="btn primary" id="btnSaveSpesa" style="flex:1;" type="button">Salva</button>
-            <button class="btn" id="btnResetSpesa" type="button">Reset</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SPESE -->
-    <section id="tab-spese" hidden>
+    <!-- 2) SPESE -->
+    <section id="page-spese" class="page" hidden>
       <div class="card">
-        <div class="hd"><h2>Spese</h2></div>
-        <div class="bd" style="overflow:auto;">
-          <table class="table" id="speseTable">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Tipologia</th>
-                <th>Motivazione</th>
-                <th>Lordo</th>
-                <th>IVA</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+        <div class="hd">
+          <h2>Spese</h2>
+          <button class="btn" id="btnApplyPeriodSpese" type="button">Applica</button>
+        </div>
+        <div class="bd">
+          <div class="period-row">
+            <div class="field">
+              <label>Da</label>
+              <input type="date" id="fromDate" />
+            </div>
+            <div class="field">
+              <label>A</label>
+              <input type="date" id="toDate" />
+            </div>
+          </div>
+          <div class="list" id="speseList"></div>
         </div>
       </div>
     </section>
 
-    <!-- MOTIVI -->
-    <section id="tab-motivazioni" hidden>
-      <div class="grid cols-2">
-        <div class="card">
-          <div class="hd"><h2>Nuovo motivo</h2></div>
-          <div class="bd">
-            <div class="field">
-              <label>Motivazione</label>
-              <input type="text" id="newMotivazione" placeholder="Es. Colazione, Pulizie…" />
-            </div>
-            <div class="row" style="margin-top:10px;">
-              <button class="btn primary" id="btnAddMotivazione" type="button">Aggiungi</button>
-            </div>
-          </div>
+    <!-- 3) RIEPILOGO -->
+    <section id="page-riepilogo" class="page" hidden>
+      <div class="card">
+        <div class="hd">
+          <h2>Riepilogo</h2>
+          <button class="btn" id="btnApplyPeriodRiep" type="button">Applica</button>
         </div>
-
-        <div class="card">
-          <div class="hd"><h2>Motivi</h2></div>
-          <div class="bd" style="overflow:auto;">
-            <table class="table" id="motTable">
-              <thead>
-                <tr>
-                  <th>Motivazione</th>
-                  <th style="width:160px;"></th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+        <div class="bd">
+          <div class="period-row">
+            <div class="field">
+              <label>Da</label>
+              <input type="date" id="fromDate2" />
+            </div>
+            <div class="field">
+              <label>A</label>
+              <input type="date" id="toDate2" />
+            </div>
           </div>
+
+          <div class="kpi-stack" style="margin-top:12px;">
+            <div class="kpi-card">
+              <div class="kpi-label">Totale spese</div>
+              <div class="kpi-value" id="kpiTotSpese">€ 0,00</div>
+            </div>
+            <div class="kpi-card accent">
+              <div class="kpi-label">IVA detraibile</div>
+              <div class="kpi-value" id="kpiIvaDetraibile">€ 0,00</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Totale imponibile</div>
+              <div class="kpi-value" id="kpiImponibile">€ 0,00</div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="subhead">Totali per categoria</div>
+          <div id="byCat"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4) GRAFICO -->
+    <section id="page-grafico" class="page" hidden>
+      <div class="card">
+        <div class="hd">
+          <h2>Grafico</h2>
+          <button class="btn" id="btnApplyPeriodGraph" type="button">Applica</button>
+        </div>
+        <div class="bd">
+          <div class="period-row">
+            <div class="field">
+              <label>Da</label>
+              <input type="date" id="fromDate3" />
+            </div>
+            <div class="field">
+              <label>A</label>
+              <input type="date" id="toDate3" />
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="pieCanvas" width="320" height="320" aria-label="Grafico a torta per categoria"></canvas>
+          </div>
+
+          <div class="legend" id="pieLegend"></div>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Bottom navigation: ONLY 4 voci -->
+  <nav class="bottomnav" aria-label="Navigazione">
+    <button class="navbtn active" data-page="inserisci" type="button" aria-label="Inserisci">
+      <span class="navicon">＋</span>
+      <span class="navlabel">Inserisci</span>
+    </button>
+    <button class="navbtn" data-page="spese" type="button" aria-label="Spese">
+      <span class="navicon">≡</span>
+      <span class="navlabel">Spese</span>
+    </button>
+    <button class="navbtn" data-page="riepilogo" type="button" aria-label="Riepilogo">
+      <span class="navicon">▦</span>
+      <span class="navlabel">Riepilogo</span>
+    </button>
+    <button class="navbtn" data-page="grafico" type="button" aria-label="Grafico">
+      <span class="navicon">◔</span>
+      <span class="navlabel">Grafico</span>
+    </button>
+  </nav>
 
   <div class="toast" id="toast"></div>
 

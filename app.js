@@ -6,6 +6,16 @@ const state = {
   motivazioni: [],
   spese: [],
   report: null,
+  period: { from: "", to: "" },
+  page: "inserisci",
+};
+
+const COLORS = {
+  CONTANTI: "#2b7cb4",          // azzurro
+  TASSA_SOGGIORNO: "#d8bd97",   // beige
+  IVA_22: "#c9772b",            // arancio
+  IVA_10: "#7ac0db",            // azzurro chiaro
+  IVA_4: "#1f2937",             // scuro
 };
 
 function euro(n){
@@ -18,59 +28,7 @@ function toast(msg){
   if (!t) return;
   t.textContent = msg;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2200);
-}
-
-function showTab(tab){
-  document.querySelectorAll("section[id^='tab-']").forEach(s => {
-    s.hidden = true;
-  });
-  const el = document.querySelector(`#tab-${tab}`);
-  if (el) el.hidden = false;
-  closeMenu_();
-}
-
-function openMenu_(){
-  const b = $("#menuBackdrop");
-  const d = $("#menuDrawer");
-  if (b) b.hidden = false;
-  if (d) d.hidden = false;
-}
-function closeMenu_(){
-  const b = $("#menuBackdrop");
-  const d = $("#menuDrawer");
-  if (b) b.hidden = true;
-  if (d) d.hidden = true;
-}
-
-function setupNavigation(){
-  // Home icons + drawer menu items
-  document.querySelectorAll("[data-go]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tab = btn.getAttribute("data-go");
-      showTab(tab);
-    });
-  });
-
-  const menuBtn = $("#menuBtn");
-  const closeBtn = $("#menuCloseBtn");
-  const backdrop = $("#menuBackdrop");
-
-  if (menuBtn) menuBtn.addEventListener("click", openMenu_);
-  if (closeBtn) closeBtn.addEventListener("click", closeMenu_);
-  if (backdrop) backdrop.addEventListener("click", closeMenu_);
-
-  // swipe to close drawer (destra -> sinistra non serve, qui basta trascinare verso destra)
-  const drawer = $("#menuDrawer");
-  if (drawer){
-    let startX = null;
-    drawer.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; }, {passive:true});
-    drawer.addEventListener("touchmove", (e) => {
-      if (startX === null) return;
-      const dx = e.touches[0].clientX - startX;
-      if (dx > 60) { closeMenu_(); startX = null; }
-    }, {passive:true});
-  }
+  setTimeout(() => t.classList.remove("show"), 1700);
 }
 
 function todayISO(){
@@ -87,6 +45,7 @@ function toISO(d){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
+
 function monthRangeISO(date = new Date()){
   const y = date.getFullYear();
   const m = date.getMonth();
@@ -94,9 +53,15 @@ function monthRangeISO(date = new Date()){
   const end = new Date(y, m+1, 0);
   return [toISO(start), toISO(end)];
 }
-function yearRangeISO(date = new Date()){
-  const y = date.getFullYear();
-  return [`${y}-01-01`, `${y}-12-31`];
+
+function categoriaLabel(cat){
+  return ({
+    CONTANTI: "Contanti",
+    TASSA_SOGGIORNO: "Tassa soggiorno",
+    IVA_22: "IVA 22%",
+    IVA_10: "IVA 10%",
+    IVA_4: "IVA 4%",
+  })[cat] || cat;
 }
 
 async function api(action, { method="GET", params={}, body=null } = {}){
@@ -112,14 +77,12 @@ async function api(action, { method="GET", params={}, body=null } = {}){
     if (v !== undefined && v !== null && String(v).length) url.searchParams.set(k, v);
   });
 
-  // Apps Script: PUT/DELETE via _method (POST)
   let realMethod = method;
   if (method === "PUT" || method === "DELETE") {
     url.searchParams.set("_method", method);
     realMethod = "POST";
   }
 
-  // Nota: usiamo text/plain per evitare la preflight CORS (Apps Script)
   const res = await fetch(url.toString(), {
     method: realMethod,
     headers: { "Content-Type":"text/plain;charset=utf-8" },
@@ -131,6 +94,60 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   return json.data;
 }
 
+/* NAV */
+function showPage(page){
+  state.page = page;
+  document.querySelectorAll(".page").forEach(s => s.hidden = true);
+  const el = $(`#page-${page}`);
+  if (el) el.hidden = false;
+
+  document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector(`.navbtn[data-page="${page}"]`);
+  if (btn) btn.classList.add("active");
+
+  // aggiorna pill periodo
+  const chip = $("#periodChip");
+  if (chip) chip.textContent = `${state.period.from} → ${state.period.to}`;
+
+  // quando entri in pagine dati, assicurati che siano renderizzate
+  if (page === "spese") renderSpese();
+  if (page === "riepilogo") renderRiepilogo();
+  if (page === "grafico") renderGrafico();
+}
+
+function setupNav(){
+  document.querySelectorAll(".navbtn").forEach(btn => {
+    btn.addEventListener("click", () => showPage(btn.getAttribute("data-page")));
+  });
+}
+
+/* PERIOD SYNC */
+function setPeriod(from, to){
+  state.period = { from, to };
+
+  // sync inputs (3 copie)
+  const map = [
+    ["#fromDate", "#toDate"],
+    ["#fromDate2", "#toDate2"],
+    ["#fromDate3", "#toDate3"],
+  ];
+  for (const [fSel,tSel] of map){
+    const f = $(fSel), t = $(tSel);
+    if (f) f.value = from;
+    if (t) t.value = to;
+  }
+
+  const chip = $("#periodChip");
+  if (chip) chip.textContent = `${from} → ${to}`;
+}
+
+function readPeriodFromInputs(prefix){
+  const from = $(`#fromDate${prefix}`)?.value || "";
+  const to = $(`#toDate${prefix}`)?.value || "";
+  return { from, to };
+}
+
+/* DATA LOAD */
 async function loadMotivazioni(){
   const data = await api("motivazioni");
   state.motivazioni = data;
@@ -144,70 +161,29 @@ async function loadMotivazioni(){
       list.appendChild(opt);
     });
   }
-
-  renderMotivazioniTable();
 }
 
-function renderMotivazioniTable(){
-  const tbody = $("#motTable tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
+async function loadData(){
+  const { from, to } = state.period;
+  const [report, spese] = await Promise.all([
+    api("report", { params: { from, to } }),
+    api("spese", { params: { from, to } }),
+  ]);
+  state.report = report;
+  state.spese = spese;
 
-  state.motivazioni.forEach(m => {
-    const tr = document.createElement("tr");
-
-    const td1 = document.createElement("td");
-    td1.textContent = m.motivazione;
-
-    const td2 = document.createElement("td");
-    const btnEdit = document.createElement("button");
-    btnEdit.className = "btn";
-    btnEdit.type = "button";
-    btnEdit.textContent = "Modifica";
-    btnEdit.addEventListener("click", async () => {
-      const nuovo = prompt("Nuova motivazione:", m.motivazione);
-      if (!nuovo) return;
-      await api("motivazioni", { method:"PUT", params:{ id: m.id }, body:{ motivazione: nuovo, attiva: true } });
-      toast("Motivazione aggiornata");
-      await loadMotivazioni();
-    });
-
-    const btnDel = document.createElement("button");
-    btnDel.className = "btn warn";
-    btnDel.type = "button";
-    btnDel.style.marginLeft = "8px";
-    btnDel.textContent = "Disattiva";
-    btnDel.addEventListener("click", async () => {
-      if (!confirm("Disattivare questa motivazione?")) return;
-      await api("motivazioni", { method:"DELETE", params:{ id: m.id } });
-      toast("Motivazione disattivata");
-      await loadMotivazioni();
-    });
-
-    td2.appendChild(btnEdit);
-    td2.appendChild(btnDel);
-
-    tr.appendChild(td1);
-    tr.appendChild(td2);
-    tbody.appendChild(tr);
-  });
+  // update renders for current page
+  if (state.page === "spese") renderSpese();
+  if (state.page === "riepilogo") renderRiepilogo();
+  if (state.page === "grafico") renderGrafico();
 }
 
-async function addMotivazione(){
-  const v = ($("#newMotivazione")?.value || "").trim();
-  if (!v) return toast("Inserisci una motivazione");
-  await api("motivazioni", { method:"POST", body:{ motivazione: v } });
-  $("#newMotivazione").value = "";
-  toast("Motivazione aggiunta");
-  await loadMotivazioni();
-}
-
-function resetSpesaForm(){
-  $("#spesaData").value = todayISO();
-  $("#spesaCategoria").value = "";
+/* 1) INSERISCI */
+function resetInserisci(){
   $("#spesaImporto").value = "";
   $("#spesaMotivazione").value = "";
-  $("#spesaNote").value = "";
+  $("#spesaCategoria").value = "";
+  $("#spesaData").value = todayISO(); // lascia oggi
 }
 
 async function saveSpesa(){
@@ -215,14 +191,13 @@ async function saveSpesa(){
   const categoria = $("#spesaCategoria").value;
   const importoLordo = Number($("#spesaImporto").value);
   const motivazione = ($("#spesaMotivazione").value || "").trim();
-  const note = $("#spesaNote").value;
 
-  if (!dataSpesa) return toast("Data obbligatoria");
-  if (!categoria) return toast("Tipologia obbligatoria");
-  if (!motivazione) return toast("Motivazione obbligatoria");
   if (!isFinite(importoLordo) || importoLordo <= 0) return toast("Importo non valido");
+  if (!motivazione) return toast("Motivazione obbligatoria");
+  if (!dataSpesa) return toast("Data obbligatoria");
+  if (!categoria) return toast("Categoria obbligatoria");
 
-  // se la motivazione non esiste, la memorizza automaticamente
+  // se motivazione nuova => salva per futuro
   const exists = state.motivazioni.some(m => (m.motivazione || "").toLowerCase() === motivazione.toLowerCase());
   if (!exists) {
     try {
@@ -231,226 +206,283 @@ async function saveSpesa(){
     } catch (_) {}
   }
 
-  await api("spese", { method:"POST", body:{ dataSpesa, categoria, motivazione, importoLordo, note } });
-  toast("Spesa salvata");
-  resetSpesaForm();
-  await loadReportAndSpese();
+  await api("spese", { method:"POST", body:{ dataSpesa, categoria, motivazione, importoLordo, note: "" } });
+
+  toast("Salvato");
+  resetInserisci();
+
+  // aggiorna dati (se la spesa rientra nel periodo)
+  try { await loadData(); } catch(_) {}
 }
 
-function badgeCategoria(cat){
-  const map = {
-    CONTANTI: "Contanti",
-    TASSA_SOGGIORNO: "Tassa soggiorno",
-    IVA_22: "IVA 22%",
-    IVA_10: "IVA 10%",
-    IVA_4: "IVA 4%",
-  };
-  return map[cat] || cat;
-}
+/* 2) SPESE */
+function renderSpese(){
+  const list = $("#speseList");
+  if (!list) return;
+  list.innerHTML = "";
 
-function renderSpeseTable(){
-  const tbody = $("#speseTable tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  state.spese.forEach(s => {
-    const tr = document.createElement("tr");
-
-    const tdD = document.createElement("td");
-    tdD.textContent = s.dataSpesa;
-
-    const tdC = document.createElement("td");
-    const b = document.createElement("span");
-    b.className = "badge";
-    b.textContent = badgeCategoria(s.categoria);
-    tdC.appendChild(b);
-
-    const tdM = document.createElement("td");
-    tdM.textContent = s.motivazione;
-
-    const tdL = document.createElement("td");
-    tdL.textContent = euro(s.importoLordo);
-
-    const tdI = document.createElement("td");
-    tdI.textContent = euro(s.iva);
-
-    const tdX = document.createElement("td");
-    const btn = document.createElement("button");
-    btn.className = "btn warn";
-    btn.type = "button";
-    btn.textContent = "Elimina";
-    btn.addEventListener("click", async () => {
-      if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"DELETE", params:{ id: s.id } });
-      toast("Spesa eliminata");
-      await loadReportAndSpese();
-    });
-    tdX.appendChild(btn);
-
-    tr.appendChild(tdD);
-    tr.appendChild(tdC);
-    tr.appendChild(tdM);
-    tr.appendChild(tdL);
-    tr.appendChild(tdI);
-    tr.appendChild(tdX);
-
-    tbody.appendChild(tr);
-  });
-}
-
-function setRange(from, to){
-  $("#fromDate").value = from;
-  $("#toDate").value = to;
-}
-
-function updateTopIvaCard(){
-  const r = state.report;
-  if (!r) return;
-
-  const top = $("#kpiIvaDetraibileTop");
-  if (top) top.textContent = euro(r.totals.ivaDetraibile);
-
-  const periodLabel = $("#periodLabel");
-  if (periodLabel){
-    const f = $("#fromDate")?.value || r.from || "";
-    const t = $("#toDate")?.value || r.to || "";
-    periodLabel.textContent = (f && t) ? `${f} → ${t}` : "—";
-  }
-}
-
-async function loadReportAndSpese(){
-  const from = $("#fromDate").value;
-  const to = $("#toDate").value;
-
-  const [report, spese] = await Promise.all([
-    api("report", { params: { from, to } }),
-    api("spese", { params: { from, to } }),
-  ]);
-
-  state.report = report;
-  state.spese = spese;
-
-  renderKPI();
-  renderByCat();
-  renderSpeseTable();
-  updateTopIvaCard();
-}
-
-function renderKPI(){
-  const r = state.report;
-  if (!r) return;
-  $("#kpiTotSpese").textContent = euro(r.totals.importoLordo);
-  $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
-  $("#kpiImponibile").textContent = euro(r.totals.imponibile);
-  $("#kpiCount").textContent = String(r.totals.count);
-}
-
-function renderByCat(){
-  const container = $("#byCat");
-  if (!container || !state.report) return;
-  const by = state.report.byCategoria || {};
-  const keys = Object.keys(by);
-
-  if (!keys.length){
-    container.innerHTML = `<div style="font-size:13px; opacity:.75;">Nessun dato nel periodo.</div>`;
+  if (!state.spese || !state.spese.length){
+    list.innerHTML = `<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa nel periodo.</div>`;
     return;
   }
 
-  const rows = keys.map(k => {
-    const o = by[k];
-    return `
-      <div class="card" style="margin-bottom:10px;">
-        <div class="bd">
-          <div class="row" style="justify-content:space-between;">
-            <div><span class="badge">${badgeCategoria(k)}</span> <span style="font-size:12px; opacity:.75;">(${o.count})</span></div>
-            <div style="font-weight:900;">${euro(o.importoLordo)}</div>
-          </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px; font-size:12px;">
-            <div>Imponibile: <b>${euro(o.imponibile)}</b></div>
-            <div>IVA: <b>${euro(o.iva)}</b></div>
-            <div>IVA detraibile: <b>${euro(o.ivaDetraibile)}</b></div>
-            <div></div>
+  for (const s of state.spese){
+    const el = document.createElement("div");
+    el.className = "item";
+
+    el.innerHTML = `
+      <div class="item-top">
+        <div>
+          <div class="item-title">${euro(s.importoLordo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(s.iva)}</span></div>
+          <div class="item-sub">
+            <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 0.20)}">${categoriaLabel(s.categoria)}</span>
+            <span class="mini">${s.dataSpesa}</span>
+            <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione)}</span>
           </div>
         </div>
+        <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
       </div>
     `;
-  }).join("");
 
-  container.innerHTML = rows;
+    el.querySelector("[data-del]").addEventListener("click", async () => {
+      if (!confirm("Eliminare questa spesa?")) return;
+      await api("spese", { method:"DELETE", params:{ id: s.id } });
+      toast("Eliminata");
+      await loadData();
+    });
+
+    list.appendChild(el);
+  }
 }
 
-function exportCsv(){
-  const cols = ["dataSpesa","categoria","motivazione","importoLordo","aliquotaIva","imponibile","iva","ivaDetraibile","note"];
-  const lines = [cols.join(";")];
-  for (const s of state.spese){
-    const row = cols.map(c => {
-      const v = (s[c] !== undefined && s[c] !== null) ? String(s[c]) : "";
-      const safe = v.replaceAll('"','""');
-      return `"${safe}"`;
-    }).join(";");
-    lines.push(row);
+/* 3) RIEPILOGO */
+function renderRiepilogo(){
+  const r = state.report;
+  if (!r) return;
+
+  $("#kpiTotSpese").textContent = euro(r.totals.importoLordo);
+  $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
+  $("#kpiImponibile").textContent = euro(r.totals.imponibile);
+
+  const container = $("#byCat");
+  if (!container) return;
+
+  const by = r.byCategoria || {};
+  const order = ["CONTANTI","TASSA_SOGGIORNO","IVA_22","IVA_10","IVA_4"];
+
+  container.innerHTML = "";
+  for (const k of order){
+    const o = by[k] || { count:0, importoLordo:0, imponibile:0, iva:0, ivaDetraibile:0 };
+    const row = document.createElement("div");
+    row.className = "catrow";
+    row.innerHTML = `
+      <div class="catrow-top">
+        <div class="catname">
+          <span class="badge" style="background:${hexToRgba(COLORS[k] || "#d8bd97", 0.20)}">${categoriaLabel(k)}</span>
+          <span style="font-size:12px; opacity:.7; font-weight:900;">(${o.count})</span>
+        </div>
+        <div style="font-weight:950;">${euro(o.importoLordo)}</div>
+      </div>
+      <div class="catgrid">
+        <div>Imponibile: <b>${euro(o.imponibile)}</b></div>
+        <div>IVA: <b>${euro(o.iva)}</b></div>
+        <div>IVA detraibile: <b>${euro(o.ivaDetraibile)}</b></div>
+        <div></div>
+      </div>
+    `;
+    container.appendChild(row);
   }
-  const blob = new Blob([lines.join("\n")], { type:"text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "spese.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-  toast("Export pronto");
+}
+
+/* 4) GRAFICO */
+function renderGrafico(){
+  const r = state.report;
+  if (!r) return;
+
+  const by = r.byCategoria || {};
+  const order = ["CONTANTI","TASSA_SOGGIORNO","IVA_22","IVA_10","IVA_4"];
+  const values = order.map(k => Number(by[k]?.importoLordo || 0));
+  const total = values.reduce((a,b)=>a+b,0);
+
+  // Draw pie
+  drawPie("pieCanvas", order.map((k,i)=>({
+    key: k,
+    label: categoriaLabel(k),
+    value: values[i],
+    color: COLORS[k] || "#999999"
+  })));
+
+  // Legend
+  const leg = $("#pieLegend");
+  if (!leg) return;
+  leg.innerHTML = "";
+
+  order.forEach((k,i) => {
+    const v = values[i];
+    const pct = total > 0 ? (v/total*100) : 0;
+    const row = document.createElement("div");
+    row.className = "legrow";
+    row.innerHTML = `
+      <div class="legleft">
+        <div class="dot" style="background:${COLORS[k] || "#999"}"></div>
+        <div class="legname">${categoriaLabel(k)}</div>
+      </div>
+      <div class="legright">${pct.toFixed(1)}% · ${euro(v)}</div>
+    `;
+    leg.appendChild(row);
+  });
+}
+
+/* PIE DRAW (no librerie) */
+function drawPie(canvasId, slices){
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+
+  // handle high-DPI
+  const cssSize = Math.min(320, Math.floor(window.innerWidth * 0.78));
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width = cssSize + "px";
+  canvas.style.height = cssSize + "px";
+  canvas.width = Math.floor(cssSize * dpr);
+  canvas.height = Math.floor(cssSize * dpr);
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssSize,cssSize);
+
+  const total = slices.reduce((a,s)=>a+Math.max(0,Number(s.value||0)),0);
+  const cx = cssSize/2, cy = cssSize/2;
+  const r = cssSize/2 - 10;
+
+  // Glass ring background
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(15,23,42,0.08)";
+  ctx.stroke();
+
+  let ang = -Math.PI/2;
+  if (total <= 0){
+    // empty state
+    ctx.beginPath();
+    ctx.arc(cx, cy, r-8, 0, Math.PI*2);
+    ctx.fillStyle = "rgba(43,124,180,0.10)";
+    ctx.fill();
+    ctx.fillStyle = "rgba(15,23,42,0.55)";
+    ctx.font = "600 12px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("Nessun dato", cx, cy+4);
+    return;
+  }
+
+  // slices
+  slices.forEach(s => {
+    const v = Math.max(0, Number(s.value||0));
+    const a = (v/total) * Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r-8,ang,ang+a);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+
+    // subtle separator
+    ctx.strokeStyle = "rgba(255,255,255,0.65)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ang += a;
+  });
+
+  // inner hole for a cleaner iOS look
+  ctx.beginPath();
+  ctx.arc(cx, cy, r*0.58, 0, Math.PI*2);
+  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(15,23,42,0.08)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // center label
+  ctx.fillStyle = "rgba(15,23,42,0.75)";
+  ctx.font = "900 12px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("Totale", cx, cy-4);
+  ctx.fillStyle = "rgba(15,23,42,0.92)";
+  ctx.font = "950 14px system-ui";
+  ctx.fillText(euro(total), cx, cy+14);
+}
+
+/* Helpers */
+function hexToRgba(hex, a){
+  const h = (hex || "").replace("#","");
+  if (h.length !== 6) return `rgba(0,0,0,${a})`;
+  const r = parseInt(h.slice(0,2),16);
+  const g = parseInt(h.slice(2,4),16);
+  const b = parseInt(h.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function escapeHtml(s){
+  return String(s || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+/* Wire buttons */
+function setupPeriodButtons(){
+  $("#btnApplyPeriodSpese").addEventListener("click", async () => {
+    const from = $("#fromDate").value;
+    const to = $("#toDate").value;
+    if (!from || !to) return toast("Periodo non valido");
+    setPeriod(from,to);
+    await loadData();
+  });
+
+  $("#btnApplyPeriodRiep").addEventListener("click", async () => {
+    const from = $("#fromDate2").value;
+    const to = $("#toDate2").value;
+    if (!from || !to) return toast("Periodo non valido");
+    setPeriod(from,to);
+    await loadData();
+  });
+
+  $("#btnApplyPeriodGraph").addEventListener("click", async () => {
+    const from = $("#fromDate3").value;
+    const to = $("#toDate3").value;
+    if (!from || !to) return toast("Periodo non valido");
+    setPeriod(from,to);
+    await loadData();
+  });
 }
 
 async function init(){
-  setupNavigation();
-  showTab("home");
+  setupNav();
 
-  const [from, to] = monthRangeISO(new Date());
-  setRange(from, to);
+  // default period = this month
+  const [from,to] = monthRangeISO(new Date());
+  setPeriod(from,to);
 
   $("#spesaData").value = todayISO();
-
-  $("#btnRefresh").addEventListener("click", async () => {
-    try { await loadReportAndSpese(); toast("Aggiornato"); } catch(e){ toast(e.message); }
-  });
-
-  $("#btnThisMonth").addEventListener("click", async () => {
-    const [f,t] = monthRangeISO(new Date());
-    setRange(f,t);
-    try { await loadReportAndSpese(); toast("Periodo aggiornato"); } catch(e){ toast(e.message); }
-  });
-
-  $("#btnLastMonth").addEventListener("click", async () => {
-    const d = new Date();
-    d.setMonth(d.getMonth()-1);
-    const [f,t] = monthRangeISO(d);
-    setRange(f,t);
-    try { await loadReportAndSpese(); toast("Periodo aggiornato"); } catch(e){ toast(e.message); }
-  });
-
-  $("#btnThisYear").addEventListener("click", async () => {
-    const [f,t] = yearRangeISO(new Date());
-    setRange(f,t);
-    try { await loadReportAndSpese(); toast("Periodo aggiornato"); } catch(e){ toast(e.message); }
-  });
-
-  $("#btnExportCsv").addEventListener("click", exportCsv);
-
-  $("#btnAddMotivazione").addEventListener("click", async () => {
-    try { await addMotivazione(); } catch(e){ toast(e.message); }
-  });
 
   $("#btnSaveSpesa").addEventListener("click", async () => {
     try { await saveSpesa(); } catch(e){ toast(e.message); }
   });
 
-  $("#btnResetSpesa").addEventListener("click", resetSpesaForm);
+  setupPeriodButtons();
 
   try {
     await loadMotivazioni();
-    await loadReportAndSpese();
-  } catch (e) {
+    await loadData();
+  } catch(e){
     toast(e.message);
   }
+
+  showPage("inserisci");
 }
 
 init();
