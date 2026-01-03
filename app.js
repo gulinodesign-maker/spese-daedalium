@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.017";
+const BUILD_VERSION = "1.018";
 
 const $ = (sel) => document.querySelector(sel);
 

@@ -878,3 +878,17 @@ body::before{
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+
+
+/* HOME: rimuovi ombre strane sotto le icone */
+#page-home .home-icon .glyph{
+  box-shadow: none !important;
+  filter: none !important;
+}
+#page-home .home-icon{
+  text-shadow: none !important;
+}
+#page-home .home-icon .label{
+  text-shadow: none !important;
+}
