@@ -821,3 +821,32 @@ body::before{
 }
 /* evita sovrapposizioni con la build */
 .home-page{ padding-bottom: calc(44px + var(--safe-bottom)); }
+
+
+
+/* HOME: elimina QUALSIASI rettangolo sotto le icone (bottoni) */
+#page-home .home-icon{
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#page-home .home-icon::before,
+#page-home .home-icon::after{
+  content: none !important;
+  display: none !important;
+}
+#page-home .home-icon:focus{
+  outline: none !important;
+}
+#page-home .home-icon:focus-visible{
+  outline: 2px solid rgba(43,124,180,0.28);
+  outline-offset: 4px;
+  border-radius: 18px;
+}
