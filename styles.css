@@ -26,15 +26,15 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.14), transparent 62%),
-    radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.14), transparent 64%),
-    radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.14), transparent 62%),
-    radial-gradient(900px 700px at 90% 100%, rgba(216,189,151,0.18), transparent 62%),
-    linear-gradient(to bottom, rgba(255,255,255,0.92), rgba(255,255,255,0.92)),
-    url("./assets/bg-daedalium.png");
+    url("./assets/bg-daedalium.png"),
+    radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
+    radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
+    radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
+    radial-gradient(900px 700px at 90% 100%, rgba(216,189,151,0.14), transparent 62%),
+    linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0.12));
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-position: 10% 0%, 90% 8%, 20% 100%, 90% 100%, center, center;
-  background-size: auto, auto, auto, auto, cover, cover;
+  background-position: center, 10% 0%, 90% 8%, 20% 100%, 90% 100%, center;
+  background-size: cover, auto, auto, auto, auto, cover;
   background-attachment: scroll;
 }
 
@@ -601,15 +601,15 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.22), transparent 62%),
-    radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.20), transparent 62%),
-    radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.20), transparent 62%),
-    radial-gradient(900px 700px at 92% 92%, rgba(216,189,151,0.24), transparent 62%),
-    linear-gradient(to bottom, rgba(255,255,255,0.88), rgba(255,255,255,0.88)),
-    url("./assets/bg-daedalium.png");
+    url("./assets/bg-daedalium.png"),
+    radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
+    radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
+    radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
+    radial-gradient(900px 700px at 92% 92%, rgba(216,189,151,0.18), transparent 62%),
+    linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.10));
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-  background-position: 12% 8%, 92% 14%, 18% 96%, 92% 92%, center, center;
-  background-size: auto, auto, auto, auto, cover, cover;
+  background-position: center, 12% 8%, 92% 14%, 18% 96%, 92% 92%, center;
+  background-size: cover, auto, auto, auto, auto, cover;
   background-attachment: scroll;
 }
 
@@ -770,5 +770,54 @@ body::before{
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.55));
+  background: rgba(255,255,255,0.02);
 }
+
+
+
+/* HOME: icone senza rettangoli + più grandi + gruppo più in alto + build in basso */
+.home-icon{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 10px 6px 8px !important;
+}
+.home-icon::after{ display:none !important; }
+
+.home-icon .glyph{
+  width: 93px !important;
+  height: 93px !important;
+  border-radius: 28px !important;
+  font-size: 42px !important;
+  box-shadow: 0 14px 38px rgba(15,23,42,0.12);
+}
+.home-icon .label{ font-size: 16px !important; }
+
+.home-card{
+  width: min(460px, 94vw) !important;
+  padding: 14px !important;
+}
+.home-grid{ gap: 12px !important; }
+
+/* alza la card (più in alto) */
+.home-page .home-spacer:first-of-type{ flex: 0.35 !important; }
+.home-page .home-spacer:last-of-type{ flex: 1.15 !important; }
+
+/* build: in fondo display, sopra safe-area */
+#page-home .build{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(10px + var(--safe-bottom));
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.72;
+  z-index: 60;
+}
+/* evita sovrapposizioni con la build */
+.home-page{ padding-bottom: calc(44px + var(--safe-bottom)); }
