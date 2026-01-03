@@ -65,9 +65,10 @@ async function api(action, { method="GET", params={}, body=null } = {}){
     realMethod = "POST";
   }
 
+  // Nota: usiamo text/plain per evitare la preflight CORS (Apps Script)
   const res = await fetch(url.toString(), {
     method: realMethod,
-    headers: { "Content-Type":"application/json" },
+    headers: { "Content-Type":"text/plain;charset=utf-8" },
     body: body ? JSON.stringify(body) : null
   });
 
@@ -92,19 +93,15 @@ async function loadMotivazioni(){
   const data = await api("motivazioni");
   state.motivazioni = data;
 
-  const sel = $("#spesaMotivazione");
-  sel.innerHTML = "";
-  const opt0 = document.createElement("option");
-  opt0.value = "";
-  opt0.textContent = "Seleziona…";
-  sel.appendChild(opt0);
-
-  data.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = m.motivazione;
-    opt.textContent = m.motivazione;
-    sel.appendChild(opt);
-  });
+  const list = document.querySelector("#motivazioniList");
+  if (list) {
+    list.innerHTML = "";
+    data.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.motivazione;
+      list.appendChild(opt);
+    });
+  }
 
   renderMotivazioniTable();
 }
@@ -178,6 +175,14 @@ async function saveSpesa(){
   if (!categoria) return toast("Categoria obbligatoria");
   if (!motivazione) return toast("Motivazione obbligatoria");
   if (!isFinite(importoLordo) || importoLordo <= 0) return toast("Importo non valido");
+
+  // se la motivazione non esiste, la memorizza automaticamente
+  const exists = state.motivazioni.some(m => m.motivazione.toLowerCase() === motivazione.toLowerCase());
+  if (!exists) {
+    try {
+      await api("motivazioni", { method:"POST", body:{ motivazione } });
+    } catch(e){}
+  }
 
   await api("spese", { method:"POST", body:{ dataSpesa, categoria, motivazione, importoLordo, note } });
   toast("Spesa salvata");
