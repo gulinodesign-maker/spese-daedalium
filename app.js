@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.005";
+const BUILD_VERSION = "1.006";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -291,6 +291,7 @@ async function api(action, { method="GET", params={}, body=null } = {}){
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
   state.page = page;
+  document.body.dataset.page = page;
 
   document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
@@ -703,6 +704,7 @@ function bindPeriodAuto(fromSel, toSel){
 }
 
 async function init(){
+  document.body.dataset.page = "home";
   setupHeader();
   setupHome();
 

@@ -589,3 +589,113 @@ input[type="date"]{
 
 /* Periodo preset (scroll picker iOS) */
 .period-preset{ margin-bottom: 10px; }
+
+
+
+/* HOME più accattivante (sempre minimal: solo icone + build) */
+body[data-page="home"]{
+  background:
+    radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.24), transparent 62%),
+    radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.22), transparent 62%),
+    radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.22), transparent 62%),
+    radial-gradient(900px 700px at 92% 92%, rgba(216,189,151,0.26), transparent 62%),
+    linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,1));
+}
+
+/* Card launcher: più premium, con highlight e shimmer */
+.home-card{
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  animation: homeFloat 4.8s ease-in-out infinite;
+}
+@keyframes homeFloat{
+  0%,100%{ transform: translateY(0px); }
+  50%{ transform: translateY(-3px); }
+}
+.home-card::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: 24px;
+  background: radial-gradient(120% 90% at 20% 0%, rgba(255,255,255,0.75), transparent 55%);
+  pointer-events:none;
+  opacity: 0.8;
+}
+.home-card::after{
+  /* shimmer diagonale molto leggero */
+  content:"";
+  position:absolute;
+  top:-40%;
+  left:-60%;
+  width: 140%;
+  height: 140%;
+  background: linear-gradient(105deg,
+    transparent 0%,
+    rgba(255,255,255,0.0) 35%,
+    rgba(255,255,255,0.28) 48%,
+    rgba(255,255,255,0.0) 60%,
+    transparent 100%);
+  transform: rotate(8deg);
+  animation: homeShimmer 6.5s ease-in-out infinite;
+  pointer-events:none;
+  opacity: 0.55;
+}
+@keyframes homeShimmer{
+  0%{ transform: translateX(-10%) rotate(8deg); }
+  50%{ transform: translateX(22%) rotate(8deg); }
+  100%{ transform: translateX(-10%) rotate(8deg); }
+}
+
+/* Icone stile iPhone: app icon glass + gloss */
+.home-icon{
+  position: relative;
+  overflow: hidden;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.home-icon:active{
+  transform: scale(0.98);
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+}
+.home-icon::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: 22px;
+  background: radial-gradient(120% 90% at 20% 0%, rgba(255,255,255,0.70), transparent 58%);
+  pointer-events:none;
+  opacity: 0.65;
+}
+
+/* Glyph box: più "app icon", con colore per ogni tasto */
+.home-icon .glyph{
+  position: relative;
+  overflow:hidden;
+  background:
+    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.85), rgba(255,255,255,0.60)),
+    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.72));
+}
+.home-icon .glyph::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: 20px;
+  background: radial-gradient(120% 120% at 20% 10%, rgba(43,124,180,0.16), transparent 60%);
+  pointer-events:none;
+  opacity: 1;
+}
+.home-icon.primary .glyph::before{
+  background: radial-gradient(120% 120% at 20% 10%, rgba(201,119,43,0.18), transparent 60%);
+}
+.home-icon[data-go="spese"] .glyph{ color: var(--blue); }
+.home-icon[data-go="riepilogo"] .glyph{ color: var(--orange); }
+.home-icon[data-go="grafico"] .glyph{ color: var(--dark); }
+
+/* Etichetta leggermente più grande */
+.home-icon .label{ font-size: 14px; }
+
+/* Build più elegante */
+.build{
+  letter-spacing: 0.3px;
+  opacity: 0.72;
+}
