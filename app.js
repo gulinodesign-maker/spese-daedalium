@@ -23,6 +23,69 @@ const COLORS = {
   IVA_4: "#1f2937",             // scuro
 };
 
+
+// Loader globale (gestisce richieste parallele + anti-flicker)
+const loadingState = {
+  requestCount: 0,
+  showTimer: null,
+  shownAt: 0,
+  isVisible: false,
+  delayMs: 180,      // opzionale: evita flicker se rapidissimo
+  minVisibleMs: 300, // opzionale: se compare non sparisce subito
+};
+
+function showLoading(){
+  const ov = document.getElementById("loadingOverlay");
+  if (!ov) return;
+  ov.hidden = false;
+  loadingState.isVisible = true;
+  loadingState.shownAt = performance.now();
+}
+
+function hideLoading(){
+  const ov = document.getElementById("loadingOverlay");
+  if (!ov) return;
+  ov.hidden = true;
+  loadingState.isVisible = false;
+}
+
+function beginRequest(){
+  loadingState.requestCount += 1;
+  if (loadingState.requestCount !== 1) return;
+
+  // Programma la comparsa dopo delayMs
+  if (loadingState.showTimer) clearTimeout(loadingState.showTimer);
+  loadingState.showTimer = setTimeout(() => {
+    if (loadingState.requestCount > 0 && !loadingState.isVisible) {
+      showLoading();
+    }
+  }, loadingState.delayMs);
+}
+
+function endRequest(){
+  loadingState.requestCount = Math.max(0, loadingState.requestCount - 1);
+  if (loadingState.requestCount !== 0) return;
+
+  if (loadingState.showTimer) {
+    clearTimeout(loadingState.showTimer);
+    loadingState.showTimer = null;
+  }
+
+  // Se non è mai comparso, fine.
+  if (!loadingState.isVisible) return;
+
+  const elapsed = performance.now() - (loadingState.shownAt || performance.now());
+  const remaining = loadingState.minVisibleMs - elapsed;
+  if (remaining > 0) {
+    setTimeout(() => {
+      // Ricontrollo: potrebbe essere partita un'altra richiesta.
+      if (loadingState.requestCount === 0) hideLoading();
+    }, remaining);
+  } else {
+    hideLoading();
+  }
+}
+
 function euro(n){
   const x = Number(n || 0);
   return x.toLocaleString("it-IT", { style:"currency", currency:"EUR" });
@@ -70,6 +133,8 @@ function categoriaLabel(cat){
 }
 
 async function api(action, { method="GET", params={}, body=null } = {}){
+  beginRequest();
+  try {
   if (!API_BASE_URL || API_BASE_URL.includes("INCOLLA_QUI")) {
     throw new Error("Config mancante: imposta API_BASE_URL in config.js");
   }
@@ -97,6 +162,9 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   const json = await res.json();
   if (!json.ok) throw new Error(json.error || "API error");
   return json.data;
+  } finally {
+    endRequest();
+  }
 }
 
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
