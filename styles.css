@@ -1281,3 +1281,7 @@ body::before{
   box-sizing:border-box;
   -webkit-appearance: none;
 }
+
+
+/* Hidden attribute safety (prevents FOUC on iPhone) */
+[hidden]{ display: none !important; }
