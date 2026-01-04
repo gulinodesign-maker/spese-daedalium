@@ -1483,3 +1483,68 @@ body::before{
   left: 14px;
   transform: translateY(-10px) scale(0.86);
 }
+
+
+
+/* ============================
+   Input height (more room for labels)
+============================ */
+.field.float input,
+.field.float select{
+  height: 56px;
+  padding-top: 26px; /* more space so label never overlaps */
+  padding-bottom: 12px;
+}
+.field.float > label{
+  top: 18px; /* keep inside */
+}
+.field.float.has-value > label,
+.field.float input:focus + label,
+.field.float select:focus + label{
+  transform: translateY(-12px) scale(0.86);
+}
+
+
+/* Matrimonio toggle (pill with dot) */
+#page-ospite .marriage-wrap{
+  display:flex;
+  justify-content:center;
+  margin: 8px 0 2px;
+}
+#page-ospite .toggle-check{
+  position:absolute;
+  opacity:0;
+  width:1px;
+  height:1px;
+  pointer-events:none;
+}
+#page-ospite .pill-toggle{
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  font-weight: 950;
+  letter-spacing: .2px;
+  color: rgba(15,23,42,0.86);
+}
+#page-ospite .pill-toggle .dot{
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid rgba(43,124,180,0.55);
+  background: rgba(255,255,255,0.8);
+}
+#page-ospite .toggle-check:checked + .pill-toggle{
+  border-color: rgba(43,124,180,0.45);
+  background: rgba(43,124,180,0.10);
+}
+#page-ospite .toggle-check:checked + .pill-toggle .dot{
+  background: var(--blue);
+  border-color: var(--blue);
+}
