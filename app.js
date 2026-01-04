@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.019";
+const BUILD_VERSION = "1.020";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -290,6 +290,27 @@ async function api(action, { method="GET", params={}, body=null } = {}){
 
 
 /* Launcher modal (popup) */
+
+let launcherDelegationBound = false;
+function bindLauncherDelegation(){
+  if (launcherDelegationBound) return;
+  launcherDelegationBound = true;
+
+  document.addEventListener("click", (e) => {
+    const goBtn = e.target.closest && e.target.closest("#launcherModal [data-go]");
+    if (goBtn){
+      const page = goBtn.getAttribute("data-go");
+      hideLauncher();
+      showPage(page);
+      return;
+    }
+    const close = e.target.closest && e.target.closest("#launcherModal [data-close], #closeLauncher");
+    if (close){
+      hideLauncher();
+    }
+  });
+}
+
 function showLauncher(){
   const m = document.getElementById("launcherModal");
   if (!m) return;
@@ -334,6 +355,7 @@ function setupHeader(){
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
 }
 function setupHome(){
+  bindLauncherDelegation();
   // stampa build
   const build = $("#buildText");
   if (build) build.textContent = `Build ${BUILD_VERSION}`;
