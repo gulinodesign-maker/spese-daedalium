@@ -1548,3 +1548,69 @@ body::before{
   background: var(--blue);
   border-color: var(--blue);
 }
+
+
+
+/* ============================
+   No overlap: hide placeholders in floating fields
+============================ */
+.field.float input::placeholder,
+.field.float textarea::placeholder{
+  opacity: 0 !important;
+}
+
+/* Matrimonio: centered pill toggle, no native checkbox visible */
+#page-ospite .marriage-wrap{
+  position: relative;
+  display:flex;
+  justify-content:center;
+  margin: 10px 0 6px;
+}
+#page-ospite .toggle-check{
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+#page-ospite .pill-toggle{
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  font-weight: 950;
+  letter-spacing: .2px;
+  color: rgba(15,23,42,0.86);
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+}
+#page-ospite .pill-toggle .dot{
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid rgba(43,124,180,0.55);
+  background: rgba(255,255,255,0.85);
+}
+#page-ospite .pill-toggle .at{
+  font-weight: 1000;
+  color: rgba(43,124,180,0.85);
+}
+#page-ospite .toggle-check:checked + .pill-toggle{
+  border-color: rgba(43,124,180,0.45);
+  background: rgba(43,124,180,0.10);
+}
+#page-ospite .toggle-check:checked + .pill-toggle .dot{
+  background: var(--blue);
+  border-color: var(--blue);
+}
