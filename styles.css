@@ -1614,127 +1614,97 @@ body::before{
 
 
 /* ============================
-   Palette Boost (more visible colors, logo-coherent)
-   Build: 1.032
+   Color boost (palette logo) – more visible accents
 ============================ */
-
-/* Stronger accents while staying in Daedalium palette */
 :root{
-  /* keep same hues, increase opacity/contrast */
-  --blue-strong: rgba(43,124,180,1);
-  --blue-soft: rgba(43,124,180,0.18);
-  --orange-strong: rgba(201,119,43,1);
-  --orange-soft: rgba(201,119,43,0.18);
-  --beige-strong: rgba(214,191,156,1);
-  --beige-soft: rgba(214,191,156,0.22);
-  --ink: rgba(15,23,42,0.92);
-  --ink-soft: rgba(15,23,42,0.72);
+  --glass: rgba(255,255,255,0.76);
+  --glass2: rgba(255,255,255,0.58);
+  --border: rgba(15,23,42,0.16);
+  --shadow: 0 14px 34px rgba(15,23,42,0.14);
 }
 
-/* Headings / titles slightly darker for readability */
-h1,h2,.section-title,.title,.page-title{
-  color: var(--ink) !important;
+/* Topbar: stronger premium accent */
+.topbar{
+  border-bottom-color: rgba(15,23,42,0.14);
+}
+.topbar::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-1px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(122,192,219,0.0), rgba(122,192,219,0.85), rgba(43,124,180,0.92), rgba(201,119,43,0.85), rgba(122,192,219,0.0));
+  opacity: 0.55;
+  pointer-events:none;
+}
+.topbar h1{
+  color: rgba(11,15,22,0.98);
 }
 
-/* Glass cards: slightly more definition (border + highlight) */
-.card{
-  border: 1px solid rgba(43,124,180,0.12) !important;
-  box-shadow: 0 16px 42px rgba(15,23,42,0.12) !important;
-}
-.card::before{
-  /* if existing ::before highlight, increase gently */
-  opacity: 0.95 !important;
-}
-
-/* Inputs: clearer border + focus ring in blue */
-input, select, textarea{
-  color: var(--ink) !important;
-}
-input, select, textarea{
-  border-color: rgba(15,23,42,0.14) !important;
-}
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(43,124,180,0.55) !important;
-  box-shadow: 0 0 0 3px rgba(43,124,180,0.18) !important;
-}
-
-/* Floating labels: darker and more readable */
-.field.float > label,
-.field.float .seg-label{
-  color: var(--ink-soft) !important;
-}
-
-/* Primary buttons: more visible blue with subtle orange highlight */
-.btn.primary{
-  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72)) !important;
-  border-color: rgba(43,124,180,0.40) !important;
-  box-shadow: 0 14px 34px rgba(43,124,180,0.18) !important;
-}
-.btn.primary{
-  color: rgba(43,124,180,0.98) !important;
-}
-.btn.primary:active{
-  transform: translateY(1px);
-  box-shadow: 0 10px 24px rgba(43,124,180,0.16) !important;
-}
-
-/* Secondary / neutral buttons: better definition */
-.btn{
-  border-color: rgba(15,23,42,0.14) !important;
-}
-
-/* Segmented controls: active state stronger */
-.segmented .seg-btn.active,
-#depositType .seg-btn.active{
-  background: rgba(43,124,180,0.14) !important;
-  border-color: rgba(43,124,180,0.45) !important;
-  box-shadow: 0 10px 22px rgba(43,124,180,0.12) !important;
-}
-.segmented .seg-btn{
-  border-color: rgba(15,23,42,0.12) !important;
-}
-
-/* Room dots: clearer base + selected already blue strong */
-.room-dot{
+/* Cards: slightly stronger border + shadow */
+.card, .kpi-card, .catrow, .legrow{
   border-color: rgba(15,23,42,0.16) !important;
-  background: rgba(255,255,255,0.78) !important;
-}
-#page-ospite .room-dot.selected{
-  background: var(--blue-strong) !important;
-  border-color: rgba(43,124,180,0.65) !important;
+  box-shadow: 0 14px 34px rgba(15,23,42,0.12) !important;
 }
 
-/* Period chip / pills: clearer */
-.period-chip, .chip, .pill{
-  border-color: rgba(43,124,180,0.18) !important;
-  background: rgba(255,255,255,0.72) !important;
+/* Inputs: visible focus ring in logo-blue */
+.field input,
+.field select,
+.field textarea{
+  border-color: rgba(15,23,42,0.16) !important;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+  border-color: rgba(43,124,180,0.55) !important;
+  box-shadow:
+    0 0 0 4px rgba(43,124,180,0.14),
+    0 14px 34px rgba(15,23,42,0.10) !important;
 }
 
-/* Launcher/home icons: more vivid glyph background */
-.home-main-glyph{
-  box-shadow: 0 16px 36px rgba(15,23,42,0.14) !important;
+/* Primary buttons: stronger blue tint + blue text */
+.btn.primary{
+  border-color: rgba(43,124,180,0.55) !important;
+  background: linear-gradient(to bottom, rgba(43,124,180,0.28), rgba(255,255,255,0.88)) !important;
+  color: rgba(31,112,166,0.98) !important;
 }
-.home-main-glyph{
-  border: 1px solid rgba(43,124,180,0.20) !important;
+/* Secondary/warn: stronger orange */
+.btn.warn{
+  border-color: rgba(201,119,43,0.62) !important;
+  background: linear-gradient(to bottom, rgba(201,119,43,0.24), rgba(255,255,255,0.88)) !important;
+  color: rgba(176,92,18,0.98) !important;
 }
-.home-main-glyph.alt{
-  border: 1px solid rgba(201,119,43,0.22) !important;
-  box-shadow: 0 16px 36px rgba(201,119,43,0.14) !important;
-}
-
-/* Accent strokes for small icons/badges */
-.badge, .tag{
-  border-color: rgba(201,119,43,0.22) !important;
-  background: rgba(201,119,43,0.10) !important;
-  color: rgba(201,119,43,0.95) !important;
-}
-
-/* Table/list rows: slightly stronger separators */
-.row, .list-row, .spese-row{
-  border-bottom-color: rgba(15,23,42,0.10) !important;
+.btn.danger{
+  border-color: rgba(201,119,43,0.60) !important;
+  background: rgba(201,119,43,0.16) !important;
+  color: rgba(176,92,18,0.98) !important;
 }
 
-/* Grafico legend labels: darker */
-.legend, .chart-legend, .pie-legend{
-  color: var(--ink-soft) !important;
+/* Segmented active: more visible blue */
+.seg-btn.active{
+  border-color: rgba(43,124,180,0.52) !important;
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(43,124,180,0.30), transparent 62%),
+    rgba(255,255,255,0.86) !important;
+}
+
+/* KPI: make the important number pop */
+.kpi-card.accent{
+  border-color: rgba(43,124,180,0.52) !important;
+  background: linear-gradient(to bottom, rgba(43,124,180,0.20), rgba(255,255,255,0.72)) !important;
+}
+.kpi-value{
+  color: rgba(11,15,22,0.96);
+}
+.kpi-card.accent .kpi-value{
+  color: rgba(31,112,166,0.98);
+}
+
+/* Home icons: clearer glass + subtle color glow */
+#page-home .home-icon{
+  border-color: rgba(15,23,42,0.14) !important;
+  box-shadow: 0 16px 38px rgba(15,23,42,0.10) !important;
+}
+#page-home .home-icon.spese::before,
+#page-home .home-icon.ospite::before{
+  opacity: 0.14 !important;
 }

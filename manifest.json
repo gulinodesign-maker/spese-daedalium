@@ -1,6 +1,6 @@
 {
-  "name": "Spese Daedalium",
-  "short_name": "Spese",
+  "name": "Daedalium PMS",
+  "short_name": "Daedalium PMS",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
