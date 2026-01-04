@@ -892,3 +892,174 @@ body::before{
 #page-home .home-icon .label{
   text-shadow: none !important;
 }
+
+
+
+/* ============================
+   HOME: 1 icona + Launcher popup
+============================ */
+
+/* HOME: la griglia contiene SOLO l'icona principale */
+#page-home .home-grid{
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 10px 0 !important;
+  gap: 0 !important;
+}
+
+/* Icona principale "Spese" */
+#page-home .home-main{
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 170px;
+  max-width: 70vw;
+}
+
+#page-home .home-main-glyph{
+  width: 118px;
+  height: 118px;
+  border-radius: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 54px;
+  font-weight: 950;
+  color: var(--blue);
+  border: 1px solid rgba(15,23,42,0.10);
+  background:
+    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.88), rgba(255,255,255,0.60)),
+    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.72));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+#page-home .home-main-label{
+  font-weight: 950;
+  letter-spacing: 0.2px;
+  font-size: 17px;
+  color: rgba(15,23,42,0.88);
+}
+
+/* Launcher overlay */
+.launcher[hidden]{ display:none !important; }
+.launcher{
+  position: fixed;
+  inset: 0;
+  z-index: 450;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.launcher-backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.30);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.launcher-shell{
+  position: relative;
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 18px 16px;
+}
+
+.launcher-close{
+  position: absolute;
+  top: calc(10px + var(--safe-top));
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+  font-size: 18px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.launcher-card{
+  width: min(430px, 92vw);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  background:
+    radial-gradient(120% 120% at 12% 0%, rgba(43,124,180,0.14), transparent 58%),
+    radial-gradient(120% 120% at 92% 0%, rgba(201,119,43,0.14), transparent 58%),
+    linear-gradient(to bottom, var(--glass), var(--glass2));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 18px 60px rgba(15,23,42,0.14);
+  padding: 16px;
+}
+
+.launcher-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px;
+}
+
+/* icone nel launcher */
+.launcher-icon{
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  padding: 8px 6px 6px;
+}
+
+.launcher-icon .glyph{
+  width: 96px;
+  height: 96px;
+  border-radius: 30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 40px;
+  font-weight: 950;
+  border: 1px solid rgba(15,23,42,0.10);
+  background:
+    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.88), rgba(255,255,255,0.60)),
+    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.72));
+  color: var(--blue);
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.launcher-icon.primary .glyph{ color: var(--orange); }
+.launcher-icon[data-go="spese"] .glyph{ color: var(--blue); }
+.launcher-icon[data-go="riepilogo"] .glyph{ color: var(--orange); }
+.launcher-icon[data-go="grafico"] .glyph{ color: var(--dark); }
+
+.launcher-icon .label{
+  font-weight: 950;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+  color: rgba(15,23,42,0.86);
+}
+
+.launcher-icon:active{ transform: scale(0.98); }

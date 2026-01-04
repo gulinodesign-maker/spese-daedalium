@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.018";
+const BUILD_VERSION = "1.019";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -288,6 +288,21 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   }
 }
 
+
+/* Launcher modal (popup) */
+function showLauncher(){
+  const m = document.getElementById("launcherModal");
+  if (!m) return;
+  m.hidden = false;
+  m.setAttribute("aria-hidden", "false");
+}
+function hideLauncher(){
+  const m = document.getElementById("launcherModal");
+  if (!m) return;
+  m.hidden = true;
+  m.setAttribute("aria-hidden", "true");
+}
+
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
   state.page = page;
@@ -316,22 +331,44 @@ function showPage(page){
 
 function setupHeader(){
   const hb = $("#hamburgerBtn");
-  if (hb) hb.addEventListener("click", () => showPage("home"));
+  if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
 }
-
 function setupHome(){
   // stampa build
   const build = $("#buildText");
   if (build) build.textContent = `Build ${BUILD_VERSION}`;
 
-  // icone -> aprono le pagine
-  document.querySelectorAll("#page-home [data-go]").forEach(btn => {
+  // HOME: icona principale apre il launcher
+  const openBtn = $("#openLauncher");
+  if (openBtn){
+    openBtn.addEventListener("click", () => showLauncher());
+  }
+
+  // launcher: icone interne navigano alle pagine
+  document.querySelectorAll("#launcherModal [data-go]").forEach(btn => {
     btn.addEventListener("click", () => {
       const page = btn.getAttribute("data-go");
+      hideLauncher();
       showPage(page);
     });
   });
+
+  // chiusura launcher
+  const closeBtn = $("#closeLauncher");
+  if (closeBtn) closeBtn.addEventListener("click", hideLauncher);
+
+  const modal = $("#launcherModal");
+  if (modal){
+    modal.querySelectorAll("[data-close]").forEach(el => {
+      el.addEventListener("click", hideLauncher);
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") hideLauncher();
+  });
 }
+
 
 /* PERIOD SYNC */
 function setPeriod(from, to){
