@@ -215,30 +215,35 @@
               <h2>Inserisci ospite</h2>
             </div>
             <div class="bd form-stack">
-<div class="field">
-            <label for="guestName">Nome ospite</label>
-            <input id="guestName" type="text" placeholder="Es. Mario Rossi" autocomplete="name" />
+<div class="field field-float">
+            <label class="sr-only" for="guestName">Nome ospite</label>
+<input id="guestName" type="text" placeholder=" " autocomplete="name" / aria-label="Nome ospite">
+            <span class="float-label">Nome ospite</span>
           </div>
 
-          <div class="field two-col">
+          <div class="field field-float">
+            <label class="sr-only" for="guestAdults">Adulti</label>
             <div class="subfield">
-              <label for="guestAdults">Adulti</label>
-              <input id="guestAdults" type="number" inputmode="numeric" min="0" step="1" placeholder="0" />
+<input id="guestAdults" type="number" inputmode="numeric" min="0" step="1" placeholder=" " / aria-label="Adulti">
+            <span class="float-label">Adulti</span>
             </div>
-            <div class="subfield">
-              <label for="guestKidsU10">Bambini < 10</label>
-              <input id="guestKidsU10" type="number" inputmode="numeric" min="0" step="1" placeholder="0" />
+            <div class="subfield field-float">
+              <label class="sr-only" for="guestKidsU10">Bambini < 10</label>
+<input id="guestKidsU10" type="number" inputmode="numeric" min="0" step="1" placeholder=" " / aria-label="Bambini < 10">
+              <span class="float-label">Bambini < 10</span>
             </div>
           </div>
 
-          <div class="field two-col">
+          <div class="field field-float always">
+            <label class="sr-only" for="guestCheckIn">Check-in</label>
             <div class="subfield">
-              <label for="guestCheckIn">Check-in</label>
-              <input id="guestCheckIn" type="date" />
+<input placeholder=" " id="guestCheckIn" type="date" / aria-label="Check-in">
+            <span class="float-label">Check-in</span>
             </div>
-            <div class="subfield">
-              <label for="guestCheckOut">Check-out</label>
-              <input id="guestCheckOut" type="date" />
+            <div class="subfield field-float always">
+              <label class="sr-only" for="guestCheckOut">Check-out</label>
+<input placeholder=" " id="guestCheckOut" type="date" / aria-label="Check-out">
+              <span class="float-label">Check-out</span>
             </div>
           </div>
 
@@ -254,24 +259,27 @@
             </div>
           </div>
 
-          <div class="field">
-            <label for="guestTotal">Importo prenotazione (€)</label>
-            <input id="guestTotal" type="number" inputmode="decimal" step="0.01" placeholder="0,00" />
+          <div class="field field-float">
+            <label class="sr-only" for="guestTotal">Importo prenotazione (€)</label>
+<input id="guestTotal" type="number" inputmode="decimal" step="0.01" placeholder=" " / aria-label="Importo prenotazione (€)">
+            <span class="float-label">Importo prenotazione (€)</span>
           </div>
 
-          <div class="field">
-            <label for="guestBooking">Importo booking (€)</label>
-            <input id="guestBooking" type="number" inputmode="decimal" step="0.01" placeholder="0,00" />
+          <div class="field field-float">
+            <label class="sr-only" for="guestBooking">Importo booking (€)</label>
+<input id="guestBooking" type="number" inputmode="decimal" step="0.01" placeholder=" " / aria-label="Importo booking (€)">
+            <span class="float-label">Importo booking (€)</span>
           </div>
 
-          <div class="field two-col">
+          <div class="field field-float">
+            <label class="sr-only" for="guestDeposit">Acconto (€)</label>
             <div class="subfield">
-              <label for="guestDeposit">Acconto (€)</label>
-              <input id="guestDeposit" type="number" inputmode="decimal" step="0.01" placeholder="0,00" />
+<input id="guestDeposit" type="number" inputmode="decimal" step="0.01" placeholder=" " / aria-label="Acconto (€)">
+            <span class="float-label">Acconto (€)</span>
             </div>
-            <div class="subfield">
-              <label>Tipo acconto</label>
-              <div class="segmented" id="depositType" role="tablist" aria-label="Tipo acconto">
+            <div class="subfield field-float always">
+              <span class="float-label static">Tipo acconto</span>
+<div class="segmented" id="depositType" aria-label="Tipo acconto" role="tablist" aria-label="Tipo acconto">
                 <button type="button" class="seg-btn active" data-type="contante" aria-label="Contante" role="tab" aria-selected="true"><span class="seg-ico" aria-hidden="true">💶</span></button>
                 <button type="button" class="seg-btn" data-type="elettronico" aria-label="Elettronico" role="tab" aria-selected="false"><span class="seg-ico" aria-hidden="true">💳</span></button>
               </div>
