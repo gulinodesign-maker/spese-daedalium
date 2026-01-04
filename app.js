@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.024";
+const BUILD_VERSION = "1.025";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -349,7 +349,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home") {
+    if (page === "home" || page === "ospite") {
       chip.hidden = true;
     } else {
       chip.hidden = false;

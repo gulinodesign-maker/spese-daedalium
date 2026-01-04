@@ -1285,3 +1285,60 @@ body::before{
 
 /* Hidden attribute safety (prevents FOUC on iPhone) */
 [hidden]{ display: none !important; }
+
+
+
+/* ============================
+   OSPITE: allineamento e ordine (fix centering)
+============================ */
+#page-ospite .ospite-wrap{
+  max-width: 560px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+#page-ospite .guest-form-card .hd h2,
+#page-ospite .guest-cards-card .hd h2{
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: .2px;
+}
+#page-ospite .form-stack{
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+#page-ospite .guest-cards-card .bd{
+  padding: 14px;
+}
+#page-ospite .field{
+  margin: 0 !important;
+}
+#page-ospite .field label{
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.72);
+  margin-bottom: 6px;
+}
+#page-ospite .field input,
+#page-ospite .field select{
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+#page-ospite .field.two-col{
+  margin-top: 2px;
+}
+#page-ospite .rooms{
+  justify-content: center;
+}
+#page-ospite .room-dot{
+  position: relative;
+}
+#page-ospite .readonly{
+  opacity: 0.88;
+}
+#page-ospite #createGuestCard{
+  margin-top: 6px;
+}
