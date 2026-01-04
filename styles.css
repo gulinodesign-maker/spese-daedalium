@@ -1342,3 +1342,43 @@ body::before{
 #page-ospite #createGuestCard{
   margin-top: 6px;
 }
+
+
+
+/* ============================
+   OSPITE UI cleanup (rooms/date/segmented)
+============================ */
+
+/* Stanze: solo pallini (selezione blu, niente slash) */
+#page-ospite .room-dot.selected{
+  background: var(--blue) !important;
+  border-color: rgba(43,124,180,0.55) !important;
+  color: rgba(255,255,255,0.96) !important;
+}
+#page-ospite .room-dot.selected::after{ content: none !important; }
+
+/* Check-in / Check-out: stessa dimensione perfetta */
+#page-ospite .field.two-col{
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important;
+}
+#page-ospite .field.two-col input[type="date"]{
+  height: 48px;
+}
+
+/* Tipo acconto: compatto + icone */
+#page-ospite #depositType{
+  gap: 10px;
+}
+#page-ospite #depositType .seg-btn{
+  height: 40px !important;
+  border-radius: 14px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0 !important; /* nasconde eventuale testo residuo */
+}
+#page-ospite #depositType .seg-ico{
+  font-size: 20px;
+  line-height: 1;
+}

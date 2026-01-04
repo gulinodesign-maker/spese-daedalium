@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.025";
+const BUILD_VERSION = "1.026";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -788,11 +788,10 @@ function setupOspite(){
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
 
   const roomsWrap = document.getElementById("roomsPicker");
-  const roomsOut = document.getElementById("guestRooms");
+  const roomsOut = null; // removed UI string output
 
   function renderRooms(){
     const arr = Array.from(state.guestRooms).sort((a,b)=>a-b);
-    roomsOut.value = arr.length ? arr.join("/") : "";
     roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
       const n = parseInt(btn.getAttribute("data-room"), 10);
       const on = state.guestRooms.has(n);

@@ -252,7 +252,6 @@
               <button type="button" class="room-dot" data-room="5" aria-pressed="false">5</button>
               <button type="button" class="room-dot" data-room="6" aria-pressed="false">6</button>
             </div>
-            <input id="guestRooms" type="text" class="readonly" readonly placeholder="Stanze selezionate (es. 1/3/5)" />
           </div>
 
           <div class="field">
@@ -273,8 +272,8 @@
             <div class="subfield">
               <label>Tipo acconto</label>
               <div class="segmented" id="depositType" role="tablist" aria-label="Tipo acconto">
-                <button type="button" class="seg-btn active" data-type="contante" role="tab" aria-selected="true">Contante</button>
-                <button type="button" class="seg-btn" data-type="elettronico" role="tab" aria-selected="false">Elettronico</button>
+                <button type="button" class="seg-btn active" data-type="contante" aria-label="Contante" role="tab" aria-selected="true"><span class="seg-ico" aria-hidden="true">💶</span></button>
+                <button type="button" class="seg-btn" data-type="elettronico" aria-label="Elettronico" role="tab" aria-selected="false"><span class="seg-ico" aria-hidden="true">💳</span></button>
               </div>
             </div>
           </div>
@@ -282,17 +281,8 @@
           <button id="createGuestCard" class="btn primary" type="button">Crea scheda cliente</button>
             </div>
           </div>
-
-          <div class="card guest-cards-card">
-            <div class="hd">
-              <h2>Schede create</h2>
-            </div>
-            <div class="bd">
-              <div id="guestCards" class="cards"></div>
-            </div>
-          </div>
         </div>
-</div>
+      </div>
     </section>
 
 </main>
