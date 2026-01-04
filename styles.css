@@ -1455,3 +1455,31 @@ body::before{
 /* Ospite: subfield float with segmented needs top padding */
 #page-ospite .subfield.field.float{ position: relative; }
 #page-ospite .subfield.field.float .segmented{ margin-top: 10px; }
+
+
+
+/* ============================
+   Floating label: always INSIDE the field border
+============================ */
+.field.float{ position: relative; }
+.field.float > label{
+  top: 16px;                 /* inside box */
+  left: 14px;
+  max-width: calc(100% - 28px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+}
+.field.float.has-value > label,
+.field.float input:focus + label,
+.field.float select:focus + label{
+  transform: translateY(-10px) scale(0.86); /* 16px -> 6px (still inside) */
+}
+
+/* segmented label (Tipo acconto) inside its box */
+.field.float .seg-label{
+  top: 16px;
+  left: 14px;
+  transform: translateY(-10px) scale(0.86);
+}
