@@ -1610,3 +1610,103 @@ body::before{
   background: var(--blue);
   border-color: var(--blue);
 }
+
+
+
+/* ============================
+   High Contrast pass (palette-safe)
+   Goal: stronger readability while keeping Liquid Glass.
+============================ */
+:root{
+  --glass: rgba(255,255,255,0.78);
+  --glass2: rgba(255,255,255,0.58);
+  --border: rgba(15,23,42,0.16);
+  --shadow: 0 14px 40px rgba(15,23,42,0.14);
+}
+
+/* Global text */
+body{
+  color: var(--text);
+}
+
+/* Cards / panels */
+.card, .panel, .glass{
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+.card{
+  background: var(--glass) !important;
+}
+
+/* Topbar separation */
+.topbar{
+  border-bottom: 1px solid rgba(15,23,42,0.14) !important;
+}
+
+/* Inputs */
+input, select, textarea{
+  border-color: rgba(15,23,42,0.16) !important;
+  background: rgba(255,255,255,0.82) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+input:focus, select:focus, textarea:focus{
+  border-color: rgba(43,124,180,0.55) !important;
+  box-shadow: 0 0 0 4px rgba(43,124,180,0.18) !important;
+}
+
+/* Floating labels */
+.field.float > label{
+  color: rgba(15,23,42,0.74) !important;
+}
+.field.float.has-value > label,
+.field.float input:focus + label,
+.field.float select:focus + label{
+  color: rgba(15,23,42,0.88) !important;
+}
+
+/* Buttons: bigger contrast */
+.btn{
+  border-color: rgba(15,23,42,0.16) !important;
+  box-shadow: 0 10px 26px rgba(15,23,42,0.12) !important;
+}
+.btn.primary{
+  border-color: rgba(43,124,180,0.35) !important;
+  background:
+    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.28), rgba(255,255,255,0.00)),
+    linear-gradient(180deg, rgba(43,124,180,0.95), rgba(33,103,156,0.95)) !important;
+  color: rgba(255,255,255,0.96) !important;
+}
+.btn.primary:active{
+  transform: translateY(1px);
+}
+.btn.ghost, .btn.secondary{
+  background: rgba(255,255,255,0.74) !important;
+  color: rgba(15,23,42,0.90) !important;
+}
+
+/* Chips / pills */
+.chip, .pill, .period-chip, .pill-toggle{
+  border-color: rgba(15,23,42,0.16) !important;
+  background: rgba(255,255,255,0.78) !important;
+  color: rgba(15,23,42,0.90) !important;
+}
+
+/* Tables / rows */
+.row, .list-row, .expense-row{
+  border-color: rgba(15,23,42,0.14) !important;
+}
+
+/* Home icons: glyph + label more readable */
+.home-main-label, .launcher-label, .home-label{
+  color: rgba(15,23,42,0.92) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+/* Segmented (icons) */
+.segmented, .segmented .seg-btn{
+  border-color: rgba(15,23,42,0.16) !important;
+}
+.segmented .seg-btn.active{
+  background: rgba(43,124,180,0.14) !important;
+  border-color: rgba(43,124,180,0.40) !important;
+}
