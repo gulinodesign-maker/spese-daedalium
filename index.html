@@ -200,7 +200,75 @@
         </div>
       </div>
     </section>
-  </main>
+  
+    <!-- Pagina Ospite (solo UI demo, nessun DB) -->
+    <section id="page-ospite" class="page" aria-label="Inserisci ospite">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Inserisci ospite</h1>
+        </div>
+        <button class="hamburger" id="hamburgerBtnOspite" aria-label="Home" type="button">
+          <span></span><span></span><span></span>
+        </button>
+      </header>
+
+      <div class="content">
+        <div class="card">
+          <div class="field">
+            <label for="guestName">Nome ospite</label>
+            <input id="guestName" type="text" placeholder="Es. Mario Rossi" autocomplete="name" />
+          </div>
+
+          <div class="field">
+            <label for="guestCheckIn">Data check-in</label>
+            <input id="guestCheckIn" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="guestCheckOut">Data check-out</label>
+            <input id="guestCheckOut" type="date" />
+          </div>
+
+          <div class="field">
+            <label>Stanze (1–6)</label>
+            <div class="rooms" id="roomsPicker" role="group" aria-label="Seleziona stanze">
+              <button type="button" class="room-dot" data-room="1" aria-pressed="false">1</button><button type="button" class="room-dot" data-room="2" aria-pressed="false">2</button><button type="button" class="room-dot" data-room="3" aria-pressed="false">3</button><button type="button" class="room-dot" data-room="4" aria-pressed="false">4</button><button type="button" class="room-dot" data-room="5" aria-pressed="false">5</button><button type="button" class="room-dot" data-room="6" aria-pressed="false">6</button>
+            </div>
+            <input id="guestRooms" type="text" class="readonly" readonly placeholder="Stanze selezionate (es. 1/3/5)" />
+          </div>
+
+          <div class="field">
+            <label for="guestTotal">Importo prenotazione (€)</label>
+            <input id="guestTotal" type="number" inputmode="decimal" step="0.01" placeholder="0,00" />
+          </div>
+
+          <div class="field">
+            <label for="guestBooking">Importo booking (€)</label>
+            <input id="guestBooking" type="number" inputmode="decimal" step="0.01" placeholder="0,00" />
+          </div>
+
+          <div class="field">
+            <label for="guestDeposit">Acconto (€)</label>
+            <input id="guestDeposit" type="number" inputmode="decimal" step="0.01" placeholder="0,00" />
+          </div>
+
+          <div class="field">
+            <label>Tipo acconto</label>
+            <div class="segmented" id="depositType" role="tablist" aria-label="Tipo acconto">
+              <button type="button" class="seg-btn active" data-type="contante" role="tab" aria-selected="true">Contante</button>
+              <button type="button" class="seg-btn" data-type="elettronico" role="tab" aria-selected="false">Elettronico</button>
+            </div>
+          </div>
+
+          <button id="createGuestCard" class="btn primary" type="button">Crea scheda cliente</button>
+        </div>
+
+        <div class="section-title">Schede create</div>
+        <div id="guestCards" class="cards"></div>
+      </div>
+    </section>
+
+</main>
 
   <div class="toast" id="toast"></div>
 
@@ -245,7 +313,12 @@
             <div class="glyph" aria-hidden="true">◔</div>
             <div class="label">Grafico</div>
           </button>
-        </div>
+
+          <button class="launcher-icon span2" data-go="ospite" type="button" aria-label="Ospite">
+            <div class="glyph" aria-hidden="true">👤</div>
+            <div class="label">Ospite</div>
+          </button>
+</div>
       </div>
     </div>
   </div>

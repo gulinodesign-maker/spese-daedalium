@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.020";
+const BUILD_VERSION = "1.021";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -14,6 +14,9 @@ const state = {
   period: { from: "", to: "" },
   periodPreset: "this_month",
   page: "home",
+  guests: [],
+  guestRooms: new Set(),
+  guestDepositType: "contante",
 };
 
 const COLORS = {
@@ -762,12 +765,164 @@ function bindPeriodAuto(fromSel, toSel){
   toEl.addEventListener("change", schedule);
 }
 
+
+function setupOspite(){
+  const hb = document.getElementById("hamburgerBtnOspite");
+  if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
+
+  const roomsWrap = document.getElementById("roomsPicker");
+  const roomsOut = document.getElementById("guestRooms");
+
+  function renderRooms(){
+    const arr = Array.from(state.guestRooms).sort((a,b)=>a-b);
+    roomsOut.value = arr.length ? arr.join("/") : "";
+    roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
+      const n = parseInt(btn.getAttribute("data-room"), 10);
+      const on = state.guestRooms.has(n);
+      btn.classList.toggle("selected", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  roomsWrap?.addEventListener("click", (e) => {
+    const b = e.target.closest(".room-dot");
+    if (!b) return;
+    const n = parseInt(b.getAttribute("data-room"), 10);
+    if (state.guestRooms.has(n)) state.guestRooms.delete(n);
+    else state.guestRooms.add(n);
+    renderRooms();
+  });
+
+  const seg = document.getElementById("depositType");
+  seg?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".seg-btn");
+    if (!btn) return;
+    const t = btn.getAttribute("data-type");
+    state.guestDepositType = t;
+    seg.querySelectorAll(".seg-btn").forEach(b=>{
+      const active = b.getAttribute("data-type") === t;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  });
+
+  const btnCreate = document.getElementById("createGuestCard");
+  btnCreate?.addEventListener("click", () => {
+    const name = (document.getElementById("guestName")?.value || "").trim();
+    const checkIn = document.getElementById("guestCheckIn")?.value || "";
+    const checkOut = document.getElementById("guestCheckOut")?.value || "";
+    const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
+    const booking = parseFloat(document.getElementById("guestBooking")?.value || "0") || 0;
+    const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
+    const rooms = Array.from(state.guestRooms).sort((a,b)=>a-b);
+    const depositType = state.guestDepositType || "contante";
+
+    // UI only validation (soft)
+    if (!name){
+      toast("Inserisci il nome");
+      return;
+    }
+
+    const item = {
+      id: String(Date.now()) + Math.random().toString(16).slice(2),
+      name, checkIn, checkOut,
+      rooms,
+      total, booking, deposit,
+      depositType
+    };
+    state.guests.unshift(item);
+    renderGuestCards();
+    toast("Scheda creata (demo)");
+
+    // reset fields (keep dates if user wants; we'll keep check-in today if empty)
+    document.getElementById("guestName").value = "";
+    document.getElementById("guestTotal").value = "";
+    document.getElementById("guestBooking").value = "";
+    document.getElementById("guestDeposit").value = "";
+    state.guestRooms.clear();
+    renderRooms();
+  });
+
+  // Default: check-in oggi (solo UI)
+  const today = new Date();
+  const iso = today.toISOString().slice(0,10);
+  const ci = document.getElementById("guestCheckIn");
+  if (ci && !ci.value) ci.value = iso;
+
+  renderRooms();
+  renderGuestCards();
+}
+
+function euro(n){
+  try { return (Number(n)||0).toLocaleString("it-IT", { style:"currency", currency:"EUR" }); }
+  catch { return (Number(n)||0).toFixed(2) + " €"; }
+}
+
+function renderGuestCards(){
+  const wrap = document.getElementById("guestCards");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  state.guests.forEach(item => {
+    const rooms = (item.rooms || []).join("/") || "—";
+    const badgeClass = item.depositType === "elettronico" ? "blue" : "orange";
+    const badgeLabel = item.depositType === "elettronico" ? "Elettronico" : "Contante";
+
+    const card = document.createElement("div");
+    card.className = "guest-card";
+    card.dataset.id = item.id;
+
+    card.innerHTML = `
+      <div class="top">
+        <div>
+          <div class="name">${escapeHtml(item.name)}</div>
+          <div class="meta">
+            <span>Check-in: <b>${escapeHtml(item.checkIn || "—")}</b></span>
+            <span>Check-out: <b>${escapeHtml(item.checkOut || "—")}</b></span>
+            <span>Stanze: <b>${escapeHtml(rooms)}</b></span>
+          </div>
+        </div>
+        <span class="badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn ghost" type="button" data-open="1">Apri</button>
+        <button class="btn danger" type="button" data-del="1">Elimina</button>
+      </div>
+
+      <details>
+        <summary>Dettagli</summary>
+        <div class="detail-grid">
+          <div><div class="k">Prenotazione</div><div>${euro(item.total)}</div></div>
+          <div><div class="k">Booking</div><div>${euro(item.booking)}</div></div>
+          <div><div class="k">Acconto</div><div>${euro(item.deposit)}</div></div>
+          <div><div class="k">Tipo</div><div>${badgeLabel}</div></div>
+        </div>
+      </details>
+    `;
+
+    // buttons
+    card.querySelector('[data-open="1"]')?.addEventListener("click", () => {
+      const d = card.querySelector("details");
+      if (d) d.open = !d.open;
+    });
+    card.querySelector('[data-del="1"]')?.addEventListener("click", () => {
+      state.guests = state.guests.filter(x => x.id !== item.id);
+      renderGuestCards();
+      toast("Eliminata");
+    });
+
+    wrap.appendChild(card);
+  });
+}
+
+
 async function init(){
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
 
-  // default period = this month
+    setupOspite();
+// default period = this month
   const [from,to] = monthRangeISO(new Date());
   setPeriod(from,to);
 

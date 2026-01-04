@@ -1063,3 +1063,174 @@ body::before{
 }
 
 .launcher-icon:active{ transform: scale(0.98); }
+
+
+
+/* ============================
+   OSPITE (UI demo)
+============================ */
+
+#page-ospite .content{ padding-bottom: calc(64px + var(--safe-bottom)); }
+#page-ospite .section-title{
+  margin: 14px 6px 10px;
+  font-weight: 950;
+  letter-spacing: .2px;
+  font-size: 14px;
+  color: rgba(15,23,42,0.70);
+}
+
+/* Stanze: pallini multi-select */
+.rooms{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 2px 6px;
+}
+.room-dot{
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-weight: 950;
+  font-size: 16px;
+  color: rgba(15,23,42,0.86);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 0;
+  cursor: pointer;
+}
+.room-dot.selected{
+  border-color: rgba(43,124,180,0.35);
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(43,124,180,0.22), transparent 60%),
+    rgba(255,255,255,0.78);
+  color: rgba(15,23,42,0.92);
+}
+.room-dot.selected::after{
+  content:"/";
+  position:absolute;
+  transform: translate(15px, -14px) rotate(22deg);
+  font-size: 16px;
+  font-weight: 950;
+  color: rgba(201,119,43,0.85);
+}
+
+/* Segmented control */
+.segmented{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.seg-btn{
+  height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-weight: 950;
+  font-size: 16px;
+  cursor: pointer;
+}
+.seg-btn.active{
+  border-color: rgba(43,124,180,0.35);
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(43,124,180,0.22), transparent 60%),
+    rgba(255,255,255,0.82);
+}
+
+/* Scheda cliente */
+.guest-card{
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 120% at 12% 0%, rgba(43,124,180,0.12), transparent 58%),
+    radial-gradient(120% 120% at 92% 0%, rgba(201,119,43,0.12), transparent 58%),
+    linear-gradient(to bottom, var(--glass), var(--glass2));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 52px rgba(15,23,42,0.10);
+  padding: 14px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+.guest-card .top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+}
+.guest-card .name{
+  font-weight: 950;
+  font-size: 18px;
+  letter-spacing: .2px;
+}
+.guest-card .meta{
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(15,23,42,0.70);
+  display:flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.74);
+  font-weight: 900;
+  font-size: 12px;
+}
+.badge.orange{ border-color: rgba(201,119,43,0.25); }
+.badge.blue{ border-color: rgba(43,124,180,0.25); }
+
+.guest-card .actions{
+  display:flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.guest-card .btn{
+  height: 46px;
+  border-radius: 16px;
+  font-weight: 950;
+  font-size: 15px;
+  padding: 0 14px;
+}
+.guest-card .btn.ghost{
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.60);
+}
+.guest-card .btn.danger{
+  border: 1px solid rgba(15,23,42,0.08);
+  background: rgba(201,119,43,0.10);
+  color: rgba(15,23,42,0.88);
+}
+.guest-card details{
+  margin-top: 10px;
+}
+.guest-card details summary{
+  list-style: none;
+  cursor: pointer;
+  font-weight: 950;
+  font-size: 14px;
+}
+.guest-card details summary::-webkit-details-marker{ display:none; }
+.guest-card .detail-grid{
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(15,23,42,0.76);
+}
+.guest-card .detail-grid .k{ font-weight: 950; color: rgba(15,23,42,0.90); }
+
+/* Launcher: 5 icone -> ultima centrata */
+.launcher-icon.span2{ grid-column: 1 / span 2; justify-self: center; }
