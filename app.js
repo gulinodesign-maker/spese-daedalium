@@ -940,12 +940,30 @@ function renderGuestCards(){
 }
 
 
+
+function initFloatingLabels(){
+  const fields = document.querySelectorAll(".field.float");
+  fields.forEach((f) => {
+    const control = f.querySelector("input, select, textarea");
+    if (!control) return;
+    const update = () => {
+      const has = !!(control.value && String(control.value).trim().length);
+      f.classList.toggle("has-value", has);
+    };
+    control.addEventListener("input", update);
+    control.addEventListener("change", update);
+    update();
+  });
+}
+
+
 async function init(){
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
 
     setupOspite();
+  initFloatingLabels();
 // default period = this month
   const [from,to] = monthRangeISO(new Date());
   setPeriod(from,to);

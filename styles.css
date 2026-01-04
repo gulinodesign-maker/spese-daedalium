@@ -1386,68 +1386,72 @@ body::before{
 
 
 /* ============================
-   Floating labels (iOS-style)
+   Floating labels (iPhone-friendly)
 ============================ */
-.sr-only{
-  position:absolute !important;
-  width:1px !important;
-  height:1px !important;
-  padding:0 !important;
-  margin:-1px !important;
-  overflow:hidden !important;
-  clip:rect(0,0,0,0) !important;
-  white-space:nowrap !important;
-  border:0 !important;
-}
-
-.field-float{
+.field.float{
   position: relative;
 }
-
-.field-float input,
-.field-float select,
-.field-float textarea{
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  padding-top: 22px !important;
-  padding-bottom: 10px !important;
-}
-
-.field-float .float-label{
+.field.float > label{
   position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 14px;
+  top: 14px;
+  margin: 0;
+  padding: 0;
   font-weight: 900;
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(15,23,42,0.62);
   pointer-events: none;
-  transition: all .18s ease;
+  transform-origin: left top;
+  transition: transform 160ms ease, color 160ms ease, opacity 160ms ease;
+  opacity: 0.96;
+}
+.field.float input,
+.field.float select{
+  padding-top: 20px; /* spazio per la label dentro */
+}
+.field.float.has-value > label{
+  transform: translateY(-8px) scale(0.86);
+  color: rgba(15,23,42,0.76);
+  opacity: 1;
+}
+.field.float input:focus + label,
+.field.float select:focus + label{
+  transform: translateY(-8px) scale(0.86);
+  color: rgba(15,23,42,0.80);
+  opacity: 1;
 }
 
-/* quando focus o con valore -> label sale */
-.field-float:focus-within .float-label,
-.field-float input:not(:placeholder-shown) + .float-label,
-.field-float textarea:not(:placeholder-shown) + .float-label,
-.field-float input:valid + .float-label{
-  top: 10px;
-  transform: translateY(0);
-  font-size: 12px;
-  color: rgba(15,23,42,0.55);
-}
-
-/* Select e date: label sempre in alto */
-.field-float.always .float-label,
-.field-float .float-label.static{
-  top: 10px;
-  transform: translateY(0);
-  font-size: 12px;
-}
-
-/* iOS date safety */
-.field-float input[type="date"]{
+/* date iOS: allineamento e padding coerente */
+.field.float input[type="date"]{
   display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
   -webkit-appearance:none;
 }
+
+/* select: allineamento label */
+.field.float select{
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Segmented label inside (Tipo acconto) */
+.field.float .seg-label{
+  position:absolute;
+  left: 14px;
+  top: 14px;
+  margin:0;
+  font-weight: 900;
+  font-size: 13px;
+  color: rgba(15,23,42,0.62);
+  pointer-events:none;
+  transform: translateY(-8px) scale(0.86);
+  transform-origin: left top;
+  opacity: 1;
+}
+
+/* Ospite: subfield float with segmented needs top padding */
+#page-ospite .subfield.field.float{ position: relative; }
+#page-ospite .subfield.field.float .segmented{ margin-top: 10px; }
