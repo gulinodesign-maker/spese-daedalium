@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.035";
+const BUILD_VERSION = "1.036";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -832,7 +832,7 @@ function setupOspite(){
   });
 
   const btnCreate = document.getElementById("createGuestCard");
-  btnCreate?.addEventListener("click", () => {
+  btnCreate?.addEventListener("click", async () => {
     const name = (document.getElementById("guestName")?.value || "").trim();
     const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
     const kidsU10 = parseInt(document.getElementById("guestKidsU10")?.value || "0", 10) || 0;
@@ -850,16 +850,35 @@ function setupOspite(){
       return;
     }
 
-    const item = {
-      id: String(Date.now()) + Math.random().toString(16).slice(2),
-      name, adults, kidsU10, checkIn, checkOut,
-      rooms,
-      total, booking, deposit,
-      depositType
-    };
-    state.guests.unshift(item);
-    renderGuestCards();
-    toast("Scheda creata (demo)");
+    const payload = {
+  nome: name,
+  adulti,
+  bambini_u10: kidsU10,
+  check_in: checkIn,
+  check_out: checkOut,
+  stanze: rooms, // array -> backend joins
+  importo_prenotazione: total,
+  importo_booking: booking,
+  acconto_importo: deposit,
+  acconto_tipo: depositType,
+  matrimonio: !!document.getElementById("guestMarriage")?.checked
+};
+
+// Salvataggio su Google Sheet (action=ospiti)
+const res = await api("ospiti", { method:"POST", body: payload });
+
+// Manteniamo una scheda locale per UI (id restituito dal backend)
+const item = {
+  id: (res && res.id) ? res.id : Math.random().toString(16).slice(2),
+  name, adults, kidsU10, checkIn, checkOut,
+  rooms,
+  total, booking, deposit,
+  depositType,
+  marriage: payload.matrimonio
+};
+state.guests.unshift(item);
+renderGuestCards();
+toast("Salvato");
 
     // reset fields (keep dates if user wants; we'll keep check-in today if empty)
     document.getElementById("guestName").value = "";
