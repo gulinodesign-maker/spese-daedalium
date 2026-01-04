@@ -42,12 +42,20 @@
 
           <div class="home-grid" role="navigation" aria-label="Sezioni">
             <button class="home-main" id="openLauncher" type="button" aria-label="Apri Spese">
-              <div class="home-main-glyph" aria-hidden="true">💼</div>
+              <div class="home-main-glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 6.5h6"></path>
+  <path d="M9 6.5V5.5A2.5 2.5 0 0 1 11.5 3h1A2.5 2.5 0 0 1 15 5.5v1"></path>
+  <path d="M4.5 9.5h15a2 2 0 0 1 2 2v6.5a3 3 0 0 1-3 3h-13a3 3 0 0 1-3-3V11.5a2 2 0 0 1 2-2Z"></path>
+  <path d="M4.5 13h15"></path>
+</svg></div>
               <div class="home-main-label">Spese</div>
             </button>
 
             <button class="home-main" id="goOspite" type="button" aria-label="Inserisci ospite">
-              <div class="home-main-glyph alt" aria-hidden="true">👤</div>
+              <div class="home-main-glyph alt" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
+  <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+</svg></div>
               <div class="home-main-label">Ospite</div>
             </button>
 </div>
@@ -271,8 +279,17 @@
             </div>
             <div class="subfield field float">
               <div class="segmented" id="depositType" role="tablist" aria-label="Tipo acconto">
-                <button type="button" class="seg-btn active" data-type="contante" aria-label="Contante" role="tab" aria-selected="true"><span class="seg-ico" aria-hidden="true">💶</span></button>
-                <button type="button" class="seg-btn" data-type="elettronico" aria-label="Elettronico" role="tab" aria-selected="false"><span class="seg-ico" aria-hidden="true">💳</span></button>
+                <button type="button" class="seg-btn active" data-type="contante" aria-label="Contante" role="tab" aria-selected="true"><span class="seg-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4 7h16v10H4z"></path>
+  <path d="M7 10h.01"></path>
+  <path d="M17 14h.01"></path>
+  <path d="M12 14a2 2 0 1 0-2-2 2 2 0 0 0 2 2Z"></path>
+</svg></span></button>
+                <button type="button" class="seg-btn" data-type="elettronico" aria-label="Elettronico" role="tab" aria-selected="false"><span class="seg-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"></path>
+  <path d="M2 11h20"></path>
+  <path d="M6 15h5"></path>
+</svg></span></button>
               </div>
             </div>
 </div>
@@ -301,7 +318,12 @@
   <div id="loadingOverlay" class="loading-overlay" hidden>
     <div class="loading-shell">
       <div class="loading-card" role="status" aria-live="polite" aria-label="Caricamento">
-        <div class="loading-hourglass" aria-hidden="true">⏳</div>
+        <div class="loading-hourglass" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 3h10"></path>
+  <path d="M7 21h10"></path>
+  <path d="M8 3c0 4 4 5 4 9s-4 5-4 9"></path>
+  <path d="M16 3c0 4-4 5-4 9s4 5 4 9"></path>
+</svg></div>
         <div class="loading-text">Caricamento…</div>
       </div>
     </div>
@@ -320,22 +342,40 @@
       <div class="launcher-card">
         <div class="launcher-grid" role="navigation" aria-label="Sezioni">
           <button class="launcher-icon primary" data-go="inserisci" type="button" aria-label="Inserisci">
-            <div class="glyph" aria-hidden="true">＋</div>
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 5v14"></path>
+  <path d="M5 12h14"></path>
+</svg></div>
             <div class="label">Inserisci</div>
           </button>
 
           <button class="launcher-icon" data-go="spese" type="button" aria-label="Spese">
-            <div class="glyph" aria-hidden="true">≡</div>
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 6h14"></path>
+  <path d="M7 12h14"></path>
+  <path d="M7 18h14"></path>
+  <path d="M3.5 6h.01"></path>
+  <path d="M3.5 12h.01"></path>
+  <path d="M3.5 18h.01"></path>
+</svg></div>
             <div class="label">Spese</div>
           </button>
 
           <button class="launcher-icon" data-go="riepilogo" type="button" aria-label="Riepilogo">
-            <div class="glyph" aria-hidden="true">▦</div>
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4 4h7v7H4z"></path>
+  <path d="M13 4h7v7h-7z"></path>
+  <path d="M4 13h7v7H4z"></path>
+  <path d="M13 13h7v7h-7z"></path>
+</svg></div>
             <div class="label">Riepilogo</div>
           </button>
 
           <button class="launcher-icon" data-go="grafico" type="button" aria-label="Grafico">
-            <div class="glyph" aria-hidden="true">◔</div>
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 12V3a9 9 0 1 1-9 9h9Z"></path>
+  <path d="M12 3a9 9 0 0 1 9 9h-9V3Z"></path>
+</svg></div>
             <div class="label">Grafico</div>
           </button>
 </div>

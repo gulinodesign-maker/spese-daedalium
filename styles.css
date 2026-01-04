@@ -1708,3 +1708,36 @@ body::before{
 #page-home .home-icon.ospite::before{
   opacity: 0.14 !important;
 }
+
+
+/* ============================
+   Minimal icons (no skeuomorphism)
+============================ */
+.ui-ico{
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.home-main-glyph .ui-ico{ width: 40px; height: 40px; }
+.launcher .glyph .ui-ico{ width: 28px; height: 28px; }
+.seg-ico .ui-ico{ width: 22px; height: 22px; }
+.loading-hourglass .ui-ico{ width: 44px; height: 44px; }
+
+/* Loader: no rectangular card background */
+.loading-card{
+  width: auto !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.loading-text{
+  color: rgba(11,15,22,0.90);
+}
+.loading-hourglass{
+  color: rgba(31,112,166,0.98);
+}
