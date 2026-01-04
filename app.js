@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.021";
+const BUILD_VERSION = "1.022";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -367,6 +367,12 @@ function setupHome(){
   const openBtn = $("#openLauncher");
   if (openBtn){
     openBtn.addEventListener("click", () => showLauncher());
+  }
+
+  // HOME: icona Ospite va alla pagina ospite
+  const goO = $("#goOspite");
+  if (goO){
+    goO.addEventListener("click", () => showPage("ospite"));
   }
 
   // launcher: icone interne navigano alle pagine
