@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.022";
+const BUILD_VERSION = "1.023";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -295,6 +295,16 @@ async function api(action, { method="GET", params={}, body=null } = {}){
 /* Launcher modal (popup) */
 
 let launcherDelegationBound = false;
+let homeDelegationBound = false;
+function bindHomeDelegation(){
+  if (homeDelegationBound) return;
+  homeDelegationBound = true;
+  document.addEventListener("click", (e)=>{
+    const o = e.target.closest && e.target.closest("#goOspite");
+    if (o){ hideLauncher(); showPage("ospite"); return; }
+  });
+}
+
 function bindLauncherDelegation(){
   if (launcherDelegationBound) return;
   launcherDelegationBound = true;
@@ -359,6 +369,7 @@ function setupHeader(){
 }
 function setupHome(){
   bindLauncherDelegation();
+  bindHomeDelegation();
   // stampa build
   const build = $("#buildText");
   if (build) build.textContent = `Build ${BUILD_VERSION}`;
@@ -815,6 +826,8 @@ function setupOspite(){
   const btnCreate = document.getElementById("createGuestCard");
   btnCreate?.addEventListener("click", () => {
     const name = (document.getElementById("guestName")?.value || "").trim();
+    const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
+    const kidsU10 = parseInt(document.getElementById("guestKidsU10")?.value || "0", 10) || 0;
     const checkIn = document.getElementById("guestCheckIn")?.value || "";
     const checkOut = document.getElementById("guestCheckOut")?.value || "";
     const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
@@ -831,7 +844,7 @@ function setupOspite(){
 
     const item = {
       id: String(Date.now()) + Math.random().toString(16).slice(2),
-      name, checkIn, checkOut,
+      name, adults, kidsU10, checkIn, checkOut,
       rooms,
       total, booking, deposit,
       depositType
@@ -842,6 +855,8 @@ function setupOspite(){
 
     // reset fields (keep dates if user wants; we'll keep check-in today if empty)
     document.getElementById("guestName").value = "";
+    document.getElementById("guestAdults").value = "";
+    document.getElementById("guestKidsU10").value = "";
     document.getElementById("guestTotal").value = "";
     document.getElementById("guestBooking").value = "";
     document.getElementById("guestDeposit").value = "";
@@ -885,6 +900,8 @@ function renderGuestCards(){
             <span>Check-in: <b>${escapeHtml(item.checkIn || "—")}</b></span>
             <span>Check-out: <b>${escapeHtml(item.checkOut || "—")}</b></span>
             <span>Stanze: <b>${escapeHtml(rooms)}</b></span>
+            <span>Adulti: <b>${escapeHtml(item.adults ?? 0)}</b></span>
+            <span>Bambini<10: <b>${escapeHtml(item.kidsU10 ?? 0)}</b></span>
           </div>
         </div>
         <span class="badge ${badgeClass}">${badgeLabel}</span>
@@ -901,6 +918,8 @@ function renderGuestCards(){
           <div><div class="k">Prenotazione</div><div>${euro(item.total)}</div></div>
           <div><div class="k">Booking</div><div>${euro(item.booking)}</div></div>
           <div><div class="k">Acconto</div><div>${euro(item.deposit)}</div></div>
+          <div><div class="k">Adulti</div><div>${escapeHtml(item.adults ?? 0)}</div></div>
+          <div><div class="k">Bambini<10</div><div>${escapeHtml(item.kidsU10 ?? 0)}</div></div>
           <div><div class="k">Tipo</div><div>${badgeLabel}</div></div>
         </div>
       </details>
