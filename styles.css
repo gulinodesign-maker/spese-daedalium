@@ -852,149 +852,43 @@ body::before{
 }
 
 
-/* HOME: singola icona principale (modulo) */
-.home-grid-single{
+
+/* HOME: griglia senza contenitore (icone direttamente sullo sfondo) */
+
+#page-home .home-grid{
   width: min(460px, 94vw);
   margin: 0 auto;
-  padding: 18px 10px;
-  display: grid;
-  place-items: center;
+  padding: 14px;
+  border-radius: 0; /* niente card */
+  background: transparent;
 }
-#page-home .home-main{
+
+#page-home .home-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  justify-items: center;
+}
+
+/* HOME: nessun contenitore - se resta un wrapper, non deve creare box */
+#page-home .home-card{
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-  padding: 10px 6px 8px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
-#page-home .home-main::before,
-#page-home .home-main::after{ display:none !important; }
 
-#page-home .home-main .glyph{
-  width: 120px !important;
-  height: 120px !important;
-  border-radius: 34px !important;
-  font-size: 54px !important;
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.86), rgba(255,255,255,0.62)),
-    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.74));
-  border: 1px solid rgba(0,0,0,0.06);
+
+
+/* HOME: rimuovi ombre strane sotto le icone */
+#page-home .home-icon .glyph{
   box-shadow: none !important;
+  filter: none !important;
 }
-#page-home .home-main .label{
-  margin-top: 12px;
-  font-size: 18px !important;
-  font-weight: 800;
+#page-home .home-icon{
+  text-shadow: none !important;
 }
-
-/* Modal launcher Liquid Glass */
-.modal{
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  padding-top: var(--safe-top);
-  padding-bottom: var(--safe-bottom);
+#page-home .home-icon .label{
+  text-shadow: none !important;
 }
-.modal[hidden]{ display:none !important; }
-
-.modal-overlay{
-  position: absolute;
-  inset: 0;
-  background: rgba(10,14,18,0.10);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: modalFade .16s ease-out;
-}
-@keyframes modalFade{
-  from{ opacity:0; }
-  to{ opacity:1; }
-}
-.modal-card{
-  position: relative;
-  width: min(520px, 92vw);
-  margin: 14vh auto 0 auto;
-  border-radius: 26px;
-  padding: 18px 16px 16px 16px;
-  background: rgba(255,255,255,0.62);
-  border: 1px solid rgba(255,255,255,0.55);
-  box-shadow: 0 18px 44px rgba(15,23,42,0.18);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  overflow: hidden;
-  animation: modalPop .18s ease-out;
-}
-@keyframes modalPop{
-  from{ transform: translateY(8px) scale(0.985); opacity: 0; }
-  to{ transform: translateY(0) scale(1); opacity: 1; }
-}
-.modal-card::before{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  border-radius: 26px;
-  background: radial-gradient(120% 90% at 20% 0%, rgba(255,255,255,0.80), transparent 58%);
-  pointer-events:none;
-  opacity: 0.8;
-}
-.modal-close{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.06);
-  background: rgba(255,255,255,0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  font-size: 18px;
-  font-weight: 900;
-}
-.modal-close:active{ transform: scale(0.98); }
-
-.launcher-grid{
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 14px;
-  padding-top: 18px;
-}
-.launcher-item{
-  min-height: 120px;
-  border-radius: 22px;
-  border: 1px solid rgba(255,255,255,0.55);
-  background: rgba(255,255,255,0.54);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 14px 34px rgba(15,23,42,0.14);
-  display: grid;
-  place-items: center;
-  padding: 14px 10px;
-}
-.launcher-item:active{ transform: scale(0.985); }
-
-.launcher-item .glyph{
-  width: 78px;
-  height: 78px;
-  border-radius: 24px;
-  display: grid;
-  place-items: center;
-  font-size: 40px;
-  background:
-    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.86), rgba(255,255,255,0.62)),
-    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.74));
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: none;
-}
-.launcher-item .label{
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: 800;
-}
-
-/* Palette */
-.launcher-item[data-go="spese"] .glyph{ color: var(--blue); }
-.launcher-item[data-go="riepilogo"] .glyph{ color: var(--orange); }
-.launcher-item[data-go="grafico"] .glyph{ color: var(--dark); }
-.launcher-item[data-go="inserisci"] .glyph{ color: var(--blue); }

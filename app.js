@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.019";
+const BUILD_VERSION = "1.018";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -289,21 +289,6 @@ async function api(action, { method="GET", params={}, body=null } = {}){
 }
 
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
-
-function showLauncher(){
-  const m = document.querySelector("#launcherModal");
-  if (!m) return;
-  m.hidden = false;
-  m.setAttribute("aria-hidden","false");
-}
-
-function hideLauncher(){
-  const m = document.querySelector("#launcherModal");
-  if (!m) return;
-  m.hidden = true;
-  m.setAttribute("aria-hidden","true");
-}
-
 function showPage(page){
   state.page = page;
   document.body.dataset.page = page;
@@ -766,24 +751,6 @@ async function init(){
   }
 
   // avvio: mostra la HOME
-  // Launcher modal bindings (HOME -> popup con 4 icone)
-  const open = document.querySelector("#openLauncher");
-  const close = document.querySelector("#closeLauncher");
-  const modal = document.querySelector("#launcherModal");
-  if (open) open.addEventListener("click", () => showLauncher());
-  if (close) close.addEventListener("click", () => hideLauncher());
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      const t = e.target;
-      if (t && t.dataset && t.dataset.close) hideLauncher();
-      const btn = t && t.closest ? t.closest(".launcher-item") : null;
-      if (btn && btn.dataset && btn.dataset.go) {
-        hideLauncher();
-        showPage(btn.dataset.go);
-      }
-    });
-  }
-
   showPage("home");
 }
 

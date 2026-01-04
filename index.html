@@ -40,14 +40,10 @@
       <div class="home-page">
         <div class="home-spacer"></div>
 
-        <div class="home-card" aria-label="Launcher">
-          <div class="home-grid home-grid-single">
-          <button class="home-icon home-main" id="openLauncher" aria-label="Apri menu Spese">
-            <div class="glyph">💼</div>
-            <div class="label">Spese</div>
-          </button>
-        </div>
-<div class="label">Inserisci</div>
+          <div class="home-grid" role="navigation" aria-label="Sezioni">
+            <button class="home-icon primary" data-go="inserisci" type="button" aria-label="Inserisci">
+              <div class="glyph" aria-hidden="true">＋</div>
+              <div class="label">Inserisci</div>
             </button>
 
             <button class="home-icon" data-go="spese" type="button" aria-label="Spese">
@@ -65,7 +61,6 @@
               <div class="label">Grafico</div>
             </button>
           </div>
-        </div>
 
         <div class="build" id="buildText">Build</div>
 
@@ -237,32 +232,5 @@
 
   <script src="./config.js"></script>
   <script src="./app.js"></script>
-
-  <!-- Launcher Modal -->
-  <div id="launcherModal" class="modal" hidden aria-hidden="true">
-    <div class="modal-overlay" data-close="1"></div>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Menu Spese">
-      <button class="modal-close" id="closeLauncher" aria-label="Chiudi">✕</button>
-      <div class="launcher-grid">
-        <button class="launcher-item" data-go="inserisci" aria-label="Inserisci">
-          <div class="glyph">➕</div>
-          <div class="label">Inserisci</div>
-        </button>
-        <button class="launcher-item" data-go="spese" aria-label="Spese">
-          <div class="glyph">🧾</div>
-          <div class="label">Spese</div>
-        </button>
-        <button class="launcher-item" data-go="riepilogo" aria-label="Riepilogo">
-          <div class="glyph">∑</div>
-          <div class="label">Riepilogo</div>
-        </button>
-        <button class="launcher-item" data-go="grafico" aria-label="Grafico">
-          <div class="glyph">◔</div>
-          <div class="label">Grafico</div>
-        </button>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>
