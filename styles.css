@@ -1610,3 +1610,131 @@ body::before{
   background: var(--blue);
   border-color: var(--blue);
 }
+
+
+
+/* ============================
+   Palette Boost (more visible colors, logo-coherent)
+   Build: 1.032
+============================ */
+
+/* Stronger accents while staying in Daedalium palette */
+:root{
+  /* keep same hues, increase opacity/contrast */
+  --blue-strong: rgba(43,124,180,1);
+  --blue-soft: rgba(43,124,180,0.18);
+  --orange-strong: rgba(201,119,43,1);
+  --orange-soft: rgba(201,119,43,0.18);
+  --beige-strong: rgba(214,191,156,1);
+  --beige-soft: rgba(214,191,156,0.22);
+  --ink: rgba(15,23,42,0.92);
+  --ink-soft: rgba(15,23,42,0.72);
+}
+
+/* Headings / titles slightly darker for readability */
+h1,h2,.section-title,.title,.page-title{
+  color: var(--ink) !important;
+}
+
+/* Glass cards: slightly more definition (border + highlight) */
+.card{
+  border: 1px solid rgba(43,124,180,0.12) !important;
+  box-shadow: 0 16px 42px rgba(15,23,42,0.12) !important;
+}
+.card::before{
+  /* if existing ::before highlight, increase gently */
+  opacity: 0.95 !important;
+}
+
+/* Inputs: clearer border + focus ring in blue */
+input, select, textarea{
+  color: var(--ink) !important;
+}
+input, select, textarea{
+  border-color: rgba(15,23,42,0.14) !important;
+}
+input:focus, select:focus, textarea:focus{
+  border-color: rgba(43,124,180,0.55) !important;
+  box-shadow: 0 0 0 3px rgba(43,124,180,0.18) !important;
+}
+
+/* Floating labels: darker and more readable */
+.field.float > label,
+.field.float .seg-label{
+  color: var(--ink-soft) !important;
+}
+
+/* Primary buttons: more visible blue with subtle orange highlight */
+.btn.primary{
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72)) !important;
+  border-color: rgba(43,124,180,0.40) !important;
+  box-shadow: 0 14px 34px rgba(43,124,180,0.18) !important;
+}
+.btn.primary{
+  color: rgba(43,124,180,0.98) !important;
+}
+.btn.primary:active{
+  transform: translateY(1px);
+  box-shadow: 0 10px 24px rgba(43,124,180,0.16) !important;
+}
+
+/* Secondary / neutral buttons: better definition */
+.btn{
+  border-color: rgba(15,23,42,0.14) !important;
+}
+
+/* Segmented controls: active state stronger */
+.segmented .seg-btn.active,
+#depositType .seg-btn.active{
+  background: rgba(43,124,180,0.14) !important;
+  border-color: rgba(43,124,180,0.45) !important;
+  box-shadow: 0 10px 22px rgba(43,124,180,0.12) !important;
+}
+.segmented .seg-btn{
+  border-color: rgba(15,23,42,0.12) !important;
+}
+
+/* Room dots: clearer base + selected already blue strong */
+.room-dot{
+  border-color: rgba(15,23,42,0.16) !important;
+  background: rgba(255,255,255,0.78) !important;
+}
+#page-ospite .room-dot.selected{
+  background: var(--blue-strong) !important;
+  border-color: rgba(43,124,180,0.65) !important;
+}
+
+/* Period chip / pills: clearer */
+.period-chip, .chip, .pill{
+  border-color: rgba(43,124,180,0.18) !important;
+  background: rgba(255,255,255,0.72) !important;
+}
+
+/* Launcher/home icons: more vivid glyph background */
+.home-main-glyph{
+  box-shadow: 0 16px 36px rgba(15,23,42,0.14) !important;
+}
+.home-main-glyph{
+  border: 1px solid rgba(43,124,180,0.20) !important;
+}
+.home-main-glyph.alt{
+  border: 1px solid rgba(201,119,43,0.22) !important;
+  box-shadow: 0 16px 36px rgba(201,119,43,0.14) !important;
+}
+
+/* Accent strokes for small icons/badges */
+.badge, .tag{
+  border-color: rgba(201,119,43,0.22) !important;
+  background: rgba(201,119,43,0.10) !important;
+  color: rgba(201,119,43,0.95) !important;
+}
+
+/* Table/list rows: slightly stronger separators */
+.row, .list-row, .spese-row{
+  border-bottom-color: rgba(15,23,42,0.10) !important;
+}
+
+/* Grafico legend labels: darker */
+.legend, .chart-legend, .pie-legend{
+  color: var(--ink-soft) !important;
+}
