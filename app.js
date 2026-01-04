@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.034";
+const BUILD_VERSION = "1.035";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -302,6 +302,15 @@ function bindHomeDelegation(){
   document.addEventListener("click", (e)=>{
     const o = e.target.closest && e.target.closest("#goOspite");
     if (o){ hideLauncher(); showPage("ospite"); return; }
+    const cal = e.target.closest && e.target.closest("#goCalendario");
+    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
+    const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
+    if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
+    const pul = e.target.closest && e.target.closest("#goPulizie");
+    if (pul){ hideLauncher(); toast("Pulizie: in arrivo"); return; }
+    const g = e.target.closest && e.target.closest("#goGuadagni");
+    if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
+
   });
 }
 
