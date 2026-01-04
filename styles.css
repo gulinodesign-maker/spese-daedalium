@@ -1602,10 +1602,6 @@ body::before{
   border: 2px solid rgba(43,124,180,0.55);
   background: rgba(255,255,255,0.85);
 }
-#page-ospite .pill-toggle .at{
-  font-weight: 1000;
-  color: rgba(43,124,180,0.85);
-}
 #page-ospite .toggle-check:checked + .pill-toggle{
   border-color: rgba(43,124,180,0.45);
   background: rgba(43,124,180,0.10);
