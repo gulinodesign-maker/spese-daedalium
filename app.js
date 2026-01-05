@@ -1,7 +1,7 @@
 
 const API_KEY = "daedalium2026";
 const API_URL = CONFIG.API_URL;
-const BUILD_VERSION = "1.051";
+const BUILD_VERSION = "1.052";
 
 async function apiGet(action){
   const r = await fetch(`${API_URL}?action=${action}&apiKey=${API_KEY}`);
@@ -79,3 +79,36 @@ document.addEventListener("DOMContentLoaded",()=>{
   show("home");
   caricaSpese();
 });
+
+
+/* ==== DEFINITIVE NAVIGATION FIX ==== */
+const NAV_MAP = {
+  home: "home",
+  ospiti: "ospiti",
+  spese: "spese",
+  motivazioni: "motivazioni"
+};
+
+function showSection(id){
+  document.querySelectorAll("section").forEach(s=>{
+    s.hidden = true;
+    s.style.display = "none";
+  });
+  const el = document.getElementById(id);
+  if(el){
+    el.hidden = false;
+    el.style.display = "block";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  showSection("home");
+});
+
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-go]");
+  if(!btn) return;
+  const key = btn.getAttribute("data-go");
+  if(NAV_MAP[key]) showSection(NAV_MAP[key]);
+});
+/* ==== END NAV ==== */
