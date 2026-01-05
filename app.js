@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.047";
+const BUILD_VERSION = "1.038";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -579,7 +579,7 @@ async function saveSpesa(){
     } catch (_) {}
   }
 
-  await api("spese", { method:"POST", body:{ importo: importoLordo, motivazione, data: dataSpesa, categoria } });
+  await api("spese", { method:"POST", body:{ dataSpesa, categoria, motivazione, importoLordo, note: "" } });
 
   toast("Salvato");
   resetInserisci();
@@ -606,10 +606,10 @@ function renderSpese(){
     el.innerHTML = `
       <div class="item-top">
         <div>
-          <div class="item-title">${euro(s.importo)} <span style="opacity:.7; font-weight:800;"></span></div>
+          <div class="item-title">${euro(s.importoLordo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(s.iva)}</span></div>
           <div class="item-sub">
             <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 0.20)}">${categoriaLabel(s.categoria)}</span>
-            <span class="mini">${s.data}</span>
+            <span class="mini">${s.dataSpesa}</span>
             <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione)}</span>
           </div>
         </div>
@@ -619,7 +619,7 @@ function renderSpese(){
 
     el.querySelector("[data-del]").addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"POST", body:{ importo: importoLordo, motivazione, data: dataSpesa, categoria } });
+      await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
       await loadData();
     });
@@ -633,7 +633,7 @@ function renderRiepilogo(){
   const r = state.report;
   if (!r) return;
 
-  $("#kpiTotSpese").textContent = euro(r.totals.importo);
+  $("#kpiTotSpese").textContent = euro(r.totals.importoLordo);
   $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
   $("#kpiImponibile").textContent = euro(r.totals.imponibile);
 
@@ -1190,48 +1190,3 @@ async function registerSW(){
 }
 registerSW();
 
-
-
-// --- Room beds config (non-invasive) ---
-state.lettiPerStanza = state.lettiPerStanza || {};
-let __rc_room = null;
-
-function __rc_renderToggle(el, on){
-  el.innerHTML = `<span class="dot ${on?'on':''}"></span>`;
-  el.onclick = ()=> el.firstElementChild.classList.toggle('on');
-}
-function __rc_renderSingoli(el, n){
-  el.innerHTML = '';
-  for(let i=1;i<=3;i++){
-    const s=document.createElement('span');
-    s.className='dot'+(i<=n?' on':'');
-    s.onclick=()=>{
-      [...el.children].forEach((c,ix)=>c.classList.toggle('on', ix < i));
-    };
-    el.appendChild(s);
-  }
-}
-
-function openRoomConfig(room){
-  __rc_room = String(room);
-  const d = state.lettiPerStanza[__rc_room] || {matrimoniale:false,singoli:0,culla:false};
-  document.getElementById('roomConfigTitle').textContent = 'Stanza '+room;
-  __rc_renderToggle(document.getElementById('rc_matrimoniale'), d.matrimoniale);
-  __rc_renderSingoli(document.getElementById('rc_singoli'), d.singoli);
-  __rc_renderToggle(document.getElementById('rc_culla'), d.culla);
-  document.getElementById('roomConfigModal').hidden = false;
-}
-
-document.addEventListener('click', (e)=>{
-  const b = e.target.closest && e.target.closest('[data-room]');
-  if(b){ openRoomConfig(b.getAttribute('data-room')); }
-});
-
-document.getElementById('rc_save')?.addEventListener('click', ()=>{
-  const matrimoniale = document.querySelector('#rc_matrimoniale .dot')?.classList.contains('on')||false;
-  const culla = document.querySelector('#rc_culla .dot')?.classList.contains('on')||false;
-  const singoli = document.querySelectorAll('#rc_singoli .dot.on').length;
-  state.lettiPerStanza[__rc_room] = {matrimoniale, singoli, culla};
-  document.getElementById('roomConfigModal').hidden = true;
-});
-// --- end room beds config ---
