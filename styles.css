@@ -1761,3 +1761,35 @@ body[data-page="ospiti"] .guest-card .actions {
 .dots{display:flex;gap:8px}
 .dot{width:22px;height:22px;border-radius:50%;border:2px solid #333}
 .dot.on{background:#333}
+
+
+/* Popup stanza: testo a sinistra, pallini a destra */
+.modal-card .row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.modal-card .row > span{
+  font-weight:700;
+  font-size:14px;
+  white-space:nowrap;
+}
+.modal-card .dots{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-shrink:0;
+}
+
+
+/* Popup stanza: più spazio verticale */
+.modal-card .row{
+  margin-bottom: 18px;
+}
+
+/* Pallini azzurri quando attivi */
+.dot.on{
+  background: #2b7cb4;
+  border-color: #2b7cb4;
+}
