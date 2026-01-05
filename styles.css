@@ -1751,66 +1751,7 @@ body::before{
 #page-home #goTassaSoggiorno .home-main-glyph{ color: rgba(201,119,43,0.92); }
 #page-home #goPulizie .home-main-glyph{ color: rgba(15,23,42,0.92); }
 #page-home #goGuadagni .home-main-glyph{ color: rgba(176,92,18,0.92); }
-
-
-/* ============================
-   Ospiti: letti per stanza (modal + indicatori)
-============================ */
-.beds-summary{
-  margin-top: 6px;
-  font-size: 13px;
-  font-weight: 900;
-  color: rgba(15,23,42,0.66);
-  padding-left: 2px;
-}
-
-.room-dot{
-  position: relative;
-}
-.room-dot.configured::before{
-  content:"";
-  position:absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  top: 6px;
-  left: 6px;
-  background: rgba(43,124,180,0.85);
-  box-shadow: 0 6px 14px rgba(15,23,42,0.16);
-  border: 1px solid rgba(255,255,255,0.70);
-}
-
-.room-beds-card{
-  padding: 14px 14px 16px;
-}
-.room-beds-hd{
-  padding: 10px 6px 6px;
-}
-.room-beds-title{
-  font-weight: 950;
-  font-size: 18px;
-  color: rgba(15,23,42,0.92);
-}
-.room-beds-sub{
-  margin-top: 4px;
-  font-weight: 850;
-  font-size: 13px;
-  color: rgba(15,23,42,0.60);
-}
-.room-beds-form{
-  margin-top: 10px;
-}
-.room-beds-actions{
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 12px;
-}
-.room-beds-actions .btn{
-  width: 100%;
-}
-@media (max-width: 420px){
-  .room-beds-actions{
-    grid-template-columns: 1fr;
-  }
+/* dDAE_1.038 - Ospiti: solo consultazione (azioni nascoste per ora) */
+body[data-page="ospiti"] .guest-card .actions {
+  display: none !important;
 }

@@ -16,7 +16,6 @@ const state = {
   page: "home",
   guests: [],
   guestRooms: new Set(),
-  guestBedsPerRoom: {},
   guestDepositType: "contante",
   guestEditId: null,
 };
@@ -382,7 +381,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home" || page === "ospite") {
+    if (page === "home" || page === "ospite" || page === "ospiti") {
       chip.hidden = true;
     } else {
       chip.hidden = false;
@@ -394,7 +393,7 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
-  if (page === "ospite") loadOspiti().catch(e => toast(e.message));
+  if (page === "ospiti") loadOspiti().catch(e => toast(e.message));
 }
 
 function setupHeader(){
@@ -419,6 +418,12 @@ function setupHome(){
   if (goO){
     goO.addEventListener("click", () => showPage("ospite"));
   }
+  // HOME: icona Ospiti va alla pagina elenco ospiti
+  const goOs = $("#goOspiti");
+  if (goOs){
+    goOs.addEventListener("click", () => showPage("ospiti"));
+  }
+
 
   // launcher: icone interne navigano alle pagine
   document.querySelectorAll("#launcherModal [data-go]").forEach(btn => {
@@ -830,165 +835,26 @@ function setupOspite(){
   const roomsWrap = document.getElementById("roomsPicker");
   const roomsOut = null; // removed UI string output
 
-  // Letti per stanza (salvati in letti_per_stanza come JSON)
-  const bedsSummaryEl = document.getElementById("bedsSummary");
-
-  // Modal "letti stanza"
-  const roomModal = document.getElementById("roomBedsModal");
-  const roomModalBackdrop = roomModal?.querySelector(".launcher-backdrop");
-  const roomModalTitle = document.getElementById("roomBedsTitle");
-  const inMatr = document.getElementById("roomBedsMatr");
-  const inSing = document.getElementById("roomBedsSing");
-  const inCulla = document.getElementById("roomBedsCulla");
-  const btnRoomSave = document.getElementById("roomBedsSave");
-  const btnRoomCancel = document.getElementById("roomBedsCancel");
-  const btnRoomRemove = document.getElementById("roomBedsRemove");
-  const btnRoomClose = document.getElementById("closeRoomBedsModal");
-
-  function nonNegInt(v){
-    const n = parseInt(String(v ?? "").trim() || "0", 10);
-    return Number.isFinite(n) && n > 0 ? n : 0;
-  }
-
-  function bedsTotals(){
-    let matr = 0, sing = 0, culla = 0;
-    const obj = state.guestBedsPerRoom || {};
-    Object.values(obj).forEach((x)=>{
-      matr += nonNegInt(x?.matr);
-      sing += nonNegInt(x?.sing);
-      culla += nonNegInt(x?.culla);
-    });
-    return { matr, sing, culla };
-  }
-
-  function updateBedsSummary(){
-    if (!bedsSummaryEl) return;
-    const rooms = Array.from(state.guestRooms).sort((a,b)=>a-b);
-    // Safety: ogni stanza selezionata deve avere i letti configurati
-    for (const r of rooms) {
-      if (!state.guestBedsPerRoom || !state.guestBedsPerRoom[r]) {
-        toast(`Configura i letti per la stanza ${r}`);
-        return;
-      }
-    }
-    if (!rooms.length){
-      bedsSummaryEl.textContent = "Seleziona una stanza per impostare i letti.";
-      return;
-    }
-    const t = bedsTotals();
-    bedsSummaryEl.textContent = `Totale letti: ${t.matr} matr, ${t.sing} sing, ${t.culla} culla`;
-  }
-
-  function setRoomModalOpen(isOpen){
-    if (!roomModal) return;
-    roomModal.hidden = !isOpen;
-    roomModal.setAttribute("aria-hidden", isOpen ? "false" : "true");
-  }
-
-  function openRoomBedsModal(roomNumber, initial = { matr:0, sing:0, culla:0 }, { allowRemove=false } = {}){
-    return new Promise((resolve)=>{
-      if (!roomModal || !inMatr || !inSing || !inCulla || !roomModalTitle || !btnRoomSave || !btnRoomCancel || !btnRoomClose || !btnRoomRemove){
-        // fallback: se per qualche motivo il modal non esiste, salva valori 0
-        resolve({ matr:0, sing:0, culla:0 });
-        return;
-      }
-
-      roomModalTitle.textContent = `Stanza ${roomNumber}`;
-      inMatr.value = String(nonNegInt(initial?.matr));
-      inSing.value = String(nonNegInt(initial?.sing));
-      inCulla.value = String(nonNegInt(initial?.culla));
-
-      btnRoomRemove.hidden = !allowRemove;
-
-      setRoomModalOpen(true);
-
-      const close = (val) => {
-        setRoomModalOpen(false);
-        cleanup();
-        resolve(val);
-      };
-
-      const onBackdrop = (e) => {
-        if (e.target && e.target.matches && e.target.matches(".launcher-backdrop")) close(null);
-      };
-
-      const onSave = () => {
-        const out = {
-          matr: nonNegInt(inMatr.value),
-          sing: nonNegInt(inSing.value),
-          culla: nonNegInt(inCulla.value),
-        };
-        close(out);
-      };
-
-      const onCancel = () => close(null);
-      const onClose = () => close(null);
-      const onRemove = () => close({ remove: true });
-
-      function cleanup(){
-        btnRoomSave.removeEventListener("click", onSave);
-        btnRoomCancel.removeEventListener("click", onCancel);
-        btnRoomClose.removeEventListener("click", onClose);
-        btnRoomRemove.removeEventListener("click", onRemove);
-        roomModal.removeEventListener("click", onBackdrop);
-        roomModalBackdrop?.removeEventListener("click", onCancel);
-      }
-
-      btnRoomSave.addEventListener("click", onSave);
-      btnRoomCancel.addEventListener("click", onCancel);
-      btnRoomClose.addEventListener("click", onClose);
-      btnRoomRemove.addEventListener("click", onRemove);
-      roomModal.addEventListener("click", onBackdrop);
-      roomModalBackdrop?.addEventListener("click", onCancel);
-    });
-  }
-
-
   function renderRooms(){
+    const arr = Array.from(state.guestRooms).sort((a,b)=>a-b);
     roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
       const n = parseInt(btn.getAttribute("data-room"), 10);
       const on = state.guestRooms.has(n);
-      const conf = !!(state.guestBedsPerRoom && state.guestBedsPerRoom[n]);
       btn.classList.toggle("selected", on);
-      btn.classList.toggle("configured", conf);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    updateBedsSummary();
   }
 
-  roomsWrap?.addEventListener("click", async (e) => {
+  roomsWrap?.addEventListener("click", (e) => {
     const b = e.target.closest(".room-dot");
     if (!b) return;
     const n = parseInt(b.getAttribute("data-room"), 10);
-
-    // Se già selezionata -> modifica / rimuovi
-    if (state.guestRooms.has(n)) {
-      const current = state.guestBedsPerRoom?.[n] || { matr:0, sing:0, culla:0 };
-      const res = await openRoomBedsModal(n, current, { allowRemove:true });
-      if (!res) return;
-
-      if (res.remove) {
-        state.guestRooms.delete(n);
-        if (state.guestBedsPerRoom) delete state.guestBedsPerRoom[n];
-      } else {
-        state.guestBedsPerRoom = state.guestBedsPerRoom || {};
-        state.guestBedsPerRoom[n] = res;
-      }
-      renderRooms();
-      return;
-    }
-
-    // Nuova selezione -> obbliga configurazione letti
-    const res = await openRoomBedsModal(n, { matr:0, sing:0, culla:0 }, { allowRemove:false });
-    if (!res) return;
-
-    state.guestRooms.add(n);
-    state.guestBedsPerRoom = state.guestBedsPerRoom || {};
-    state.guestBedsPerRoom[n] = res;
-
+    if (state.guestRooms.has(n)) state.guestRooms.delete(n);
+    else state.guestRooms.add(n);
     renderRooms();
   });
-const seg = document.getElementById("depositType");
+
+  const seg = document.getElementById("depositType");
   seg?.addEventListener("click", (e) => {
     const btn = e.target.closest(".seg-btn");
     if (!btn) return;
@@ -1035,10 +901,6 @@ const seg = document.getElementById("depositType");
       deposit,
       depositType,
       matrimonio,
-      letti_per_stanza: JSON.stringify(state.guestBedsPerRoom || {}),
-      letti_matrimoniali: bedsTotals().matr,
-      letti_singoli: bedsTotals().sing,
-      culle: bedsTotals().culla,
       // default backend flags
       ps_registrato: false,
       istat_registrato: false,
@@ -1069,7 +931,6 @@ const seg = document.getElementById("depositType");
     if (mEl) mEl.checked = false;
 
     state.guestRooms.clear();
-    state.guestBedsPerRoom = {};
     renderRooms();
 
   });
