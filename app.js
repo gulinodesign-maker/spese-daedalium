@@ -1,9 +1,9 @@
 /* global API_BASE_URL, API_KEY */
 
 /**
- * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
+ * Build: incrementa questa stringa alla prossima modifica (es. 1.048)
  */
-const BUILD_VERSION = "1.047";
+const BUILD_VERSION = "1.048";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -579,7 +579,15 @@ async function saveSpesa(){
     } catch (_) {}
   }
 
-  await api("spese", { method:"POST", body:{ importo: importoLordo, motivazione, data: dataSpesa, categoria } });
+  await api("spese", {
+      method: "POST",
+      body: {
+        importo: importoLordo,
+        data: dataSpesa,
+        categoria,
+        motivazione
+      }
+    });
 
   toast("Salvato");
   resetInserisci();
@@ -606,9 +614,9 @@ function renderSpese(){
     el.innerHTML = `
       <div class="item-top">
         <div>
-          <div class="item-title">${euro(s.importo)} <span style="opacity:.7; font-weight:800;"></span></div>
+          <div class="item-title">${euro(s.importo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(0)}</span></div>
           <div class="item-sub">
-            <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 0.20)}">${categoriaLabel(s.categoria)}</span>
+            <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 1.048)}">${categoriaLabel(s.categoria)}</span>
             <span class="mini">${s.data}</span>
             <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione)}</span>
           </div>
@@ -619,7 +627,15 @@ function renderSpese(){
 
     el.querySelector("[data-del]").addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"POST", body:{ importo: importoLordo, motivazione, data: dataSpesa, categoria } });
+      await api("spese", {
+      method: "POST",
+      body: {
+        importo: importoLordo,
+        data: dataSpesa,
+        categoria,
+        motivazione
+      }
+    });
       toast("Eliminata");
       await loadData();
     });
@@ -634,7 +650,7 @@ function renderRiepilogo(){
   if (!r) return;
 
   $("#kpiTotSpese").textContent = euro(r.totals.importo);
-  $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
+  $("#kpiIvaDetraibile").textContent = euro(r.total0Detraibile);
   $("#kpiImponibile").textContent = euro(r.totals.imponibile);
 
   // Lista semplice: 5 righe (categoria + totale lordo)
@@ -651,7 +667,7 @@ function renderRiepilogo(){
     row.className = "catitem";
     row.innerHTML = `
       <div class="catitem-left">
-        <span class="badge" style="background:${hexToRgba(COLORS[k] || "#d8bd97", 0.20)}">${categoriaLabel(k)}</span>
+        <span class="badge" style="background:${hexToRgba(COLORS[k] || "#d8bd97", 1.048)}">${categoriaLabel(k)}</span>
         <div class="catitem-name">Totale</div>
       </div>
       <div class="catitem-total">${euro(o.importoLordo)}</div>
@@ -702,7 +718,7 @@ function drawPie(canvasId, slices){
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  const cssSize = Math.min(320, Math.floor(window.innerWidth * 0.78));
+  const cssSize = Math.min(320, Math.floor(window.innerWidth * 1.048));
   const dpr = window.devicePixelRatio || 1;
   canvas.style.width = cssSize + "px";
   canvas.style.height = cssSize + "px";
@@ -720,19 +736,19 @@ function drawPie(canvasId, slices){
   // Glass ring background
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI*2);
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.fillStyle = "rgba(255,255,255,1.048)";
   ctx.fill();
   ctx.lineWidth = 1;
-  ctx.strokeStyle = "rgba(15,23,42,0.08)";
+  ctx.strokeStyle = "rgba(15,23,42,1.048)";
   ctx.stroke();
 
   let ang = -Math.PI/2;
   if (total <= 0){
     ctx.beginPath();
     ctx.arc(cx, cy, r-8, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(43,124,180,0.10)";
+    ctx.fillStyle = "rgba(43,124,180,1.048)";
     ctx.fill();
-    ctx.fillStyle = "rgba(15,23,42,0.55)";
+    ctx.fillStyle = "rgba(15,23,42,1.048)";
     ctx.font = "600 12px system-ui";
     ctx.textAlign = "center";
     ctx.fillText("Nessun dato", cx, cy+4);
@@ -749,7 +765,7 @@ function drawPie(canvasId, slices){
     ctx.fillStyle = s.color;
     ctx.fill();
 
-    ctx.strokeStyle = "rgba(255,255,255,0.65)";
+    ctx.strokeStyle = "rgba(255,255,255,1.048)";
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -758,19 +774,19 @@ function drawPie(canvasId, slices){
 
   // inner hole
   ctx.beginPath();
-  ctx.arc(cx, cy, r*0.58, 0, Math.PI*2);
-  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.arc(cx, cy, r*1.048, 0, Math.PI*2);
+  ctx.fillStyle = "rgba(255,255,255,1.048)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(15,23,42,0.08)";
+  ctx.strokeStyle = "rgba(15,23,42,1.048)";
   ctx.lineWidth = 1;
   ctx.stroke();
 
   // center label
-  ctx.fillStyle = "rgba(15,23,42,0.75)";
+  ctx.fillStyle = "rgba(15,23,42,1.048)";
   ctx.font = "900 12px system-ui";
   ctx.textAlign = "center";
   ctx.fillText("Totale", cx, cy-4);
-  ctx.fillStyle = "rgba(15,23,42,0.92)";
+  ctx.fillStyle = "rgba(15,23,42,1.048)";
   ctx.font = "950 14px system-ui";
   ctx.fillText(euro(total), cx, cy+14);
 }
@@ -1190,48 +1206,3 @@ async function registerSW(){
 }
 registerSW();
 
-
-
-// --- Room beds config (non-invasive) ---
-state.lettiPerStanza = state.lettiPerStanza || {};
-let __rc_room = null;
-
-function __rc_renderToggle(el, on){
-  el.innerHTML = `<span class="dot ${on?'on':''}"></span>`;
-  el.onclick = ()=> el.firstElementChild.classList.toggle('on');
-}
-function __rc_renderSingoli(el, n){
-  el.innerHTML = '';
-  for(let i=1;i<=3;i++){
-    const s=document.createElement('span');
-    s.className='dot'+(i<=n?' on':'');
-    s.onclick=()=>{
-      [...el.children].forEach((c,ix)=>c.classList.toggle('on', ix < i));
-    };
-    el.appendChild(s);
-  }
-}
-
-function openRoomConfig(room){
-  __rc_room = String(room);
-  const d = state.lettiPerStanza[__rc_room] || {matrimoniale:false,singoli:0,culla:false};
-  document.getElementById('roomConfigTitle').textContent = 'Stanza '+room;
-  __rc_renderToggle(document.getElementById('rc_matrimoniale'), d.matrimoniale);
-  __rc_renderSingoli(document.getElementById('rc_singoli'), d.singoli);
-  __rc_renderToggle(document.getElementById('rc_culla'), d.culla);
-  document.getElementById('roomConfigModal').hidden = false;
-}
-
-document.addEventListener('click', (e)=>{
-  const b = e.target.closest && e.target.closest('[data-room]');
-  if(b){ openRoomConfig(b.getAttribute('data-room')); }
-});
-
-document.getElementById('rc_save')?.addEventListener('click', ()=>{
-  const matrimoniale = document.querySelector('#rc_matrimoniale .dot')?.classList.contains('on')||false;
-  const culla = document.querySelector('#rc_culla .dot')?.classList.contains('on')||false;
-  const singoli = document.querySelectorAll('#rc_singoli .dot.on').length;
-  state.lettiPerStanza[__rc_room] = {matrimoniale, singoli, culla};
-  document.getElementById('roomConfigModal').hidden = true;
-});
-// --- end room beds config ---
