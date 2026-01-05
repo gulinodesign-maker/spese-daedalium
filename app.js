@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.041";
+const BUILD_VERSION = "1.050";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -499,11 +499,7 @@ async function loadOspiti({ from="", to="" } = {}){
 
 async function loadData(){
   const { from, to } = state.period;
-  const [report, spese] = await Promise.all([
-    api("report", { params: { from, to } }),
-    api("spese", { params: { from, to } }),
-  ]);
-  state.report = report;
+  const spese = await api("spese");
   state.spese = spese;
 
   // refresh current page
@@ -619,7 +615,7 @@ function renderSpese(){
 
     el.querySelector("[data-del]").addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"DELETE", params:{ id: s.id } });
+      toast('Eliminazione non supportata');
       toast("Eliminata");
       await loadData();
     });
@@ -631,7 +627,7 @@ function renderSpese(){
 /* 3) RIEPILOGO */
 function renderRiepilogo(){
   const r = state.report;
-  if (!r) return;
+  if (!r) { toast('Report non disponibile'); return; }
 
   $("#kpiTotSpese").textContent = euro(r.totals.importoLordo);
   $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
