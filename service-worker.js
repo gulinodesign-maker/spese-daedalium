@@ -2,7 +2,7 @@
 /* Build: dDAE_1.037 */
 
 const BUILD = "1.037";
-const CACHE_NAME = "dDAE_1.037"; // cambia ad ogni build
+const CACHE_NAME = 'dDAE-cache-1.038'; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
 const CORE_ASSETS = [

@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.037";
+const BUILD_VERSION = '1.038';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1184,3 +1184,9 @@ async function registerSW(){
 }
 registerSW();
 
+
+
+/* === PAGE: OSPITI === */
+function renderOspitiPage(container, data) {
+  container.innerHTML = '<h2>Ospiti</h2>' + renderOspitiTable(data);
+}
