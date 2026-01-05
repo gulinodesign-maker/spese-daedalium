@@ -1755,3 +1755,9 @@ body::before{
 body[data-page="ospiti"] .guest-card .actions {
   display: none !important;
 }
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999}
+.modal-card{background:#fff;margin:12vh auto;padding:16px;border-radius:16px;width:min(420px,92vw)}
+.dots{display:flex;gap:8px}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid #333}
+.dot.on{background:#333}
