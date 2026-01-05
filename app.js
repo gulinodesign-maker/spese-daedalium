@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.041";
+const BUILD_VERSION = "1.047";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -579,7 +579,7 @@ async function saveSpesa(){
     } catch (_) {}
   }
 
-  await api("spese", { method:"POST", body:{ dataSpesa, categoria, motivazione, importoLordo, note: "" } });
+  await api("spese", { method:"POST", body:{ importo: importoLordo, motivazione, data: dataSpesa, categoria } });
 
   toast("Salvato");
   resetInserisci();
@@ -606,10 +606,10 @@ function renderSpese(){
     el.innerHTML = `
       <div class="item-top">
         <div>
-          <div class="item-title">${euro(s.importoLordo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(s.iva)}</span></div>
+          <div class="item-title">${euro(s.importo)} <span style="opacity:.7; font-weight:800;"></span></div>
           <div class="item-sub">
             <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 0.20)}">${categoriaLabel(s.categoria)}</span>
-            <span class="mini">${s.dataSpesa}</span>
+            <span class="mini">${s.data}</span>
             <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione)}</span>
           </div>
         </div>
@@ -619,7 +619,7 @@ function renderSpese(){
 
     el.querySelector("[data-del]").addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"DELETE", params:{ id: s.id } });
+      await api("spese", { method:"POST", body:{ importo: importoLordo, motivazione, data: dataSpesa, categoria } });
       toast("Eliminata");
       await loadData();
     });
@@ -633,7 +633,7 @@ function renderRiepilogo(){
   const r = state.report;
   if (!r) return;
 
-  $("#kpiTotSpese").textContent = euro(r.totals.importoLordo);
+  $("#kpiTotSpese").textContent = euro(r.totals.importo);
   $("#kpiIvaDetraibile").textContent = euro(r.totals.ivaDetraibile);
   $("#kpiImponibile").textContent = euro(r.totals.imponibile);
 
