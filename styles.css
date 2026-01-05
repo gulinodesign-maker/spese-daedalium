@@ -1751,3 +1751,7 @@ body::before{
 #page-home #goTassaSoggiorno .home-main-glyph{ color: rgba(201,119,43,0.92); }
 #page-home #goPulizie .home-main-glyph{ color: rgba(15,23,42,0.92); }
 #page-home #goGuadagni .home-main-glyph{ color: rgba(176,92,18,0.92); }
+/* dDAE_1.038 - Ospiti: solo consultazione (azioni nascoste per ora) */
+body[data-page="ospiti"] .guest-card .actions {
+  display: none !important;
+}

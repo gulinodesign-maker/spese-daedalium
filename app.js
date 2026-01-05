@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = '1.038';
+const BUILD_VERSION = "1.038";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -381,7 +381,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home" || page === "ospite") {
+    if (page === "home" || page === "ospite" || page === "ospiti") {
       chip.hidden = true;
     } else {
       chip.hidden = false;
@@ -393,7 +393,7 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
-  if (page === "ospite") loadOspiti().catch(e => toast(e.message));
+  if (page === "ospiti") loadOspiti().catch(e => toast(e.message));
 }
 
 function setupHeader(){
@@ -418,6 +418,12 @@ function setupHome(){
   if (goO){
     goO.addEventListener("click", () => showPage("ospite"));
   }
+  // HOME: icona Ospiti va alla pagina elenco ospiti
+  const goOs = $("#goOspiti");
+  if (goOs){
+    goOs.addEventListener("click", () => showPage("ospiti"));
+  }
+
 
   // launcher: icone interne navigano alle pagine
   document.querySelectorAll("#launcherModal [data-go]").forEach(btn => {
@@ -1184,9 +1190,3 @@ async function registerSW(){
 }
 registerSW();
 
-
-
-/* === PAGE: OSPITI === */
-function renderOspitiPage(container, data) {
-  container.innerHTML = '<h2>Ospiti</h2>' + renderOspitiTable(data);
-}
