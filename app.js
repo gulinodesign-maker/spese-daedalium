@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.041";
+const BUILD_VERSION = "1.045";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1235,3 +1235,26 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
   document.getElementById('roomConfigModal').hidden = true;
 });
 // --- end room beds config ---
+
+
+// ===== SALDO + RIMANENZA (ATTIVO) =====
+state.saldo_tipo = "contante";
+
+document.getElementById("saldo_tipo_contante")?.addEventListener("click",()=>{
+  state.saldo_tipo = "contante";
+});
+document.getElementById("saldo_tipo_elettronico")?.addEventListener("click",()=>{
+  state.saldo_tipo = "elettronico";
+});
+
+function aggiornaAncoraDaPagare(){
+  const totale = Number(document.getElementById("importo_prenota")?.value || 0);
+  const acconto = Number(document.getElementById("acconto_importo")?.value || 0);
+  const saldo = Number(document.getElementById("saldo_pagato")?.value || 0);
+  const r = Math.max(0, totale - acconto - saldo);
+  const out = document.getElementById("ancora_da_pagare");
+  if(out) out.value = "€ " + r.toFixed(2);
+}
+
+document.addEventListener("input", aggiornaAncoraDaPagare);
+// ===== FINE SALDO =====
