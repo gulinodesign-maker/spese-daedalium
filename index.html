@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/favicon-16.png" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Spese Daedalium" />
+  <meta name="apple-mobile-web-app-title" content="Daedalium PMS" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 </head>
 <body>
@@ -41,31 +41,73 @@
         <div class="home-spacer"></div>
 
           <div class="home-grid" role="navigation" aria-label="Sezioni">
-            <button class="home-icon primary" data-go="inserisci" type="button" aria-label="Inserisci">
-              <div class="glyph" aria-hidden="true">＋</div>
-              <div class="label">Inserisci</div>
+<button class="home-main" id="goOspite" type="button" aria-label="Inserisci ospite">
+              <div class="home-main-glyph alt" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
+  <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+</svg></div>
+              <div class="home-main-label">Ospite</div>
             </button>
 
-            <button class="home-icon" data-go="spese" type="button" aria-label="Spese">
-              <div class="glyph" aria-hidden="true">≡</div>
-              <div class="label">Spese</div>
-            </button>
-            <button class="home-icon" data-go="ospite" type="button" aria-label="Ospite">
-              <div class="glyph" aria-hidden="true">⌁</div>
-              <div class="label">Ospite</div>
-            </button>
-
-
-            <button class="home-icon" data-go="riepilogo" type="button" aria-label="Riepilogo">
-              <div class="glyph" aria-hidden="true">▦</div>
-              <div class="label">Riepilogo</div>
+<button class="home-main" id="openLauncher" type="button" aria-label="Apri Spese">
+              <div class="home-main-glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 6.5h6"></path>
+  <path d="M9 6.5V5.5A2.5 2.5 0 0 1 11.5 3h1A2.5 2.5 0 0 1 15 5.5v1"></path>
+  <path d="M4.5 9.5h15a2 2 0 0 1 2 2v6.5a3 3 0 0 1-3 3h-13a3 3 0 0 1-3-3V11.5a2 2 0 0 1 2-2Z"></path>
+  <path d="M4.5 13h15"></path>
+</svg></div>
+              <div class="home-main-label">Spese</div>
             </button>
 
-            <button class="home-icon" data-go="grafico" type="button" aria-label="Grafico">
-              <div class="glyph" aria-hidden="true">◔</div>
-              <div class="label">Grafico</div>
+            <button class="home-main" id="goCalendario" type="button" aria-label="Calendario">
+              <div class="home-main-glyph alt" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 3v3"></path>
+  <path d="M17 3v3"></path>
+  <path d="M4.5 8h15"></path>
+  <path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
+  <path d="M8 12h.01"></path>
+  <path d="M12 12h.01"></path>
+  <path d="M16 12h.01"></path>
+  <path d="M8 16h.01"></path>
+  <path d="M12 16h.01"></path>
+  <path d="M16 16h.01"></path>
+</svg></div>
+              <div class="home-main-label">Calendario</div>
             </button>
-          </div>
+
+            <button class="home-main" id="goTassaSoggiorno" type="button" aria-label="Tassa">
+              <div class="home-main-glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 10V8.5A4.5 4.5 0 0 1 11.5 4h1A4.5 4.5 0 0 1 17 8.5V10"></path>
+  <path d="M5.5 10h13a2 2 0 0 1 2 2v6a3 3 0 0 1-3 3h-11a3 3 0 0 1-3-3v-6a2 2 0 0 1 2-2Z"></path>
+  <path d="M12 13v5"></path>
+  <path d="M10.2 14.8 12 13l1.8 1.8"></path>
+</svg></div>
+              <div class="home-main-label">Tassa</div>
+            </button>
+
+            <button class="home-main" id="goPulizie" type="button" aria-label="Pulizie">
+              <div class="home-main-glyph alt" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M9 3h6"></path>
+  <path d="M10 3v3"></path>
+  <path d="M14 3v3"></path>
+  <path d="M8 6h8"></path>
+  <path d="M9 6v3a3 3 0 0 0 6 0V6"></path>
+  <path d="M7 12h10"></path>
+  <path d="M8 12l-2 9h12l-2-9"></path>
+</svg></div>
+              <div class="home-main-label">Pulizie</div>
+            </button>
+
+            <button class="home-main" id="goGuadagni" type="button" aria-label="Guadagni">
+              <div class="home-main-glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 9V7.5A2.5 2.5 0 0 1 9.5 5h5A2.5 2.5 0 0 1 17 7.5V9"></path>
+  <path d="M6 9h12a2 2 0 0 1 2 2v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-7a2 2 0 0 1 2-2Z"></path>
+  <path d="M9 15h6"></path>
+  <path d="M12 12v6"></path>
+</svg></div>
+              <div class="home-main-label">Guadagni</div>
+            </button>
+</div>
 
         <div class="build" id="buildText">Build</div>
 
@@ -78,25 +120,24 @@
       <div class="card">
         <div class="hd"><h2>Inserisci spesa</h2></div>
         <div class="bd">
-          <div class="field">
-            <label>Importo (€)</label>
-            <input type="number" id="spesaImporto" step="0.01" min="0" placeholder="Es. 12.50" inputmode="decimal" />
+          <div class="field float">
+            <input type="number" id="spesaImporto" step="0.01" min="0" placeholder="Es. 12.50" inputmode="decimal"  placeholder=" " />
+            <label for="spesaImporto">Importo (€)</label>
           </div>
 
-          <div class="field" style="margin-top:10px;">
-            <label>Motivazione</label>
-            <input list="motivazioniList" id="spesaMotivazione" placeholder="Scrivi o scegli…" />
+          <div class="field float" style="margin-top:10px;">
+            <input list="motivazioniList" id="spesaMotivazione" placeholder=" " autocomplete="off" />
+            <label for="spesaMotivazione">Motivazione</label>
             <datalist id="motivazioniList"></datalist>
           </div>
 
-          <div class="field" style="margin-top:10px;">
-            <label>Data</label>
+          <div class="field float" style="margin-top:10px;">
             <input type="date" id="spesaData" />
+            <label for="spesaData">Data</label>
           </div>
 
-          <div class="field" style="margin-top:10px;">
-            <label>Categoria</label>
-            <select id="spesaCategoria">
+          <div class="field float" style="margin-top:10px;">
+            <select id="spesaCategoria" required>
               <option value="">Seleziona…</option>
               <option value="CONTANTI">Contanti</option>
               <option value="TASSA_SOGGIORNO">Tassa soggiorno</option>
@@ -104,6 +145,7 @@
               <option value="IVA_10">IVA 10%</option>
               <option value="IVA_4">IVA 4%</option>
             </select>
+            <label for="spesaCategoria">Categoria</label>
           </div>
 
           <div class="row" style="margin-top:14px;">
@@ -112,88 +154,6 @@
         </div>
       </div>
     </section>
-  <section id="page-ospite" class="page" hidden>
-    <div class="page-inner">
-      <div class="card">
-        <h2 class="page-title">Inserisci ospite</h2>
-
-        <div class="field">
-          <label for="guestName">Nome ospite</label>
-          <input id="guestName" type="text" autocomplete="name" inputmode="text" />
-        </div>
-
-        <div class="row two">
-          <div class="field">
-            <label for="guestAdults">Adulti</label>
-            <input id="guestAdults" type="number" inputmode="numeric" min="0" value="1" />
-          </div>
-          <div class="field">
-            <label for="guestKids">Bambini &lt;10</label>
-            <input id="guestKids" type="number" inputmode="numeric" min="0" value="0" />
-          </div>
-        </div>
-
-        <div class="row two">
-          <div class="field">
-            <label for="guestCheckIn">Check-in</label>
-            <input id="guestCheckIn" type="date" />
-          </div>
-          <div class="field">
-            <label for="guestCheckOut">Check-out</label>
-            <input id="guestCheckOut" type="date" />
-          </div>
-        </div>
-
-        <div class="marriage-row" role="group" aria-label="Matrimonio">
-          <button id="guestMatrimonioDot" type="button" class="dot-toggle" aria-pressed="false" aria-label="Matrimonio"></button>
-          <div class="marriage-label">Matrimonio</div>
-        </div>
-
-        <div class="field">
-          <label>Stanze</label>
-          <div class="rooms-grid" aria-label="Seleziona stanze">
-            <button type="button" class="room-dot" data-room="1" aria-label="Stanza 1">1</button>
-            <button type="button" class="room-dot" data-room="2" aria-label="Stanza 2">2</button>
-            <button type="button" class="room-dot" data-room="3" aria-label="Stanza 3">3</button>
-            <button type="button" class="room-dot" data-room="4" aria-label="Stanza 4">4</button>
-            <button type="button" class="room-dot" data-room="5" aria-label="Stanza 5">5</button>
-            <button type="button" class="room-dot" data-room="6" aria-label="Stanza 6">6</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="guestImportoPren">Importo prenotazione</label>
-          <input id="guestImportoPren" type="number" inputmode="decimal" step="0.01" min="0" />
-        </div>
-
-        <div class="field">
-          <label for="guestImportoBooking">Importo booking</label>
-          <input id="guestImportoBooking" type="number" inputmode="decimal" step="0.01" min="0" />
-        </div>
-
-        <div class="row two">
-          <div class="field">
-            <label for="guestAcconto">Acconto</label>
-            <input id="guestAcconto" type="number" inputmode="decimal" step="0.01" min="0" />
-          </div>
-          <div class="field">
-            <label>&nbsp;</label>
-            <div class="acconto-toggle" role="group" aria-label="Tipo acconto">
-              <button type="button" class="acconto-btn" data-type="contante" aria-label="Contante" title="Contante">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 10h8M8 14h5"/></svg>
-              </button>
-              <button type="button" class="acconto-btn" data-type="elettronico" aria-label="Elettronico" title="Elettronico">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16v8H4z"/><path d="M6 11h6"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <button id="btnSaveGuest" type="button" class="btn primary">Salva</button>
-      </div>
-    </div>
-  </section>
-
 
     <!-- 2) SPESE -->
     <section id="page-spese" class="page" hidden>
@@ -302,7 +262,104 @@
         </div>
       </div>
     </section>
-  </main>
+  
+    <!-- Pagina Ospite (solo UI demo, nessun DB) -->
+    <section id="page-ospite" class="page" hidden aria-label="Inserisci ospite">
+<div class="content">
+        <div class="ospite-wrap">
+          <div class="card guest-form-card">
+            <div class="hd">
+              <h2>Inserisci ospite</h2>
+            </div>
+            <div class="bd form-stack">
+<div class="field float">
+            <input id="guestName" type="text" placeholder="Es. Mario Rossi" autocomplete="name"  placeholder=" " />
+            <label for="guestName">Nome ospite</label>
+          </div>
+
+          <div class="field two-col">
+            <div class="subfield field float">
+              <input id="guestAdults" type="number" inputmode="numeric" min="0" step="1" placeholder="0"  placeholder=" " />
+              <label for="guestAdults">Adulti</label>
+            </div>
+            <div class="subfield field float">
+              <input id="guestKidsU10" type="number" inputmode="numeric" min="0" step="1" placeholder="0"  placeholder=" " />
+              <label for="guestKidsU10">Bambini < 10</label>
+            </div>
+          </div>
+
+          <div class="field two-col">
+            <div class="subfield field float">
+              <input id="guestCheckIn" type="date" />
+              <label for="guestCheckIn">Check-in</label>
+            </div>
+            <div class="subfield field float">
+              <input id="guestCheckOut" type="date" />
+              <label for="guestCheckOut">Check-out</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Stanze (1–6)</label>
+            <div class="rooms" id="roomsPicker" role="group" aria-label="Seleziona stanze">
+              <button type="button" class="room-dot" data-room="1" aria-pressed="false">1</button>
+              <button type="button" class="room-dot" data-room="2" aria-pressed="false">2</button>
+              <button type="button" class="room-dot" data-room="3" aria-pressed="false">3</button>
+              <button type="button" class="room-dot" data-room="4" aria-pressed="false">4</button>
+              <button type="button" class="room-dot" data-room="5" aria-pressed="false">5</button>
+              <button type="button" class="room-dot" data-room="6" aria-pressed="false">6</button>
+            </div>
+          </div>
+
+          <div class="field float">
+            <input id="guestTotal" type="number" inputmode="decimal" step="0.01" placeholder="0,00"  placeholder=" " />
+            <label for="guestTotal">Importo prenotazione (€)</label>
+          </div>
+
+          <div class="field float">
+            <input id="guestBooking" type="number" inputmode="decimal" step="0.01" placeholder="0,00"  placeholder=" " />
+            <label for="guestBooking">Importo booking (€)</label>
+          </div>
+
+          <div class="field two-col">
+            <div class="subfield field float">
+              <input id="guestDeposit" type="number" inputmode="decimal" step="0.01" placeholder="0,00"  placeholder=" " />
+              <label for="guestDeposit">Acconto (€)</label>
+            </div>
+            <div class="subfield field float">
+              <div class="segmented" id="depositType" role="tablist" aria-label="Tipo acconto">
+                <button type="button" class="seg-btn active" data-type="contante" aria-label="Contante" role="tab" aria-selected="true"><span class="seg-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4 7h16v10H4z"></path>
+  <path d="M7 10h.01"></path>
+  <path d="M17 14h.01"></path>
+  <path d="M12 14a2 2 0 1 0-2-2 2 2 0 0 0 2 2Z"></path>
+</svg></span></button>
+                <button type="button" class="seg-btn" data-type="elettronico" aria-label="Elettronico" role="tab" aria-selected="false"><span class="seg-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"></path>
+  <path d="M2 11h20"></path>
+  <path d="M6 15h5"></path>
+</svg></span></button>
+              </div>
+            </div>
+</div>
+
+          <div class="marriage-wrap">
+            <input id="guestMarriage" class="toggle-check" type="checkbox" />
+            <label for="guestMarriage" class="pill-toggle" aria-label="Matrimonio">
+              <span class="dot" aria-hidden="true"></span>
+              <span class="txt">Matrimonio</span>
+            </label>
+          </div>
+
+
+          <button id="createGuestCard" class="btn primary" type="button">Crea scheda cliente</button>
+            </div>
+          </div>
+        </div>
+</div>
+    </section>
+
+</main>
 
   <div class="toast" id="toast"></div>
 
@@ -310,14 +367,70 @@
   <div id="loadingOverlay" class="loading-overlay" hidden>
     <div class="loading-shell">
       <div class="loading-card" role="status" aria-live="polite" aria-label="Caricamento">
-        <div class="loading-hourglass" aria-hidden="true">⏳</div>
+        <div class="loading-hourglass" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 3h10"></path>
+  <path d="M7 21h10"></path>
+  <path d="M8 3c0 4 4 5 4 9s-4 5-4 9"></path>
+  <path d="M16 3c0 4-4 5-4 9s4 5 4 9"></path>
+</svg></div>
         <div class="loading-text">Caricamento…</div>
       </div>
     </div>
   </div>
 
 
-  <script src="./config.js"></script>
-  <script src="./app.js"></script>
+  <script src="./config.js" defer></script>
+  <script src="./app.js" defer></script>
+
+  <!-- Launcher (popup) con 4 icone interne -->
+  <div id="launcherModal" class="launcher" hidden aria-hidden="true">
+    <div class="launcher-backdrop" data-close="1"></div>
+    <div class="launcher-shell" role="dialog" aria-modal="true" aria-label="Sezioni Spese">
+      <button class="launcher-close" type="button" aria-label="Chiudi" id="closeLauncher">✕</button>
+
+      <div class="launcher-card">
+        <div class="launcher-grid" role="navigation" aria-label="Sezioni">
+          <button class="launcher-icon primary" data-go="inserisci" type="button" aria-label="Inserisci">
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 5v14"></path>
+  <path d="M5 12h14"></path>
+</svg></div>
+            <div class="label">Inserisci</div>
+          </button>
+
+          <button class="launcher-icon" data-go="spese" type="button" aria-label="Spese">
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M7 6h14"></path>
+  <path d="M7 12h14"></path>
+  <path d="M7 18h14"></path>
+  <path d="M3.5 6h.01"></path>
+  <path d="M3.5 12h.01"></path>
+  <path d="M3.5 18h.01"></path>
+</svg></div>
+            <div class="label">Spese</div>
+          </button>
+
+          <button class="launcher-icon" data-go="riepilogo" type="button" aria-label="Riepilogo">
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M4 4h7v7H4z"></path>
+  <path d="M13 4h7v7h-7z"></path>
+  <path d="M4 13h7v7H4z"></path>
+  <path d="M13 13h7v7h-7z"></path>
+</svg></div>
+            <div class="label">Riepilogo</div>
+          </button>
+
+          <button class="launcher-icon" data-go="grafico" type="button" aria-label="Grafico">
+            <div class="glyph" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 12V3a9 9 0 1 1-9 9h9Z"></path>
+  <path d="M12 3a9 9 0 0 1 9 9h-9V3Z"></path>
+</svg></div>
+            <div class="label">Grafico</div>
+          </button>
+</div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
