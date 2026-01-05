@@ -1,5 +1,5 @@
 /* Spese Daedalium - Service Worker (PWA) */
-const CACHE_NAME = "spese-daedalium-1.036";
+const CACHE_NAME = "spese-daedalium-1.019";
 const ASSETS = [
 "./",
   "./index.html",

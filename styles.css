@@ -894,860 +894,99 @@ body::before{
 }
 
 
-
-/* ============================
-   HOME: 1 icona + Launcher popup
-============================ */
-
-/* HOME: la griglia contiene SOLO l'icona principale */
-#page-home .home-grid{
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  width: 100% !important;
-  padding: 10px 0 !important;
-  gap: 0 !important;
+/* ===== OSPITE (UI) ===== */
+.row.two{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 12px;
+  align-items: start;
 }
+.row.two .field{ width:100%; }
 
-/* Icona principale "Spese" */
-#page-home .home-main{
-  appearance: none;
-  -webkit-appearance: none;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.rooms-grid{
+  display:flex;
+  flex-wrap: wrap;
   gap: 10px;
-  width: 170px;
-  max-width: 70vw;
+  align-items:center;
 }
-
-#page-home .home-main-glyph{
-  width: 118px;
-  height: 118px;
-  border-radius: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 54px;
-  font-weight: 950;
-  color: var(--blue);
-  border: 1px solid rgba(15,23,42,0.10);
-  background:
-    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.88), rgba(255,255,255,0.60)),
-    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.72));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-#page-home .home-main-label{
-  font-weight: 950;
-  letter-spacing: 0.2px;
-  font-size: 17px;
-  color: rgba(15,23,42,0.88);
-}
-
-/* Launcher overlay */
-.launcher[hidden]{ display:none !important; }
-.launcher{
-  position: fixed;
-  inset: 0;
-  z-index: 450;
-  padding-top: var(--safe-top);
-  padding-bottom: var(--safe-bottom);
-}
-
-.launcher-backdrop{
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.30);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.launcher-shell{
-  position: relative;
-  height: 100%;
+.room-dot{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(0,0,0,0.80);
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 18px 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+.room-dot.selected{
+  background: var(--blue);
+  border-color: rgba(0,0,0,0.12);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
 }
 
-.launcher-close{
-  position: absolute;
-  top: calc(10px + var(--safe-top));
-  right: 14px;
+.marriage-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  margin: 2px 0 6px;
+}
+.dot-toggle{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(0,0,0,0.25);
+  background: rgba(255,255,255,0.35);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+.dot-toggle.on{
+  background: var(--blue);
+  border-color: rgba(0,0,0,0.10);
+}
+.marriage-label{
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: rgba(0,0,0,0.70);
+}
+
+.acconto-toggle{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  justify-content:flex-end;
+  height: 44px;
+}
+.acconto-btn{
   width: 44px;
   height: 44px;
   border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.72);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
-  font-size: 18px;
-  font-weight: 950;
-  cursor: pointer;
-}
-
-.launcher-card{
-  width: min(430px, 92vw);
-  border: 1px solid var(--border);
-  border-radius: 26px;
-  background:
-    radial-gradient(120% 120% at 12% 0%, rgba(43,124,180,0.14), transparent 58%),
-    radial-gradient(120% 120% at 92% 0%, rgba(201,119,43,0.14), transparent 58%),
-    linear-gradient(to bottom, var(--glass), var(--glass2));
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 18px 60px rgba(15,23,42,0.14);
-  padding: 16px;
-}
-
-.launcher-grid{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-  gap: 14px;
-}
-
-/* icone nel launcher */
-.launcher-icon{
-  appearance: none;
-  -webkit-appearance: none;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  cursor:pointer;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap: 10px;
-  padding: 8px 6px 6px;
-}
-
-.launcher-icon .glyph{
-  width: 96px;
-  height: 96px;
-  border-radius: 30px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size: 40px;
-  font-weight: 950;
-  border: 1px solid rgba(15,23,42,0.10);
-  background:
-    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.88), rgba(255,255,255,0.60)),
-    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.72));
-  color: var(--blue);
-  box-shadow: none !important;
-  filter: none !important;
 }
-
-.launcher-icon.primary .glyph{ color: var(--orange); }
-.launcher-icon[data-go="spese"] .glyph{ color: var(--blue); }
-.launcher-icon[data-go="riepilogo"] .glyph{ color: var(--orange); }
-.launcher-icon[data-go="grafico"] .glyph{ color: var(--dark); }
-
-.launcher-icon .label{
-  font-weight: 950;
-  font-size: 16px;
-  letter-spacing: 0.2px;
-  color: rgba(15,23,42,0.86);
-}
-
-.launcher-icon:active{ transform: scale(0.98); }
-
-
-
-/* ============================
-   OSPITE (UI demo)
-============================ */
-
-#page-ospite .content{ padding-bottom: calc(64px + var(--safe-bottom)); }
-#page-ospite .section-title{
-  margin: 14px 6px 10px;
-  font-weight: 950;
-  letter-spacing: .2px;
-  font-size: 14px;
-  color: rgba(15,23,42,0.70);
-}
-
-/* Stanze: pallini multi-select */
-.rooms{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding: 10px 2px 6px;
-}
-.room-dot{
-  width: 46px;
-  height: 46px;
-  border-radius: 999px;
-  border: 1px solid rgba(15,23,42,0.12);
-  background: rgba(255,255,255,0.70);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  font-weight: 950;
-  font-size: 16px;
-  color: rgba(15,23,42,0.86);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 0;
-  cursor: pointer;
-}
-.room-dot.selected{
-  border-color: rgba(43,124,180,0.35);
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(43,124,180,0.22), transparent 60%),
-    rgba(255,255,255,0.78);
-  color: rgba(15,23,42,0.92);
-}
-.room-dot.selected::after{
-  content:"/";
-  position:absolute;
-  transform: translate(15px, -14px) rotate(22deg);
-  font-size: 16px;
-  font-weight: 950;
-  color: rgba(201,119,43,0.85);
-}
-
-/* Segmented control */
-.segmented{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.seg-btn{
-  height: 48px;
-  border-radius: 16px;
-  border: 1px solid rgba(15,23,42,0.12);
-  background: rgba(255,255,255,0.70);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  font-weight: 950;
-  font-size: 16px;
-  cursor: pointer;
-}
-.seg-btn.active{
-  border-color: rgba(43,124,180,0.35);
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(43,124,180,0.22), transparent 60%),
-    rgba(255,255,255,0.82);
-}
-
-/* Scheda cliente */
-.guest-card{
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  background:
-    radial-gradient(120% 120% at 12% 0%, rgba(43,124,180,0.12), transparent 58%),
-    radial-gradient(120% 120% at 92% 0%, rgba(201,119,43,0.12), transparent 58%),
-    linear-gradient(to bottom, var(--glass), var(--glass2));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 16px 52px rgba(15,23,42,0.10);
-  padding: 14px;
-  margin: 10px 0;
-  overflow: hidden;
-}
-.guest-card .top{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap: 10px;
-}
-.guest-card .name{
-  font-weight: 950;
-  font-size: 18px;
-  letter-spacing: .2px;
-}
-.guest-card .meta{
-  margin-top: 6px;
-  font-size: 13px;
-  color: rgba(15,23,42,0.70);
-  display:flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-}
-.badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(15,23,42,0.10);
-  background: rgba(255,255,255,0.74);
-  font-weight: 900;
-  font-size: 12px;
-}
-.badge.orange{ border-color: rgba(201,119,43,0.25); }
-.badge.blue{ border-color: rgba(43,124,180,0.25); }
-
-.guest-card .actions{
-  display:flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-.guest-card .btn{
-  height: 46px;
-  border-radius: 16px;
-  font-weight: 950;
-  font-size: 15px;
-  padding: 0 14px;
-}
-.guest-card .btn.ghost{
-  border: 1px solid rgba(15,23,42,0.12);
-  background: rgba(255,255,255,0.60);
-}
-.guest-card .btn.danger{
-  border: 1px solid rgba(15,23,42,0.08);
-  background: rgba(201,119,43,0.10);
-  color: rgba(15,23,42,0.88);
-}
-.guest-card details{
-  margin-top: 10px;
-}
-.guest-card details summary{
-  list-style: none;
-  cursor: pointer;
-  font-weight: 950;
-  font-size: 14px;
-}
-.guest-card details summary::-webkit-details-marker{ display:none; }
-.guest-card .detail-grid{
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  font-size: 13px;
-  color: rgba(15,23,42,0.76);
-}
-.guest-card .detail-grid .k{ font-weight: 950; color: rgba(15,23,42,0.90); }
-
-/* Launcher: 5 icone -> ultima centrata */
-.launcher-icon.span2{ grid-column: 1 / span 2; justify-self: center; }
-
-
-
-/* HOME: due icone principali affiancate (Spese + Ospite) */
-#page-home .home-grid{
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 18px !important;
-  width: min(460px, 92vw) !important;
-  margin: 0 auto !important;
-  padding: 10px 10px !important;
-  justify-items: center !important;
-  align-items: start !important;
-}
-#page-home .home-main{
-  width: 100% !important;
-  max-width: 210px !important;
-}
-#page-home .home-main-glyph{
-  margin: 0 auto;
-}
-#page-home .home-main-glyph.alt{
-  color: var(--orange);
-  background:
-    radial-gradient(140% 120% at 30% 0%, rgba(255,255,255,0.88), rgba(255,255,255,0.60)),
-    radial-gradient(120% 120% at 20% 0%, rgba(201,119,43,0.18), transparent 60%),
-    linear-gradient(to bottom, rgba(255,255,255,0.90), rgba(255,255,255,0.72));
-}
-
-
-
-/* OSPITE: layout ordinato a 2 colonne (iPhone-friendly) */
-#page-ospite .field.two-col{
-  display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-  gap: 12px;
-  align-items: end;
-}
-#page-ospite .field.two-col .subfield{ min-width: 0; }
-#page-ospite input[type="date"]{
-  display:block;
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  box-sizing:border-box;
-  -webkit-appearance: none;
-}
-
-
-/* Hidden attribute safety (prevents FOUC on iPhone) */
-[hidden]{ display: none !important; }
-
-
-
-/* ============================
-   OSPITE: allineamento e ordine (fix centering)
-============================ */
-#page-ospite .ospite-wrap{
-  max-width: 560px;
-  margin: 0 auto;
-  display: grid;
-  gap: 14px;
-}
-#page-ospite .guest-form-card .hd h2,
-#page-ospite .guest-cards-card .hd h2{
-  font-size: 22px;
-  font-weight: 950;
-  letter-spacing: .2px;
-}
-#page-ospite .form-stack{
-  display: grid;
-  gap: 12px;
-  padding: 14px;
-}
-#page-ospite .guest-cards-card .bd{
-  padding: 14px;
-}
-#page-ospite .field{
-  margin: 0 !important;
-}
-#page-ospite .field label{
-  font-size: 13px;
-  font-weight: 900;
-  color: rgba(15,23,42,0.72);
-  margin-bottom: 6px;
-}
-#page-ospite .field input,
-#page-ospite .field select{
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-#page-ospite .field.two-col{
-  margin-top: 2px;
-}
-#page-ospite .rooms{
-  justify-content: center;
-}
-#page-ospite .room-dot{
-  position: relative;
-}
-#page-ospite .readonly{
-  opacity: 0.88;
-}
-#page-ospite #createGuestCard{
-  margin-top: 6px;
-}
-
-
-
-/* ============================
-   OSPITE UI cleanup (rooms/date/segmented)
-============================ */
-
-/* Stanze: solo pallini (selezione blu, niente slash) */
-#page-ospite .room-dot.selected{
-  background: var(--blue) !important;
-  border-color: rgba(43,124,180,0.55) !important;
-  color: rgba(255,255,255,0.96) !important;
-}
-#page-ospite .room-dot.selected::after{ content: none !important; }
-
-/* Check-in / Check-out: stessa dimensione perfetta */
-#page-ospite .field.two-col{
-  grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important;
-}
-#page-ospite .field.two-col input[type="date"]{
-  height: 48px;
-}
-
-/* Tipo acconto: compatto + icone */
-#page-ospite #depositType{
-  gap: 10px;
-}
-#page-ospite #depositType .seg-btn{
-  height: 40px !important;
-  border-radius: 14px !important;
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0 !important; /* nasconde eventuale testo residuo */
-}
-#page-ospite #depositType .seg-ico{
-  font-size: 20px;
-  line-height: 1;
-}
-
-
-
-/* ============================
-   Floating labels (iPhone-friendly)
-============================ */
-.field.float{
-  position: relative;
-}
-.field.float > label{
-  position: absolute;
-  left: 14px;
-  top: 14px;
-  margin: 0;
-  padding: 0;
-  font-weight: 900;
-  font-size: 13px;
-  color: rgba(15,23,42,0.62);
-  pointer-events: none;
-  transform-origin: left top;
-  transition: transform 160ms ease, color 160ms ease, opacity 160ms ease;
-  opacity: 0.96;
-}
-.field.float input,
-.field.float select{
-  padding-top: 20px; /* spazio per la label dentro */
-}
-.field.float.has-value > label{
-  transform: translateY(-8px) scale(0.86);
-  color: rgba(15,23,42,0.76);
-  opacity: 1;
-}
-.field.float input:focus + label,
-.field.float select:focus + label{
-  transform: translateY(-8px) scale(0.86);
-  color: rgba(15,23,42,0.80);
-  opacity: 1;
-}
-
-/* date iOS: allineamento e padding coerente */
-.field.float input[type="date"]{
-  display:block;
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  box-sizing:border-box;
-  -webkit-appearance:none;
-}
-
-/* select: allineamento label */
-.field.float select{
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-/* Segmented label inside (Tipo acconto) */
-.field.float .seg-label{
-  position:absolute;
-  left: 14px;
-  top: 14px;
-  margin:0;
-  font-weight: 900;
-  font-size: 13px;
-  color: rgba(15,23,42,0.62);
-  pointer-events:none;
-  transform: translateY(-8px) scale(0.86);
-  transform-origin: left top;
-  opacity: 1;
-}
-
-/* Ospite: subfield float with segmented needs top padding */
-#page-ospite .subfield.field.float{ position: relative; }
-#page-ospite .subfield.field.float .segmented{ margin-top: 10px; }
-
-
-
-/* ============================
-   Floating label: always INSIDE the field border
-============================ */
-.field.float{ position: relative; }
-.field.float > label{
-  top: 16px;                 /* inside box */
-  left: 14px;
-  max-width: calc(100% - 28px);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.1;
-}
-.field.float.has-value > label,
-.field.float input:focus + label,
-.field.float select:focus + label{
-  transform: translateY(-10px) scale(0.86); /* 16px -> 6px (still inside) */
-}
-
-/* segmented label (Tipo acconto) inside its box */
-.field.float .seg-label{
-  top: 16px;
-  left: 14px;
-  transform: translateY(-10px) scale(0.86);
-}
-
-
-
-/* ============================
-   Input height (more room for labels)
-============================ */
-.field.float input,
-.field.float select{
-  height: 56px;
-  padding-top: 26px; /* more space so label never overlaps */
-  padding-bottom: 12px;
-}
-.field.float > label{
-  top: 18px; /* keep inside */
-}
-.field.float.has-value > label,
-.field.float input:focus + label,
-.field.float select:focus + label{
-  transform: translateY(-12px) scale(0.86);
-}
-
-
-/* Matrimonio toggle (pill with dot) */
-#page-ospite .marriage-wrap{
-  display:flex;
-  justify-content:center;
-  margin: 8px 0 2px;
-}
-#page-ospite .toggle-check{
-  position:absolute;
-  opacity:0;
-  width:1px;
-  height:1px;
-  pointer-events:none;
-}
-#page-ospite .pill-toggle{
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(15,23,42,0.12);
-  background: rgba(255,255,255,0.70);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  font-weight: 950;
-  letter-spacing: .2px;
-  color: rgba(15,23,42,0.86);
-}
-#page-ospite .pill-toggle .dot{
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 2px solid rgba(43,124,180,0.55);
-  background: rgba(255,255,255,0.8);
-}
-#page-ospite .toggle-check:checked + .pill-toggle{
-  border-color: rgba(43,124,180,0.45);
-  background: rgba(43,124,180,0.10);
-}
-#page-ospite .toggle-check:checked + .pill-toggle .dot{
-  background: var(--blue);
-  border-color: var(--blue);
-}
-
-
-
-/* ============================
-   No overlap: hide placeholders in floating fields
-============================ */
-.field.float input::placeholder,
-.field.float textarea::placeholder{
-  opacity: 0 !important;
-}
-
-/* Matrimonio: centered pill toggle, no native checkbox visible */
-#page-ospite .marriage-wrap{
-  position: relative;
-  display:flex;
-  justify-content:center;
-  margin: 10px 0 6px;
-}
-#page-ospite .toggle-check{
-  position: absolute !important;
-  opacity: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  overflow: hidden !important;
-  clip: rect(0 0 0 0) !important;
-  clip-path: inset(50%) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-#page-ospite .pill-toggle{
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(15,23,42,0.12);
-  background: rgba(255,255,255,0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  font-weight: 950;
-  letter-spacing: .2px;
-  color: rgba(15,23,42,0.86);
-  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
-}
-#page-ospite .pill-toggle .dot{
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  border: 2px solid rgba(43,124,180,0.55);
-  background: rgba(255,255,255,0.85);
-}
-#page-ospite .toggle-check:checked + .pill-toggle{
-  border-color: rgba(43,124,180,0.45);
-  background: rgba(43,124,180,0.10);
-}
-#page-ospite .toggle-check:checked + .pill-toggle .dot{
-  background: var(--blue);
-  border-color: var(--blue);
-}
-
-
-
-/* ============================
-   Color boost (palette logo) – more visible accents
-============================ */
-:root{
-  --glass: rgba(255,255,255,0.76);
-  --glass2: rgba(255,255,255,0.58);
-  --border: rgba(15,23,42,0.16);
-  --shadow: 0 14px 34px rgba(15,23,42,0.14);
-}
-
-/* Topbar: stronger premium accent */
-.topbar{
-  border-bottom-color: rgba(15,23,42,0.14);
-}
-.topbar::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:-1px;
-  height: 3px;
-  background: linear-gradient(90deg, rgba(122,192,219,0.0), rgba(122,192,219,0.85), rgba(43,124,180,0.92), rgba(201,119,43,0.85), rgba(122,192,219,0.0));
-  opacity: 0.55;
-  pointer-events:none;
-}
-.topbar h1{
-  color: rgba(11,15,22,0.98);
-}
-
-/* Cards: slightly stronger border + shadow */
-.card, .kpi-card, .catrow, .legrow{
-  border-color: rgba(15,23,42,0.16) !important;
-  box-shadow: 0 14px 34px rgba(15,23,42,0.12) !important;
-}
-
-/* Inputs: visible focus ring in logo-blue */
-.field input,
-.field select,
-.field textarea{
-  border-color: rgba(15,23,42,0.16) !important;
-}
-.field input:focus,
-.field select:focus,
-.field textarea:focus{
-  border-color: rgba(43,124,180,0.55) !important;
-  box-shadow:
-    0 0 0 4px rgba(43,124,180,0.14),
-    0 14px 34px rgba(15,23,42,0.10) !important;
-}
-
-/* Primary buttons: stronger blue tint + blue text */
-.btn.primary{
-  border-color: rgba(43,124,180,0.55) !important;
-  background: linear-gradient(to bottom, rgba(43,124,180,0.28), rgba(255,255,255,0.88)) !important;
-  color: rgba(31,112,166,0.98) !important;
-}
-/* Secondary/warn: stronger orange */
-.btn.warn{
-  border-color: rgba(201,119,43,0.62) !important;
-  background: linear-gradient(to bottom, rgba(201,119,43,0.24), rgba(255,255,255,0.88)) !important;
-  color: rgba(176,92,18,0.98) !important;
-}
-.btn.danger{
-  border-color: rgba(201,119,43,0.60) !important;
-  background: rgba(201,119,43,0.16) !important;
-  color: rgba(176,92,18,0.98) !important;
-}
-
-/* Segmented active: more visible blue */
-.seg-btn.active{
-  border-color: rgba(43,124,180,0.52) !important;
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(43,124,180,0.30), transparent 62%),
-    rgba(255,255,255,0.86) !important;
-}
-
-/* KPI: make the important number pop */
-.kpi-card.accent{
-  border-color: rgba(43,124,180,0.52) !important;
-  background: linear-gradient(to bottom, rgba(43,124,180,0.20), rgba(255,255,255,0.72)) !important;
-}
-.kpi-value{
-  color: rgba(11,15,22,0.96);
-}
-.kpi-card.accent .kpi-value{
-  color: rgba(31,112,166,0.98);
-}
-
-/* Home icons: clearer glass + subtle color glow */
-#page-home .home-icon{
-  border-color: rgba(15,23,42,0.14) !important;
-  box-shadow: 0 16px 38px rgba(15,23,42,0.10) !important;
-}
-#page-home .home-icon.spese::before,
-#page-home .home-icon.ospite::before{
-  opacity: 0.14 !important;
-}
-
-
-/* ============================
-   Minimal icons (no skeuomorphism)
-============================ */
-.ui-ico{
-  width: 32px;
-  height: 32px;
-  stroke: currentColor;
-  stroke-width: 2;
+.acconto-btn svg{
+  width: 22px;
+  height: 22px;
   fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+  opacity: 0.95;
 }
-.home-main-glyph .ui-ico{ width: 40px; height: 40px; }
-.launcher .glyph .ui-ico{ width: 28px; height: 28px; }
-.seg-ico .ui-ico{ width: 22px; height: 22px; }
-.loading-hourglass .ui-ico{ width: 44px; height: 44px; }
-
-/* Loader: no rectangular card background */
-.loading-card{
-  width: auto !important;
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  padding: 0 !important;
+.acconto-btn.active{
+  background: rgba(61, 163, 255, 0.16);
+  border-color: rgba(61, 163, 255, 0.45);
+  color: var(--blue);
 }
-.loading-text{
-  color: rgba(11,15,22,0.90);
-}
-.loading-hourglass{
-  color: rgba(31,112,166,0.98);
-}
-
-
-
-/* Home: more modules (6 icons) */
-#page-home .home-grid{ gap: 16px; }
-#page-home .home-main-label{ font-weight: 950; letter-spacing: .2px; }
-#page-home #goCalendario .home-main-glyph{ color: rgba(43,124,180,0.92); }
-#page-home #goTassaSoggiorno .home-main-glyph{ color: rgba(201,119,43,0.92); }
-#page-home #goPulizie .home-main-glyph{ color: rgba(15,23,42,0.92); }
-#page-home #goGuadagni .home-main-glyph{ color: rgba(176,92,18,0.92); }

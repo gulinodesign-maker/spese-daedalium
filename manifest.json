@@ -1,6 +1,6 @@
 {
   "name": "Daedalium PMS",
-  "short_name": "Daedalium PMS",
+  "short_name": "Daedalium",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.036";
+const BUILD_VERSION = "1.019";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -14,9 +14,6 @@ const state = {
   period: { from: "", to: "" },
   periodPreset: "this_month",
   page: "home",
-  guests: [],
-  guestRooms: new Set(),
-  guestDepositType: "contante",
 };
 
 const COLORS = {
@@ -291,61 +288,6 @@ async function api(action, { method="GET", params={}, body=null } = {}){
   }
 }
 
-
-/* Launcher modal (popup) */
-
-let launcherDelegationBound = false;
-let homeDelegationBound = false;
-function bindHomeDelegation(){
-  if (homeDelegationBound) return;
-  homeDelegationBound = true;
-  document.addEventListener("click", (e)=>{
-    const o = e.target.closest && e.target.closest("#goOspite");
-    if (o){ hideLauncher(); showPage("ospite"); return; }
-    const cal = e.target.closest && e.target.closest("#goCalendario");
-    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
-    const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
-    if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
-    const pul = e.target.closest && e.target.closest("#goPulizie");
-    if (pul){ hideLauncher(); toast("Pulizie: in arrivo"); return; }
-    const g = e.target.closest && e.target.closest("#goGuadagni");
-    if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
-
-  });
-}
-
-function bindLauncherDelegation(){
-  if (launcherDelegationBound) return;
-  launcherDelegationBound = true;
-
-  document.addEventListener("click", (e) => {
-    const goBtn = e.target.closest && e.target.closest("#launcherModal [data-go]");
-    if (goBtn){
-      const page = goBtn.getAttribute("data-go");
-      hideLauncher();
-      showPage(page);
-      return;
-    }
-    const close = e.target.closest && e.target.closest("#launcherModal [data-close], #closeLauncher");
-    if (close){
-      hideLauncher();
-    }
-  });
-}
-
-function showLauncher(){
-  const m = document.getElementById("launcherModal");
-  if (!m) return;
-  m.hidden = false;
-  m.setAttribute("aria-hidden", "false");
-}
-function hideLauncher(){
-  const m = document.getElementById("launcherModal");
-  if (!m) return;
-  m.hidden = true;
-  m.setAttribute("aria-hidden", "true");
-}
-
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
   state.page = page;
@@ -358,7 +300,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home" || page === "ospite") {
+    if (page === "home") {
       chip.hidden = true;
     } else {
       chip.hidden = false;
@@ -374,52 +316,22 @@ function showPage(page){
 
 function setupHeader(){
   const hb = $("#hamburgerBtn");
-  if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
+  if (hb) hb.addEventListener("click", () => showPage("home"));
 }
+
 function setupHome(){
-  bindLauncherDelegation();
-  bindHomeDelegation();
   // stampa build
   const build = $("#buildText");
   if (build) build.textContent = `Build ${BUILD_VERSION}`;
 
-  // HOME: icona principale apre il launcher
-  const openBtn = $("#openLauncher");
-  if (openBtn){
-    openBtn.addEventListener("click", () => showLauncher());
-  }
-
-  // HOME: icona Ospite va alla pagina ospite
-  const goO = $("#goOspite");
-  if (goO){
-    goO.addEventListener("click", () => showPage("ospite"));
-  }
-
-  // launcher: icone interne navigano alle pagine
-  document.querySelectorAll("#launcherModal [data-go]").forEach(btn => {
+  // icone -> aprono le pagine
+  document.querySelectorAll("#page-home [data-go]").forEach(btn => {
     btn.addEventListener("click", () => {
       const page = btn.getAttribute("data-go");
-      hideLauncher();
       showPage(page);
     });
   });
-
-  // chiusura launcher
-  const closeBtn = $("#closeLauncher");
-  if (closeBtn) closeBtn.addEventListener("click", hideLauncher);
-
-  const modal = $("#launcherModal");
-  if (modal){
-    modal.querySelectorAll("[data-close]").forEach(el => {
-      el.addEventListener("click", hideLauncher);
-    });
-  }
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") hideLauncher();
-  });
 }
-
 
 /* PERIOD SYNC */
 function setPeriod(from, to){
@@ -550,6 +462,113 @@ async function saveSpesa(){
 
   // aggiorna dati
   try { await loadData(); } catch(_) {}
+}
+
+
+
+/* OSPITI (UI + salvataggio) */
+function setupOspiteUI(){
+  // default date values
+  const ci = $("#guestCheckIn");
+  const co = $("#guestCheckOut");
+  if (ci && !ci.value) ci.value = todayISO();
+  if (co && !co.value) co.value = todayISO();
+
+  // stanze multi-select
+  document.querySelectorAll(".room-dot").forEach((b) => {
+    b.addEventListener("click", () => {
+      b.classList.toggle("selected");
+    });
+  });
+
+  // matrimonio toggle (pallino)
+  const md = $("#guestMatrimonioDot");
+  if (md){
+    md.addEventListener("click", () => {
+      const on = md.classList.toggle("on");
+      md.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+
+  // tipo acconto (icone)
+  const setAcconto = (type) => {
+    document.querySelectorAll(".acconto-btn").forEach(btn => {
+      const is = btn.getAttribute("data-type") === type;
+      btn.classList.toggle("active", is);
+    });
+  };
+  const first = document.querySelector(".acconto-btn[data-type='contante']");
+  if (first) setAcconto("contante");
+
+  document.querySelectorAll(".acconto-btn").forEach(btn => {
+    btn.addEventListener("click", () => setAcconto(btn.getAttribute("data-type")));
+  });
+
+  // salva ospite
+  const saveBtn = $("#btnSaveGuest");
+  if (saveBtn){
+    // a prova di iOS: niente submit
+    saveBtn.setAttribute("type","button");
+    saveBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      await saveGuest();
+    });
+  }
+}
+
+async function saveGuest(){
+  const nome = ($("#guestName")?.value || "").trim();
+  const adulti = Number($("#guestAdults")?.value || 0);
+  const bambini_u10 = Number($("#guestKids")?.value || 0);
+  const check_in = $("#guestCheckIn")?.value || "";
+  const check_out = $("#guestCheckOut")?.value || "";
+
+  const stanze = Array.from(document.querySelectorAll(".room-dot.selected"))
+    .map(el => String(el.getAttribute("data-room") || "").trim())
+    .filter(Boolean);
+
+  const importo_prenotazione = Number($("#guestImportoPren")?.value || 0);
+  const importo_booking = Number($("#guestImportoBooking")?.value || 0);
+  const acconto_importo = Number($("#guestAcconto")?.value || 0);
+  const acconto_tipo = document.querySelector(".acconto-btn.active")?.getAttribute("data-type") || "contante";
+  const matrimonio = !!$("#guestMatrimonioDot")?.classList.contains("on");
+
+  if (!nome) return toast("Nome obbligatorio");
+  if (!check_in) return toast("Check-in obbligatorio");
+  if (!check_out) return toast("Check-out obbligatorio");
+
+  // NON cambiare flusso API: usa api() esistente
+  try {
+    await api("ospiti", { method:"POST", body: {
+      nome, adulti, bambini_u10, check_in, check_out, stanze,
+      importo_prenotazione, importo_booking,
+      acconto_importo, acconto_tipo,
+      matrimonio
+    }});
+
+    toast("Salvato");
+
+    // reset campi (lascia date)
+    $("#guestName").value = "";
+    $("#guestAdults").value = "1";
+    $("#guestKids").value = "0";
+    document.querySelectorAll(".room-dot.selected").forEach(el => el.classList.remove("selected"));
+    $("#guestImportoPren").value = "";
+    $("#guestImportoBooking").value = "";
+    $("#guestAcconto").value = "";
+    document.querySelectorAll(".acconto-btn").forEach(btn => btn.classList.remove("active"));
+    const first = document.querySelector(".acconto-btn[data-type='contante']");
+    if (first) first.classList.add("active");
+    const md = $("#guestMatrimonioDot");
+    if (md){
+      md.classList.remove("on");
+      md.setAttribute("aria-pressed","false");
+    }
+  } catch (e){
+    toast(e.message || "Errore");
+    throw e;
+  }
 }
 
 /* 2) SPESE */
@@ -791,208 +810,12 @@ function bindPeriodAuto(fromSel, toSel){
   toEl.addEventListener("change", schedule);
 }
 
-
-function setupOspite(){
-  const hb = document.getElementById("hamburgerBtnOspite");
-  if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
-
-  const roomsWrap = document.getElementById("roomsPicker");
-  const roomsOut = null; // removed UI string output
-
-  function renderRooms(){
-    const arr = Array.from(state.guestRooms).sort((a,b)=>a-b);
-    roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
-      const n = parseInt(btn.getAttribute("data-room"), 10);
-      const on = state.guestRooms.has(n);
-      btn.classList.toggle("selected", on);
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-    });
-  }
-
-  roomsWrap?.addEventListener("click", (e) => {
-    const b = e.target.closest(".room-dot");
-    if (!b) return;
-    const n = parseInt(b.getAttribute("data-room"), 10);
-    if (state.guestRooms.has(n)) state.guestRooms.delete(n);
-    else state.guestRooms.add(n);
-    renderRooms();
-  });
-
-  const seg = document.getElementById("depositType");
-  seg?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".seg-btn");
-    if (!btn) return;
-    const t = btn.getAttribute("data-type");
-    state.guestDepositType = t;
-    seg.querySelectorAll(".seg-btn").forEach(b=>{
-      const active = b.getAttribute("data-type") === t;
-      b.classList.toggle("active", active);
-      b.setAttribute("aria-selected", active ? "true" : "false");
-    });
-  });
-
-  const btnCreate = document.getElementById("createGuestCard");
-  btnCreate?.addEventListener("click", async () => {
-    const name = (document.getElementById("guestName")?.value || "").trim();
-    const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
-    const kidsU10 = parseInt(document.getElementById("guestKidsU10")?.value || "0", 10) || 0;
-    const checkIn = document.getElementById("guestCheckIn")?.value || "";
-    const checkOut = document.getElementById("guestCheckOut")?.value || "";
-    const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
-    const booking = parseFloat(document.getElementById("guestBooking")?.value || "0") || 0;
-    const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
-    const rooms = Array.from(state.guestRooms).sort((a,b)=>a-b);
-    const depositType = state.guestDepositType || "contante";
-
-    // UI only validation (soft)
-    if (!name){
-      toast("Inserisci il nome");
-      return;
-    }
-
-    const payload = {
-  nome: name,
-  adulti,
-  bambini_u10: kidsU10,
-  check_in: checkIn,
-  check_out: checkOut,
-  stanze: rooms, // array -> backend joins
-  importo_prenotazione: total,
-  importo_booking: booking,
-  acconto_importo: deposit,
-  acconto_tipo: depositType,
-  matrimonio: !!document.getElementById("guestMarriage")?.checked
-};
-
-// Salvataggio su Google Sheet (action=ospiti)
-const res = await api("ospiti", { method:"POST", body: payload });
-
-// Manteniamo una scheda locale per UI (id restituito dal backend)
-const item = {
-  id: (res && res.id) ? res.id : Math.random().toString(16).slice(2),
-  name, adults, kidsU10, checkIn, checkOut,
-  rooms,
-  total, booking, deposit,
-  depositType,
-  marriage: payload.matrimonio
-};
-state.guests.unshift(item);
-renderGuestCards();
-toast("Salvato");
-
-    // reset fields (keep dates if user wants; we'll keep check-in today if empty)
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestAdults").value = "";
-    document.getElementById("guestKidsU10").value = "";
-    document.getElementById("guestTotal").value = "";
-    document.getElementById("guestBooking").value = "";
-    document.getElementById("guestDeposit").value = "";
-    state.guestRooms.clear();
-    renderRooms();
-  });
-
-  // Default: check-in oggi (solo UI)
-  const today = new Date();
-  const iso = today.toISOString().slice(0,10);
-  const ci = document.getElementById("guestCheckIn");
-  if (ci && !ci.value) ci.value = iso;
-
-  renderRooms();
-  renderGuestCards();
-}
-
-function euro(n){
-  try { return (Number(n)||0).toLocaleString("it-IT", { style:"currency", currency:"EUR" }); }
-  catch { return (Number(n)||0).toFixed(2) + " €"; }
-}
-
-function renderGuestCards(){
-  const wrap = document.getElementById("guestCards");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-  state.guests.forEach(item => {
-    const rooms = (item.rooms || []).join("/") || "—";
-    const badgeClass = item.depositType === "elettronico" ? "blue" : "orange";
-    const badgeLabel = item.depositType === "elettronico" ? "Elettronico" : "Contante";
-
-    const card = document.createElement("div");
-    card.className = "guest-card";
-    card.dataset.id = item.id;
-
-    card.innerHTML = `
-      <div class="top">
-        <div>
-          <div class="name">${escapeHtml(item.name)}</div>
-          <div class="meta">
-            <span>Check-in: <b>${escapeHtml(item.checkIn || "—")}</b></span>
-            <span>Check-out: <b>${escapeHtml(item.checkOut || "—")}</b></span>
-            <span>Stanze: <b>${escapeHtml(rooms)}</b></span>
-            <span>Adulti: <b>${escapeHtml(item.adults ?? 0)}</b></span>
-            <span>Bambini<10: <b>${escapeHtml(item.kidsU10 ?? 0)}</b></span>
-          </div>
-        </div>
-        <span class="badge ${badgeClass}">${badgeLabel}</span>
-      </div>
-
-      <div class="actions">
-        <button class="btn ghost" type="button" data-open="1">Apri</button>
-        <button class="btn danger" type="button" data-del="1">Elimina</button>
-      </div>
-
-      <details>
-        <summary>Dettagli</summary>
-        <div class="detail-grid">
-          <div><div class="k">Prenotazione</div><div>${euro(item.total)}</div></div>
-          <div><div class="k">Booking</div><div>${euro(item.booking)}</div></div>
-          <div><div class="k">Acconto</div><div>${euro(item.deposit)}</div></div>
-          <div><div class="k">Adulti</div><div>${escapeHtml(item.adults ?? 0)}</div></div>
-          <div><div class="k">Bambini<10</div><div>${escapeHtml(item.kidsU10 ?? 0)}</div></div>
-          <div><div class="k">Tipo</div><div>${badgeLabel}</div></div>
-        </div>
-      </details>
-    `;
-
-    // buttons
-    card.querySelector('[data-open="1"]')?.addEventListener("click", () => {
-      const d = card.querySelector("details");
-      if (d) d.open = !d.open;
-    });
-    card.querySelector('[data-del="1"]')?.addEventListener("click", () => {
-      state.guests = state.guests.filter(x => x.id !== item.id);
-      renderGuestCards();
-      toast("Eliminata");
-    });
-
-    wrap.appendChild(card);
-  });
-}
-
-
-
-function initFloatingLabels(){
-  const fields = document.querySelectorAll(".field.float");
-  fields.forEach((f) => {
-    const control = f.querySelector("input, select, textarea");
-    if (!control) return;
-    const update = () => {
-      const has = !!(control.value && String(control.value).trim().length);
-      f.classList.toggle("has-value", has);
-    };
-    control.addEventListener("input", update);
-    control.addEventListener("change", update);
-    update();
-  });
-}
-
-
 async function init(){
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
 
-    setupOspite();
-  initFloatingLabels();
-// default period = this month
+  // default period = this month
   const [from,to] = monthRangeISO(new Date());
   setPeriod(from,to);
 
@@ -1024,6 +847,10 @@ async function init(){
   $("#btnSaveSpesa").addEventListener("click", async () => {
     try { await saveSpesa(); } catch(e){ toast(e.message); }
   });
+
+
+  // Ospiti (solo UI + salvataggio su backend action=ospiti)
+  setupOspiteUI();
 
 
   // pre-carico dati (non cambia flusso API)
