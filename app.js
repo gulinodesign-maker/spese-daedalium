@@ -1,7 +1,7 @@
 
 const API_KEY = "daedalium2026";
 const API_URL = CONFIG.API_URL;
-const BUILD_VERSION = "1.054";
+const BUILD_VERSION = "1.055";
 
 async function apiGet(action){
   const r = await fetch(`${API_URL}?action=${action}&apiKey=${API_KEY}`);
@@ -21,47 +21,7 @@ function euro(v){
   return Number(v||0).toFixed(2).replace(".",",");
 }
 
-/* ================= SPESE ================= */
 
-async function salvaSpesa(){
-  const body = {
-    dataSpesa: document.getElementById("spesaData").value,
-    categoria: document.getElementById("spesaCategoria").value,
-    motivazione: document.getElementById("spesaMotivazione").value,
-    importoLordo: Number(document.getElementById("spesaImporto").value),
-    aliquotaIva: 0,
-    imponibile: Number(document.getElementById("spesaImporto").value),
-    iva: 0,
-    ivaDetraibile: 0,
-    note: ""
-  };
-  const r = await apiPost("spese", body);
-  if(r.ok) caricaSpese();
-  else alert("Errore salvataggio spesa");
-}
-
-async function caricaSpese(){
-  const r = await apiGet("spese");
-  if(!r.ok) return;
-
-  const ul = document.getElementById("listaSpese");
-  if(!ul) return;
-  ul.innerHTML = "";
-
-  r.data
-    .filter(s => s.isDeleted !== true && s.isDeleted !== "TRUE")
-    .forEach(s=>{
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div><strong>${s.motivazione}</strong></div>
-        <div>${s.dataSpesa} · ${s.categoria}</div>
-        <div>€ ${euro(s.importoLordo)}</div>
-      `;
-      ul.appendChild(li);
-    });
-}
-
-/* ============== NAV ================= */
 
 function show(id){
   document.querySelectorAll("section").forEach(s=>s.style.display="none");
@@ -81,7 +41,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 
 
-/* ==== DEFINITIVE NAVIGATION FIX ==== */
+
 const NAV_MAP = {
   home: "home",
   ospiti: "ospiti",
@@ -111,10 +71,10 @@ document.addEventListener("click", (e)=>{
   const key = btn.getAttribute("data-go");
   if(NAV_MAP[key]) showSection(NAV_MAP[key]);
 });
-/* ==== END NAV ==== */
 
 
-/* ==== HARD NAV FIX (EXPLICIT IDS) ==== */
+
+
 function hideAll(){
   document.querySelectorAll("section").forEach(s=>{
     s.style.display="none";
@@ -134,4 +94,28 @@ document.addEventListener("DOMContentLoaded",()=>{
   show("home");
 
 });
-/* ==== END NAV FIX ==== */
+
+
+// ===== SINGLE NAVIGATION SYSTEM =====
+function showPage(id){
+  document.querySelectorAll("section").forEach(s=>{
+    s.style.display="none";
+    s.hidden=true;
+  });
+  const el=document.getElementById(id);
+  if(el){
+    el.style.display="block";
+    el.hidden=false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  showPage("page-home");
+});
+
+document.addEventListener("click",(e)=>{
+  const btn=e.target.closest("[data-page]");
+  if(!btn) return;
+  showPage(btn.getAttribute("data-page"));
+});
+// ===== END NAV =====
