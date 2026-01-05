@@ -1,7 +1,7 @@
 
 const API_KEY = "daedalium2026";
 const API_URL = CONFIG.API_URL;
-const BUILD_VERSION = "1.052";
+const BUILD_VERSION = "1.053";
 
 async function apiGet(action){
   const r = await fetch(`${API_URL}?action=${action}&apiKey=${API_KEY}`);
