@@ -1,7 +1,7 @@
 
 const API_KEY = "daedalium2026";
 const API_URL = CONFIG.API_URL;
-const BUILD_VERSION = "1.053";
+const BUILD_VERSION = "1.054";
 
 async function apiGet(action){
   const r = await fetch(`${API_URL}?action=${action}&apiKey=${API_KEY}`);
@@ -112,3 +112,26 @@ document.addEventListener("click", (e)=>{
   if(NAV_MAP[key]) showSection(NAV_MAP[key]);
 });
 /* ==== END NAV ==== */
+
+
+/* ==== HARD NAV FIX (EXPLICIT IDS) ==== */
+function hideAll(){
+  document.querySelectorAll("section").forEach(s=>{
+    s.style.display="none";
+    s.hidden=true;
+  });
+}
+function show(id){
+  hideAll();
+  const el=document.getElementById(id);
+  if(el){
+    el.style.display="block";
+    el.hidden=false;
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  show("home");
+
+});
+/* ==== END NAV FIX ==== */
