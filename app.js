@@ -33,3 +33,15 @@ async function caricaSpese(){
 }
 
 document.addEventListener("DOMContentLoaded", caricaSpese);
+
+
+// === HOME ICONS NAVIGATION FIX ===
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-go]");
+  if(!btn) return;
+  const target = btn.getAttribute("data-go");
+  document.querySelectorAll("section").forEach(s=>s.hidden=true);
+  const page = document.getElementById(target);
+  if(page) page.hidden=false;
+});
+// === END FIX ===
