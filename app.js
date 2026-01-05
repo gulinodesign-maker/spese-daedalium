@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.035";
+const BUILD_VERSION = '1.038';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -17,6 +17,7 @@ const state = {
   guests: [],
   guestRooms: new Set(),
   guestDepositType: "contante",
+  guestEditId: null,
 };
 
 const COLORS = {
@@ -277,15 +278,37 @@ async function api(action, { method="GET", params={}, body=null } = {}){
     realMethod = "POST";
   }
 
-  const res = await fetch(url.toString(), {
-    method: realMethod,
-    headers: { "Content-Type":"text/plain;charset=utf-8" },
-    body: body ? JSON.stringify(body) : null
-  });
+  // Timeout concreto: evita loader infinito su iOS quando la rete “si pianta”
+const controller = new AbortController();
+const t = setTimeout(() => controller.abort(), 15000);
 
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.error || "API error");
-  return json.data;
+const fetchOpts = {
+  method: realMethod,
+  signal: controller.signal,
+};
+
+// Headers/body solo quando serve (riduce rischi di preflight su Safari iOS)
+if (realMethod !== "GET") {
+  fetchOpts.headers = { "Content-Type": "text/plain;charset=utf-8" };
+  fetchOpts.body = body ? JSON.stringify(body) : "{}";
+}
+
+let res;
+try {
+  res = await fetch(url.toString(), fetchOpts);
+} finally {
+  clearTimeout(t);
+}
+
+let json;
+try {
+  json = await res.json();
+} catch (_) {
+  throw new Error("Risposta non valida dal server");
+}
+
+if (!json.ok) throw new Error(json.error || "API error");
+return json.data;
   } finally {
     endRequest();
   }
@@ -370,6 +393,7 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
+  if (page === "ospite") loadOspiti().catch(e => toast(e.message));
 }
 
 function setupHeader(){
@@ -381,7 +405,7 @@ function setupHome(){
   bindHomeDelegation();
   // stampa build
   const build = $("#buildText");
-  if (build) build.textContent = `Build ${BUILD_VERSION}`;
+  if (build) build.textContent = `${BUILD_VERSION}`;
 
   // HOME: icona principale apre il launcher
   const openBtn = $("#openLauncher");
@@ -459,6 +483,12 @@ async function loadMotivazioni(){
       list.appendChild(opt);
     });
   }
+}
+
+async function loadOspiti({ from="", to="" } = {}){
+  const data = await api("ospiti", { params: { from, to } });
+  state.guests = Array.isArray(data) ? data : [];
+  renderGuestCards();
 }
 
 async function loadData(){
@@ -832,7 +862,8 @@ function setupOspite(){
   });
 
   const btnCreate = document.getElementById("createGuestCard");
-  btnCreate?.addEventListener("click", () => {
+  btnCreate?.addEventListener("click", async () => {
+
     const name = (document.getElementById("guestName")?.value || "").trim();
     const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
     const kidsU10 = parseInt(document.getElementById("guestKidsU10")?.value || "0", 10) || 0;
@@ -843,33 +874,59 @@ function setupOspite(){
     const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
     const rooms = Array.from(state.guestRooms).sort((a,b)=>a-b);
     const depositType = state.guestDepositType || "contante";
+    const matrimonio = !!document.getElementById("guestMarriage")?.checked;
 
-    // UI only validation (soft)
+    // UI validation (soft)
     if (!name){
       toast("Inserisci il nome");
       return;
     }
 
-    const item = {
-      id: String(Date.now()) + Math.random().toString(16).slice(2),
-      name, adults, kidsU10, checkIn, checkOut,
+    const payload = {
+      id: state.guestEditId || undefined,
+      name,
+      adults,
+      kidsU10,
+      checkIn,
+      checkOut,
       rooms,
-      total, booking, deposit,
-      depositType
+      total,
+      booking,
+      deposit,
+      depositType,
+      matrimonio,
+      // default backend flags
+      ps_registrato: false,
+      istat_registrato: false,
     };
-    state.guests.unshift(item);
-    renderGuestCards();
-    toast("Scheda creata (demo)");
 
-    // reset fields (keep dates if user wants; we'll keep check-in today if empty)
+    const isEdit = !!state.guestEditId;
+
+    try {
+      await api("ospiti", { method:"POST", body: payload });
+      await loadOspiti();
+      toast(isEdit ? "Aggiornato" : "Scheda salvata");
+    } catch (e) {
+      toast(e.message || "Errore");
+      return;
+    }
+
+    // reset fields
+    state.guestEditId = null;
+    if (btnCreate) btnCreate.textContent = "Crea scheda cliente";
+
     document.getElementById("guestName").value = "";
     document.getElementById("guestAdults").value = "";
     document.getElementById("guestKidsU10").value = "";
     document.getElementById("guestTotal").value = "";
     document.getElementById("guestBooking").value = "";
     document.getElementById("guestDeposit").value = "";
+    const mEl = document.getElementById("guestMarriage");
+    if (mEl) mEl.checked = false;
+
     state.guestRooms.clear();
     renderRooms();
+
   });
 
   // Default: check-in oggi (solo UI)
@@ -890,8 +947,10 @@ function euro(n){
 function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
+
   wrap.innerHTML = "";
-  state.guests.forEach(item => {
+
+  (state.guests || []).forEach(item => {
     const rooms = (item.rooms || []).join("/") || "—";
     const badgeClass = item.depositType === "elettronico" ? "blue" : "orange";
     const badgeLabel = item.depositType === "elettronico" ? "Elettronico" : "Contante";
@@ -917,6 +976,7 @@ function renderGuestCards(){
 
       <div class="actions">
         <button class="btn ghost" type="button" data-open="1">Apri</button>
+        <button class="btn ghost" type="button" data-edit="1">Modifica</button>
         <button class="btn danger" type="button" data-del="1">Elimina</button>
       </div>
 
@@ -929,24 +989,82 @@ function renderGuestCards(){
           <div><div class="k">Adulti</div><div>${escapeHtml(item.adults ?? 0)}</div></div>
           <div><div class="k">Bambini<10</div><div>${escapeHtml(item.kidsU10 ?? 0)}</div></div>
           <div><div class="k">Tipo</div><div>${badgeLabel}</div></div>
+          <div><div class="k">Matrimonio</div><div>${item.matrimonio ? "Sì" : "No"}</div></div>
         </div>
       </details>
     `;
 
-    // buttons
+    // Apri/chiudi dettagli
     card.querySelector('[data-open="1"]')?.addEventListener("click", () => {
       const d = card.querySelector("details");
       if (d) d.open = !d.open;
     });
-    card.querySelector('[data-del="1"]')?.addEventListener("click", () => {
-      state.guests = state.guests.filter(x => x.id !== item.id);
-      renderGuestCards();
-      toast("Eliminata");
+
+    // Modifica: carica nel form
+    card.querySelector('[data-edit="1"]')?.addEventListener("click", () => {
+      state.guestEditId = item.id;
+
+      const setVal = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.value = (v ?? "");
+      };
+
+      setVal("guestName", item.name || "");
+      setVal("guestAdults", item.adults ?? "");
+      setVal("guestKidsU10", item.kidsU10 ?? "");
+      setVal("guestCheckIn", item.checkIn || "");
+      setVal("guestCheckOut", item.checkOut || "");
+      setVal("guestTotal", item.total ?? "");
+      setVal("guestBooking", item.booking ?? "");
+      setVal("guestDeposit", item.deposit ?? "");
+
+      const mEl = document.getElementById("guestMarriage");
+      if (mEl) mEl.checked = !!item.matrimonio;
+
+      // stanze
+      state.guestRooms.clear();
+      (item.rooms || []).forEach(n => state.guestRooms.add(Number(n)));
+
+      // tipo acconto
+      state.guestDepositType = item.depositType || "contante";
+      const seg = document.getElementById("depositType");
+      seg?.querySelectorAll(".seg-btn").forEach(b=>{
+        const t = b.getAttribute("data-type");
+        const active = t === state.guestDepositType;
+        b.classList.toggle("active", active);
+        b.setAttribute("aria-selected", active ? "true" : "false");
+      });
+
+      // aggiorna UI stanze
+      const roomsWrap = document.getElementById("roomsPicker");
+      roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
+        const n = parseInt(btn.getAttribute("data-room"), 10);
+        const on = state.guestRooms.has(n);
+        btn.classList.toggle("selected", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+
+      const btnCreate = document.getElementById("createGuestCard");
+      if (btnCreate) btnCreate.textContent = "Salva modifiche";
+      try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
+      toast("Modifica attiva");
+    });
+
+    // Elimina
+    card.querySelector('[data-del="1"]')?.addEventListener("click", async () => {
+      try {
+        await api("ospiti", { method:"DELETE", params:{ id: item.id } });
+        await loadOspiti();
+        toast("Eliminato");
+      } catch (e) {
+        toast(e.message || "Errore");
+      }
     });
 
     wrap.appendChild(card);
   });
 }
+
 
 
 
@@ -1027,9 +1145,34 @@ async function registerSW(){
   if (!("serviceWorker" in navigator)) return;
   try {
     // Query param = BUILD_VERSION -> forza fetch del file SW anche con cache aggressiva
-    const reg = await navigator.serviceWorker.register(`./service-worker.js?v=${BUILD_VERSION}`);
-    // prova subito un update (utile su iOS)
-    if (reg && reg.update) reg.update();
+    const reg = await navigator.serviceWorker.register(`./service-worker.js?v=${BUILD_VERSION}`, {
+      updateViaCache: "none"
+    });
+
+    const checkUpdate = () => {
+      try { reg?.update?.(); } catch (_) {}
+    };
+
+    // check immediato + quando torna in primo piano
+    checkUpdate();
+    window.addEventListener("focus", checkUpdate);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) checkUpdate();
+    });
+    // check periodico (non invasivo)
+    setInterval(checkUpdate, 60 * 60 * 1000);
+
+    // Se viene trovata una nuova versione, prova ad attivarla subito
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener("statechange", () => {
+        if (nw.state === "installed" && navigator.serviceWorker.controller) {
+          try { nw.postMessage({ type: "SKIP_WAITING" }); } catch (_) {}
+        }
+      });
+    });
+
     // se cambia controller, ricarica una volta per prendere i file nuovi
     let reloaded = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
@@ -1041,3 +1184,9 @@ async function registerSW(){
 }
 registerSW();
 
+
+
+/* === PAGE: OSPITI === */
+function renderOspitiPage(container, data) {
+  container.innerHTML = '<h2>Ospiti</h2>' + renderOspitiTable(data);
+}

@@ -1,71 +1,118 @@
-/* Spese Daedalium - Service Worker (PWA) */
-const CACHE_NAME = "spese-daedalium-1.035";
-const ASSETS = [
-"./",
-  "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./config.js",
-  "./manifest.json",
+/* dDAE - Service Worker (PWA) */
+/* Build: dDAE_1.037 */
+
+const BUILD = "1.037";
+const CACHE_NAME = 'dDAE-cache-1.038'; // cambia ad ogni build
+
+// Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
+const CORE_ASSETS = [
+  "./",
+  "./index.html?v=1.037",
+  "./styles.css?v=1.037",
+  "./app.js?v=1.037",
+  "./config.js?v=1.037",
+  "./manifest.json?v=1.037",
   "./assets/logo.jpg",
+  "./assets/bg-daedalium.png",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
-  "./assets/icons/icon-180.png",
-  "./assets/icons/icon-32.png",
-  "./assets/bg-daedalium.png",
+  "./assets/icons/favicon-32.png",
+  "./assets/icons/favicon-16.png",
+  "./assets/icons/apple-touch-icon.png",
 ];
 
+// Install: precache + skipWaiting (fix aggiornamenti su iOS)
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // "reload" bypassa la HTTP cache del browser
+    const reqs = CORE_ASSETS.map((url) => new Request(url, { cache: "reload" }));
+    await cache.addAll(reqs);
+    self.skipWaiting();
+  })());
 });
 
+// Activate: cleanup cache vecchie + claim
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : Promise.resolve(true))))
-    ).then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => {
+      if (k !== CACHE_NAME) return caches.delete(k);
+    }));
+    await self.clients.claim();
+  })());
 });
 
-async function networkFirst(request){
+// Messaggi (fallback)
+self.addEventListener("message", (event) => {
+  if (event?.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+function isApiRequest(req) {
+  const url = new URL(req.url);
+  return (
+    url.origin.includes("script.google.com") ||
+    url.origin.includes("script.googleusercontent.com")
+  );
+}
+
+async function networkFirstHTML(req) {
   const cache = await caches.open(CACHE_NAME);
+
   try {
-    const fresh = await fetch(request);
-    cache.put(request, fresh.clone());
+    // no-store per HTML/navigazioni: evita cache aggressiva iOS/Safari
+    const fresh = await fetch(new Request(req.url, { cache: "no-store" }));
+    if (fresh && fresh.ok) {
+      // salva una copia (match con ignoreSearch durante il fetch)
+      await cache.put(req, fresh.clone());
+    }
     return fresh;
   } catch (e) {
-    const cached = await cache.match(request);
-    return cached || Response.error();
+    // fallback: prova cache ignorando querystring
+    const cached =
+      (await cache.match(req, { ignoreSearch: true })) ||
+      (await cache.match("./index.html", { ignoreSearch: true })) ||
+      (await cache.match("./", { ignoreSearch: true }));
+    if (cached) return cached;
+    throw e;
   }
 }
 
-async function cacheFirst(request){
+async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  const fresh = await fetch(request);
-  cache.put(request, fresh.clone());
-  return fresh;
+  const cached = await cache.match(req, { ignoreSearch: true });
+
+  const fetchPromise = fetch(new Request(req.url, { cache: "no-store" }))
+    .then((res) => {
+      if (res && res.ok) cache.put(req, res.clone());
+      return res;
+    })
+    .catch(() => null);
+
+  return cached || (await fetchPromise);
 }
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  const url = new URL(req.url);
-
-  // Non gestire chiamate API o cross-origin
-  if (url.origin !== self.location.origin) return;
 
   // Solo GET
   if (req.method !== "GET") return;
 
-  // Navigazioni: network-first
-  if (req.mode === "navigate") {
-    event.respondWith(networkFirst(req));
+  // API: mai in cache
+  if (isApiRequest(req)) {
+    event.respondWith(fetch(new Request(req.url, { cache: "no-store" })));
     return;
   }
 
-  // Static assets: cache-first
-  event.respondWith(cacheFirst(req));
+  // Navigazioni / HTML: network-first
+  const accept = req.headers.get("accept") || "";
+  if (req.mode === "navigate" || accept.includes("text/html")) {
+    event.respondWith(networkFirstHTML(req));
+    return;
+  }
+
+  // Static assets: stale-while-revalidate
+  event.respondWith(staleWhileRevalidate(req));
 });

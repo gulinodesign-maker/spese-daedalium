@@ -7,11 +7,11 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="stylesheet" href="./styles.css" />
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/favicon-16.png" />
+  <link rel="stylesheet" href="./styles.css?v=1.037" />
+  <link rel="manifest" href="./manifest.json?v=1.037" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/icons/apple-touch-icon.png?v=1.037" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png?v=1.037" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/icons/favicon-16.png?v=1.037" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Daedalium PMS" />
@@ -41,7 +41,7 @@
         <div class="home-spacer"></div>
 
           <div class="home-grid" role="navigation" aria-label="Sezioni">
-<button class="home-main" id="goOspite" type="button" aria-label="Inserisci ospite">
+<button class="home-main" id="goOspite" type="button" aria-label="Nuovo ospite">
               <div class="home-main-glyph alt" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
   <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
   <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
@@ -109,7 +109,7 @@
             </button>
 </div>
 
-        <div class="build" id="buildText">Build</div>
+        <div class="build" id="buildText">1.036</div>
 
         <div class="home-spacer"></div>
       </div>
@@ -263,13 +263,13 @@
       </div>
     </section>
   
-    <!-- Pagina Ospite (solo UI demo, nessun DB) -->
-    <section id="page-ospite" class="page" hidden aria-label="Inserisci ospite">
+    <!-- Pagina Ospite (DB) -->
+    <section id="page-ospite" class="page" hidden aria-label="Nuovo ospite">
 <div class="content">
         <div class="ospite-wrap">
           <div class="card guest-form-card">
             <div class="hd">
-              <h2>Inserisci ospite</h2>
+              <h2>Nuovo ospite</h2>
             </div>
             <div class="bd form-stack">
 <div class="field float">
@@ -310,6 +310,16 @@
               <button type="button" class="room-dot" data-room="6" aria-pressed="false">6</button>
             </div>
           </div>
+
+          <div class="card guest-cards-card">
+            <div class="hd">
+              <h2>Ospiti</h2>
+            </div>
+            <div class="bd">
+              <div id="guestCards" class="guest-cards"></div>
+            </div>
+          </div>
+
 
           <div class="field float">
             <input id="guestTotal" type="number" inputmode="decimal" step="0.01" placeholder="0,00"  placeholder=" " />
@@ -379,8 +389,8 @@
   </div>
 
 
-  <script src="./config.js" defer></script>
-  <script src="./app.js" defer></script>
+  <script src="./config.js?v=1.037" defer></script>
+  <script src="./app.js?v=1.037" defer></script>
 
   <!-- Launcher (popup) con 4 icone interne -->
   <div id="launcherModal" class="launcher" hidden aria-hidden="true">
