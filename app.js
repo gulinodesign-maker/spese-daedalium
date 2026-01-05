@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.041";
+const BUILD_VERSION = "1.042";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -18,6 +18,7 @@ const state = {
   guestRooms: new Set(),
   guestDepositType: "contante",
   guestEditId: null,
+  lettiPerStanza: {},
 };
 
 const COLORS = {
@@ -882,6 +883,23 @@ function setupOspite(){
     const depositType = state.guestDepositType || "contante";
     const matrimonio = !!document.getElementById("guestMarriage")?.checked;
 
+    // letti per stanza: salva configurazione + calcola riepilogo (matrimoniali/singoli/culle)
+    const lettiPerStanza = (state.lettiPerStanza && typeof state.lettiPerStanza === "object") ? state.lettiPerStanza : {};
+    let letti_matrimoniali = 0;
+    let letti_singoli = 0;
+    let culle = 0;
+    try {
+      Object.keys(lettiPerStanza).forEach(k => {
+        const d = lettiPerStanza[k] || {};
+        if (d.matrimoniale) letti_matrimoniali += 1;
+        letti_singoli += (parseInt(d.singoli, 10) || 0);
+        if (d.culla) culle += 1;
+      });
+    } catch (_) {}
+
+    const letto_tipologia = (letti_matrimoniali > 0 && letti_singoli > 0) ? "mista" : (letti_matrimoniali > 0 ? "matrimoniale" : (letti_singoli > 0 ? "singoli" : ""));
+
+
     // UI validation (soft)
     if (!name){
       toast("Inserisci il nome");
@@ -932,6 +950,8 @@ function setupOspite(){
 
     state.guestRooms.clear();
     renderRooms();
+    state.lettiPerStanza = {};
+
 
   });
 
@@ -1030,6 +1050,21 @@ function renderGuestCards(){
       // stanze
       state.guestRooms.clear();
       (item.rooms || []).forEach(n => state.guestRooms.add(Number(n)));
+
+      // letti per stanza (persistenza configurazione letti)
+      try {
+        const lp = (item.lettiPerStanza ?? item.letti_per_stanza ?? item.letti_per_stanza_json ?? null);
+        if (lp && typeof lp === "string") {
+          state.lettiPerStanza = JSON.parse(lp);
+        } else if (lp && typeof lp === "object") {
+          state.lettiPerStanza = lp;
+        } else {
+          state.lettiPerStanza = {};
+        }
+      } catch (_) {
+        state.lettiPerStanza = {};
+      }
+
 
       // tipo acconto
       state.guestDepositType = item.depositType || "contante";
