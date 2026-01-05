@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.036";
+const BUILD_VERSION = "1.037";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -278,15 +278,37 @@ async function api(action, { method="GET", params={}, body=null } = {}){
     realMethod = "POST";
   }
 
-  const res = await fetch(url.toString(), {
-    method: realMethod,
-    headers: { "Content-Type":"text/plain;charset=utf-8" },
-    body: body ? JSON.stringify(body) : null
-  });
+  // Timeout concreto: evita loader infinito su iOS quando la rete “si pianta”
+const controller = new AbortController();
+const t = setTimeout(() => controller.abort(), 15000);
 
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.error || "API error");
-  return json.data;
+const fetchOpts = {
+  method: realMethod,
+  signal: controller.signal,
+};
+
+// Headers/body solo quando serve (riduce rischi di preflight su Safari iOS)
+if (realMethod !== "GET") {
+  fetchOpts.headers = { "Content-Type": "text/plain;charset=utf-8" };
+  fetchOpts.body = body ? JSON.stringify(body) : "{}";
+}
+
+let res;
+try {
+  res = await fetch(url.toString(), fetchOpts);
+} finally {
+  clearTimeout(t);
+}
+
+let json;
+try {
+  json = await res.json();
+} catch (_) {
+  throw new Error("Risposta non valida dal server");
+}
+
+if (!json.ok) throw new Error(json.error || "API error");
+return json.data;
   } finally {
     endRequest();
   }
@@ -466,7 +488,7 @@ async function loadMotivazioni(){
 async function loadOspiti({ from="", to="" } = {}){
   const data = await api("ospiti", { params: { from, to } });
   state.guests = Array.isArray(data) ? data : [];
-  loadOspiti().catch(e => toast(e.message));
+  renderGuestCards();
 }
 
 async function loadData(){
