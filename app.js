@@ -850,8 +850,12 @@ function setupOspite(){
     const b = e.target.closest(".room-dot");
     if (!b) return;
     const n = parseInt(b.getAttribute("data-room"), 10);
-    if (state.guestRooms.has(n)) state.guestRooms.delete(n);
-    else state.guestRooms.add(n);
+    if (state.guestRooms.has(n)) {
+      state.guestRooms.delete(n);
+      if (state.lettiPerStanza) delete state.lettiPerStanza[String(n)];
+    } else {
+      state.guestRooms.add(n);
+    }
     renderRooms();
   });
 
@@ -883,23 +887,6 @@ function setupOspite(){
     const depositType = state.guestDepositType || "contante";
     const matrimonio = !!document.getElementById("guestMarriage")?.checked;
 
-    // letti per stanza: salva configurazione + calcola riepilogo (matrimoniali/singoli/culle)
-    const lettiPerStanza = (state.lettiPerStanza && typeof state.lettiPerStanza === "object") ? state.lettiPerStanza : {};
-    let letti_matrimoniali = 0;
-    let letti_singoli = 0;
-    let culle = 0;
-    try {
-      Object.keys(lettiPerStanza).forEach(k => {
-        const d = lettiPerStanza[k] || {};
-        if (d.matrimoniale) letti_matrimoniali += 1;
-        letti_singoli += (parseInt(d.singoli, 10) || 0);
-        if (d.culla) culle += 1;
-      });
-    } catch (_) {}
-
-    const letto_tipologia = (letti_matrimoniali > 0 && letti_singoli > 0) ? "mista" : (letti_matrimoniali > 0 ? "matrimoniale" : (letti_singoli > 0 ? "singoli" : ""));
-
-
     // UI validation (soft)
     if (!name){
       toast("Inserisci il nome");
@@ -927,7 +914,10 @@ function setupOspite(){
     const isEdit = !!state.guestEditId;
 
     try {
-      await api("ospiti", { method:"POST", body: payload });
+      const saved = await api("ospiti", { method:"POST", body: payload });
+      const ospiteId = (saved && saved.id) ? saved.id : (state.guestEditId || payload.id);
+      const stanze = buildStanzeArrayFromState();
+      await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } });
       await loadOspiti();
       toast(isEdit ? "Aggiornato" : "Scheda salvata");
     } catch (e) {
@@ -949,9 +939,8 @@ function setupOspite(){
     if (mEl) mEl.checked = false;
 
     state.guestRooms.clear();
-    renderRooms();
     state.lettiPerStanza = {};
-
+    renderRooms();
 
   });
 
@@ -1027,7 +1016,7 @@ function renderGuestCards(){
     });
 
     // Modifica: carica nel form
-    card.querySelector('[data-edit="1"]')?.addEventListener("click", () => {
+    card.querySelector('[data-edit="1"]')?.addEventListener("click", async () => {
       state.guestEditId = item.id;
 
       const setVal = (id, v) => {
@@ -1051,20 +1040,19 @@ function renderGuestCards(){
       state.guestRooms.clear();
       (item.rooms || []).forEach(n => state.guestRooms.add(Number(n)));
 
-      // letti per stanza (persistenza configurazione letti)
+      // dettagli letti/culla per stanza (foglio "stanze")
       try {
-        const lp = (item.lettiPerStanza ?? item.letti_per_stanza ?? item.letti_per_stanza_json ?? null);
-        if (lp && typeof lp === "string") {
-          state.lettiPerStanza = JSON.parse(lp);
-        } else if (lp && typeof lp === "object") {
-          state.lettiPerStanza = lp;
+        const stanzeRows = await api("stanze", { params: { ospite_id: item.id } });
+        if (Array.isArray(stanzeRows) && stanzeRows.length) {
+          applyStanzeToState(stanzeRows);
         } else {
+          // se non ci sono righe in "stanze", resetta config letti ma mantieni stanze selezionate
           state.lettiPerStanza = {};
         }
-      } catch (_) {
+      } catch (e) {
+        // fallback: niente dettagli letti
         state.lettiPerStanza = {};
       }
-
 
       // tipo acconto
       state.guestDepositType = item.depositType || "contante";
@@ -1095,6 +1083,7 @@ function renderGuestCards(){
     card.querySelector('[data-del="1"]')?.addEventListener("click", async () => {
       try {
         await api("ospiti", { method:"DELETE", params:{ id: item.id } });
+        try { await api("stanze", { method:"DELETE", params:{ ospite_id: item.id } }); } catch (_) {}
         await loadOspiti();
         toast("Eliminato");
       } catch (e) {
@@ -1226,6 +1215,40 @@ async function registerSW(){
 registerSW();
 
 
+
+
+// --- Stanze helpers (sheet "stanze") ---
+function buildStanzeArrayFromState(){
+  const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
+  const lp = state.lettiPerStanza || {};
+  return rooms.map((n)=>{
+    const d = lp[String(n)] || lp[n] || {};
+    return {
+      stanza_num: n,
+      letto_m: !!d.matrimoniale,
+      letto_s: parseInt(d.singoli || 0, 10) || 0,
+      culla: !!d.culla,
+      note: (d.note || "").toString()
+    };
+  });
+}
+
+function applyStanzeToState(rows){
+  state.guestRooms = state.guestRooms || new Set();
+  state.lettiPerStanza = {};
+  state.guestRooms.clear();
+  (Array.isArray(rows) ? rows : []).forEach(r=>{
+    const n = parseInt(r.stanza_num ?? r.stanzaNum ?? r.room ?? r.stanza, 10);
+    if (!isFinite(n) || n<=0) return;
+    state.guestRooms.add(n);
+    state.lettiPerStanza[String(n)] = {
+      matrimoniale: !!(r.letto_m ?? r.lettoM ?? r.matrimoniale),
+      singoli: parseInt(r.letto_s ?? r.lettoS ?? r.singoli, 10) || 0,
+      culla: !!(r.culla),
+      note: (r.note || "").toString()
+    };
+  });
+}
 
 // --- Room beds config (non-invasive) ---
 state.lettiPerStanza = state.lettiPerStanza || {};
