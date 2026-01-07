@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.063";
+const BUILD_VERSION = "1.064";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1185,6 +1185,21 @@ function renderGuestCards(){
     const nome = escapeHtml(item.nome || item.name || "Ospite");
 
     const led = guestLedStatus(item);
+    const depositTypeRaw = (item.acconto_tipo || item.depositType || item.guestDepositType || "contante").toString().toLowerCase();
+    const depositTag = (depositTypeRaw.includes("elet")) ? "Elettronico" : "Contanti";
+
+    // Stanze prenotate (colonna 'stanze' se presente)
+    let roomsArr = [];
+    try {
+      const st = item.stanze;
+      if (Array.isArray(st)) roomsArr = st;
+      else if (st != null && String(st).trim().length) {
+        roomsArr = String(st).split(",").map(x=>parseInt(x.trim(),10)).filter(n=>isFinite(n) && n>=1 && n<=6);
+      }
+    } catch (_) {}
+    roomsArr = Array.from(new Set((roomsArr||[]).map(n=>parseInt(n,10)).filter(n=>isFinite(n) && n>=1 && n<=6))).sort((a,b)=>a-b);
+    const roomsTag = roomsArr.length ? ("Stanze: " + roomsArr.join(", ")) : "Stanze: —";
+
 
     card.innerHTML = `
       <div class="guest-top">
@@ -1200,6 +1215,10 @@ function renderGuestCards(){
       </div>
 
       <div class="guest-details" hidden>
+        <div class="guest-badges" style="display:flex; gap:8px; flex-wrap:wrap; margin: 2px 0 10px;">
+          <span class="badge" style="background: rgba(43,124,180,0.12); border-color: rgba(43,124,180,0.22);">${depositTag}</span>
+          <span class="badge" style="background: rgba(216,189,151,0.22); border-color: rgba(216,189,151,0.40);">${roomsTag}</span>
+        </div>
         <div class="detail-grid">
           <div><b>Check-in</b><br>${formatISODateLocal(item.check_in || item.checkIn || "") || "—"}</div>
           <div><b>Check-out</b><br>${formatISODateLocal(item.check_out || item.checkOut || "") || "—"}</div>
