@@ -1816,3 +1816,25 @@ body[data-page="ospiti"] .guest-card .actions {
   gap:10px;
   font-size:13px;
 }
+
+
+/* dDAE_1.061 — FORCE guest action dots visibility */
+#page-ospiti .guest-actions{
+  display:flex !important;
+  gap:10px !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+}
+
+#page-ospiti .guest-dot{
+  width:14px !important;
+  height:14px !important;
+  border-radius:50% !important;
+  display:inline-block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+#page-ospiti .guest-dot.open{ background:#22c55e !important; }
+#page-ospiti .guest-dot.edit{ background:#eab308 !important; }
+#page-ospiti .guest-dot.del{ background:#ef4444 !important; }

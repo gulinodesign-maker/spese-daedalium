@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.056";
+const BUILD_VERSION = "1.061";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1000,16 +1000,13 @@ function euro(n){
 
 
 
+
 function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
-  wrap.hidden = false;
   wrap.innerHTML = "";
 
-  const items = Array.isArray(state.ospiti) && state.ospiti.length
-    ? state.ospiti
-    : (Array.isArray(state.guests) ? state.guests : []);
-
+  const items = Array.isArray(state.guests) ? state.guests : [];
   if (!items.length){
     wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
     return;
@@ -1025,18 +1022,17 @@ function renderGuestCards(){
       <div class="guest-top">
         <div class="guest-name">${nome}</div>
         <div class="guest-actions">
-          <button class="btn ghost" data-open>Apri</button>
-          <button class="btn ghost" data-edit>Modifica</button>
-          <button class="btn danger" data-del>Elimina</button>
+          <button class="guest-dot open" aria-label="Apri"></button>
+          <button class="guest-dot edit" aria-label="Modifica"></button>
+          <button class="guest-dot del" aria-label="Elimina"></button>
         </div>
       </div>
-
       <div class="guest-details" hidden>
         <div class="detail-grid">
           <div><b>Check-in</b><br>${item.check_in || "—"}</div>
           <div><b>Check-out</b><br>${item.check_out || "—"}</div>
           <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
-          <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
+          <div><b>Bambini <10</b><br>${item.bambini_u10 ?? "—"}</div>
           <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
           <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
           <div><b>Acconto</b><br>${euro(item.acconto_importo || 0)}</div>
@@ -1044,18 +1040,15 @@ function renderGuestCards(){
       </div>
     `;
 
-    const btnOpen = card.querySelector("[data-open]");
     const details = card.querySelector(".guest-details");
+    const [dotOpen, dotEdit, dotDel] = card.querySelectorAll(".guest-dot");
 
-    btnOpen.addEventListener("click", ()=>{
-      const isOpen = !details.hidden;
-      details.hidden = isOpen;
-      btnOpen.textContent = isOpen ? "Apri" : "Chiudi";
-    });
+    dotOpen.onclick = () => { details.hidden = !details.hidden; };
 
-    card.querySelector("[data-edit]").addEventListener("click", ()=>{
-      // populate form
+    dotEdit.onclick = () => {
+      state.guestMode = "edit";
       state.guestEditId = item.id;
+
       document.getElementById("guestName").value = item.nome || item.name || "";
       document.getElementById("guestAdults").value = item.adulti || 0;
       document.getElementById("guestKidsU10").value = item.bambini_u10 || 0;
@@ -1064,20 +1057,23 @@ function renderGuestCards(){
       document.getElementById("guestTotal").value = item.importo_prenotazione || 0;
       document.getElementById("guestBooking").value = item.importo_booking || 0;
       document.getElementById("guestDeposit").value = item.acconto_importo || 0;
-      document.getElementById("createGuestCard").textContent = "Aggiorna ospite";
-      showPage("ospite");
-    });
 
-    card.querySelector("[data-del]").addEventListener("click", async ()=>{
+      const btn = document.getElementById("createGuestCard");
+      if (btn) btn.textContent = "Aggiorna ospite";
+      showPage("ospite");
+    };
+
+    dotDel.onclick = async () => {
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
-      await api("ospiti", { method:"DELETE", params:{ id: item.id }});
+      await api("ospiti", { method:"DELETE", params:{ id: item.id } });
       toast("Ospite eliminato");
-      await loadData(); renderGuestCards();
-    });
+      await loadOspiti(state.period || {});
+    };
 
     wrap.appendChild(card);
   });
 }
+
 
 
 
