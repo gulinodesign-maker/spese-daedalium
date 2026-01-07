@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.060";
+const BUILD_VERSION = "1.059";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -807,71 +807,6 @@ function escapeHtml(s){
     .replaceAll('"',"&quot;");
 }
 
-
-function toInputDate(val){
-  if (!val) return "";
-  const s = String(val).trim();
-  // YYYY-MM-DD or ISO
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
-  // DD/MM/YYYY
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-    const [d,m,y] = s.split("/");
-    return `${y}-${m}-${d}`;
-  }
-  return "";
-}
-
-function parseYMD(val){
-  const ymd = toInputDate(val);
-  if (!ymd) return null;
-  const [y,m,d] = ymd.split("-").map(n=>parseInt(n,10));
-  if (!y||!m||!d) return null;
-  return new Date(y, m-1, d);
-}
-
-function formatDateIT(val){
-  const dt = parseYMD(val);
-  if (!dt) return "—";
-  const dd = String(dt.getDate()).padStart(2,"0");
-  const mm = String(dt.getMonth()+1).padStart(2,"0");
-  const yyyy = dt.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-function diffDaysFromToday(val){
-  const target = parseYMD(val);
-  if (!target) return null;
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const ms = target.getTime() - today.getTime();
-  return Math.round(ms / 86400000);
-}
-
-function formatEuro(val){
-  const n = Number(String(val ?? "").replace(",", "."));
-  if (!isFinite(n)) return "—";
-  return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(n);
-}
-
-function normPayType(val){
-  const s = String(val ?? "").toLowerCase();
-  if (!s) return "";
-  if (s.includes("elet")) return "elettronico";
-  if (s.includes("cont")) return "contante";
-  return s;
-}
-
-function roomsToText(val){
-  if (val == null || val === "") return "—";
-  if (Array.isArray(val)) return val.join(", ");
-  const s = String(val).trim();
-  try {
-    const parsed = JSON.parse(s);
-    if (Array.isArray(parsed)) return parsed.join(", ");
-  } catch(e) {}
-  return s;
-}
-
 /* Wire buttons */
 
 
@@ -998,8 +933,8 @@ function enterGuestEditMode(ospite){
   document.getElementById("guestName").value = ospite.nome || ospite.name || "";
   document.getElementById("guestAdults").value = ospite.adulti ?? ospite.adults ?? 0;
   document.getElementById("guestKidsU10").value = ospite.bambini_u10 ?? ospite.kidsU10 ?? 0;
-  document.getElementById("guestCheckIn").value = toInputDate(ospite.check_in || ospite.checkIn || "");
-  document.getElementById("guestCheckOut").value = toInputDate(ospite.check_out || ospite.checkOut || "");
+  document.getElementById("guestCheckIn").value = ospite.check_in || ospite.checkIn || "";
+  document.getElementById("guestCheckOut").value = ospite.check_out || ospite.checkOut || "";
   document.getElementById("guestTotal").value = ospite.importo_prenotazione ?? ospite.total ?? 0;
   document.getElementById("guestBooking").value = ospite.importo_booking ?? ospite.booking ?? 0;
   document.getElementById("guestDeposit").value = ospite.acconto_importo ?? ospite.deposit ?? 0;
@@ -1143,7 +1078,6 @@ function euro(n){
 
 
 
-
 function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
@@ -1164,86 +1098,10 @@ function renderGuestCards(){
     card.className = "guest-card";
 
     const nome = escapeHtml(item.nome || item.name || "Ospite");
-    const id = item.id ?? item.ospite_id ?? item.ospiteId ?? "";
-    const checkInRaw = item.check_in || item.checkIn || item.checkin || "";
-    const checkOutRaw = item.check_out || item.checkOut || item.checkout || "";
-    const checkIn = formatDateIT(checkInRaw);
-    const checkOut = formatDateIT(checkOutRaw);
-
-    const adulti = (item.adulti ?? item.adults ?? "—");
-    const bimbi = (item.bambini_u10 ?? item.kids_u10 ?? item.kidsU10 ?? "—");
-
-    const stanzeTxt = roomsToText(item.stanze ?? item.rooms ?? item.room_list ?? item.roomList ?? "");
-
-    const pren = formatEuro(item.importo_prenotazione ?? item.importo_prenota ?? item.importoPrenotazione ?? item.total ?? "");
-    const book = formatEuro(item.importo_booking ?? item.importoBooking ?? "");
-    const acc  = formatEuro(item.acconto_importo ?? item.acconto ?? item.deposit ?? "");
-    const saldo = formatEuro(item.saldo_pagato ?? item.saldo ?? "");
-
-    const accType = normPayType(item.acconto_tipo ?? item.deposit_type ?? item.depositType ?? "");
-    const saldoType = normPayType(item.saldo_tipo ?? item.saldoType ?? "");
-
-    // Neon status dot:
-    // - 1 giorno prima del check-in: verde
-    // - 1 giorno prima del check-out: giallo
-    // - giorno del check-out: verde
-    const dIn = diffDaysFromToday(checkInRaw);
-    const dOut = diffDaysFromToday(checkOutRaw);
-
-    let neonClass = "neon-off";
-    let neonLabel = "Nessuna scadenza oggi";
-    if (dOut === 0){
-      neonClass = "neon-green";
-      neonLabel = "Check-out oggi";
-    } else if (dOut === 1){
-      neonClass = "neon-yellow";
-      neonLabel = "Check-out domani";
-    } else if (dIn === 1){
-      neonClass = "neon-green";
-      neonLabel = "Check-in domani";
-    }
-
-    const flags = [];
-    const matrimonio = String(item.matrimonio ?? "").toLowerCase();
-    if (matrimonio === "true" || matrimonio === "1" || matrimonio === "si" || matrimonio === "yes"){
-      flags.push('<span class="flag-chip" title="Matrimonio" aria-label="Matrimonio">💍</span>');
-    }
-    const ps = String(item.ps_registrato ?? item.ps ?? "").toLowerCase();
-    if (ps === "true" || ps === "1" || ps === "si" || ps === "yes"){
-      flags.push('<span class="flag-chip" title="PS registrato" aria-label="PS registrato">🛂</span>');
-    }
-    const istat = String(item.istat_registrato ?? item.istat ?? "").toLowerCase();
-    if (istat === "true" || istat === "1" || istat === "si" || istat === "yes"){
-      flags.push('<span class="flag-chip" title="ISTAT registrato" aria-label="ISTAT registrato">📊</span>');
-    }
-
-    const payChip = (type, fallback) => {
-      const t = type || fallback || "";
-      if (!t) return '<span class="info-chip pay-chip pay-none" title="Pagamento">—</span>';
-      const isCash = t.includes("cont");
-      const label = isCash ? "Contanti" : "Elettronico";
-      const ico = isCash
-        ? `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"></path><path d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg>`
-        : `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"></path><path d="M2 11h20"></path><path d="M6 15h5"></path></svg>`;
-      return `<span class="info-chip pay-chip ${isCash ? "pay-cash" : "pay-elec"}" title="Pagamento">${ico}<span>${label}</span></span>`;
-    };
-
-    const chip = (iconSvg, text, title) =>
-      `<span class="info-chip" title="${escapeHtml(title||"")}">${iconSvg}<span>${escapeHtml(text)}</span></span>`;
-
-    const iconCal = `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v3"></path><path d="M17 3v3"></path><path d="M4.5 8h15"></path><path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path></svg>`;
-    const iconUsers = `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg>`;
-    const iconBed = `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17v-7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v7"></path><path d="M4 17v3"></path><path d="M20 17v3"></path><path d="M3 17h18"></path></svg>`;
-    const iconTag = `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.59 13.41 12 22 2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"></path><path d="M7 7h.01"></path></svg>`;
-    const iconCart = `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12Z"></path><path d="M6 6 5 3H2"></path><path d="M8 20h.01"></path><path d="M18 20h.01"></path></svg>`;
-    const iconCoins = `<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1v22"></path><path d="M17 5H9.5a2.5 2.5 0 0 0 0 5H14a2.5 2.5 0 0 1 0 5H6"></path></svg>`;
 
     card.innerHTML = `
       <div class="guest-top">
-        <div class="guest-left">
-          <span class="neon-dot ${neonClass}" title="${escapeHtml(neonLabel)}" aria-label="${escapeHtml(neonLabel)}"></span>
-          <div class="guest-name">${nome}</div>
-        </div>
+        <div class="guest-name">${nome}</div>
         <div class="guest-actions" role="group" aria-label="Azioni ospite">
           <button class="tl-btn tl-green" type="button" data-open aria-label="Apri/chiudi dettagli"><span class="sr-only">Apri</span></button>
           <button class="tl-btn tl-yellow" type="button" data-edit aria-label="Modifica ospite"><span class="sr-only">Modifica</span></button>
@@ -1251,52 +1109,35 @@ function renderGuestCards(){
         </div>
       </div>
 
-      <div class="guest-info" aria-label="Dettagli ospite">
-        <div class="info-row">
-          ${chip(iconCal, `Check-in: ${checkIn}`, "Check-in")}
-          ${chip(iconCal, `Check-out: ${checkOut}`, "Check-out")}
-        </div>
-        <div class="info-row">
-          ${chip(iconUsers, `${adulti} adulti · ${bimbi} bimbi`, "Persone")}
-          ${chip(iconBed, `Stanze: ${stanzeTxt}`, "Stanze")}
-        </div>
-        <div class="info-row">
-          ${chip(iconTag, `Prenota: ${pren}`, "Importo prenotazione")}
-          ${chip(iconCart, `Booking: ${book}`, "Importo booking")}
-        </div>
-        <div class="info-row">
-          ${chip(iconCoins, `Acconto: ${acc}`, "Acconto")}
-          ${payChip(accType)}
-        </div>
-        <div class="info-row">
-          ${chip(iconCoins, `Saldo: ${saldo}`, "Saldo pagato")}
-          ${payChip(saldoType, accType)}
-          <span class="flags">${flags.join("")}</span>
-        </div>
-      </div>
-
       <div class="guest-details" hidden>
         <div class="detail-grid">
-          <div><b>ID</b><br>${escapeHtml(String(id || "—"))}</div>
-          <div><b>Pagamento saldo</b><br>${escapeHtml(saldoType || "—")}</div>
+          <div><b>Check-in</b><br>${item.check_in || "—"}</div>
+          <div><b>Check-out</b><br>${item.check_out || "—"}</div>
+          <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
+          <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
+          <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
+          <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
+          <div><b>Acconto</b><br>${euro(item.acconto_importo || 0)}</div>
         </div>
       </div>
     `;
 
-    // Events
     const btnOpen = card.querySelector("[data-open]");
-    const btnEdit = card.querySelector("[data-edit]");
-    const btnDel  = card.querySelector("[data-del]");
     const details = card.querySelector(".guest-details");
 
-    btnOpen?.addEventListener("click", () => {
-      const nowOpen = !!details?.hidden;
-      if (details) details.hidden = !nowOpen ? true : false;
-      btnOpen.classList.toggle("is-open", nowOpen);
+    btnOpen.addEventListener("click", ()=>{
+      const willOpen = details.hidden;
+      details.hidden = !willOpen;
+      btnOpen.classList.toggle("is-open", willOpen);
+      btnOpen.setAttribute("aria-pressed", willOpen ? "true" : "false");
     });
 
-    btnEdit?.addEventListener("click", () => { enterGuestEditMode(item); showPage("ospite"); });
-    btnDel?.addEventListener("click", async () => {
+    card.querySelector("[data-edit]").addEventListener("click", ()=>{
+      enterGuestEditMode(item);
+      showPage("ospite");
+    });
+
+    card.querySelector("[data-del]").addEventListener("click", async ()=>{
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
       await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
@@ -1306,6 +1147,7 @@ function renderGuestCards(){
     wrap.appendChild(card);
   });
 }
+
 
 
 
