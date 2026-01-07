@@ -1960,6 +1960,15 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* dDAE_1.080 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
+#page-ospite .pay-dots{
+  place-items: center;
+}
+#page-ospite .pay-dot{
+  line-height: 1;
+}
+
+
 
 /* dDAE_1.069 — Pay dots: bianchi quando non selezionati + più distanziati */
 
@@ -2070,4 +2079,18 @@ body[data-page="ospiti"] .guest-card .actions {
 #page-ospite .subfield.paywrap::after{
   content: none !important;
   display: none !important;
+}
+
+
+/* dDAE_1.081 — mini led accanto ai prezzi (Acconto/Saldo) */
+.guest-led.mini-led{
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.guest-led.mini-led.led-off{
+  opacity: 0.25;
+  box-shadow: none !important;
 }

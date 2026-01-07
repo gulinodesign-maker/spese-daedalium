@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.079";
+const BUILD_VERSION = "1.087";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -27,6 +27,22 @@ function setPayType(containerId, type){
     b.setAttribute("aria-pressed", on ? "true" : "false");
   });
 }
+
+// dDAE_1.087 — error overlay: evita blocchi silenziosi su iPhone PWA
+window.addEventListener("error", (e) => {
+  try {
+    const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
+    console.error("JS error", e?.error || e);
+    toast(msg);
+  } catch (_) {}
+});
+window.addEventListener("unhandledrejection", (e) => {
+  try {
+    console.error("Unhandled promise rejection", e?.reason || e);
+    const msg = (e?.reason?.message || e?.reason || "Promise rejection").toString();
+    toast("Errore: " + msg);
+  } catch (_) {}
+});
 
 const state = {
   motivazioni: [],
@@ -740,7 +756,10 @@ function renderSpese(){
       </div>
     `;
 
-    el.querySelector("[data-del]").addEventListener("click", async () => {
+    const __btnDel = el.querySelector("[data-del]");
+
+
+    if (__btnDel) __btnDel.addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
@@ -1112,8 +1131,35 @@ async function saveGuest(){
   const depositType = state.guestDepositType || "contante";
   const matrimonio = !!(state.guestMarriage);
 if (!name) return toast("Inserisci il nome");
+  const payload = {
+    // Chiavi "canoniche" lato Google Sheet
+    nome: name,
+    adulti: adults,
+    bambini_u10: kidsU10,
+    check_in: checkIn,
+    check_out: checkOut,
+    importo_prenotazione: total,
+    importo_booking: booking,
+    acconto_importo: deposit,
+    acconto_tipo: depositType,
+    saldo_pagato: saldoPagato,
+    saldo_tipo: saldoTipo,
+    matrimonio,
+    stanze: rooms.join(","),
 
-  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, saldoPagato, saldoTipo, matrimonio, stanze: rooms.join(",") };
+    // Compatibilità: alcune versioni di Apps Script mappano questi campi (name/adults/...) invece delle chiavi sopra
+    name,
+    adults,
+    kidsU10,
+    checkIn,
+    checkOut,
+    total,
+    booking,
+    deposit,
+    depositType
+  };
+
+
 
   const isEdit = state.guestMode === "edit";
   if (isEdit){
@@ -1234,6 +1280,13 @@ function renderGuestCards(){
     const depositTypeRaw = (item.acconto_tipo || item.depositType || item.guestDepositType || "contante").toString().toLowerCase();
     const depositTag = (depositTypeRaw.includes("elet")) ? "Elettronico" : "Contanti";
 
+    const depAmount = Number(item.acconto_importo || 0);
+    const saldoAmount = Number(item.saldo_pagato ?? item.saldoPagato ?? item.saldo ?? 0);
+    const saldoTypeRaw = (item.saldo_tipo || item.saldoTipo || item.saldoType || item.guestSaldoType || "").toString().toLowerCase();
+
+    const depLedCls = (!depAmount) ? "led-gray led-off" : (depositTypeRaw.includes("elet") ? "led-green" : "led-red");
+    const saldoLedCls = (!saldoAmount) ? "led-gray led-off" : (saldoTypeRaw.includes("elet") ? "led-green" : "led-red");
+
     // Stanze prenotate (campo 'stanze' se presente: "1,2", "[1,2]", "1 2", ecc.)
     let roomsArr = [];
     try {
@@ -1270,8 +1323,7 @@ function renderGuestCards(){
 
       <div class="guest-details" hidden>
         <div class="guest-badges" style="display:flex; gap:8px; flex-wrap:wrap; margin: 2px 0 10px;">
-          <span class="badge" style="background: rgba(43,124,180,0.12); border-color: rgba(43,124,180,0.22);">${depositTag}</span>
-          <div class="rooms-dots" aria-label="Stanze prenotate">${roomsDotsHTML}</div>
+<div class="rooms-dots" aria-label="Stanze prenotate">${roomsDotsHTML}</div>
         </div>
         <div class="detail-grid">
           <div><b>Check-in</b><br>${formatISODateLocal(item.check_in || item.checkIn || "") || "—"}</div>
@@ -1280,13 +1332,19 @@ function renderGuestCards(){
           <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
           <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
           <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
-          <div><b>Acconto</b><br>${euro(item.acconto_importo || 0)}</div>
+          <div><b>Acconto</b><br><span class="guest-led mini-led ${depLedCls}" aria-hidden="true"></span> ${euro(item.acconto_importo || 0)}</div>
+          <div><b>Saldo</b><br><span class="guest-led mini-led ${saldoLedCls}" aria-hidden="true"></span> ${euro(item.saldo_pagato ?? item.saldoPagato ?? item.saldo ?? 0)}</div>
         </div>
       </div>
     `;
 
     const btnOpen = card.querySelector("[data-open]");
     const details = card.querySelector(".guest-details");
+
+    if (!btnOpen || !details){
+      console.warn("dDAE guest card: elementi mancanti", { btnOpen: !!btnOpen, details: !!details });
+      return;
+    }
 
     btnOpen.addEventListener("click", ()=>{
       const willOpen = details.hidden;
@@ -1300,7 +1358,10 @@ function renderGuestCards(){
       showPage("ospite");
     });
 
-    card.querySelector("[data-del]").addEventListener("click", async ()=>{
+    const __btnDel = card.querySelector("[data-del]");
+
+
+    if (__btnDel) __btnDel.addEventListener("click", async ()=>{
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
       await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
@@ -1556,7 +1617,9 @@ function renderSpese(){
         <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
       </div>
     `;
-    el.querySelector("[data-del]").addEventListener("click", async () => {
+    const __btnDel = el.querySelector("[data-del]");
+
+    if (__btnDel) __btnDel.addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
