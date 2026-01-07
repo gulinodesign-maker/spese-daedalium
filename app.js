@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.061";
+const BUILD_VERSION = "1.062";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -117,6 +117,16 @@ function todayISO(){
 // --- Guest status LED (scheda ospiti) ---
 function _dayNumFromISO(iso){
   if (!iso || typeof iso !== 'string') return null;
+
+  // ISO datetime (es: 2026-01-05T23:00:00.000Z) -> converti in data locale (YYYY-MM-DD)
+  if (iso.includes("T")) {
+    const dt = new Date(iso);
+    if (!isNaN(dt)) {
+      return Math.floor(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()) / 86400000);
+    }
+    iso = iso.split("T")[0];
+  }
+
   // Support both YYYY-MM-DD and DD/MM/YYYY
   if (iso.includes('/')) {
     const parts = iso.split('/').map(n=>parseInt(n,10));
@@ -125,6 +135,7 @@ function _dayNumFromISO(iso){
       return Math.floor(Date.UTC(yy, mm-1, dd) / 86400000);
     }
   }
+
   const parts = iso.split('-').map(n=>parseInt(n,10));
   if (parts.length !== 3 || parts.some(n=>!isFinite(n))) return null;
   const [y,m,d] = parts;
@@ -167,6 +178,35 @@ function toISO(d){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
+
+function formatISODateLocal(value){
+  if (!value) return "";
+  const s = String(value);
+
+  // Already YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  // ISO datetime -> local date
+  if (s.includes("T")) {
+    const dt = new Date(s);
+    if (!isNaN(dt)) return toISO(dt); // toISO usa date locale
+    return s.split("T")[0];
+  }
+
+  // Fallback: DD/MM/YYYY
+  if (s.includes("/")) {
+    const parts = s.split("/").map(x=>parseInt(x,10));
+    if (parts.length === 3 && parts.every(n=>isFinite(n))) {
+      const [dd,mm,yy] = parts;
+      const dt = new Date(yy, mm-1, dd);
+      return toISO(dt);
+    }
+  }
+
+  // Last resort: cut
+  return s.slice(0,10);
+}
+
 
 function monthRangeISO(date = new Date()){
   const y = date.getFullYear();
@@ -980,8 +1020,8 @@ function enterGuestEditMode(ospite){
   document.getElementById("guestName").value = ospite.nome || ospite.name || "";
   document.getElementById("guestAdults").value = ospite.adulti ?? ospite.adults ?? 0;
   document.getElementById("guestKidsU10").value = ospite.bambini_u10 ?? ospite.kidsU10 ?? 0;
-  document.getElementById("guestCheckIn").value = ospite.check_in || ospite.checkIn || "";
-  document.getElementById("guestCheckOut").value = ospite.check_out || ospite.checkOut || "";
+  document.getElementById("guestCheckIn").value = formatISODateLocal(ospite.check_in || ospite.checkIn || "") || "";
+  document.getElementById("guestCheckOut").value = formatISODateLocal(ospite.check_out || ospite.checkOut || "") || "";
   document.getElementById("guestTotal").value = ospite.importo_prenotazione ?? ospite.total ?? 0;
   document.getElementById("guestBooking").value = ospite.importo_booking ?? ospite.booking ?? 0;
   document.getElementById("guestDeposit").value = ospite.acconto_importo ?? ospite.deposit ?? 0;
@@ -1163,8 +1203,8 @@ function renderGuestCards(){
 
       <div class="guest-details" hidden>
         <div class="detail-grid">
-          <div><b>Check-in</b><br>${item.check_in || "—"}</div>
-          <div><b>Check-out</b><br>${item.check_out || "—"}</div>
+          <div><b>Check-in</b><br>${formatISODateLocal(item.check_in || item.checkIn || "") || "—"}</div>
+          <div><b>Check-out</b><br>${formatISODateLocal(item.check_out || item.checkOut || "") || "—"}</div>
           <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
           <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
           <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
