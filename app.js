@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.061";
+const BUILD_VERSION = "1.059";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -18,6 +18,7 @@ const state = {
   guestRooms: new Set(),
   guestDepositType: "contante",
   guestEditId: null,
+  guestMode: "create",
   lettiPerStanza: {},
 };
 
@@ -300,7 +301,15 @@ if (realMethod !== "GET") {
 
 let res;
 try {
+  try {
   res = await fetch(url.toString(), fetchOpts);
+} catch (err) {
+  const msg = String(err && err.message || err || "");
+  if (msg.toLowerCase().includes("failed to fetch")) {
+    throw new Error("Failed to fetch (API). Verifica: 1) Web App Apps Script distribuita come 'Chiunque', 2) URL /exec corretto, 3) rete iPhone ok. Se hai appena aggiornato lo script, ridistribuisci una nuova versione.");
+  }
+  throw err;
+}
 } finally {
   clearTimeout(t);
 }
@@ -421,7 +430,7 @@ function setupHome(){
   // HOME: icona Ospite va alla pagina ospite
   const goO = $("#goOspite");
   if (goO){
-    goO.addEventListener("click", () => showPage("ospite"));
+    goO.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
   }
   // HOME: icona Ospiti va alla pagina elenco ospiti
   const goOs = $("#goOspiti");
@@ -868,6 +877,142 @@ function bindPeriodAutoGuests(fromSel, toSel){
 
 
 
+
+function enterGuestCreateMode(){
+  state.guestMode = "create";
+  state.guestEditId = null;
+  // UI
+  const title = document.getElementById("ospiteFormTitle");
+  if (title) title.textContent = "Nuovo ospite";
+  const btn = document.getElementById("createGuestCard");
+  if (btn) btn.textContent = "Crea ospite";
+
+  // reset fields
+  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit"];
+  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+
+  const ci = document.getElementById("guestCheckIn");
+  if (ci) ci.value = todayISO();
+
+  const mEl = document.getElementById("guestMarriage");
+  if (mEl) mEl.checked = false;
+
+  state.guestRooms = state.guestRooms || new Set();
+  state.guestRooms.clear();
+  state.lettiPerStanza = {};
+  // segmented: default contante
+  state.guestDepositType = "contante";
+  const seg = document.getElementById("depositType");
+  if (seg){
+    seg.querySelectorAll(".seg-btn").forEach(b=>{
+      const t = b.getAttribute("data-type");
+      const active = t === "contante";
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  }
+
+  // refresh rooms UI if present
+  try {
+    document.querySelectorAll("#roomsPicker .room-dot").forEach(btn => {
+      btn.classList.remove("selected");
+      btn.setAttribute("aria-pressed", "false");
+    });
+  } catch (_) {}
+}
+
+function enterGuestEditMode(ospite){
+  state.guestMode = "edit";
+  state.guestEditId = ospite?.id ?? null;
+
+  const title = document.getElementById("ospiteFormTitle");
+  if (title) title.textContent = "Modifica ospite";
+  const btn = document.getElementById("createGuestCard");
+  if (btn) btn.textContent = "Salva modifiche";
+
+  document.getElementById("guestName").value = ospite.nome || ospite.name || "";
+  document.getElementById("guestAdults").value = ospite.adulti ?? ospite.adults ?? 0;
+  document.getElementById("guestKidsU10").value = ospite.bambini_u10 ?? ospite.kidsU10 ?? 0;
+  document.getElementById("guestCheckIn").value = ospite.check_in || ospite.checkIn || "";
+  document.getElementById("guestCheckOut").value = ospite.check_out || ospite.checkOut || "";
+  document.getElementById("guestTotal").value = ospite.importo_prenotazione ?? ospite.total ?? 0;
+  document.getElementById("guestBooking").value = ospite.importo_booking ?? ospite.booking ?? 0;
+  document.getElementById("guestDeposit").value = ospite.acconto_importo ?? ospite.deposit ?? 0;
+
+  // matrimonio
+  const mEl = document.getElementById("guestMarriage");
+  if (mEl) mEl.checked = !!(ospite.matrimonio);
+
+  // deposit type (se disponibile)
+  const dt = ospite.acconto_tipo || ospite.depositType || "contante";
+  state.guestDepositType = dt;
+  const seg = document.getElementById("depositType");
+  if (seg){
+    seg.querySelectorAll(".seg-btn").forEach(b=>{
+      const t = b.getAttribute("data-type");
+      const active = t === dt;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  }
+
+  // stanze: backend non espone GET stanze; se in futuro arrivano su ospite.stanze li applichiamo
+  try {
+    if (ospite.stanze) {
+      const rooms = Array.isArray(ospite.stanze) ? ospite.stanze : String(ospite.stanze).split(",").map(x=>x.trim()).filter(Boolean);
+      state.guestRooms = new Set(rooms.map(x=>parseInt(x,10)).filter(n=>isFinite(n)));
+      document.querySelectorAll("#roomsPicker .room-dot").forEach(btn => {
+        const n = parseInt(btn.getAttribute("data-room"), 10);
+        const on = state.guestRooms.has(n);
+        btn.classList.toggle("selected", on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+      });
+    }
+  } catch (_) {}
+}
+
+async function saveGuest(){
+  const name = (document.getElementById("guestName")?.value || "").trim();
+  const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
+  const kidsU10 = parseInt(document.getElementById("guestKidsU10")?.value || "0", 10) || 0;
+  const checkIn = document.getElementById("guestCheckIn")?.value || "";
+  const checkOut = document.getElementById("guestCheckOut")?.value || "";
+  const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
+  const booking = parseFloat(document.getElementById("guestBooking")?.value || "0") || 0;
+  const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
+  const rooms = Array.from(state.guestRooms || []).sort((a,b)=>a-b);
+  const depositType = state.guestDepositType || "contante";
+  const matrimonio = !!document.getElementById("guestMarriage")?.checked;
+
+  if (!name) return toast("Inserisci il nome");
+
+  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, matrimonio };
+
+  const isEdit = state.guestMode === "edit";
+  if (isEdit){
+    if (!state.guestEditId) return toast("ID ospite mancante");
+    payload.id = state.guestEditId;
+  }
+
+  // CREATE vs UPDATE (backend GAS: POST=create, PUT=update)
+  const method = isEdit ? "PUT" : "POST";
+  const res = await api("ospiti", { method, body: payload });
+
+  // stanze: backend gestisce POST e sovrascrive (deleteWhere + append)
+  const ospiteId = isEdit ? state.guestEditId : (res?.id || payload.id);
+  const stanze = buildStanzeArrayFromState();
+  try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
+
+  await loadOspiti(state.period || {});
+  toast(isEdit ? "Modifiche salvate" : "Ospite creato");
+
+  if (isEdit){
+    showPage("ospiti");
+  } else {
+    enterGuestCreateMode();
+  }
+}
+
 function setupOspite(){
   const hb = document.getElementById("hamburgerBtnOspite");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
@@ -913,74 +1058,7 @@ function setupOspite(){
 
   const btnCreate = document.getElementById("createGuestCard");
   btnCreate?.addEventListener("click", async () => {
-
-    const name = (document.getElementById("guestName")?.value || "").trim();
-    const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
-    const kidsU10 = parseInt(document.getElementById("guestKidsU10")?.value || "0", 10) || 0;
-    const checkIn = document.getElementById("guestCheckIn")?.value || "";
-    const checkOut = document.getElementById("guestCheckOut")?.value || "";
-    const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
-    const booking = parseFloat(document.getElementById("guestBooking")?.value || "0") || 0;
-    const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
-    const rooms = Array.from(state.guestRooms).sort((a,b)=>a-b);
-    const depositType = state.guestDepositType || "contante";
-    const matrimonio = !!document.getElementById("guestMarriage")?.checked;
-
-    // UI validation (soft)
-    if (!name){
-      toast("Inserisci il nome");
-      return;
-    }
-
-    const payload = {
-      id: state.guestEditId || undefined,
-      name,
-      adults,
-      kidsU10,
-      checkIn,
-      checkOut,
-      rooms,
-      total,
-      booking,
-      deposit,
-      depositType,
-      matrimonio,
-      // default backend flags
-      ps_registrato: false,
-      istat_registrato: false,
-    };
-
-    const isEdit = !!state.guestEditId;
-
-    try {
-      const saved = await api("ospiti", { method:"POST", body: payload });
-      const ospiteId = (saved && saved.id) ? saved.id : (state.guestEditId || payload.id);
-      const stanze = buildStanzeArrayFromState();
-      await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } });
-      await loadOspiti(state.period || {});
-      toast(isEdit ? "Aggiornato" : "Scheda salvata");
-    } catch (e) {
-      toast(e.message || "Errore");
-      return;
-    }
-
-    // reset fields
-    state.guestEditId = null;
-    if (btnCreate) btnCreate.textContent = "Crea scheda cliente";
-
-    document.getElementById("guestName").value = "";
-    document.getElementById("guestAdults").value = "";
-    document.getElementById("guestKidsU10").value = "";
-    document.getElementById("guestTotal").value = "";
-    document.getElementById("guestBooking").value = "";
-    document.getElementById("guestDeposit").value = "";
-    const mEl = document.getElementById("guestMarriage");
-    if (mEl) mEl.checked = false;
-
-    state.guestRooms.clear();
-    state.lettiPerStanza = {};
-    renderRooms();
-
+    try { await saveGuest(); } catch (e) { toast(e.message || "Errore"); }
   });
 
   // Default: check-in oggi (solo UI)
@@ -1000,13 +1078,16 @@ function euro(n){
 
 
 
-
 function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
+  wrap.hidden = false;
   wrap.innerHTML = "";
 
-  const items = Array.isArray(state.guests) ? state.guests : [];
+  const items = Array.isArray(state.ospiti) && state.ospiti.length
+    ? state.ospiti
+    : (Array.isArray(state.guests) ? state.guests : []);
+
   if (!items.length){
     wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
     return;
@@ -1021,18 +1102,19 @@ function renderGuestCards(){
     card.innerHTML = `
       <div class="guest-top">
         <div class="guest-name">${nome}</div>
-        <div class="guest-actions">
-          <button class="guest-dot open" aria-label="Apri"></button>
-          <button class="guest-dot edit" aria-label="Modifica"></button>
-          <button class="guest-dot del" aria-label="Elimina"></button>
+        <div class="guest-actions" role="group" aria-label="Azioni ospite">
+          <button class="tl-btn tl-green" type="button" data-open aria-label="Apri/chiudi dettagli"><span class="sr-only">Apri</span></button>
+          <button class="tl-btn tl-yellow" type="button" data-edit aria-label="Modifica ospite"><span class="sr-only">Modifica</span></button>
+          <button class="tl-btn tl-red" type="button" data-del aria-label="Elimina ospite"><span class="sr-only">Elimina</span></button>
         </div>
       </div>
+
       <div class="guest-details" hidden>
         <div class="detail-grid">
           <div><b>Check-in</b><br>${item.check_in || "—"}</div>
           <div><b>Check-out</b><br>${item.check_out || "—"}</div>
           <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
-          <div><b>Bambini <10</b><br>${item.bambini_u10 ?? "—"}</div>
+          <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
           <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
           <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
           <div><b>Acconto</b><br>${euro(item.acconto_importo || 0)}</div>
@@ -1040,40 +1122,31 @@ function renderGuestCards(){
       </div>
     `;
 
+    const btnOpen = card.querySelector("[data-open]");
     const details = card.querySelector(".guest-details");
-    const [dotOpen, dotEdit, dotDel] = card.querySelectorAll(".guest-dot");
 
-    dotOpen.onclick = () => { details.hidden = !details.hidden; };
+    btnOpen.addEventListener("click", ()=>{
+      const willOpen = details.hidden;
+      details.hidden = !willOpen;
+      btnOpen.classList.toggle("is-open", willOpen);
+      btnOpen.setAttribute("aria-pressed", willOpen ? "true" : "false");
+    });
 
-    dotEdit.onclick = () => {
-      state.guestMode = "edit";
-      state.guestEditId = item.id;
-
-      document.getElementById("guestName").value = item.nome || item.name || "";
-      document.getElementById("guestAdults").value = item.adulti || 0;
-      document.getElementById("guestKidsU10").value = item.bambini_u10 || 0;
-      document.getElementById("guestCheckIn").value = item.check_in || "";
-      document.getElementById("guestCheckOut").value = item.check_out || "";
-      document.getElementById("guestTotal").value = item.importo_prenotazione || 0;
-      document.getElementById("guestBooking").value = item.importo_booking || 0;
-      document.getElementById("guestDeposit").value = item.acconto_importo || 0;
-
-      const btn = document.getElementById("createGuestCard");
-      if (btn) btn.textContent = "Aggiorna ospite";
+    card.querySelector("[data-edit]").addEventListener("click", ()=>{
+      enterGuestEditMode(item);
       showPage("ospite");
-    };
+    });
 
-    dotDel.onclick = async () => {
+    card.querySelector("[data-del]").addEventListener("click", async ()=>{
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
-      await api("ospiti", { method:"DELETE", params:{ id: item.id } });
+      await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
-      await loadOspiti(state.period || {});
-    };
+      await loadData(); renderGuestCards();
+    });
 
     wrap.appendChild(card);
   });
 }
-
 
 
 
@@ -1279,7 +1352,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.056: renderSpese allineato al backend ---
+// --- FIX dDAE_1.057: renderSpese allineato al backend ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -1320,7 +1393,7 @@ function renderSpese(){
 }
 
 
-// --- FIX dDAE_1.056: delete reale ospiti ---
+// --- FIX dDAE_1.057: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -1352,7 +1425,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.056: mostra nome ospite ---
+// --- FIX dDAE_1.057: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
