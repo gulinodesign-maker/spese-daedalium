@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.053";
+const BUILD_VERSION = "1.056";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -245,7 +245,7 @@ function bindPresetSelect(sel){
   bindPresetSelect("#periodPreset3");
   bindPresetSelect("#periodPreset4");
   setPresetValue(state.periodPreset || "this_month");
-    try { await loadData(); } catch (e) { toast(e.message); }
+    try { await loadData(); renderGuestCards(); } catch (e) { toast(e.message); }
   });
 }
 
@@ -591,7 +591,7 @@ async function saveSpesa(){
   resetInserisci();
 
   // aggiorna dati
-  try { await loadData(); } catch(_) {}
+  try { await loadData(); renderGuestCards(); } catch(_) {}
 }
 
 /* 2) SPESE */
@@ -627,7 +627,7 @@ function renderSpese(){
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData();
+      await loadData(); renderGuestCards();
     });
 
     list.appendChild(el);
@@ -825,7 +825,7 @@ function bindPeriodAuto(fromSel, toSel){
       setPresetValue("custom");
       setPeriod(from, to);
 
-      try { await loadData(); } catch (e) { toast(e.message); }
+      try { await loadData(); renderGuestCards(); } catch (e) { toast(e.message); }
     }, 220);
   };
 
@@ -999,6 +999,7 @@ function euro(n){
 }
 
 
+
 function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
@@ -1043,20 +1044,41 @@ function renderGuestCards(){
       </div>
     `;
 
-    card.querySelector("[data-open]").addEventListener("click", ()=>{
-      card.querySelector(".guest-details").hidden = false;
+    const btnOpen = card.querySelector("[data-open]");
+    const details = card.querySelector(".guest-details");
+
+    btnOpen.addEventListener("click", ()=>{
+      const isOpen = !details.hidden;
+      details.hidden = isOpen;
+      btnOpen.textContent = isOpen ? "Apri" : "Chiudi";
+    });
+
+    card.querySelector("[data-edit]").addEventListener("click", ()=>{
+      // populate form
+      state.guestEditId = item.id;
+      document.getElementById("guestName").value = item.nome || item.name || "";
+      document.getElementById("guestAdults").value = item.adulti || 0;
+      document.getElementById("guestKidsU10").value = item.bambini_u10 || 0;
+      document.getElementById("guestCheckIn").value = item.check_in || "";
+      document.getElementById("guestCheckOut").value = item.check_out || "";
+      document.getElementById("guestTotal").value = item.importo_prenotazione || 0;
+      document.getElementById("guestBooking").value = item.importo_booking || 0;
+      document.getElementById("guestDeposit").value = item.acconto_importo || 0;
+      document.getElementById("createGuestCard").textContent = "Aggiorna ospite";
+      showPage("ospite");
     });
 
     card.querySelector("[data-del]").addEventListener("click", async ()=>{
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
       await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
-      await loadData();
+      await loadData(); renderGuestCards();
     });
 
     wrap.appendChild(card);
   });
 }
+
 
 
 
@@ -1124,7 +1146,7 @@ async function init(){
   // pre-carico dati (non cambia flusso API)
   try {
     await loadMotivazioni();
-    await loadData();
+    await loadData(); renderGuestCards();
   } catch(e){
     toast(e.message);
   }
@@ -1261,7 +1283,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.053: renderSpese allineato al backend ---
+// --- FIX dDAE_1.056: renderSpese allineato al backend ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -1295,14 +1317,14 @@ function renderSpese(){
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData();
+      await loadData(); renderGuestCards();
     });
     list.appendChild(el);
   });
 }
 
 
-// --- FIX dDAE_1.053: delete reale ospiti ---
+// --- FIX dDAE_1.056: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -1311,7 +1333,7 @@ function attachDeleteOspite(card, ospite){
     if (!confirm("Eliminare definitivamente questo ospite?")) return;
     await api("ospiti", { method:"DELETE", params:{ id: ospite.id } });
     toast("Ospite eliminato");
-    await loadData();
+    await loadData(); renderGuestCards();
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
@@ -1334,7 +1356,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.053: mostra nome ospite ---
+// --- FIX dDAE_1.056: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;

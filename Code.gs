@@ -156,7 +156,38 @@ function handleReport(e) {
    OSPITI (DELETE REALE)
 ========================= */
 
+
 function handleOspiti(e, method) {
+  const sh = getSheet(SHEETS.OSPITI);
+
+  if (method === "PUT") {
+    const d = parseBody(e);
+    const rows = sh.getDataRange().getValues();
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][0]) === String(d.id)) {
+        sh.getRange(i+1, 2, 1, 15).setValues([[
+          d.name,
+          d.adults,
+          d.kidsU10,
+          d.checkIn,
+          d.checkOut,
+          d.total,
+          d.booking,
+          d.deposit,
+          d.depositType,
+          rows[i][10],
+          rows[i][11],
+          d.matrimonio,
+          rows[i][13],
+          rows[i][14],
+          now()
+        ]]);
+        return jsonOk({ updated: true });
+      }
+    }
+    return jsonError("Ospite non trovato");
+  }
+
   const sh = getSheet(SHEETS.OSPITI);
 
   if (method === "GET") {
