@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.045";
+const BUILD_VERSION = "1.050";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1334,3 +1334,212 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
   document.getElementById('roomConfigModal').hidden = true;
 });
 // --- end room beds config ---
+
+
+// --- FIX dDAE_1.050: renderSpese allineato al backend ---
+function renderSpese(){
+  const list = document.getElementById("speseList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const items = Array.isArray(state.spese) ? state.spese : [];
+  if (!items.length){
+    list.innerHTML = '<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa nel periodo.</div>';
+    return;
+  }
+
+  items.forEach(s => {
+    const el = document.createElement("div");
+    el.className = "item";
+    const importo = Number(s.importoLordo || 0);
+    const iva = Number(s.iva || 0);
+    el.innerHTML = `
+      <div class="item-top">
+        <div>
+          <div class="item-title">${euro(importo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(iva)}</span></div>
+          <div class="item-sub">
+            <span class="badge">${categoriaLabel(s.categoria)}</span>
+            <span class="mini">${s.dataSpesa || ""}</span>
+            <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione || "")}</span>
+          </div>
+        </div>
+        <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
+      </div>
+    `;
+    el.querySelector("[data-del]").addEventListener("click", async () => {
+      if (!confirm("Eliminare questa spesa?")) return;
+      await api("spese", { method:"DELETE", params:{ id: s.id } });
+      toast("Eliminata");
+      await loadData();
+    });
+    list.appendChild(el);
+  });
+}
+
+
+// --- FIX dDAE_1.050: delete reale ospiti ---
+function attachDeleteOspite(card, ospite){
+  const btn = document.createElement("button");
+  btn.className = "delbtn";
+  btn.textContent = "Elimina";
+  btn.addEventListener("click", async () => {
+    if (!confirm("Eliminare definitivamente questo ospite?")) return;
+    await api("ospiti", { method:"DELETE", params:{ id: ospite.id } });
+    toast("Ospite eliminato");
+    await loadData();
+  });
+  const actions = card.querySelector(".actions") || card;
+  actions.appendChild(btn);
+}
+
+
+// Hook delete button into ospiti render
+(function(){
+  const orig = window.renderOspiti;
+  if (!orig) return;
+  window.renderOspiti = function(){
+    orig();
+    const cards = document.querySelectorAll(".guest-card");
+    cards.forEach(card => {
+      const id = card.getAttribute("data-id");
+      const ospite = (state.ospiti||[]).find(o=>String(o.id)===String(id));
+      if (ospite) attachDeleteOspite(card, ospite);
+    });
+  }
+})();
+
+
+// --- FIX dDAE_1.050: mostra nome ospite ---
+(function(){
+  const orig = window.renderOspiti;
+  if (!orig) return;
+  window.renderOspiti = function(){
+    orig();
+    document.querySelectorAll(".guest-card").forEach(card=>{
+      const id = card.getAttribute("data-id");
+      const ospite = (state.ospiti||[]).find(o=>String(o.id)===String(id));
+      if(!ospite) return;
+      if(card.querySelector(".guest-name")) return;
+      const name = document.createElement("div");
+      name.className = "guest-name";
+      name.textContent = ospite.nome || ospite.name || "Ospite";
+      name.style.fontWeight = "950";
+      name.style.fontSize = "18px";
+      name.style.marginBottom = "6px";
+      card.prepend(name);
+    });
+  }
+})();
+
+
+// === dDAE_1.050 – renderOspiti clean & readable ===
+window.renderOspiti = function(){
+  const wrap = document.getElementById("ospitiList");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  const items = Array.isArray(state.ospiti) ? state.ospiti : [];
+  if (!items.length){
+    wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
+    return;
+  }
+
+  items.forEach(o => {
+    const card = document.createElement("div");
+    card.className = "guest-card";
+    card.setAttribute("data-id", o.id);
+
+    card.innerHTML = `
+      <div class="guest-head">
+        <div class="guest-name">${escapeHtml(o.nome || o.name || "Ospite")}</div>
+        <button class="delbtn" data-del>Elimina</button>
+      </div>
+
+      <div class="guest-meta">
+        <div><b>Check-in:</b> ${o.check_in || "—"}</div>
+        <div><b>Check-out:</b> ${o.check_out || "—"}</div>
+        <div><b>Adulti:</b> ${o.adulti ?? "—"}</div>
+        <div><b>Bambini &lt;10:</b> ${o.bambini_u10 ?? "—"}</div>
+      </div>
+
+      <div class="guest-amounts">
+        <div><span>Prenotazione</span><b>${euro(o.importo_prenotazione || 0)}</b></div>
+        <div><span>Booking</span><b>${euro(o.importo_booking || 0)}</b></div>
+        <div><span>Acconto</span><b>${euro(o.acconto_importo || 0)}</b></div>
+      </div>
+    `;
+
+    card.querySelector("[data-del]").addEventListener("click", async ()=>{
+      if(!confirm("Eliminare definitivamente questo ospite?")) return;
+      await api("ospiti", { method:"DELETE", params:{ id:o.id }});
+      toast("Ospite eliminato");
+      await loadData();
+    });
+
+    wrap.appendChild(card);
+  });
+};
+
+
+// === dDAE_1.050 – renderOspiti accordion ===
+window.renderOspiti = function(){
+  const wrap = document.getElementById("ospitiList");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  const items = Array.isArray(state.ospiti) ? state.ospiti : [];
+  if (!items.length){
+    wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
+    return;
+  }
+
+  items.forEach(o => {
+    const card = document.createElement("div");
+    card.className = "guest-card";
+    card.setAttribute("data-id", o.id);
+
+    const nome = escapeHtml(o.nome || o.name || "Ospite");
+
+    card.innerHTML = `
+      <div class="guest-row">
+        <div class="guest-title">${nome}</div>
+        <div class="guest-actions">
+          <button class="btn ghost" data-open>Apri</button>
+          <button class="btn ghost" data-edit>Modifica</button>
+          <button class="btn danger" data-del>Elimina</button>
+        </div>
+      </div>
+
+      <div class="guest-details" hidden>
+        <div class="guest-meta">
+          <div><b>Check-in:</b> ${o.check_in || "—"}</div>
+          <div><b>Check-out:</b> ${o.check_out || "—"}</div>
+          <div><b>Adulti:</b> ${o.adulti ?? "—"}</div>
+          <div><b>Bambini &lt;10:</b> ${o.bambini_u10 ?? "—"}</div>
+        </div>
+
+        <div class="guest-amounts">
+          <div><span>Prenotazione</span><b>${euro(o.importo_prenotazione || 0)}</b></div>
+          <div><span>Booking</span><b>${euro(o.importo_booking || 0)}</b></div>
+          <div><span>Acconto</span><b>${euro(o.acconto_importo || 0)}</b></div>
+        </div>
+      </div>
+    `;
+
+    // open/close
+    card.querySelector("[data-open]").addEventListener("click", ()=>{
+      const det = card.querySelector(".guest-details");
+      det.hidden = !det.hidden;
+    });
+
+    // delete
+    card.querySelector("[data-del]").addEventListener("click", async ()=>{
+      if(!confirm("Eliminare definitivamente questo ospite?")) return;
+      await api("ospiti", { method:"DELETE", params:{ id:o.id }});
+      toast("Ospite eliminato");
+      await loadData();
+    });
+
+    wrap.appendChild(card);
+  });
+};
