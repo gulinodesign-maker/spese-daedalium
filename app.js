@@ -3,46 +3,9 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.087";
+const BUILD_VERSION = "1.061";
 
 const $ = (sel) => document.querySelector(sel);
-
-function setMarriage(on){
-  state.guestMarriage = !!on;
-  const btn = document.getElementById("roomMarriage");
-  if (!btn) return;
-  btn.classList.toggle("selected", state.guestMarriage);
-  btn.setAttribute("aria-pressed", state.guestMarriage ? "true" : "false");
-}
-
-
-function setPayType(containerId, type){
-  const wrap = document.getElementById(containerId);
-  if (!wrap) return;
-  const t = (type || "contante").toString().toLowerCase();
-  wrap.querySelectorAll(".pay-dot").forEach(b => {
-    const v = (b.getAttribute("data-type") || "").toLowerCase();
-    const on = v === t;
-    b.classList.toggle("selected", on);
-    b.setAttribute("aria-pressed", on ? "true" : "false");
-  });
-}
-
-// dDAE_1.087 — error overlay: evita blocchi silenziosi su iPhone PWA
-window.addEventListener("error", (e) => {
-  try {
-    const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
-    console.error("JS error", e?.error || e);
-    toast(msg);
-  } catch (_) {}
-});
-window.addEventListener("unhandledrejection", (e) => {
-  try {
-    console.error("Unhandled promise rejection", e?.reason || e);
-    const msg = (e?.reason?.message || e?.reason || "Promise rejection").toString();
-    toast("Errore: " + msg);
-  } catch (_) {}
-});
 
 const state = {
   motivazioni: [],
@@ -57,8 +20,6 @@ const state = {
   guestEditId: null,
   guestMode: "create",
   lettiPerStanza: {},
-  guestMarriage: false,
-  guestSaldoType: "contante",
 };
 
 const COLORS = {
@@ -76,7 +37,7 @@ const loadingState = {
   showTimer: null,
   shownAt: 0,
   isVisible: false,
-  delayMs: 500,      // opzionale: evita flicker se rapidissimo
+  delayMs: 180,      // opzionale: evita flicker se rapidissimo
   minVisibleMs: 300, // opzionale: se compare non sparisce subito
 };
 
@@ -156,16 +117,6 @@ function todayISO(){
 // --- Guest status LED (scheda ospiti) ---
 function _dayNumFromISO(iso){
   if (!iso || typeof iso !== 'string') return null;
-
-  // ISO datetime (es: 2026-01-05T23:00:00.000Z) -> converti in data locale (YYYY-MM-DD)
-  if (iso.includes("T")) {
-    const dt = new Date(iso);
-    if (!isNaN(dt)) {
-      return Math.floor(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()) / 86400000);
-    }
-    iso = iso.split("T")[0];
-  }
-
   // Support both YYYY-MM-DD and DD/MM/YYYY
   if (iso.includes('/')) {
     const parts = iso.split('/').map(n=>parseInt(n,10));
@@ -174,7 +125,6 @@ function _dayNumFromISO(iso){
       return Math.floor(Date.UTC(yy, mm-1, dd) / 86400000);
     }
   }
-
   const parts = iso.split('-').map(n=>parseInt(n,10));
   if (parts.length !== 3 || parts.some(n=>!isFinite(n))) return null;
   const [y,m,d] = parts;
@@ -217,35 +167,6 @@ function toISO(d){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
-
-function formatISODateLocal(value){
-  if (!value) return "";
-  const s = String(value);
-
-  // Already YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-
-  // ISO datetime -> local date
-  if (s.includes("T")) {
-    const dt = new Date(s);
-    if (!isNaN(dt)) return toISO(dt); // toISO usa date locale
-    return s.split("T")[0];
-  }
-
-  // Fallback: DD/MM/YYYY
-  if (s.includes("/")) {
-    const parts = s.split("/").map(x=>parseInt(x,10));
-    if (parts.length === 3 && parts.every(n=>isFinite(n))) {
-      const [dd,mm,yy] = parts;
-      const dt = new Date(yy, mm-1, dd);
-      return toISO(dt);
-    }
-  }
-
-  // Last resort: cut
-  return s.slice(0,10);
-}
-
 
 function monthRangeISO(date = new Date()){
   const y = date.getFullYear();
@@ -372,7 +293,7 @@ function bindPresetSelect(sel){
   bindPresetSelect("#periodPreset3");
   bindPresetSelect("#periodPreset4");
   setPresetValue(state.periodPreset || "this_month");
-    try { await loadData({ showLoader:false }); renderGuestCards(); } catch (e) { toast(e.message); }
+    try { await loadData(); renderGuestCards(); } catch (e) { toast(e.message); }
   });
 }
 
@@ -386,8 +307,8 @@ function categoriaLabel(cat){
   })[cat] || cat;
 }
 
-async function api(action, { method="GET", params={}, body=null, showLoader=true } = {}){
-  if (showLoader) beginRequest();
+async function api(action, { method="GET", params={}, body=null } = {}){
+  beginRequest();
   try {
   if (!API_BASE_URL || API_BASE_URL.includes("INCOLLA_QUI")) {
     throw new Error("Config mancante: imposta API_BASE_URL in config.js");
@@ -449,7 +370,9 @@ try {
 
 if (!json.ok) throw new Error(json.error || "API error");
 return json.data;
-  } finally { if (showLoader) if (showLoader) endRequest(); }
+  } finally {
+    endRequest();
+  }
 }
 
 
@@ -616,7 +539,7 @@ function setPeriod(from, to){
 
 /* DATA LOAD */
 async function loadMotivazioni(){
-  const data = await api("motivazioni", { showLoader:false });
+  const data = await api("motivazioni");
   state.motivazioni = data;
 
   const list = $("#motivazioniList");
@@ -636,11 +559,11 @@ async function loadOspiti({ from="", to="" } = {}){
   renderGuestCards();
 }
 
-async function loadData({ showLoader=true } = {}){
+async function loadData(){
   const { from, to } = state.period;
   const [report, spese] = await Promise.all([
-    api("report", { params: { from, to }, showLoader }),
-    api("spese", { params: { from, to }, showLoader }),
+    api("report", { params: { from, to } }),
+    api("spese", { params: { from, to } }),
   ]);
   state.report = report;
   state.spese = spese;
@@ -713,7 +636,7 @@ async function saveSpesa(){
     $("#spesaMotivazione").value = canonical; // versione canonica
   } else {
     try {
-      await api("motivazioni", { method:"POST", body:{ motivazione }, showLoader:false });
+      await api("motivazioni", { method:"POST", body:{ motivazione } });
       await loadMotivazioni();
     } catch (_) {}
   }
@@ -724,7 +647,7 @@ async function saveSpesa(){
   resetInserisci();
 
   // aggiorna dati
-  try { await loadData({ showLoader:false }); renderGuestCards(); } catch(_) {}
+  try { await loadData(); renderGuestCards(); } catch(_) {}
 }
 
 /* 2) SPESE */
@@ -756,14 +679,11 @@ function renderSpese(){
       </div>
     `;
 
-    const __btnDel = el.querySelector("[data-del]");
-
-
-    if (__btnDel) __btnDel.addEventListener("click", async () => {
+    el.querySelector("[data-del]").addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData({ showLoader:false }); renderGuestCards();
+      await loadData(); renderGuestCards();
     });
 
     list.appendChild(el);
@@ -961,7 +881,7 @@ function bindPeriodAuto(fromSel, toSel){
       setPresetValue("custom");
       setPeriod(from, to);
 
-      try { await loadData({ showLoader:false }); renderGuestCards(); } catch (e) { toast(e.message); }
+      try { await loadData(); renderGuestCards(); } catch (e) { toast(e.message); }
     }, 220);
   };
 
@@ -1021,31 +941,22 @@ function enterGuestCreateMode(){
   const ci = document.getElementById("guestCheckIn");
   if (ci) ci.value = todayISO();
 
-  setMarriage(false);
-state.guestRooms = state.guestRooms || new Set();
+  const mEl = document.getElementById("guestMarriage");
+  if (mEl) mEl.checked = false;
+
+  state.guestRooms = state.guestRooms || new Set();
   state.guestRooms.clear();
   state.lettiPerStanza = {};
   // segmented: default contante
   state.guestDepositType = "contante";
-  state.guestSaldoType = "contante";
-  setPayType("saldoType", state.guestSaldoType);
   const seg = document.getElementById("depositType");
   if (seg){
-    seg.querySelectorAll(".pay-dot").forEach(b=>{
+    seg.querySelectorAll(".seg-btn").forEach(b=>{
       const t = b.getAttribute("data-type");
       const active = t === "contante";
-      b.classList.toggle("selected", active);
-      b.setAttribute("aria-pressed", active ? "true" : "false");
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
     });
-
-  const segSaldo = document.getElementById("saldoType");
-  segSaldo?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".pay-dot");
-    if (!btn) return;
-    const t = btn.getAttribute("data-type");
-    state.guestSaldoType = t;
-    setPayType("saldoType", t);
-  });
   }
 
   // refresh rooms UI if present
@@ -1069,35 +980,26 @@ function enterGuestEditMode(ospite){
   document.getElementById("guestName").value = ospite.nome || ospite.name || "";
   document.getElementById("guestAdults").value = ospite.adulti ?? ospite.adults ?? 0;
   document.getElementById("guestKidsU10").value = ospite.bambini_u10 ?? ospite.kidsU10 ?? 0;
-  document.getElementById("guestCheckIn").value = formatISODateLocal(ospite.check_in || ospite.checkIn || "") || "";
-  document.getElementById("guestCheckOut").value = formatISODateLocal(ospite.check_out || ospite.checkOut || "") || "";
+  document.getElementById("guestCheckIn").value = ospite.check_in || ospite.checkIn || "";
+  document.getElementById("guestCheckOut").value = ospite.check_out || ospite.checkOut || "";
   document.getElementById("guestTotal").value = ospite.importo_prenotazione ?? ospite.total ?? 0;
   document.getElementById("guestBooking").value = ospite.importo_booking ?? ospite.booking ?? 0;
   document.getElementById("guestDeposit").value = ospite.acconto_importo ?? ospite.deposit ?? 0;
-  document.getElementById("guestSaldo").value = ospite.saldo_pagato ?? ospite.saldoPagato ?? ospite.saldo ?? 0;
 
   // matrimonio
   const mEl = document.getElementById("guestMarriage");
   if (mEl) mEl.checked = !!(ospite.matrimonio);
-  refreshFloatingLabels();
-
 
   // deposit type (se disponibile)
   const dt = ospite.acconto_tipo || ospite.depositType || "contante";
   state.guestDepositType = dt;
-  setPayType("depositType", dt);
-
-  const st = ospite.saldo_tipo || ospite.saldoTipo || "contante";
-  state.guestSaldoType = st;
-  setPayType("saldoType", st);
-
   const seg = document.getElementById("depositType");
   if (seg){
-    seg.querySelectorAll(".pay-dot").forEach(b=>{
+    seg.querySelectorAll(".seg-btn").forEach(b=>{
       const t = b.getAttribute("data-type");
       const active = t === dt;
-      b.classList.toggle("selected", active);
-      b.setAttribute("aria-pressed", active ? "true" : "false");
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
     });
   }
 
@@ -1125,41 +1027,13 @@ async function saveGuest(){
   const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
   const booking = parseFloat(document.getElementById("guestBooking")?.value || "0") || 0;
   const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
-  const saldoPagato = parseFloat(document.getElementById("guestSaldo")?.value || "0") || 0;
-  const saldoTipo = state.guestSaldoType || "contante";
   const rooms = Array.from(state.guestRooms || []).sort((a,b)=>a-b);
   const depositType = state.guestDepositType || "contante";
-  const matrimonio = !!(state.guestMarriage);
-if (!name) return toast("Inserisci il nome");
-  const payload = {
-    // Chiavi "canoniche" lato Google Sheet
-    nome: name,
-    adulti: adults,
-    bambini_u10: kidsU10,
-    check_in: checkIn,
-    check_out: checkOut,
-    importo_prenotazione: total,
-    importo_booking: booking,
-    acconto_importo: deposit,
-    acconto_tipo: depositType,
-    saldo_pagato: saldoPagato,
-    saldo_tipo: saldoTipo,
-    matrimonio,
-    stanze: rooms.join(","),
+  const matrimonio = !!document.getElementById("guestMarriage")?.checked;
 
-    // Compatibilità: alcune versioni di Apps Script mappano questi campi (name/adults/...) invece delle chiavi sopra
-    name,
-    adults,
-    kidsU10,
-    checkIn,
-    checkOut,
-    total,
-    booking,
-    deposit,
-    depositType
-  };
+  if (!name) return toast("Inserisci il nome");
 
-
+  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, matrimonio };
 
   const isEdit = state.guestMode === "edit";
   if (isEdit){
@@ -1201,15 +1075,11 @@ function setupOspite(){
       btn.classList.toggle("selected", on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
-  // matrimonio dot
-  setMarriage(state.guestMarriage);
-
   }
 
   roomsWrap?.addEventListener("click", (e) => {
     const b = e.target.closest(".room-dot");
     if (!b) return;
-    if (b.id === "roomMarriage") { setMarriage(!state.guestMarriage); return; }
     const n = parseInt(b.getAttribute("data-room"), 10);
     if (state.guestRooms.has(n)) {
       state.guestRooms.delete(n);
@@ -1222,14 +1092,14 @@ function setupOspite(){
 
   const seg = document.getElementById("depositType");
   seg?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".pay-dot");
+    const btn = e.target.closest(".seg-btn");
     if (!btn) return;
     const t = btn.getAttribute("data-type");
     state.guestDepositType = t;
-    seg.querySelectorAll(".pay-dot").forEach(b=>{
+    seg.querySelectorAll(".seg-btn").forEach(b=>{
       const active = b.getAttribute("data-type") === t;
-      b.classList.toggle("selected", active);
-      b.setAttribute("aria-pressed", active ? "true" : "false");
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
     });
   });
 
@@ -1277,36 +1147,6 @@ function renderGuestCards(){
     const nome = escapeHtml(item.nome || item.name || "Ospite");
 
     const led = guestLedStatus(item);
-    const depositTypeRaw = (item.acconto_tipo || item.depositType || item.guestDepositType || "contante").toString().toLowerCase();
-    const depositTag = (depositTypeRaw.includes("elet")) ? "Elettronico" : "Contanti";
-
-    const depAmount = Number(item.acconto_importo || 0);
-    const saldoAmount = Number(item.saldo_pagato ?? item.saldoPagato ?? item.saldo ?? 0);
-    const saldoTypeRaw = (item.saldo_tipo || item.saldoTipo || item.saldoType || item.guestSaldoType || "").toString().toLowerCase();
-
-    const depLedCls = (!depAmount) ? "led-gray led-off" : (depositTypeRaw.includes("elet") ? "led-green" : "led-red");
-    const saldoLedCls = (!saldoAmount) ? "led-gray led-off" : (saldoTypeRaw.includes("elet") ? "led-green" : "led-red");
-
-    // Stanze prenotate (campo 'stanze' se presente: "1,2", "[1,2]", "1 2", ecc.)
-    let roomsArr = [];
-    try {
-      const st = item.stanze;
-      if (Array.isArray(st)) {
-        roomsArr = st;
-      } else if (st != null && String(st).trim().length) {
-        const s = String(st);
-        // Estrae SOLO numeri 1–6 (robusto contro separatori strani)
-        const m = s.match(/[1-6]/g) || [];
-        roomsArr = m.map(x => parseInt(x, 10));
-      }
-    } catch (_) {}
-    roomsArr = Array.from(new Set((roomsArr||[]).map(n=>parseInt(n,10)).filter(n=>isFinite(n) && n>=1 && n<=6))).sort((a,b)=>a-b);
-
-    const roomsDotsHTML = roomsArr.length
-      ? roomsArr.map(n => `<span class="room-dot-badge" aria-label="Stanza ${n}">${n}</span>`).join("")
-      : `<span class="room-dot-badge is-empty" aria-label="Nessuna stanza">—</span>`;
-
-
 
     card.innerHTML = `
       <div class="guest-top">
@@ -1322,29 +1162,20 @@ function renderGuestCards(){
       </div>
 
       <div class="guest-details" hidden>
-        <div class="guest-badges" style="display:flex; gap:8px; flex-wrap:wrap; margin: 2px 0 10px;">
-<div class="rooms-dots" aria-label="Stanze prenotate">${roomsDotsHTML}</div>
-        </div>
         <div class="detail-grid">
-          <div><b>Check-in</b><br>${formatISODateLocal(item.check_in || item.checkIn || "") || "—"}</div>
-          <div><b>Check-out</b><br>${formatISODateLocal(item.check_out || item.checkOut || "") || "—"}</div>
+          <div><b>Check-in</b><br>${item.check_in || "—"}</div>
+          <div><b>Check-out</b><br>${item.check_out || "—"}</div>
           <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
           <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
           <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
           <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
-          <div><b>Acconto</b><br><span class="guest-led mini-led ${depLedCls}" aria-hidden="true"></span> ${euro(item.acconto_importo || 0)}</div>
-          <div><b>Saldo</b><br><span class="guest-led mini-led ${saldoLedCls}" aria-hidden="true"></span> ${euro(item.saldo_pagato ?? item.saldoPagato ?? item.saldo ?? 0)}</div>
+          <div><b>Acconto</b><br>${euro(item.acconto_importo || 0)}</div>
         </div>
       </div>
     `;
 
     const btnOpen = card.querySelector("[data-open]");
     const details = card.querySelector(".guest-details");
-
-    if (!btnOpen || !details){
-      console.warn("dDAE guest card: elementi mancanti", { btnOpen: !!btnOpen, details: !!details });
-      return;
-    }
 
     btnOpen.addEventListener("click", ()=>{
       const willOpen = details.hidden;
@@ -1358,14 +1189,11 @@ function renderGuestCards(){
       showPage("ospite");
     });
 
-    const __btnDel = card.querySelector("[data-del]");
-
-
-    if (__btnDel) __btnDel.addEventListener("click", async ()=>{
+    card.querySelector("[data-del]").addEventListener("click", async ()=>{
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
       await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
-      await loadData({ showLoader:false }); renderGuestCards();
+      await loadData(); renderGuestCards();
     });
 
     wrap.appendChild(card);
@@ -1390,17 +1218,6 @@ function initFloatingLabels(){
     control.addEventListener("change", update);
     update();
   });
-}
-
-
-function refreshFloatingLabels(){
-  try{
-    document.querySelectorAll(".field.float").forEach(f => {
-      const c = f.querySelector("input, select, textarea");
-      const v = c ? String(c.value ?? "").trim() : "";
-      f.classList.toggle("has-value", v.length > 0);
-    });
-  }catch(_){}
 }
 
 
@@ -1450,7 +1267,7 @@ async function init(){
   // pre-carico dati (non cambia flusso API)
   try {
     await loadMotivazioni();
-    await loadData({ showLoader:false }); renderGuestCards();
+    await loadData(); renderGuestCards();
   } catch(e){
     toast(e.message);
   }
@@ -1617,13 +1434,11 @@ function renderSpese(){
         <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
       </div>
     `;
-    const __btnDel = el.querySelector("[data-del]");
-
-    if (__btnDel) __btnDel.addEventListener("click", async () => {
+    el.querySelector("[data-del]").addEventListener("click", async () => {
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData({ showLoader:false }); renderGuestCards();
+      await loadData(); renderGuestCards();
     });
     list.appendChild(el);
   });
@@ -1639,7 +1454,7 @@ function attachDeleteOspite(card, ospite){
     if (!confirm("Eliminare definitivamente questo ospite?")) return;
     await api("ospiti", { method:"DELETE", params:{ id: ospite.id } });
     toast("Ospite eliminato");
-    await loadData({ showLoader:false }); renderGuestCards();
+    await loadData(); renderGuestCards();
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
