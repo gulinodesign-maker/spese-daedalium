@@ -1794,100 +1794,25 @@ body[data-page="ospiti"] .guest-card .actions {
   border-color: #2b7cb4;
 }
 
-/* === dDAE_1.050 – Ospiti clean UI === */
-#page-ospiti .guest-card{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-#page-ospiti .guest-head{
+#page-ospiti .guest-top{
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-
 #page-ospiti .guest-name{
   font-size:18px;
-  font-weight:950;
-}
-
-#page-ospiti .guest-meta{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px 12px;
-  font-size:13px;
-  opacity:.85;
-}
-
-#page-ospiti .guest-amounts{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-top:4px;
-}
-
-#page-ospiti .guest-amounts div{
-  border:1px solid rgba(15,23,42,.12);
-  border-radius:14px;
-  padding:8px 10px;
-  background:rgba(255,255,255,.7);
-}
-
-#page-ospiti .guest-amounts span{
-  font-size:11px;
-  opacity:.7;
-}
-
-#page-ospiti .guest-amounts b{
-  display:block;
-  font-size:15px;
-}
-
-/* === dDAE_1.050 – Ospiti accordion layout === */
-#page-ospiti .guest-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-}
-#page-ospiti .guest-title{
-  font-size:18px;
-  font-weight:950;
+  font-weight:900;
 }
 #page-ospiti .guest-actions{
   display:flex;
   gap:8px;
 }
 #page-ospiti .guest-details{
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+  margin-top:12px;
 }
-#page-ospiti .guest-meta{
+#page-ospiti .detail-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:6px 12px;
-  font-size:13px;
-  opacity:.85;
-}
-#page-ospiti .guest-amounts{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
   gap:10px;
-}
-#page-ospiti .guest-amounts div{
-  border:1px solid rgba(15,23,42,.12);
-  border-radius:14px;
-  padding:8px 10px;
-  background:rgba(255,255,255,.7);
-}
-#page-ospiti .guest-amounts span{
-  font-size:11px;
-  opacity:.7;
-}
-#page-ospiti .guest-amounts b{
-  display:block;
-  font-size:15px;
+  font-size:13px;
 }

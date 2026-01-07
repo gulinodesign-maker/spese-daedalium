@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.050";
+const BUILD_VERSION = "1.053";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -998,141 +998,66 @@ function euro(n){
   catch { return (Number(n)||0).toFixed(2) + " €"; }
 }
 
+
 function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
-
+  wrap.hidden = false;
   wrap.innerHTML = "";
 
-  (state.guests || []).forEach(item => {
-    const rooms = (item.rooms || []).join("/") || "—";
-    const badgeClass = item.acconto_importoType === "elettronico" ? "blue" : "orange";
-    const badgeLabel = item.acconto_importoType === "elettronico" ? "Elettronico" : "Contante";
+  const items = Array.isArray(state.ospiti) && state.ospiti.length
+    ? state.ospiti
+    : (Array.isArray(state.guests) ? state.guests : []);
 
+  if (!items.length){
+    wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
+    return;
+  }
+
+  items.forEach(item => {
     const card = document.createElement("div");
     card.className = "guest-card";
-    card.dataset.id = item.id;
+
+    const nome = escapeHtml(item.nome || item.name || "Ospite");
 
     card.innerHTML = `
-      <div class="top">
-        <div>
-          <div class="name">${escapeHtml(item.name)}</div>
-          <div class="meta">
-            <span>Check-in: <b>${escapeHtml(item.checkIn || "—")}</b></span>
-            <span>Check-out: <b>${escapeHtml(item.checkOut || "—")}</b></span>
-            <span>Stanze: <b>${escapeHtml(rooms)}</b></span>
-            <span>Adulti: <b>${escapeHtml(item.adults ?? 0)}</b></span>
-            <span>Bambini<10: <b>${escapeHtml(item.kidsU10 ?? 0)}</b></span>
-          </div>
+      <div class="guest-top">
+        <div class="guest-name">${nome}</div>
+        <div class="guest-actions">
+          <button class="btn ghost" data-open>Apri</button>
+          <button class="btn ghost" data-edit>Modifica</button>
+          <button class="btn danger" data-del>Elimina</button>
         </div>
-        <span class="badge ${badgeClass}">${badgeLabel}</span>
       </div>
 
-      <div class="actions">
-        <button class="btn ghost" type="button" data-open="1">Apri</button>
-        <button class="btn ghost" type="button" data-edit="1">Modifica</button>
-        <button class="btn danger" type="button" data-del="1">Elimina</button>
-      </div>
-
-      <details>
-        <summary>Dettagli</summary>
+      <div class="guest-details" hidden>
         <div class="detail-grid">
-          <div><div class="k">Prenotazione</div><div>${euro(item.importo_prenotazione)}</div></div>
-          <div><div class="k">Booking</div><div>${euro(item.importo_booking)}</div></div>
-          <div><div class="k">Acconto</div><div>${euro(item.acconto_importo)}</div></div>
-          <div><div class="k">Adulti</div><div>${escapeHtml(item.adults ?? 0)}</div></div>
-          <div><div class="k">Bambini<10</div><div>${escapeHtml(item.kidsU10 ?? 0)}</div></div>
-          <div><div class="k">Tipo</div><div>${badgeLabel}</div></div>
-          <div><div class="k">Matrimonio</div><div>${item.matrimonio ? "Sì" : "No"}</div></div>
+          <div><b>Check-in</b><br>${item.check_in || "—"}</div>
+          <div><b>Check-out</b><br>${item.check_out || "—"}</div>
+          <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
+          <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
+          <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
+          <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
+          <div><b>Acconto</b><br>${euro(item.acconto_importo || 0)}</div>
         </div>
-      </details>
+      </div>
     `;
 
-    // Apri/chiudi dettagli
-    card.querySelector('[data-open="1"]')?.addEventListener("click", () => {
-      const d = card.querySelector("details");
-      if (d) d.open = !d.open;
+    card.querySelector("[data-open]").addEventListener("click", ()=>{
+      card.querySelector(".guest-details").hidden = false;
     });
 
-    // Modifica: carica nel form
-    card.querySelector('[data-edit="1"]')?.addEventListener("click", async () => {
-      state.guestEditId = item.id;
-
-      const setVal = (id, v) => {
-        const el = document.getElementById(id);
-        if (el) el.value = (v ?? "");
-      };
-
-      setVal("guestName", item.name || "");
-      setVal("guestAdults", item.adults ?? "");
-      setVal("guestKidsU10", item.kidsU10 ?? "");
-      setVal("guestCheckIn", item.checkIn || "");
-      setVal("guestCheckOut", item.checkOut || "");
-      setVal("guestTotal", item.importo_prenotazione ?? "");
-      setVal("guestBooking", item.importo_booking ?? "");
-      setVal("guestDeposit", item.acconto_importo ?? "");
-
-      const mEl = document.getElementById("guestMarriage");
-      if (mEl) mEl.checked = !!item.matrimonio;
-
-      // stanze
-      state.guestRooms.clear();
-      (item.rooms || []).forEach(n => state.guestRooms.add(Number(n)));
-
-      // dettagli letti/culla per stanza (foglio "stanze")
-      try {
-        const stanzeRows = await api("stanze", { params: { ospite_id: item.id } });
-        if (Array.isArray(stanzeRows) && stanzeRows.length) {
-          applyStanzeToState(stanzeRows);
-        } else {
-          // se non ci sono righe in "stanze", resetta config letti ma mantieni stanze selezionate
-          state.lettiPerStanza = {};
-        }
-      } catch (e) {
-        // fallback: niente dettagli letti
-        state.lettiPerStanza = {};
-      }
-
-      // tipo acconto
-      state.guestDepositType = item.acconto_importoType || "contante";
-      const seg = document.getElementById("depositType");
-      seg?.querySelectorAll(".seg-btn").forEach(b=>{
-        const t = b.getAttribute("data-type");
-        const active = t === state.guestDepositType;
-        b.classList.toggle("active", active);
-        b.setAttribute("aria-selected", active ? "true" : "false");
-      });
-
-      // aggiorna UI stanze
-      const roomsWrap = document.getElementById("roomsPicker");
-      roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
-        const n = parseInt(btn.getAttribute("data-room"), 10);
-        const on = state.guestRooms.has(n);
-        btn.classList.toggle("selected", on);
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-
-      const btnCreate = document.getElementById("createGuestCard");
-      if (btnCreate) btnCreate.textContent = "Salva modifiche";
-      try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
-      toast("Modifica attiva");
-    });
-
-    // Elimina
-    card.querySelector('[data-del="1"]')?.addEventListener("click", async () => {
-      try {
-        await api("ospiti", { method:"DELETE", params:{ id: item.id } });
-        try { await api("stanze", { method:"DELETE", params:{ ospite_id: item.id } }); } catch (_) {}
-        await loadOspiti(state.period || {});
-        toast("Eliminato");
-      } catch (e) {
-        toast(e.message || "Errore");
-      }
+    card.querySelector("[data-del]").addEventListener("click", async ()=>{
+      if (!confirm("Eliminare definitivamente questo ospite?")) return;
+      await api("ospiti", { method:"DELETE", params:{ id: item.id }});
+      toast("Ospite eliminato");
+      await loadData();
     });
 
     wrap.appendChild(card);
   });
 }
+
 
 
 
@@ -1336,7 +1261,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.050: renderSpese allineato al backend ---
+// --- FIX dDAE_1.053: renderSpese allineato al backend ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -1377,7 +1302,7 @@ function renderSpese(){
 }
 
 
-// --- FIX dDAE_1.050: delete reale ospiti ---
+// --- FIX dDAE_1.053: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -1409,7 +1334,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.050: mostra nome ospite ---
+// --- FIX dDAE_1.053: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
@@ -1430,116 +1355,3 @@ function attachDeleteOspite(card, ospite){
     });
   }
 })();
-
-
-// === dDAE_1.050 – renderOspiti clean & readable ===
-window.renderOspiti = function(){
-  const wrap = document.getElementById("ospitiList");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-
-  const items = Array.isArray(state.ospiti) ? state.ospiti : [];
-  if (!items.length){
-    wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
-    return;
-  }
-
-  items.forEach(o => {
-    const card = document.createElement("div");
-    card.className = "guest-card";
-    card.setAttribute("data-id", o.id);
-
-    card.innerHTML = `
-      <div class="guest-head">
-        <div class="guest-name">${escapeHtml(o.nome || o.name || "Ospite")}</div>
-        <button class="delbtn" data-del>Elimina</button>
-      </div>
-
-      <div class="guest-meta">
-        <div><b>Check-in:</b> ${o.check_in || "—"}</div>
-        <div><b>Check-out:</b> ${o.check_out || "—"}</div>
-        <div><b>Adulti:</b> ${o.adulti ?? "—"}</div>
-        <div><b>Bambini &lt;10:</b> ${o.bambini_u10 ?? "—"}</div>
-      </div>
-
-      <div class="guest-amounts">
-        <div><span>Prenotazione</span><b>${euro(o.importo_prenotazione || 0)}</b></div>
-        <div><span>Booking</span><b>${euro(o.importo_booking || 0)}</b></div>
-        <div><span>Acconto</span><b>${euro(o.acconto_importo || 0)}</b></div>
-      </div>
-    `;
-
-    card.querySelector("[data-del]").addEventListener("click", async ()=>{
-      if(!confirm("Eliminare definitivamente questo ospite?")) return;
-      await api("ospiti", { method:"DELETE", params:{ id:o.id }});
-      toast("Ospite eliminato");
-      await loadData();
-    });
-
-    wrap.appendChild(card);
-  });
-};
-
-
-// === dDAE_1.050 – renderOspiti accordion ===
-window.renderOspiti = function(){
-  const wrap = document.getElementById("ospitiList");
-  if (!wrap) return;
-  wrap.innerHTML = "";
-
-  const items = Array.isArray(state.ospiti) ? state.ospiti : [];
-  if (!items.length){
-    wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
-    return;
-  }
-
-  items.forEach(o => {
-    const card = document.createElement("div");
-    card.className = "guest-card";
-    card.setAttribute("data-id", o.id);
-
-    const nome = escapeHtml(o.nome || o.name || "Ospite");
-
-    card.innerHTML = `
-      <div class="guest-row">
-        <div class="guest-title">${nome}</div>
-        <div class="guest-actions">
-          <button class="btn ghost" data-open>Apri</button>
-          <button class="btn ghost" data-edit>Modifica</button>
-          <button class="btn danger" data-del>Elimina</button>
-        </div>
-      </div>
-
-      <div class="guest-details" hidden>
-        <div class="guest-meta">
-          <div><b>Check-in:</b> ${o.check_in || "—"}</div>
-          <div><b>Check-out:</b> ${o.check_out || "—"}</div>
-          <div><b>Adulti:</b> ${o.adulti ?? "—"}</div>
-          <div><b>Bambini &lt;10:</b> ${o.bambini_u10 ?? "—"}</div>
-        </div>
-
-        <div class="guest-amounts">
-          <div><span>Prenotazione</span><b>${euro(o.importo_prenotazione || 0)}</b></div>
-          <div><span>Booking</span><b>${euro(o.importo_booking || 0)}</b></div>
-          <div><span>Acconto</span><b>${euro(o.acconto_importo || 0)}</b></div>
-        </div>
-      </div>
-    `;
-
-    // open/close
-    card.querySelector("[data-open]").addEventListener("click", ()=>{
-      const det = card.querySelector(".guest-details");
-      det.hidden = !det.hidden;
-    });
-
-    // delete
-    card.querySelector("[data-del]").addEventListener("click", async ()=>{
-      if(!confirm("Eliminare definitivamente questo ospite?")) return;
-      await api("ospiti", { method:"DELETE", params:{ id:o.id }});
-      toast("Ospite eliminato");
-      await loadData();
-    });
-
-    wrap.appendChild(card);
-  });
-};
