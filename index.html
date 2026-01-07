@@ -39,7 +39,13 @@
 <div class="home-page">
 <div class="home-spacer"></div>
 <div aria-label="Sezioni" class="home-grid" role="navigation">
-<button aria-label="Ospiti" class="home-main" id="goOspiti" type="button"><div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg></div><div class="home-main-label">Ospiti</div></button>
+<button aria-label="Nuovo ospite" class="home-main" id="goOspite" type="button">
+<div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
+<path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
+<path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+</svg></div>
+<div class="home-main-label">Nuovo ospite</div>
+</button><button aria-label="Ospiti" class="home-main" id="goOspiti" type="button"><div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg></div><div class="home-main-label">Ospiti</div></button>
 <button aria-label="Apri Spese" class="home-main" id="openLauncher" type="button">
 <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M9 6.5h6"></path>
@@ -48,6 +54,21 @@
 <path d="M4.5 13h15"></path>
 </svg></div>
 <div class="home-main-label">Spese</div>
+</button>
+<button aria-label="Calendario" class="home-main" id="goCalendario" type="button">
+<div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
+<path d="M7 3v3"></path>
+<path d="M17 3v3"></path>
+<path d="M4.5 8h15"></path>
+<path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
+<path d="M8 12h.01"></path>
+<path d="M12 12h.01"></path>
+<path d="M16 12h.01"></path>
+<path d="M8 16h.01"></path>
+<path d="M12 16h.01"></path>
+<path d="M16 16h.01"></path>
+</svg></div>
+<div class="home-main-label">Calendario</div>
 </button>
 <button aria-label="Tassa" class="home-main" id="goTassaSoggiorno" type="button">
 <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
@@ -381,59 +402,6 @@
 </div>
 </div>
 </div>
-</div>
-
-<!-- OSPITI launcher (popup) -->
-<div aria-hidden="true" class="launcher" hidden id="ospitiLauncherModal">
-  <div class="launcher-backdrop" data-close="1"></div>
-  <div aria-label="Sezione Ospiti" aria-modal="true" class="launcher-shell" role="dialog">
-    <button aria-label="Chiudi" class="launcher-close" id="closeOspitiLauncher" type="button">✕</button>
-    <div class="launcher-card">
-      <div aria-label="Azioni Ospiti" class="launcher-grid" role="navigation">
-        <button aria-label="Nuovo ospite" class="launcher-icon primary" data-ospiti-go="nuovo" type="button">
-          <div aria-hidden="true" class="glyph">
-            <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-              <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
-              <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
-            </svg>
-          </div>
-          <div class="label">Nuovo ospite</div>
-        </button>
-
-        <button aria-label="Ospiti" class="launcher-icon" data-ospiti-go="ospiti" type="button">
-          <div aria-hidden="true" class="glyph">
-            <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-              <path d="M8 6h13"></path>
-              <path d="M8 12h13"></path>
-              <path d="M8 18h13"></path>
-              <path d="M3 6h.01"></path>
-              <path d="M3 12h.01"></path>
-              <path d="M3 18h.01"></path>
-            </svg>
-          </div>
-          <div class="label">Ospiti</div>
-        </button>
-
-        <button aria-label="Calendario" class="launcher-icon span2" data-ospiti-go="calendario" type="button">
-          <div aria-hidden="true" class="glyph">
-            <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-              <path d="M7 3v3"></path>
-              <path d="M17 3v3"></path>
-              <path d="M4.5 8h15"></path>
-              <path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
-              <path d="M8 12h.01"></path>
-              <path d="M12 12h.01"></path>
-              <path d="M16 12h.01"></path>
-              <path d="M8 16h.01"></path>
-              <path d="M12 16h.01"></path>
-              <path d="M16 16h.01"></path>
-            </svg>
-          </div>
-          <div class="label">Calendario</div>
-        </button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- ROOM CONFIG MODAL -->

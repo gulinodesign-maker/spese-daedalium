@@ -37,7 +37,7 @@ const loadingState = {
   showTimer: null,
   shownAt: 0,
   isVisible: false,
-  delayMs: 180,      // opzionale: evita flicker se rapidissimo
+  delayMs: 500,      // opzionale: evita flicker se rapidissimo
   minVisibleMs: 300, // opzionale: se compare non sparisce subito
 };
 
@@ -333,7 +333,7 @@ function bindPresetSelect(sel){
   bindPresetSelect("#periodPreset3");
   bindPresetSelect("#periodPreset4");
   setPresetValue(state.periodPreset || "this_month");
-    try { await loadData(); renderGuestCards(); } catch (e) { toast(e.message); }
+    try { await loadData({ showLoader:false }); renderGuestCards(); } catch (e) { toast(e.message); }
   });
 }
 
@@ -347,8 +347,8 @@ function categoriaLabel(cat){
   })[cat] || cat;
 }
 
-async function api(action, { method="GET", params={}, body=null } = {}){
-  beginRequest();
+async function api(action, { method="GET", params={}, body=null, showLoader=true } = {}){
+  if (showLoader) beginRequest();
   try {
   if (!API_BASE_URL || API_BASE_URL.includes("INCOLLA_QUI")) {
     throw new Error("Config mancante: imposta API_BASE_URL in config.js");
@@ -410,9 +410,7 @@ try {
 
 if (!json.ok) throw new Error(json.error || "API error");
 return json.data;
-  } finally {
-    endRequest();
-  }
+  } finally { if (showLoader) if (showLoader) endRequest(); }
 }
 
 
@@ -424,9 +422,10 @@ function bindHomeDelegation(){
   if (homeDelegationBound) return;
   homeDelegationBound = true;
   document.addEventListener("click", (e)=>{
-    const os = e.target.closest && e.target.closest("#goOspiti");
-    if (os){ hideLauncher(); showOspitiLauncher(); return; }
-
+    const o = e.target.closest && e.target.closest("#goOspite");
+    if (o){ hideLauncher(); showPage("ospite"); return; }
+    const cal = e.target.closest && e.target.closest("#goCalendario");
+    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -436,7 +435,6 @@ function bindHomeDelegation(){
 
   });
 }
-
 
 function bindLauncherDelegation(){
   if (launcherDelegationBound) return;
@@ -469,45 +467,6 @@ function hideLauncher(){
   m.hidden = true;
   m.setAttribute("aria-hidden", "true");
 }
-/* Ospiti launcher modal (popup) */
-
-let ospitiLauncherDelegationBound = false;
-
-function bindOspitiLauncherDelegation(){
-  if (ospitiLauncherDelegationBound) return;
-  ospitiLauncherDelegationBound = true;
-
-  document.addEventListener("click", (e) => {
-    const goBtn = e.target.closest && e.target.closest("#ospitiLauncherModal [data-ospiti-go]");
-    if (goBtn){
-      const act = goBtn.getAttribute("data-ospiti-go");
-      hideOspitiLauncher();
-
-      if (act === "nuovo") { try { enterGuestCreateMode(); } catch(_){} showPage("ospite"); return; }
-      if (act === "ospiti") { showPage("ospiti"); return; }
-      if (act === "calendario") { toast("Calendario: in arrivo"); return; }
-    }
-
-    const close = e.target.closest && e.target.closest("#ospitiLauncherModal [data-close], #closeOspitiLauncher");
-    if (close){
-      hideOspitiLauncher();
-    }
-  });
-}
-
-function showOspitiLauncher(){
-  const m = document.getElementById("ospitiLauncherModal");
-  if (!m) return;
-  m.hidden = false;
-  m.setAttribute("aria-hidden", "false");
-}
-function hideOspitiLauncher(){
-  const m = document.getElementById("ospitiLauncherModal");
-  if (!m) return;
-  m.hidden = true;
-  m.setAttribute("aria-hidden", "true");
-}
-
 
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
@@ -542,7 +501,6 @@ function setupHeader(){
 }
 function setupHome(){
   bindLauncherDelegation();
-  bindOspitiLauncherDelegation();
   bindHomeDelegation();
   // stampa build
   const build = $("#buildText");
@@ -554,6 +512,11 @@ function setupHome(){
     openBtn.addEventListener("click", () => showLauncher());
   }
 
+  // HOME: icona Ospite va alla pagina ospite
+  const goO = $("#goOspite");
+  if (goO){
+    goO.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
+  }
   // HOME: icona Ospiti va alla pagina elenco ospiti
   const goOs = $("#goOspiti");
   if (goOs){
@@ -582,7 +545,7 @@ function setupHome(){
   }
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { hideLauncher(); hideOspitiLauncher(); }
+    if (e.key === "Escape") hideLauncher();
   });
 }
 
@@ -614,7 +577,7 @@ function setPeriod(from, to){
 
 /* DATA LOAD */
 async function loadMotivazioni(){
-  const data = await api("motivazioni");
+  const data = await api("motivazioni", { showLoader:false });
   state.motivazioni = data;
 
   const list = $("#motivazioniList");
@@ -634,11 +597,11 @@ async function loadOspiti({ from="", to="" } = {}){
   renderGuestCards();
 }
 
-async function loadData(){
+async function loadData({ showLoader=true } = {}){
   const { from, to } = state.period;
   const [report, spese] = await Promise.all([
-    api("report", { params: { from, to } }),
-    api("spese", { params: { from, to } }),
+    api("report", { params: { from, to }, showLoader }),
+    api("spese", { params: { from, to }, showLoader }),
   ]);
   state.report = report;
   state.spese = spese;
@@ -711,7 +674,7 @@ async function saveSpesa(){
     $("#spesaMotivazione").value = canonical; // versione canonica
   } else {
     try {
-      await api("motivazioni", { method:"POST", body:{ motivazione } });
+      await api("motivazioni", { method:"POST", body:{ motivazione }, showLoader:false });
       await loadMotivazioni();
     } catch (_) {}
   }
@@ -722,7 +685,7 @@ async function saveSpesa(){
   resetInserisci();
 
   // aggiorna dati
-  try { await loadData(); renderGuestCards(); } catch(_) {}
+  try { await loadData({ showLoader:false }); renderGuestCards(); } catch(_) {}
 }
 
 /* 2) SPESE */
@@ -758,7 +721,7 @@ function renderSpese(){
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData(); renderGuestCards();
+      await loadData({ showLoader:false }); renderGuestCards();
     });
 
     list.appendChild(el);
@@ -956,7 +919,7 @@ function bindPeriodAuto(fromSel, toSel){
       setPresetValue("custom");
       setPeriod(from, to);
 
-      try { await loadData(); renderGuestCards(); } catch (e) { toast(e.message); }
+      try { await loadData({ showLoader:false }); renderGuestCards(); } catch (e) { toast(e.message); }
     }, 220);
   };
 
@@ -1268,7 +1231,7 @@ function renderGuestCards(){
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
       await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
-      await loadData(); renderGuestCards();
+      await loadData({ showLoader:false }); renderGuestCards();
     });
 
     wrap.appendChild(card);
@@ -1342,7 +1305,7 @@ async function init(){
   // pre-carico dati (non cambia flusso API)
   try {
     await loadMotivazioni();
-    await loadData(); renderGuestCards();
+    await loadData({ showLoader:false }); renderGuestCards();
   } catch(e){
     toast(e.message);
   }
@@ -1513,7 +1476,7 @@ function renderSpese(){
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData(); renderGuestCards();
+      await loadData({ showLoader:false }); renderGuestCards();
     });
     list.appendChild(el);
   });
@@ -1529,7 +1492,7 @@ function attachDeleteOspite(card, ospite){
     if (!confirm("Eliminare definitivamente questo ospite?")) return;
     await api("ospiti", { method:"DELETE", params:{ id: ospite.id } });
     toast("Ospite eliminato");
-    await loadData(); renderGuestCards();
+    await loadData({ showLoader:false }); renderGuestCards();
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
