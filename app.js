@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.044";
+const BUILD_VERSION = "1.045";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1006,8 +1006,8 @@ function renderGuestCards(){
 
   (state.guests || []).forEach(item => {
     const rooms = (item.rooms || []).join("/") || "—";
-    const badgeClass = item.depositType === "elettronico" ? "blue" : "orange";
-    const badgeLabel = item.depositType === "elettronico" ? "Elettronico" : "Contante";
+    const badgeClass = item.acconto_importoType === "elettronico" ? "blue" : "orange";
+    const badgeLabel = item.acconto_importoType === "elettronico" ? "Elettronico" : "Contante";
 
     const card = document.createElement("div");
     card.className = "guest-card";
@@ -1037,9 +1037,9 @@ function renderGuestCards(){
       <details>
         <summary>Dettagli</summary>
         <div class="detail-grid">
-          <div><div class="k">Prenotazione</div><div>${euro(item.total)}</div></div>
-          <div><div class="k">Booking</div><div>${euro(item.booking)}</div></div>
-          <div><div class="k">Acconto</div><div>${euro(item.deposit)}</div></div>
+          <div><div class="k">Prenotazione</div><div>${euro(item.importo_prenotazione)}</div></div>
+          <div><div class="k">Booking</div><div>${euro(item.importo_booking)}</div></div>
+          <div><div class="k">Acconto</div><div>${euro(item.acconto_importo)}</div></div>
           <div><div class="k">Adulti</div><div>${escapeHtml(item.adults ?? 0)}</div></div>
           <div><div class="k">Bambini<10</div><div>${escapeHtml(item.kidsU10 ?? 0)}</div></div>
           <div><div class="k">Tipo</div><div>${badgeLabel}</div></div>
@@ -1068,9 +1068,9 @@ function renderGuestCards(){
       setVal("guestKidsU10", item.kidsU10 ?? "");
       setVal("guestCheckIn", item.checkIn || "");
       setVal("guestCheckOut", item.checkOut || "");
-      setVal("guestTotal", item.total ?? "");
-      setVal("guestBooking", item.booking ?? "");
-      setVal("guestDeposit", item.deposit ?? "");
+      setVal("guestTotal", item.importo_prenotazione ?? "");
+      setVal("guestBooking", item.importo_booking ?? "");
+      setVal("guestDeposit", item.acconto_importo ?? "");
 
       const mEl = document.getElementById("guestMarriage");
       if (mEl) mEl.checked = !!item.matrimonio;
@@ -1094,7 +1094,7 @@ function renderGuestCards(){
       }
 
       // tipo acconto
-      state.guestDepositType = item.depositType || "contante";
+      state.guestDepositType = item.acconto_importoType || "contante";
       const seg = document.getElementById("depositType");
       seg?.querySelectorAll(".seg-btn").forEach(b=>{
         const t = b.getAttribute("data-type");
