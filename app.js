@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.059";
+const BUILD_VERSION = "1.061";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -113,6 +113,53 @@ function todayISO(){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
+
+// --- Guest status LED (scheda ospiti) ---
+function _dayNumFromISO(iso){
+  if (!iso || typeof iso !== 'string') return null;
+  // Support both YYYY-MM-DD and DD/MM/YYYY
+  if (iso.includes('/')) {
+    const parts = iso.split('/').map(n=>parseInt(n,10));
+    if (parts.length === 3 && parts.every(n=>isFinite(n))) {
+      const [dd,mm,yy] = parts;
+      return Math.floor(Date.UTC(yy, mm-1, dd) / 86400000);
+    }
+  }
+  const parts = iso.split('-').map(n=>parseInt(n,10));
+  if (parts.length !== 3 || parts.some(n=>!isFinite(n))) return null;
+  const [y,m,d] = parts;
+  // day number in UTC to avoid DST issues
+  return Math.floor(Date.UTC(y, m-1, d) / 86400000);
+}
+
+function guestLedStatus(item){
+  const ci = item?.check_in || item?.checkIn || "";
+  const co = item?.check_out || item?.checkOut || "";
+
+  const t = _dayNumFromISO(todayISO());
+  const dIn = _dayNumFromISO(ci);
+  const dOut = _dayNumFromISO(co);
+
+  if (t == null) return { cls: "led-gray", label: "Nessuna scadenza" };
+
+  // Priorità: check-out (rosso) > giorno prima check-out (arancione) > dopo check-in (verde) > grigio
+  if (dOut != null) {
+    if (t === dOut) return { cls: "led-red", label: "Check-out oggi" };
+    if (t > dOut) return { cls: "led-red", label: "Check-out passato" };
+    if (t === (dOut - 1)) return { cls: "led-orange", label: "Check-out domani" };
+  }
+
+  if (dIn != null) {
+    if (t === dIn) return { cls: "led-green", label: "Check-in oggi" };
+    if (t > dIn) return { cls: "led-green", label: "In soggiorno" };
+    return { cls: "led-gray", label: "In arrivo" };
+  }
+
+  return { cls: "led-gray", label: "Nessuna data" };
+}
+
+
+
 
 function toISO(d){
   const yyyy = d.getFullYear();
@@ -1099,9 +1146,14 @@ function renderGuestCards(){
 
     const nome = escapeHtml(item.nome || item.name || "Ospite");
 
+    const led = guestLedStatus(item);
+
     card.innerHTML = `
       <div class="guest-top">
-        <div class="guest-name">${nome}</div>
+        <div class="guest-left">
+          <span class="guest-led ${led.cls}" aria-label="${led.label}" title="${led.label}"></span>
+          <div class="guest-name">${nome}</div>
+        </div>
         <div class="guest-actions" role="group" aria-label="Azioni ospite">
           <button class="tl-btn tl-green" type="button" data-open aria-label="Apri/chiudi dettagli"><span class="sr-only">Apri</span></button>
           <button class="tl-btn tl-yellow" type="button" data-edit aria-label="Modifica ospite"><span class="sr-only">Modifica</span></button>

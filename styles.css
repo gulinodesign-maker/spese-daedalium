@@ -1799,6 +1799,32 @@ body[data-page="ospiti"] .guest-card .actions {
   justify-content:space-between;
   align-items:center;
 }
+
+
+/* OSPITI: LED status a sinistra del nome */
+#page-ospiti .guest-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width: 0;
+}
+#page-ospiti .guest-led{
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.9);
+  box-shadow: 0 0 0 3px rgba(15,23,42,0.06), 0 2px 8px rgba(15,23,42,0.10) inset;
+  flex: 0 0 auto;
+}
+#page-ospiti .guest-led.led-gray{ background: rgba(148,163,184,0.9); }
+#page-ospiti .guest-led.led-green{ background: #34c759; box-shadow: 0 0 0 3px rgba(52,199,89,0.16), 0 0 12px rgba(52,199,89,0.42); }
+#page-ospiti .guest-led.led-orange{ background: #ff9500; box-shadow: 0 0 0 3px rgba(255,149,0,0.16), 0 0 12px rgba(255,149,0,0.42); }
+#page-ospiti .guest-led.led-red{ background: #ff3b30; box-shadow: 0 0 0 3px rgba(255,59,48,0.16), 0 0 12px rgba(255,59,48,0.42); }
+
+/* tap target: resta comodo anche su iPhone */
+@media (max-width: 480px){
+  #page-ospiti .guest-led{ width: 16px; height: 16px; }
+}
 #page-ospiti .guest-name{
   font-size:18px;
   font-weight:900;
