@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.086";
+const BUILD_VERSION = "1.087";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -28,7 +28,7 @@ function setPayType(containerId, type){
   });
 }
 
-// dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.087 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -59,6 +59,7 @@ const state = {
   lettiPerStanza: {},
   guestMarriage: false,
   guestSaldoType: "contante",
+  calendarWeekStart: "",
 };
 
 const COLORS = {
@@ -152,6 +153,31 @@ function todayISO(){
   const dd = String(d.getDate()).padStart(2,"0");
   return `${yyyy}-${mm}-${dd}`;
 }
+
+function getMondayISO(dateObj){
+  const d = new Date(dateObj);
+  // JS: 0=Dom,1=Lun,...6=Sab
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day); // torna al lunedì
+  d.setDate(d.getDate() + diff);
+  // normalizza mezzanotte locale
+  d.setHours(0,0,0,0);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function addDaysISO(iso, days){
+  const d = new Date(iso);
+  d.setDate(d.getDate() + days);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+
 
 // --- Guest status LED (scheda ospiti) ---
 function _dayNumFromISO(iso){
@@ -464,7 +490,7 @@ function bindHomeDelegation(){
     const o = e.target.closest && e.target.closest("#goOspite");
     if (o){ hideLauncher(); showPage("ospite"); return; }
     const cal = e.target.closest && e.target.closest("#goCalendario");
-    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
+    if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -531,6 +557,7 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
+  if (page === "calendario") renderCalendario();
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
 }
 
@@ -587,6 +614,49 @@ function setupHome(){
     if (e.key === "Escape") hideLauncher();
   });
 }
+
+function setupCalendario(){
+  const weekInput = document.getElementById("calWeekStart");
+  const btnToday = document.getElementById("calToday");
+  const btnPrev = document.getElementById("calPrev");
+  const btnNext = document.getElementById("calNext");
+  const btnRefresh = document.getElementById("calRefresh");
+
+  if (!weekInput) return;
+
+  const setWeek = (isoMonday) => {
+    state.calendarWeekStart = isoMonday;
+    weekInput.value = isoMonday;
+  };
+
+  // default: settimana corrente (lunedì)
+  setWeek(getMondayISO(new Date()));
+
+  weekInput.addEventListener("change", () => {
+    const d = new Date(weekInput.value);
+    if (isNaN(d.getTime())) return;
+    setWeek(getMondayISO(d));
+    if (state.page === "calendario") renderCalendario();
+  });
+
+  const shiftWeek = (deltaDays) => {
+    const cur = state.calendarWeekStart ? new Date(state.calendarWeekStart) : new Date();
+    const d = new Date(cur);
+    d.setDate(d.getDate() + deltaDays);
+    setWeek(getMondayISO(d));
+    if (state.page === "calendario") renderCalendario();
+  };
+
+  btnToday && btnToday.addEventListener("click", () => {
+    setWeek(getMondayISO(new Date()));
+    if (state.page === "calendario") renderCalendario();
+  });
+  btnPrev && btnPrev.addEventListener("click", () => shiftWeek(-7));
+  btnNext && btnNext.addEventListener("click", () => shiftWeek(7));
+  btnRefresh && btnRefresh.addEventListener("click", () => renderCalendario());
+}
+
+
 
 
 /* PERIOD SYNC */
@@ -1392,12 +1462,242 @@ function refreshFloatingLabels(){
 }
 
 
+
+
+/* CALENDARIO SETTIMANALE */
+async function renderCalendario(){
+  const grid = document.getElementById("calGrid");
+  const hint = document.getElementById("calHint");
+  if (!grid) return;
+
+  const mondayISO = state.calendarWeekStart || getMondayISO(new Date());
+  const daysISO = Array.from({length:7}, (_,i)=>addDaysISO(mondayISO,i));
+  const dayLabels = ["L","M","M","G","V","S","D"];
+
+  // header info
+  if (hint){
+    const d0 = new Date(daysISO[0]);
+    const d6 = new Date(daysISO[6]);
+    hint.textContent = `Settimana: ${fmtShortDate(d0)} – ${fmtShortDate(d6)}`;
+  }
+
+  // fetch DB
+  let ospiti = [];
+  let stanze = [];
+  try{
+    [ospiti, stanze] = await Promise.all([
+      api({ action:"ospiti" }),
+      api({ action:"stanze" }),
+    ]);
+  }catch(e){
+    toast(e.message);
+    return;
+  }
+
+  // Map ospite_id -> ospite
+  const ospById = new Map();
+  (Array.isArray(ospiti)?ospiti:[]).forEach(o=>{
+    if (!o) return;
+    const id = String(o.id || "").trim();
+    if (!id) return;
+    ospById.set(id, o);
+  });
+
+  // normalize room rows
+  const roomRows = (Array.isArray(stanze)?stanze:[])
+    .map(r => ({
+      id: String(r.id || ""),
+      ospite_id: String(r.ospite_id || r.ospiteId || ""),
+      stanza_num: String(r.stanza_num ?? r.stanzaNum ?? ""),
+      letto_m: toIntSafe(r.letto_m ?? r.lettoM ?? 0),
+      letto_s: toIntSafe(r.letto_s ?? r.lettoS ?? 0),
+      culla: toIntSafe(r.culla ?? 0),
+      note: String(r.note || "")
+    }))
+    .filter(r => r.stanza_num);
+
+  // rooms list
+  const roomNums = Array.from(new Set(roomRows.map(r=>r.stanza_num))).sort((a,b)=>Number(a)-Number(b));
+
+  // color palette (arancio -> rosso)
+  const palette = buildRoomPalette(roomNums.length);
+
+  // Build matrix: room -> day -> list of occupants
+  const cellMap = new Map(); // key: room|day -> array of {initials,dots}
+  function pushCell(room, dayISO, item){
+    const key = room + "|" + dayISO;
+    const arr = cellMap.get(key) || [];
+    arr.push(item);
+    cellMap.set(key, arr);
+  }
+
+  for (const rr of roomRows){
+    const osp = ospById.get(rr.ospite_id);
+    if (!osp) continue;
+
+    const ci = parseAnyDate_(osp.check_in || osp.checkIn || osp.checkin);
+    const co = parseAnyDate_(osp.check_out || osp.checkOut || osp.checkout);
+
+    if (!ci || !co) continue;
+
+    // occupazione: [check_in, check_out) (checkout escluso)
+    for (const dayISO of daysISO){
+      const d = new Date(dayISO);
+      if (d >= ci && d < co){
+        pushCell(rr.stanza_num, dayISO, {
+          initials: guestInitials(osp.nome || osp.name || ""),
+          letto_m: rr.letto_m,
+          letto_s: rr.letto_s,
+          culla: rr.culla
+        });
+      }
+    }
+  }
+
+  // Render table grid
+  grid.innerHTML = "";
+  grid.style.setProperty("--cal-cols", String(8)); // 1 label + 7 days
+
+  // Header row
+  grid.appendChild(makeCell_("cal-h cal-corner", "Stanza"));
+  for (let i=0;i<7;i++){
+    const d = new Date(daysISO[i]);
+    const txt = `${dayLabels[i]} ${String(d.getDate()).padStart(2,"0")}`;
+    grid.appendChild(makeCell_("cal-h", txt));
+  }
+
+  // Rows
+  roomNums.forEach((room, idx)=>{
+    const color = palette[idx] || "#f0a";
+    const label = makeCell_("cal-room", room);
+    label.style.background = "#fff";
+    label.style.fontWeight = "800";
+    grid.appendChild(label);
+
+    for (const dayISO of daysISO){
+      const cell = document.createElement("div");
+      cell.className = "cal-cell";
+      cell.style.background = color;
+
+      const items = cellMap.get(room + "|" + dayISO) || [];
+      if (items.length > 0){
+        const first = items[0];
+        const top = document.createElement("div");
+        top.className = "cal-initials";
+        top.textContent = first.initials || "";
+        cell.appendChild(top);
+
+        const dots = document.createElement("div");
+        dots.className = "cal-dots";
+        // 🔴 matrimoniale: se boolean in sheet può arrivare 1/0 o true/false
+        const mCount = (first.letto_m === true ? 1 : toIntSafe(first.letto_m));
+        const sCount = toIntSafe(first.letto_s);
+        const cCount = (first.culla === true ? 1 : toIntSafe(first.culla));
+
+        for (let k=0;k<mCount;k++) dots.appendChild(makeDot_("red"));
+        for (let k=0;k<sCount;k++) dots.appendChild(makeDot_("blue"));
+        for (let k=0;k<cCount;k++) dots.appendChild(makeDot_("green"));
+
+        cell.appendChild(dots);
+
+        if (items.length > 1){
+          const badge = document.createElement("div");
+          badge.className = "cal-badge";
+          badge.textContent = `+${items.length-1}`;
+          cell.appendChild(badge);
+        }
+      }
+
+      grid.appendChild(cell);
+    }
+  });
+
+  if (roomNums.length === 0){
+    grid.innerHTML = "";
+    grid.appendChild(makeCell_("hint", "Nessuna stanza trovata nel foglio 'stanze'."));
+  }
+}
+
+function makeCell_(cls, txt){
+  const d = document.createElement("div");
+  d.className = cls;
+  d.textContent = txt;
+  return d;
+}
+
+function makeDot_(cls){
+  const s = document.createElement("span");
+  s.className = "dot " + cls;
+  return s;
+}
+
+function toIntSafe(v){
+  if (v === true) return 1;
+  if (v === false) return 0;
+  const n = parseInt(String(v||"0"),10);
+  return isFinite(n) ? n : 0;
+}
+
+function parseAnyDate_(v){
+  if (!v) return null;
+  if (Object.prototype.toString.call(v) === "[object Date]" && !isNaN(v.getTime())) return v;
+  const s = String(v).trim();
+  if (!s) return null;
+  // prefer YYYY-MM-DD
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m){
+    const dt = new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+    if (!isNaN(dt.getTime())) { dt.setHours(0,0,0,0); return dt; }
+  }
+  const dt2 = new Date(s);
+  if (!isNaN(dt2.getTime())) { dt2.setHours(0,0,0,0); return dt2; }
+  return null;
+}
+
+function guestInitials(fullName){
+  const s = collapseSpaces(String(fullName||"").trim());
+  if (!s) return "";
+  const parts = s.split(" ").filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  if (parts[0].length >= 2) return parts[0].slice(0,2).toUpperCase();
+  return parts[0][0].toUpperCase();
+}
+
+function fmtShortDate(d){
+  try{
+    const dd = String(d.getDate()).padStart(2,"0");
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    return `${dd}/${mm}`;
+  }catch(_){ return ""; }
+}
+
+function buildRoomPalette(n){
+  // semplice gradiente arancio->rosso
+  const start = {r: 255, g: 191, b: 118}; // arancio chiaro
+  const end   = {r: 255, g: 110, b: 110}; // rosso chiaro
+  if (n<=1) return [rgbToHex_(end.r,end.g,end.b)];
+  const out=[];
+  for(let i=0;i<n;i++){
+    const t=i/(n-1);
+    const r=Math.round(start.r + (end.r-start.r)*t);
+    const g=Math.round(start.g + (end.g-start.g)*t);
+    const b=Math.round(start.b + (end.b-start.b)*t);
+    out.push(rgbToHex_(r,g,b));
+  }
+  return out;
+}
+function rgbToHex_(r,g,b){
+  const toH=(x)=>Number(x).toString(16).padStart(2,"0");
+  return `#${toH(r)}${toH(g)}${toH(b)}`;
+}
+
 async function init(){
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
+  setupCalendario();
 
-    setupOspite();
+  setupOspite();
   initFloatingLabels();
 // default period = this month
   const [from,to] = monthRangeISO(new Date());
