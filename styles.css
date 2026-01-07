@@ -1939,3 +1939,70 @@ body[data-page="ospiti"] .guest-card .actions {
   background: rgba(148,163,184,0.55);
   border-color: rgba(148,163,184,0.55);
 }
+
+
+/* dDAE_1.067 — Matrimonio: pallino verde 'M' nella riga stanze */
+
+#page-ospite .room-dot-marriage{
+  margin-left: 14px; /* un po' più a destra dopo la stanza 6 */
+}
+#page-ospite .room-dot-marriage.selected{
+  background: #34c759 !important;
+  border-color: #34c759 !important;
+  color: rgba(255,255,255,0.98) !important;
+  box-shadow: 0 0 0 3px rgba(52,199,89,0.16), 0 0 12px rgba(52,199,89,0.42);
+}
+
+
+/* dDAE_1.068 — Acconto: pallini C/E come stanze */
+
+#page-ospite .pay-dots{
+  display:flex;
+  gap:18px;
+  justify-content:center;
+  padding-top: 2px;
+}
+#page-ospite .pay-dot{
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 0;
+  border: 1px solid rgba(15,23,42,0.14);
+  background: rgba(255,255,255,0.92);
+  color: rgba(15,23,42,0.86);
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* dDAE_1.069 — Pay dots: bianchi quando non selezionati + più distanziati */
+
+#page-ospite .pay-cash,
+#page-ospite .pay-elec{
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(15,23,42,0.14);
+  color: rgba(15,23,42,0.88);
+}
+
+#page-ospite .pay-dot.selected{
+  box-shadow: 0 0 0 4px rgba(43,124,180,0.14), 0 10px 22px rgba(15,23,42,0.10);
+}
+
+#page-ospite .pay-cash.selected{
+  background: rgba(11,15,22,0.92);
+  border-color: rgba(11,15,22,0.92);
+  color: rgba(255,255,255,0.98);
+  box-shadow: 0 0 0 4px rgba(11,15,22,0.14), 0 10px 22px rgba(15,23,42,0.10);
+}
+
+#page-ospite .pay-elec.selected{
+  background: rgba(43,124,180,0.92);
+  border-color: rgba(43,124,180,0.92);
+  color: rgba(255,255,255,0.98);
+}

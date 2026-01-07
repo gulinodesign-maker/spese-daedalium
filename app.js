@@ -3,9 +3,18 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.066";
+const BUILD_VERSION = "1.069";
 
 const $ = (sel) => document.querySelector(sel);
+
+function setMarriage(on){
+  state.guestMarriage = !!on;
+  const btn = document.getElementById("roomMarriage");
+  if (!btn) return;
+  btn.classList.toggle("selected", state.guestMarriage);
+  btn.setAttribute("aria-pressed", state.guestMarriage ? "true" : "false");
+}
+
 
 const state = {
   motivazioni: [],
@@ -20,6 +29,7 @@ const state = {
   guestEditId: null,
   guestMode: "create",
   lettiPerStanza: {},
+  guestMarriage: false,
 };
 
 const COLORS = {
@@ -979,21 +989,19 @@ function enterGuestCreateMode(){
   const ci = document.getElementById("guestCheckIn");
   if (ci) ci.value = todayISO();
 
-  const mEl = document.getElementById("guestMarriage");
-  if (mEl) mEl.checked = false;
-
-  state.guestRooms = state.guestRooms || new Set();
+  setMarriage(false);
+state.guestRooms = state.guestRooms || new Set();
   state.guestRooms.clear();
   state.lettiPerStanza = {};
   // segmented: default contante
   state.guestDepositType = "contante";
   const seg = document.getElementById("depositType");
   if (seg){
-    seg.querySelectorAll(".seg-btn").forEach(b=>{
+    seg.querySelectorAll(".pay-dot").forEach(b=>{
       const t = b.getAttribute("data-type");
       const active = t === "contante";
-      b.classList.toggle("active", active);
-      b.setAttribute("aria-selected", active ? "true" : "false");
+      b.classList.toggle("selected", active);
+      b.setAttribute("aria-pressed", active ? "true" : "false");
     });
   }
 
@@ -1033,11 +1041,11 @@ function enterGuestEditMode(ospite){
   state.guestDepositType = dt;
   const seg = document.getElementById("depositType");
   if (seg){
-    seg.querySelectorAll(".seg-btn").forEach(b=>{
+    seg.querySelectorAll(".pay-dot").forEach(b=>{
       const t = b.getAttribute("data-type");
       const active = t === dt;
-      b.classList.toggle("active", active);
-      b.setAttribute("aria-selected", active ? "true" : "false");
+      b.classList.toggle("selected", active);
+      b.setAttribute("aria-pressed", active ? "true" : "false");
     });
   }
 
@@ -1067,9 +1075,8 @@ async function saveGuest(){
   const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
   const rooms = Array.from(state.guestRooms || []).sort((a,b)=>a-b);
   const depositType = state.guestDepositType || "contante";
-  const matrimonio = !!document.getElementById("guestMarriage")?.checked;
-
-  if (!name) return toast("Inserisci il nome");
+  const matrimonio = !!(state.guestMarriage);
+if (!name) return toast("Inserisci il nome");
 
   const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, matrimonio, stanze: rooms.join(",") };
 
@@ -1113,11 +1120,15 @@ function setupOspite(){
       btn.classList.toggle("selected", on);
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
+  // matrimonio dot
+  setMarriage(state.guestMarriage);
+
   }
 
   roomsWrap?.addEventListener("click", (e) => {
     const b = e.target.closest(".room-dot");
     if (!b) return;
+    if (b.id === "roomMarriage") { setMarriage(!state.guestMarriage); return; }
     const n = parseInt(b.getAttribute("data-room"), 10);
     if (state.guestRooms.has(n)) {
       state.guestRooms.delete(n);
@@ -1130,14 +1141,14 @@ function setupOspite(){
 
   const seg = document.getElementById("depositType");
   seg?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".seg-btn");
+    const btn = e.target.closest(".pay-dot");
     if (!btn) return;
     const t = btn.getAttribute("data-type");
     state.guestDepositType = t;
-    seg.querySelectorAll(".seg-btn").forEach(b=>{
+    seg.querySelectorAll(".pay-dot").forEach(b=>{
       const active = b.getAttribute("data-type") === t;
-      b.classList.toggle("active", active);
-      b.setAttribute("aria-selected", active ? "true" : "false");
+      b.classList.toggle("selected", active);
+      b.setAttribute("aria-pressed", active ? "true" : "false");
     });
   });
 
