@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.062";
+const BUILD_VERSION = "1.063";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -424,10 +424,9 @@ function bindHomeDelegation(){
   if (homeDelegationBound) return;
   homeDelegationBound = true;
   document.addEventListener("click", (e)=>{
-    const o = e.target.closest && e.target.closest("#goOspite");
-    if (o){ hideLauncher(); showPage("ospite"); return; }
-    const cal = e.target.closest && e.target.closest("#goCalendario");
-    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
+    const os = e.target.closest && e.target.closest("#goOspiti");
+    if (os){ hideLauncher(); showOspitiLauncher(); return; }
+
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -437,6 +436,7 @@ function bindHomeDelegation(){
 
   });
 }
+
 
 function bindLauncherDelegation(){
   if (launcherDelegationBound) return;
@@ -469,6 +469,45 @@ function hideLauncher(){
   m.hidden = true;
   m.setAttribute("aria-hidden", "true");
 }
+/* Ospiti launcher modal (popup) */
+
+let ospitiLauncherDelegationBound = false;
+
+function bindOspitiLauncherDelegation(){
+  if (ospitiLauncherDelegationBound) return;
+  ospitiLauncherDelegationBound = true;
+
+  document.addEventListener("click", (e) => {
+    const goBtn = e.target.closest && e.target.closest("#ospitiLauncherModal [data-ospiti-go]");
+    if (goBtn){
+      const act = goBtn.getAttribute("data-ospiti-go");
+      hideOspitiLauncher();
+
+      if (act === "nuovo") { try { enterGuestCreateMode(); } catch(_){} showPage("ospite"); return; }
+      if (act === "ospiti") { showPage("ospiti"); return; }
+      if (act === "calendario") { toast("Calendario: in arrivo"); return; }
+    }
+
+    const close = e.target.closest && e.target.closest("#ospitiLauncherModal [data-close], #closeOspitiLauncher");
+    if (close){
+      hideOspitiLauncher();
+    }
+  });
+}
+
+function showOspitiLauncher(){
+  const m = document.getElementById("ospitiLauncherModal");
+  if (!m) return;
+  m.hidden = false;
+  m.setAttribute("aria-hidden", "false");
+}
+function hideOspitiLauncher(){
+  const m = document.getElementById("ospitiLauncherModal");
+  if (!m) return;
+  m.hidden = true;
+  m.setAttribute("aria-hidden", "true");
+}
+
 
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
@@ -503,6 +542,7 @@ function setupHeader(){
 }
 function setupHome(){
   bindLauncherDelegation();
+  bindOspitiLauncherDelegation();
   bindHomeDelegation();
   // stampa build
   const build = $("#buildText");
@@ -514,11 +554,6 @@ function setupHome(){
     openBtn.addEventListener("click", () => showLauncher());
   }
 
-  // HOME: icona Ospite va alla pagina ospite
-  const goO = $("#goOspite");
-  if (goO){
-    goO.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
-  }
   // HOME: icona Ospiti va alla pagina elenco ospiti
   const goOs = $("#goOspiti");
   if (goOs){
@@ -547,7 +582,7 @@ function setupHome(){
   }
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") hideLauncher();
+    if (e.key === "Escape") { hideLauncher(); hideOspitiLauncher(); }
   });
 }
 
