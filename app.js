@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.086";
+const BUILD_VERSION = "1.087";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -28,7 +28,7 @@ function setPayType(containerId, type){
   });
 }
 
-// dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.087 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -464,7 +464,7 @@ function bindHomeDelegation(){
     const o = e.target.closest && e.target.closest("#goOspite");
     if (o){ hideLauncher(); showPage("ospite"); return; }
     const cal = e.target.closest && e.target.closest("#goCalendario");
-    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
+    if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -531,6 +531,7 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
+  if (page === "calendario") renderCalendario();
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
 }
 
@@ -1392,7 +1393,258 @@ function refreshFloatingLabels(){
 }
 
 
-async function init(){
+async 
+/* =========================
+   CALENDARIO SETTIMANALE
+========================= */
+
+function startOfWeekMonday_(date){
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  // porta a mezzogiorno locale per evitare DST/UTC drift
+  d.setHours(12,0,0,0);
+  const day = d.getDay(); // 0=dom,1=lun...
+  const diff = (day === 0) ? -6 : (1 - day);
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function fmtYMD_(date){
+  const d = new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const da = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+function addDays_(date, n){
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+function initialsFromName_(name){
+  const s = (name || "").toString().trim();
+  if (!s) return "";
+  const parts = s.split(/\s+/).filter(Boolean);
+  if (parts.length === 1){
+    const w = parts[0];
+    return (w.slice(0,2)).toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+
+function parseDateLoose_(v){
+  if (!v) return null;
+  if (v instanceof Date && !isNaN(v.getTime())) return v;
+  const s = v.toString().trim();
+  if (!s) return null;
+
+  // se è già YYYY-MM-DD ok
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m){
+    const y=+m[1], mo=+m[2]-1, da=+m[3];
+    const d = new Date(y, mo, da);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  const d2 = new Date(s);
+  if (!isNaN(d2.getTime())){
+    d2.setHours(0,0,0,0);
+    return d2;
+  }
+  return null;
+}
+
+function dotHTML_(cls){
+  return `<span class="dot ${cls}"></span>`;
+}
+
+function buildRoomColors_(roomIds){
+  // palette dal giallo-arancio al rosso (come riferimento immagine)
+  const palette = [
+    "#F6B26B", // arancio
+    "#FFE599", // giallo
+    "#93C47D", // verde
+    "#6FA8DC", // azzurro
+    "#B4A7D6", // lilla
+    "#E06666", // rosso
+    "#CC0000"  // rosso forte (se più stanze)
+  ];
+  const map = {};
+  roomIds.forEach((id, i) => {
+    map[id] = palette[i % palette.length];
+  });
+  return map;
+}
+
+async function renderCalendario(){
+  const input = document.getElementById("calWeekStart");
+  const prev = document.getElementById("calPrev");
+  const next = document.getElementById("calNext");
+  const refresh = document.getElementById("calRefresh");
+
+  // init week start se vuoto
+  if (input && !input.value){
+    const monday = startOfWeekMonday_(new Date());
+    input.value = fmtYMD_(monday);
+  }
+
+  if (prev && !prev.dataset.bound){
+    prev.dataset.bound="1";
+    prev.addEventListener("click", () => {
+      const d = startOfWeekMonday_(parseDateLoose_(input.value) || new Date());
+      const n = addDays_(d, -7);
+      input.value = fmtYMD_(n);
+      loadCalendarioWeek_().catch(e=>toast(e.message));
+    });
+  }
+  if (next && !next.dataset.bound){
+    next.dataset.bound="1";
+    next.addEventListener("click", () => {
+      const d = startOfWeekMonday_(parseDateLoose_(input.value) || new Date());
+      const n = addDays_(d, 7);
+      input.value = fmtYMD_(n);
+      loadCalendarioWeek_().catch(e=>toast(e.message));
+    });
+  }
+  if (refresh && !refresh.dataset.bound){
+    refresh.dataset.bound="1";
+    refresh.addEventListener("click", () => loadCalendarioWeek_().catch(e=>toast(e.message)));
+  }
+  if (input && !input.dataset.bound){
+    input.dataset.bound="1";
+    input.addEventListener("change", () => loadCalendarioWeek_().catch(e=>toast(e.message)));
+  }
+
+  await loadCalendarioWeek_();
+}
+
+async function loadCalendarioWeek_(){
+  const grid = document.getElementById("calGrid");
+  const hint = document.getElementById("calHint");
+  const input = document.getElementById("calWeekStart");
+  if (!grid || !input) return;
+
+  const monday = startOfWeekMonday_(parseDateLoose_(input.value) || new Date());
+  if (!monday) return;
+
+  const days = Array.from({length:7}, (_,i)=> addDays_(monday,i));
+  const dayLabels = ["L","M","M","G","V","S","D"];
+
+  // fetch data
+  const [ospiti, stanze] = await Promise.all([
+    api("ospiti", {}, { showLoader: true }),
+    api("stanze", {}, { showLoader: true }),
+  ]);
+
+  // map ospiti by id
+  const guestsById = new Map();
+  (ospiti || []).forEach(o => {
+    const id = (o.id || "").toString().trim();
+    if (!id) return;
+    guestsById.set(id, o);
+  });
+
+  // normalize rooms list from stanze sheet
+  const roomRows = (stanze || []).map(r => ({
+    id: (r.id || "").toString(),
+    ospite_id: (r.ospite_id || "").toString().trim(),
+    stanza_num: (r.stanza_num || "").toString().trim(),
+    letto_m: Number(r.letto_m || 0) || 0,
+    letto_s: Number(r.letto_s || 0) || 0,
+    culla: Number(r.culla || 0) || 0,
+    note: (r.note || "").toString()
+  })).filter(r => r.stanza_num);
+
+  // unique stanza list
+  const stanzaNums = Array.from(new Set(roomRows.map(r=>r.stanza_num)));
+  stanzaNums.sort((a,b)=> (Number(a)||9999) - (Number(b)||9999) || a.localeCompare(b));
+
+  const colors = buildRoomColors_(stanzaNums);
+
+  // build occupancy map: room -> dayIndex -> entries[]
+  const occ = {}; // {stanza_num: {0:[...], ...}}
+  stanzaNums.forEach(s => occ[s] = {});
+
+  for (const rr of roomRows){
+    const g = guestsById.get(rr.ospite_id);
+    if (!g) continue;
+
+    const ci = parseDateLoose_(g.check_in || g.checkIn);
+    const co = parseDateLoose_(g.check_out || g.checkOut);
+    if (!ci || !co) continue;
+
+    // checkout escluso (standard)
+    for (let i=0;i<7;i++){
+      const d = days[i];
+      if (d >= ci && d < co){
+        const entry = {
+          guestId: rr.ospite_id,
+          initials: initialsFromName_(g.nome || g.name),
+          letto_m: rr.letto_m,
+          letto_s: rr.letto_s,
+          culla: rr.culla
+        };
+        if (!occ[rr.stanza_num][i]) occ[rr.stanza_num][i]=[];
+        occ[rr.stanza_num][i].push(entry);
+      }
+    }
+  }
+
+  // render header row
+  let html = `<div class="cal-row cal-head">
+    <div class="cal-cell cal-roomhead">Stanza</div>
+    ${dayLabels.map((lbl,i)=>`<div class="cal-cell cal-dayhead"><div class="cal-daylbl">${lbl}</div><div class="cal-daydate">${fmtYMD_(days[i]).slice(5)}</div></div>`).join("")}
+  </div>`;
+
+  // render each room row
+  for (const s of stanzaNums){
+    const bg = colors[s] || "#ddd";
+    html += `<div class="cal-row" style="--roomColor:${bg}">
+      <div class="cal-cell cal-room" title="Stanza ${escapeHtml_(s)}">
+        <div class="cal-roomtag">${escapeHtml_(s)}</div>
+      </div>`;
+    for (let i=0;i<7;i++){
+      const entries = occ[s][i] || [];
+      if (entries.length === 0){
+        html += `<div class="cal-cell cal-slot empty"></div>`;
+        continue;
+      }
+      // show first + conflict badge if >1
+      const e0 = entries[0];
+      const dots = []
+        .concat(Array.from({length: Math.max(0, e0.letto_m||0)}, ()=>dotHTML_("red")))
+        .concat(Array.from({length: Math.max(0, e0.letto_s||0)}, ()=>dotHTML_("blue")))
+        .concat(Array.from({length: Math.max(0, e0.culla||0)}, ()=>dotHTML_("green")));
+      const badge = entries.length > 1 ? `<span class="cal-badge">+${entries.length-1}</span>` : "";
+      html += `<div class="cal-cell cal-slot">
+        <div class="cal-slot-top"><span class="cal-initials">${escapeHtml_(e0.initials)}</span>${badge}</div>
+        <div class="cal-dots">${dots.join("")}</div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  grid.innerHTML = html;
+
+  if (hint){
+    hint.textContent = stanzaNums.length
+      ? `Mostrate ${stanzaNums.length} stanze. Checkout escluso (il giorno di check-out è libero).`
+      : "Nessuna stanza trovata nel database (foglio 'stanze').";
+  }
+}
+
+function escapeHtml_(s){
+  return (s ?? "").toString()
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+function init(){
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
