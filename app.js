@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.042";
+const BUILD_VERSION = "1.043";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -286,6 +286,7 @@ const t = setTimeout(() => controller.abort(), 15000);
 const fetchOpts = {
   method: realMethod,
   signal: controller.signal,
+  cache: "no-store",
 };
 
 // Headers/body solo quando serve (riduce rischi di preflight su Safari iOS)
