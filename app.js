@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.072";
+const BUILD_VERSION = "1.079";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1060,6 +1060,8 @@ function enterGuestEditMode(ospite){
   // matrimonio
   const mEl = document.getElementById("guestMarriage");
   if (mEl) mEl.checked = !!(ospite.matrimonio);
+  refreshFloatingLabels();
+
 
   // deposit type (se disponibile)
   const dt = ospite.acconto_tipo || ospite.depositType || "contante";
@@ -1327,6 +1329,17 @@ function initFloatingLabels(){
     control.addEventListener("change", update);
     update();
   });
+}
+
+
+function refreshFloatingLabels(){
+  try{
+    document.querySelectorAll(".field.float").forEach(f => {
+      const c = f.querySelector("input, select, textarea");
+      const v = c ? String(c.value ?? "").trim() : "";
+      f.classList.toggle("has-value", v.length > 0);
+    });
+  }catch(_){}
 }
 
 
