@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.069";
+const BUILD_VERSION = "1.072";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -15,6 +15,18 @@ function setMarriage(on){
   btn.setAttribute("aria-pressed", state.guestMarriage ? "true" : "false");
 }
 
+
+function setPayType(containerId, type){
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const t = (type || "contante").toString().toLowerCase();
+  wrap.querySelectorAll(".pay-dot").forEach(b => {
+    const v = (b.getAttribute("data-type") || "").toLowerCase();
+    const on = v === t;
+    b.classList.toggle("selected", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
 
 const state = {
   motivazioni: [],
@@ -30,6 +42,7 @@ const state = {
   guestMode: "create",
   lettiPerStanza: {},
   guestMarriage: false,
+  guestSaldoType: "contante",
 };
 
 const COLORS = {
@@ -995,6 +1008,8 @@ state.guestRooms = state.guestRooms || new Set();
   state.lettiPerStanza = {};
   // segmented: default contante
   state.guestDepositType = "contante";
+  state.guestSaldoType = "contante";
+  setPayType("saldoType", state.guestSaldoType);
   const seg = document.getElementById("depositType");
   if (seg){
     seg.querySelectorAll(".pay-dot").forEach(b=>{
@@ -1003,6 +1018,15 @@ state.guestRooms = state.guestRooms || new Set();
       b.classList.toggle("selected", active);
       b.setAttribute("aria-pressed", active ? "true" : "false");
     });
+
+  const segSaldo = document.getElementById("saldoType");
+  segSaldo?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".pay-dot");
+    if (!btn) return;
+    const t = btn.getAttribute("data-type");
+    state.guestSaldoType = t;
+    setPayType("saldoType", t);
+  });
   }
 
   // refresh rooms UI if present
@@ -1031,6 +1055,7 @@ function enterGuestEditMode(ospite){
   document.getElementById("guestTotal").value = ospite.importo_prenotazione ?? ospite.total ?? 0;
   document.getElementById("guestBooking").value = ospite.importo_booking ?? ospite.booking ?? 0;
   document.getElementById("guestDeposit").value = ospite.acconto_importo ?? ospite.deposit ?? 0;
+  document.getElementById("guestSaldo").value = ospite.saldo_pagato ?? ospite.saldoPagato ?? ospite.saldo ?? 0;
 
   // matrimonio
   const mEl = document.getElementById("guestMarriage");
@@ -1039,6 +1064,12 @@ function enterGuestEditMode(ospite){
   // deposit type (se disponibile)
   const dt = ospite.acconto_tipo || ospite.depositType || "contante";
   state.guestDepositType = dt;
+  setPayType("depositType", dt);
+
+  const st = ospite.saldo_tipo || ospite.saldoTipo || "contante";
+  state.guestSaldoType = st;
+  setPayType("saldoType", st);
+
   const seg = document.getElementById("depositType");
   if (seg){
     seg.querySelectorAll(".pay-dot").forEach(b=>{
@@ -1073,12 +1104,14 @@ async function saveGuest(){
   const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
   const booking = parseFloat(document.getElementById("guestBooking")?.value || "0") || 0;
   const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
+  const saldoPagato = parseFloat(document.getElementById("guestSaldo")?.value || "0") || 0;
+  const saldoTipo = state.guestSaldoType || "contante";
   const rooms = Array.from(state.guestRooms || []).sort((a,b)=>a-b);
   const depositType = state.guestDepositType || "contante";
   const matrimonio = !!(state.guestMarriage);
 if (!name) return toast("Inserisci il nome");
 
-  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, matrimonio, stanze: rooms.join(",") };
+  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, saldoPagato, saldoTipo, matrimonio, stanze: rooms.join(",") };
 
   const isEdit = state.guestMode === "edit";
   if (isEdit){

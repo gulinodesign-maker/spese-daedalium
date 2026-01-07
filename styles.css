@@ -1957,9 +1957,11 @@ body[data-page="ospiti"] .guest-card .actions {
 /* dDAE_1.068 — Acconto: pallini C/E come stanze */
 
 #page-ospite .pay-dots{
-  display:flex;
-  gap:18px;
+  display:grid;
+  grid-template-columns: 46px 46px;
+  column-gap: 22px;
   justify-content:center;
+  align-items:center;
   padding-top: 2px;
 }
 #page-ospite .pay-dot{
@@ -1990,19 +1992,16 @@ body[data-page="ospiti"] .guest-card .actions {
   color: rgba(15,23,42,0.88);
 }
 
-#page-ospite .pay-dot.selected{
-  box-shadow: 0 0 0 4px rgba(43,124,180,0.14), 0 10px 22px rgba(15,23,42,0.10);
-}
-
-#page-ospite .pay-cash.selected{
-  background: rgba(11,15,22,0.92);
-  border-color: rgba(11,15,22,0.92);
-  color: rgba(255,255,255,0.98);
-  box-shadow: 0 0 0 4px rgba(11,15,22,0.14), 0 10px 22px rgba(15,23,42,0.10);
-}
-
 #page-ospite .pay-elec.selected{
   background: rgba(43,124,180,0.92);
   border-color: rgba(43,124,180,0.92);
   color: rgba(255,255,255,0.98);
+}
+
+
+/* dDAE_1.072 — Pay dots: niente riflesso/ombra e allineamento verticale */
+
+#page-ospite .pay-dot,
+#page-ospite .pay-dot.selected{
+  box-shadow: none !important;
 }
