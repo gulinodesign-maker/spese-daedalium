@@ -1910,3 +1910,32 @@ body[data-page="ospiti"] .guest-card .actions {
 @media (max-width: 520px){
   .tl-btn{ width: 42px; height: 42px; }
 }
+
+
+/* dDAE_1.066 — Ospiti: stanze come pallini azzurri */
+
+.rooms-dots{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-left: 2px;
+}
+.room-dot-badge{
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(43,124,180,0.92);
+  color: rgba(255,255,255,0.98);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 950;
+  font-size: 14px;
+  border: 1px solid rgba(43,124,180,0.55);
+  box-shadow: 0 8px 18px rgba(15,23,42,0.10);
+}
+.room-dot-badge.is-empty{
+  background: rgba(148,163,184,0.55);
+  border-color: rgba(148,163,184,0.55);
+}

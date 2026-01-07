@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.064";
+const BUILD_VERSION = "1.066";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -1071,7 +1071,7 @@ async function saveGuest(){
 
   if (!name) return toast("Inserisci il nome");
 
-  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, matrimonio };
+  const payload = { name, adults, kidsU10, checkIn, checkOut, total, booking, deposit, depositType, matrimonio, stanze: rooms.join(",") };
 
   const isEdit = state.guestMode === "edit";
   if (isEdit){
@@ -1188,17 +1188,25 @@ function renderGuestCards(){
     const depositTypeRaw = (item.acconto_tipo || item.depositType || item.guestDepositType || "contante").toString().toLowerCase();
     const depositTag = (depositTypeRaw.includes("elet")) ? "Elettronico" : "Contanti";
 
-    // Stanze prenotate (colonna 'stanze' se presente)
+    // Stanze prenotate (campo 'stanze' se presente: "1,2", "[1,2]", "1 2", ecc.)
     let roomsArr = [];
     try {
       const st = item.stanze;
-      if (Array.isArray(st)) roomsArr = st;
-      else if (st != null && String(st).trim().length) {
-        roomsArr = String(st).split(",").map(x=>parseInt(x.trim(),10)).filter(n=>isFinite(n) && n>=1 && n<=6);
+      if (Array.isArray(st)) {
+        roomsArr = st;
+      } else if (st != null && String(st).trim().length) {
+        const s = String(st);
+        // Estrae SOLO numeri 1–6 (robusto contro separatori strani)
+        const m = s.match(/[1-6]/g) || [];
+        roomsArr = m.map(x => parseInt(x, 10));
       }
     } catch (_) {}
     roomsArr = Array.from(new Set((roomsArr||[]).map(n=>parseInt(n,10)).filter(n=>isFinite(n) && n>=1 && n<=6))).sort((a,b)=>a-b);
-    const roomsTag = roomsArr.length ? ("Stanze: " + roomsArr.join(", ")) : "Stanze: —";
+
+    const roomsDotsHTML = roomsArr.length
+      ? roomsArr.map(n => `<span class="room-dot-badge" aria-label="Stanza ${n}">${n}</span>`).join("")
+      : `<span class="room-dot-badge is-empty" aria-label="Nessuna stanza">—</span>`;
+
 
 
     card.innerHTML = `
@@ -1217,7 +1225,7 @@ function renderGuestCards(){
       <div class="guest-details" hidden>
         <div class="guest-badges" style="display:flex; gap:8px; flex-wrap:wrap; margin: 2px 0 10px;">
           <span class="badge" style="background: rgba(43,124,180,0.12); border-color: rgba(43,124,180,0.22);">${depositTag}</span>
-          <span class="badge" style="background: rgba(216,189,151,0.22); border-color: rgba(216,189,151,0.40);">${roomsTag}</span>
+          <div class="rooms-dots" aria-label="Stanze prenotate">${roomsDotsHTML}</div>
         </div>
         <div class="detail-grid">
           <div><b>Check-in</b><br>${formatISODateLocal(item.check_in || item.checkIn || "") || "—"}</div>
