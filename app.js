@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.104";
+const BUILD_VERSION = "1.107";
 
 
 function genId(prefix){
@@ -25,12 +25,30 @@ function setPayType(containerId, type){
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
   const t = (type || "contante").toString().toLowerCase();
-  wrap.querySelectorAll(".pay-dot").forEach(b => {
+  wrap.querySelectorAll(".pay-dot[data-type]").forEach(b => {
     const v = (b.getAttribute("data-type") || "").toLowerCase();
     const on = v === t;
     b.classList.toggle("selected", on);
     b.setAttribute("aria-pressed", on ? "true" : "false");
   });
+}
+
+
+function setPayReceipt(containerId, on){
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const btn = wrap.querySelector('.pay-dot[data-receipt]');
+  if (!btn) return;
+  const active = !!on;
+  btn.classList.toggle("selected", active);
+  btn.setAttribute("aria-pressed", active ? "true" : "false");
+}
+
+function truthy(v){
+  if (v === true) return true;
+  if (v === false || v === undefined || v === null) return false;
+  const s = String(v).trim().toLowerCase();
+  return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
 // dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
@@ -1188,45 +1206,34 @@ function enterGuestCreateMode(){
   state.guestMode = "create";
   state.guestEditId = null;
   state.guestEditCreatedAt = null;
-  // UI
+
   const title = document.getElementById("ospiteFormTitle");
   if (title) title.textContent = "Nuovo ospite";
   const btn = document.getElementById("createGuestCard");
   if (btn) btn.textContent = "Crea ospite";
 
   // reset fields
-  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit"];
+  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit","guestSaldo"];
   fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
 
   const ci = document.getElementById("guestCheckIn");
   if (ci) ci.value = todayISO();
 
   setMarriage(false);
-state.guestRooms = state.guestRooms || new Set();
+  state.guestRooms = state.guestRooms || new Set();
   state.guestRooms.clear();
   state.lettiPerStanza = {};
-  // segmented: default contante
+
+  // Pagamenti (pillole): default contanti + ricevuta OFF
   state.guestDepositType = "contante";
   state.guestSaldoType = "contante";
-  setPayType("saldoType", state.guestSaldoType);
-  const seg = document.getElementById("depositType");
-  if (seg){
-    seg.querySelectorAll(".pay-dot").forEach(b=>{
-      const t = b.getAttribute("data-type");
-      const active = t === "contante";
-      b.classList.toggle("selected", active);
-      b.setAttribute("aria-pressed", active ? "true" : "false");
-    });
+  state.guestDepositReceipt = false;
+  state.guestSaldoReceipt = false;
 
-  const segSaldo = document.getElementById("saldoType");
-  segSaldo?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".pay-dot");
-    if (!btn) return;
-    const t = btn.getAttribute("data-type");
-    state.guestSaldoType = t;
-    setPayType("saldoType", t);
-  });
-  }
+  setPayType("depositType", state.guestDepositType);
+  setPayType("saldoType", state.guestSaldoType);
+  setPayReceipt("depositType", state.guestDepositReceipt);
+  setPayReceipt("saldoType", state.guestSaldoReceipt);
 
   // refresh rooms UI if present
   try {
@@ -1272,15 +1279,13 @@ function enterGuestEditMode(ospite){
   state.guestSaldoType = st;
   setPayType("saldoType", st);
 
-  const seg = document.getElementById("depositType");
-  if (seg){
-    seg.querySelectorAll(".pay-dot").forEach(b=>{
-      const t = b.getAttribute("data-type");
-      const active = t === dt;
-      b.classList.toggle("selected", active);
-      b.setAttribute("aria-pressed", active ? "true" : "false");
-    });
-  }
+  // ricevuta fiscale (toggle indipendente)
+  const depRec = truthy(ospite.acconto_ricevuta ?? ospite.accontoRicevuta ?? ospite.ricevuta_acconto ?? ospite.ricevutaAcconto ?? ospite.acconto_ricevutain);
+  const saldoRec = truthy(ospite.saldo_ricevuta ?? ospite.saldoRicevuta ?? ospite.ricevuta_saldo ?? ospite.ricevutaSaldo ?? ospite.saldo_ricevutain);
+  state.guestDepositReceipt = depRec;
+  state.guestSaldoReceipt = saldoRec;
+  setPayReceipt("depositType", depRec);
+  setPayReceipt("saldoType", saldoRec);
 
   // stanze: backend non espone GET stanze; se in futuro arrivano su ospite.stanze li applichiamo
   try {
@@ -1324,6 +1329,9 @@ if (!name) return toast("Inserisci il nome");
     acconto_tipo: depositType,
     saldo_pagato: saldoPagato,
     saldo_tipo: saldoTipo,
+    acconto_ricevuta: !!state.guestDepositReceipt,
+    saldo_ricevuta: !!state.guestSaldoReceipt,
+    saldo_ricevutain: !!state.guestSaldoReceipt,
     matrimonio,
     stanze: rooms.join(",")
   };
@@ -1400,18 +1408,33 @@ function setupOspite(){
     renderRooms();
   });
 
-  const seg = document.getElementById("depositType");
-  seg?.addEventListener("click", (e) => {
-    const btn = e.target.closest(".pay-dot");
-    if (!btn) return;
-    const t = btn.getAttribute("data-type");
-    state.guestDepositType = t;
-    seg.querySelectorAll(".pay-dot").forEach(b=>{
-      const active = b.getAttribute("data-type") === t;
-      b.classList.toggle("selected", active);
-      b.setAttribute("aria-pressed", active ? "true" : "false");
+  function bindPayPill(containerId, kind){
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    wrap.addEventListener("click", (e) => {
+      const btn = e.target.closest(".pay-dot");
+      if (!btn || !wrap.contains(btn)) return;
+
+      const t = btn.getAttribute("data-type");
+      if (t) {
+        if (kind === "deposit") state.guestDepositType = t;
+        if (kind === "saldo") state.guestSaldoType = t;
+        setPayType(containerId, t);
+        return;
+      }
+
+      if (btn.hasAttribute("data-receipt")) {
+        if (kind === "deposit") state.guestDepositReceipt = !state.guestDepositReceipt;
+        if (kind === "saldo") state.guestSaldoReceipt = !state.guestSaldoReceipt;
+        setPayReceipt(containerId, kind === "deposit" ? state.guestDepositReceipt : state.guestSaldoReceipt);
+        return;
+      }
     });
-  });
+  }
+
+  bindPayPill("depositType", "deposit");
+  bindPayPill("saldoType", "saldo");
+
 
   const btnCreate = document.getElementById("createGuestCard");
   btnCreate?.addEventListener("click", async () => {

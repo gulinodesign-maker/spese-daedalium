@@ -1,18 +1,18 @@
 /* dDAE - Service Worker (PWA) */
-/* Build: dDAE_1.104 */
+/* Build: dDAE_1.107 */
 
-const BUILD = "1.104";
-const CACHE_NAME = "dDAE_1.104"; // cambia ad ogni build
+const BUILD = "1.107";
+const CACHE_NAME = "dDAE_1.107"; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./index.html?v=1.104",
-  "./styles.css?v=1.104",
-  "./app.js?v=1.104",
-  "./config.js?v=1.104",
-  "./manifest.json?v=1.104",
+  "./index.html?v=1.107",
+  "./styles.css?v=1.107",
+  "./app.js?v=1.107",
+  "./config.js?v=1.107",
+  "./manifest.json?v=1.107",
   "./assets/logo.jpg",
   "./assets/bg-daedalium.png",
   "./assets/icons/icon-192.png",
@@ -83,7 +83,11 @@ async function networkFirstHTML(req) {
 
 async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(req, { ignoreSearch: true });
+  const url = new URL(req.url);
+  const hasSearch = !!url.search;
+
+  // Per asset versionati (?v=...), NON ignorare la query: serve a forzare l'update su iOS.
+  const cached = await cache.match(req) || (!hasSearch ? await cache.match(req, { ignoreSearch: true }) : null);
 
   const fetchPromise = fetch(new Request(req.url, { cache: "no-store" }))
     .then((res) => {
