@@ -1919,6 +1919,40 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
+
+
+/* dDAE_1.089 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
+
+.rooms-stack{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.room-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.bed-dots{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+  min-height: 18px;
+}
+.bed-dot{
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display:inline-block;
+  box-shadow: 0 6px 12px rgba(15,23,42,0.10);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.bed-dot-m{ background: rgba(255,59,48,0.95); border-color: rgba(255,59,48,0.55); }   /* rosso */
+.bed-dot-s{ background: rgba(50,173,230,0.95); border-color: rgba(50,173,230,0.55); } /* azzurro */
+.bed-dot-c{ background: rgba(52,199,89,0.95); border-color: rgba(52,199,89,0.55); }   /* verde */
+
+
 /* dDAE_1.067 — Matrimonio: pallino verde 'M' nella riga stanze */
 
 #page-ospite .room-dot-marriage{
@@ -2094,113 +2128,3 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity: 0.25;
   box-shadow: none !important;
 }
-
-
-
-/* ===== Calendario settimanale ===== */
-.cal-controls{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  align-items:flex-end;
-}
-.cal-controls .field{ flex:1 1 220px; }
-.cal-btns{ display:flex; gap:8px; flex-wrap:wrap; }
-
-.cal-wrap{
-  margin-top:12px;
-  overflow:auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(255,255,255,.6);
-}
-
-.cal-grid{
-  display:grid;
-  grid-template-columns: 90px repeat(7, minmax(110px, 1fr));
-  min-width: 860px;
-}
-
-.cal-h{
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background: rgba(255,255,255,.95);
-  font-weight: 800;
-  padding: 10px 10px;
-  border-bottom: 2px solid rgba(0,0,0,.15);
-  border-right: 2px solid rgba(0,0,0,.10);
-}
-
-.cal-corner{
-  left: 0;
-  position: sticky;
-  z-index: 4;
-}
-
-.cal-room{
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  padding: 12px 10px;
-  border-right: 2px solid rgba(0,0,0,.15);
-  border-bottom: 2px solid rgba(0,0,0,.10);
-  background: #fff;
-  font-weight: 800;
-}
-
-.cal-cell{
-  min-height: 68px;
-  padding: 10px 10px;
-  border-right: 2px solid rgba(0,0,0,.10);
-  border-bottom: 2px solid rgba(0,0,0,.10);
-  position: relative;
-}
-
-.cal-initials{
-  font-weight: 900;
-  letter-spacing: .5px;
-  font-size: 18px;
-}
-
-.cal-dots{
-  display:flex;
-  gap:6px;
-  margin-top: 10px;
-  flex-wrap:wrap;
-}
-
-.cal-badge{
-  position:absolute;
-  top:8px;
-  right:8px;
-  font-size:12px;
-  font-weight:800;
-  padding:2px 6px;
-  border-radius: 999px;
-  background: rgba(0,0,0,.18);
-  color: #fff;
-}
-
-.cal-legend{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top: 10px;
-  font-weight: 700;
-}
-.legend-text{ margin-right: 10px; opacity:.9; }
-
-.dot{
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  display:inline-block;
-  background: rgba(0,0,0,.2);
-}
-.dot.red{ background: #d62f2f; }
-.dot.blue{ background: #1e88e5; }
-.dot.green{ background: #2eaf4a; }
-
