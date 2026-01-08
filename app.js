@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.091";
+const BUILD_VERSION = "1.092";
 
 
 function genId(prefix){
@@ -526,7 +526,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home" || page === "ospite" || page === "ospiti") {
+    if (page === "home" || page === "ospite" || page === "ospiti" || page === "calendario") {
       chip.hidden = true;
     } else {
       chip.hidden = false;
@@ -538,56 +538,267 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
-  if (page === "calendario") renderCalendario();
+  if (page === "calendario") renderCalendario().catch(e => toast(e.message));
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
 }
 
 
-/* Calendario (solo grafica) */
-function _calMonday(d){
+/* =========================
+   CALENDARIO (settimanale)
+========================= */
+function _addDays(d, n){
   const x = new Date(d);
-  const day = x.getDay(); // 0=Dom,1=Lun...
-  const diff = (day === 0 ? -6 : 1 - day); // porta a Lun
-  x.setHours(0,0,0,0);
-  x.setDate(x.getDate() + diff);
+  x.setDate(x.getDate() + n);
   return x;
 }
-function _calRoman(n){
-  const r = ["I","II","III","IV","V","VI"];
-  return r[n-1] || String(n);
+function _parseISODate(s){
+  if (!s) return null;
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const y = Number(m[1]), mo = Number(m[2])-1, da = Number(m[3]);
+  const dt = new Date(y, mo, da);
+  if (dt.getFullYear() !== y || dt.getMonth() !== mo || dt.getDate() !== da) return null;
+  return dt;
 }
-function _calMonthUpper(m){
-  const months = ["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
-  return months[m] || "";
+function _startOfWeekMon(d){
+  const x = new Date(d);
+  const day = (x.getDay() + 6) % 7; // Mon=0
+  x.setDate(x.getDate() - day);
+  x.setHours(0,0,0,0);
+  return x;
 }
-function renderCalendario(){
-  const title = $("#calWeekTitle");
-  if (!title) return;
+function _toISO(d){
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function _monthNameIT(m){
+  return ["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"][m] || "";
+}
+function _roman(n){
+  return ({1:"I",2:"II",3:"III",4:"IV",5:"V",6:"VI"}[n] || String(n));
+}
+function _weekTitleFromWeekStart(weekStart){
+  const th = _addDays(weekStart, 3); // giovedì → mese “dominante”
+  const y = th.getFullYear();
+  const m = th.getMonth();
+  const monthFirst = new Date(y, m, 1);
+  const base = _startOfWeekMon(monthFirst); // settimana che contiene il 1° del mese
+  const diffWeeks = Math.round((weekStart.getTime() - base.getTime()) / (7*86400000));
+  const weekNum = diffWeeks + 1;
+  return `${_roman(weekNum)} ${_monthNameIT(m)}`;
+}
+function _dayLabelIT(d){
+  const dn = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"][d.getDay()];
+  return `${dn} ${d.getDate()}`;
+}
+function _guestId(item){
+  return String(item.id || item.ID || item.ospite_id || item.ospiteId || item.guest_id || item.guestId || "").trim();
+}
+function _guestRooms(item, gid){
+  // 1) campo 'stanze' in ospiti (robusto)
+  let roomsArr = [];
+  try {
+    const st = item.stanze;
+    if (Array.isArray(st)) roomsArr = st;
+    else if (st != null && String(st).trim().length) {
+      const m = String(st).match(/[1-6]/g) || [];
+      roomsArr = m.map(x => parseInt(x,10));
+    }
+  } catch(_){}
+  roomsArr = Array.from(new Set((roomsArr||[]).map(n=>parseInt(n,10)).filter(n=>isFinite(n) && n>=1 && n<=6)));
 
-  const now = new Date();
-  const monday = _calMonday(now);
+  // 2) fallback: leggi dal foglio stanze
+  if (!roomsArr.length && Array.isArray(state.stanzeRows) && gid){
+    const set = new Set();
+    state.stanzeRows.forEach(r=>{
+      const rid = String(r.ospite_id ?? r.ospiteId ?? r.guest_id ?? r.guestId ?? "").trim();
+      if (rid !== gid) return;
+      const sn = Number(r.stanza_num ?? r.stanzaNum ?? r.room_number ?? r.roomNumber ?? r.stanza ?? r.room ?? 0) || 0;
+      if (sn>=1 && sn<=6) set.add(sn);
+    });
+    roomsArr = Array.from(set);
+  }
 
-  // mese della settimana: usa il "centro" (giovedì) per gestire settimane a cavallo mese
-  const mid = new Date(monday);
-  mid.setDate(monday.getDate() + 3);
+  roomsArr.sort((a,b)=>a-b);
+  return roomsArr;
+}
+function _initials(name){
+  const s = String(name||"").trim();
+  if (!s) return "";
+  const parts = s.split(/\s+/).filter(Boolean);
+  if (parts.length === 1){
+    return parts[0].slice(0,2).toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+function _dotsHTML(gid, roomN){
+  const key = `${gid}:${roomN}`;
+  const info = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : { letto_m: 0, letto_s: 0, culla: 0 };
+  const lettoM = Number(info.letto_m || 0) || 0;
+  const lettoS = Number(info.letto_s || 0) || 0;
+  const culla = Number(info.culla || 0) || 0;
 
-  const y = mid.getFullYear();
-  const m = mid.getMonth();
+  let dots = "";
+  if (lettoM > 0) dots += `<span class="bed-dot bed-dot-m" aria-label="Letto matrimoniale"></span>`;
+  for (let i=0;i<lettoS;i++) dots += `<span class="bed-dot bed-dot-s" aria-label="Letto singolo"></span>`;
+  if (culla > 0) dots += `<span class="bed-dot bed-dot-c" aria-label="Culla"></span>`;
+  return dots ? `<div class="cal-dots" aria-hidden="true">${dots}</div>` : "";
+}
 
-  const ref = _calMonday(new Date(y, m, 1));
-  const weekIndex = Math.floor((monday - ref) / (7 * 86400000)) + 1;
-
-  title.textContent = `${_calRoman(weekIndex)} ${_calMonthUpper(m)}`;
-
-  const dn = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
-  for (let i = 0; i < 7; i++){
-    const el = $(`#calDay${i}`);
-    if (!el) continue;
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    el.textContent = `${dn[i]} ${d.getDate()}`;
+async function ensureCalendarData(){
+  // carica stanze + ospiti una sola volta per il calendario
+  if (!state._calDataReady){
+    await loadStanze({ showLoader:false });
+    const data = await api("ospiti", { showLoader:true });
+    state._calGuests = Array.isArray(data) ? data : [];
+    state._calDataReady = true;
   }
 }
+
+function setupCalendario(){
+  const grid = document.getElementById("calGrid");
+  if (!grid) return;
+
+  state.cal = state.cal || {};
+  state.cal.weekStart = state.cal.weekStart || _startOfWeekMon(new Date());
+
+  document.getElementById("calPrevWeek")?.addEventListener("click", ()=>{
+    state.cal.weekStart = _addDays(state.cal.weekStart, -7);
+    renderCalendario();
+  });
+  document.getElementById("calNextWeek")?.addEventListener("click", ()=>{
+    state.cal.weekStart = _addDays(state.cal.weekStart, 7);
+    renderCalendario();
+  });
+  document.getElementById("calThisWeek")?.addEventListener("click", ()=>{
+    state.cal.weekStart = _startOfWeekMon(new Date());
+    renderCalendario();
+  });
+
+  const dateInput = document.getElementById("calDateInput");
+  document.getElementById("calPickDate")?.addEventListener("click", ()=>{
+    if (dateInput){
+      dateInput.value = _toISO(new Date());
+      dateInput.showPicker ? dateInput.showPicker() : dateInput.click();
+    }
+  });
+  dateInput?.addEventListener("change", ()=>{
+    const d = _parseISODate(dateInput.value);
+    if (!d) return;
+    state.cal.weekStart = _startOfWeekMon(d);
+    renderCalendario();
+  });
+
+  grid.addEventListener("click", (e)=>{
+    const cell = e.target.closest && e.target.closest(".cal-cell");
+    if (!cell) return;
+    const gid = cell.getAttribute("data-guest-id");
+    if (!gid) return;
+    state.pendingOpenGuestId = gid;
+    showPage("ospiti");
+  });
+}
+
+async function renderCalendario(){
+  const titleEl = document.getElementById("calWeekTitle");
+  const grid = document.getElementById("calGrid");
+  if (!grid) return;
+
+  // skeleton
+  const weekStart = state.cal?.weekStart || _startOfWeekMon(new Date());
+  if (titleEl) titleEl.textContent = _weekTitleFromWeekStart(weekStart);
+
+  // render grid layout
+  const rooms = [1,2,3,4,5,6];
+  grid.innerHTML = "";
+
+  // header row
+  const head = document.createElement("div");
+  head.className = "cal-row cal-head";
+  head.innerHTML = `<div class="cal-day-head" aria-hidden="true"></div>` + rooms.map(r=>`<div class="cal-room-head">Stanza ${r}</div>`).join("");
+  grid.appendChild(head);
+
+  const days = [];
+  for (let i=0;i<7;i++) days.push(_addDays(weekStart, i));
+
+  // ensure data (only when calendar page is actually visible)
+  await ensureCalendarData();
+  const guests = Array.isArray(state._calGuests) ? state._calGuests : [];
+
+  // occupancy map
+  const occ = {}; // key: iso|room -> {gid, initials, dots, name}
+  const weekStartISO = _toISO(weekStart);
+  const weekEndISO = _toISO(_addDays(weekStart, 6));
+
+  const weekStartNum = _dayNumFromISO(weekStartISO);
+  const weekEndNum = _dayNumFromISO(weekEndISO);
+
+  for (const g of guests){
+    const gid = _guestId(g);
+    if (!gid) continue;
+
+    const ci = g.check_in || g.checkIn || "";
+    const co = g.check_out || g.checkOut || "";
+    const dInNum = _dayNumFromISO(ci);
+    let dOutNum = _dayNumFromISO(co);
+
+    if (dInNum == null) continue;
+    if (dOutNum == null) dOutNum = dInNum + 1; // 1 giorno minimo
+
+    // soggiorno: [check_in, check_out) → esclude il giorno di check-out
+    const stayStart = dInNum;
+    const stayEndEx = dOutNum;
+
+    // se non interseca la settimana, salta
+    if (stayEndEx <= weekStartNum || stayStart > weekEndNum) continue;
+
+    const roomsArr = _guestRooms(g, gid);
+    if (!roomsArr.length) continue;
+
+    const initials = _initials(g.nome || g.name || "");
+    const name = String(g.nome || g.name || "").trim();
+
+    const fromNum = Math.max(stayStart, weekStartNum);
+    const toNumEx = Math.min(stayEndEx, weekEndNum + 1);
+
+    for (let dn = fromNum; dn < toNumEx; dn++){
+      // convert dayNum to Date
+      const dt = new Date(dn * 86400000);
+      const iso = _toISO(dt);
+
+      for (const r of roomsArr){
+        const key = `${iso}|${r}`;
+        occ[key] = {
+          gid,
+          initials,
+          name,
+          dots: _dotsHTML(gid, r),
+        };
+      }
+    }
+  }
+
+  // body rows
+  days.forEach((d)=>{
+    const iso = _toISO(d);
+    const row = document.createElement("div");
+    row.className = "cal-row";
+    row.innerHTML = `<div class="cal-day">${_dayLabelIT(d)}</div>` + rooms.map(r=>{
+      const data = occ[`${iso}|${r}`];
+      if (!data) return `<button type="button" class="cal-cell" aria-label="Stanza ${r}, ${_dayLabelIT(d)}"></button>`;
+      return `<button type="button" class="cal-cell cal-cell-booked" data-guest-id="${escapeHtml(data.gid)}" aria-label="Stanza ${r}, ${_dayLabelIT(d)}: ${escapeHtml(data.name)}">
+        <div class="cal-cell-content">
+          <div class="cal-initials">${escapeHtml(data.initials)}</div>
+          ${data.dots}
+        </div>
+      </button>`;
+    }).join("");
+    grid.appendChild(row);
+  });
+}
+
 
 function setupHeader(){
   const hb = $("#hamburgerBtn");
@@ -1345,6 +1556,8 @@ function renderGuestCards(){
   items.forEach(item => {
     const card = document.createElement("div");
     card.className = "guest-card";
+    const __gid = String(item.id || item.ID || item.ospite_id || item.ospiteId || item.guest_id || item.guestId || "").trim();
+    if (__gid) card.setAttribute("data-id", __gid);
 
     const nome = escapeHtml(item.nome || item.name || "Ospite");
 
@@ -1501,6 +1714,7 @@ async function init(){
   setupHome();
 
     setupOspite();
+  setupCalendario();
   initFloatingLabels();
 // default period = this month
   const [from,to] = monthRangeISO(new Date());
@@ -1717,7 +1931,23 @@ function renderSpese(){
       await loadData({ showLoader:false }); renderGuestCards();
     });
     list.appendChild(el);
-  });
+  
+  // Se arrivo dal Calendario: apri automaticamente la scheda richiesta
+  if (state.pendingOpenGuestId){
+    const gid = String(state.pendingOpenGuestId);
+    state.pendingOpenGuestId = null;
+    const card = Array.from(document.querySelectorAll(".guest-card")).find(c => String(c.getAttribute("data-id")||"") === gid);
+    if (card){
+      const details = card.querySelector(".guest-details");
+      const btnOpen = card.querySelector("[data-open]");
+      if (details && details.hidden && btnOpen) btnOpen.click();
+      card.classList.add("flash");
+      card.scrollIntoView({ block:"center", behavior:"smooth" });
+      setTimeout(()=> card.classList.remove("flash"), 1200);
+    }
+  }
+
+});
 }
 
 
@@ -1774,3 +2004,9 @@ function attachDeleteOspite(card, ospite){
     });
   }
 })();
+  // HOME: icona Calendario
+  const goCal = document.getElementById("goCalendario");
+  if (goCal){
+    goCal.addEventListener("click", () => showPage("calendario"));
+  }
+
