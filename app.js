@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.093";
+const BUILD_VERSION = "1.094";
 
 
 function genId(prefix){
@@ -526,7 +526,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home" || page === "ospite" || page === "ospiti" || page === "calendario") {
+    if (page === "home" || page === "ospite" || page === "ospiti") {
       chip.hidden = true;
     } else {
       chip.hidden = false;
@@ -538,270 +538,9 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
-  if (page === "calendario") renderCalendario().catch(e => toast(e.message));
+  if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
 }
-
-
-/* =========================
-   CALENDARIO (settimanale)
-========================= */
-function _addDays(d, n){
-  const x = new Date(d);
-  x.setDate(x.getDate() + n);
-  return x;
-}
-function _parseISODate(s){
-  if (!s) return null;
-  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return null;
-  const y = Number(m[1]), mo = Number(m[2])-1, da = Number(m[3]);
-  const dt = new Date(y, mo, da);
-  if (dt.getFullYear() !== y || dt.getMonth() !== mo || dt.getDate() !== da) return null;
-  return dt;
-}
-function _startOfWeekMon(d){
-  const x = new Date(d);
-  const day = (x.getDay() + 6) % 7; // Mon=0
-  x.setDate(x.getDate() - day);
-  x.setHours(0,0,0,0);
-  return x;
-}
-function _toISO(d){
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const dd = String(d.getDate()).padStart(2,"0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-function _monthNameIT(m){
-  return ["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"][m] || "";
-}
-function _roman(n){
-  return ({1:"I",2:"II",3:"III",4:"IV",5:"V",6:"VI"}[n] || String(n));
-}
-function _weekTitleFromWeekStart(weekStart){
-  const th = _addDays(weekStart, 3); // giovedì → mese “dominante”
-  const y = th.getFullYear();
-  const m = th.getMonth();
-  const monthFirst = new Date(y, m, 1);
-  const base = _startOfWeekMon(monthFirst); // settimana che contiene il 1° del mese
-  const diffWeeks = Math.round((weekStart.getTime() - base.getTime()) / (7*86400000));
-  const weekNum = diffWeeks + 1;
-  return `${_roman(weekNum)} ${_monthNameIT(m)}`;
-}
-function _dayLabelIT(d){
-  const dn = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"][d.getDay()];
-  return `${dn} ${d.getDate()}`;
-}
-function _guestId(item){
-  return String(item.id || item.ID || item.ospite_id || item.ospiteId || item.guest_id || item.guestId || "").trim();
-}
-function _guestRooms(item, gid){
-  // 1) campo 'stanze' in ospiti (robusto)
-  let roomsArr = [];
-  try {
-    const st = item.stanze;
-    if (Array.isArray(st)) roomsArr = st;
-    else if (st != null && String(st).trim().length) {
-      const m = String(st).match(/[1-6]/g) || [];
-      roomsArr = m.map(x => parseInt(x,10));
-    }
-  } catch(_){}
-  roomsArr = Array.from(new Set((roomsArr||[]).map(n=>parseInt(n,10)).filter(n=>isFinite(n) && n>=1 && n<=6)));
-
-  // 2) fallback: leggi dal foglio stanze
-  if (!roomsArr.length && Array.isArray(state.stanzeRows) && gid){
-    const set = new Set();
-    state.stanzeRows.forEach(r=>{
-      const rid = String(r.ospite_id ?? r.ospiteId ?? r.guest_id ?? r.guestId ?? "").trim();
-      if (rid !== gid) return;
-      const sn = Number(r.stanza_num ?? r.stanzaNum ?? r.room_number ?? r.roomNumber ?? r.stanza ?? r.room ?? 0) || 0;
-      if (sn>=1 && sn<=6) set.add(sn);
-    });
-    roomsArr = Array.from(set);
-  }
-
-  roomsArr.sort((a,b)=>a-b);
-  return roomsArr;
-}
-function _initials(name){
-  const s = String(name||"").trim();
-  if (!s) return "";
-  const parts = s.split(/\s+/).filter(Boolean);
-  if (parts.length === 1){
-    return parts[0].slice(0,2).toUpperCase();
-  }
-  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
-}
-function _dotsHTML(gid, roomN){
-  const key = `${gid}:${roomN}`;
-  const info = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : { letto_m: 0, letto_s: 0, culla: 0 };
-  const lettoM = Number(info.letto_m || 0) || 0;
-  const lettoS = Number(info.letto_s || 0) || 0;
-  const culla = Number(info.culla || 0) || 0;
-
-  let dots = "";
-  if (lettoM > 0) dots += `<span class="bed-dot bed-dot-m" aria-label="Letto matrimoniale"></span>`;
-  for (let i=0;i<lettoS;i++) dots += `<span class="bed-dot bed-dot-s" aria-label="Letto singolo"></span>`;
-  if (culla > 0) dots += `<span class="bed-dot bed-dot-c" aria-label="Culla"></span>`;
-  return dots ? `<div class="cal-dots" aria-hidden="true">${dots}</div>` : "";
-}
-
-async function ensureCalendarData(){
-  // carica stanze + ospiti una sola volta per il calendario
-  if (!state._calDataReady){
-    await loadStanze({ showLoader:false });
-    const data = await api("ospiti", { showLoader:true });
-    state._calGuests = Array.isArray(data) ? data : [];
-    state._calDataReady = true;
-  }
-}
-
-function setupCalendario(){
-  const grid = document.getElementById("calGrid");
-  if (!grid) return;
-
-  state.cal = state.cal || {};
-  state.cal.weekStart = state.cal.weekStart || _startOfWeekMon(new Date());
-
-  document.getElementById("calPrevWeek")?.addEventListener("click", ()=>{
-    state.cal.weekStart = _addDays(state.cal.weekStart, -7);
-    renderCalendario();
-  });
-  document.getElementById("calNextWeek")?.addEventListener("click", ()=>{
-    state.cal.weekStart = _addDays(state.cal.weekStart, 7);
-    renderCalendario();
-  });
-  document.getElementById("calThisWeek")?.addEventListener("click", ()=>{
-    state.cal.weekStart = _startOfWeekMon(new Date());
-    renderCalendario();
-  });
-
-  const dateInput = document.getElementById("calDateInput");
-  document.getElementById("calPickDate")?.addEventListener("click", ()=>{
-    if (dateInput){
-      dateInput.value = _toISO(new Date());
-      dateInput.showPicker ? dateInput.showPicker() : dateInput.click();
-    }
-  });
-  dateInput?.addEventListener("change", ()=>{
-    const d = _parseISODate(dateInput.value);
-    if (!d) return;
-    state.cal.weekStart = _startOfWeekMon(d);
-    renderCalendario();
-  });
-
-  grid.addEventListener("click", (e)=>{
-    const cell = e.target.closest && e.target.closest(".cal-cell");
-    if (!cell) return;
-    const gid = cell.getAttribute("data-guest-id");
-    if (!gid) return;
-    state.pendingOpenGuestId = gid;
-    showPage("ospiti");
-  });
-}
-
-async function renderCalendario(){
-  const titleEl = document.getElementById("calWeekTitle");
-  const grid = document.getElementById("calGrid");
-  if (!grid) return;
-
-  // skeleton
-  const weekStart = state.cal?.weekStart || _startOfWeekMon(new Date());
-  if (titleEl) titleEl.textContent = _weekTitleFromWeekStart(weekStart);
-
-  // render grid layout
-  const rooms = [1,2,3,4,5,6];
-  grid.innerHTML = "";
-
-  // header row
-  const head = document.createElement("div");
-  head.className = "cal-row cal-head";
-  head.innerHTML = `<div class="cal-day-head" aria-hidden="true"></div>` + rooms.map(r=>`<div class="cal-room-head cal-room-${r}">Stanza ${r}</div>`).join("");
-  grid.appendChild(head);
-
-  const days = [];
-  for (let i=0;i<7;i++) days.push(_addDays(weekStart, i));
-
-  // ensure data (only when calendar page is actually visible)
-  await ensureCalendarData();
-  const guests = Array.isArray(state._calGuests) ? state._calGuests : [];
-
-  // occupancy map
-  const occ = {}; // key: iso|room -> {gid, initials, dots, name, isLast}
-  const weekStartISO = _toISO(weekStart);
-  const weekEndISO = _toISO(_addDays(weekStart, 6));
-
-  const weekStartNum = _dayNumFromISO(weekStartISO);
-  const weekEndNum = _dayNumFromISO(weekEndISO);
-
-  for (const g of guests){
-    const gid = _guestId(g);
-    if (!gid) continue;
-
-    const ci = g.check_in || g.checkIn || "";
-    const co = g.check_out || g.checkOut || "";
-    const dInNum = _dayNumFromISO(ci);
-    let dOutNum = _dayNumFromISO(co);
-
-    if (dInNum == null) continue;
-    if (dOutNum == null) dOutNum = dInNum + 1; // 1 giorno minimo
-
-    // soggiorno: [check_in, check_out) → esclude il giorno di check-out
-    const stayStart = dInNum;
-    const stayEndEx = dOutNum;
-
-    // se non interseca la settimana, salta
-    if (stayEndEx <= weekStartNum || stayStart > weekEndNum) continue;
-
-    const roomsArr = _guestRooms(g, gid);
-    if (!roomsArr.length) continue;
-
-    const initials = _initials(g.nome || g.name || "");
-    const name = String(g.nome || g.name || "").trim();
-
-    const fromNum = Math.max(stayStart, weekStartNum);
-    const toNumEx = Math.min(stayEndEx, weekEndNum + 1);
-    const lastDayNum = stayEndEx - 1;
-
-    for (let dn = fromNum; dn < toNumEx; dn++){
-      // convert dayNum to Date
-      const dt = new Date(dn * 86400000);
-      const iso = _toISO(dt);
-
-      for (const r of roomsArr){
-        const key = `${iso}|${r}`;
-        occ[key] = {
-          gid,
-          initials,
-          name,
-          dots: _dotsHTML(gid, r),
-          isLast: dn === lastDayNum,
-        };
-      }
-    }
-  }
-
-  // body rows
-  days.forEach((d)=>{
-    const iso = _toISO(d);
-    const row = document.createElement("div");
-    row.className = "cal-row";
-    row.innerHTML = `<div class="cal-day">${_dayLabelIT(d)}</div>` + rooms.map(r=>{
-      const data = occ[`${iso}|${r}`];
-      if (!data) return `<button type="button" class="cal-cell cal-room-${r}" aria-label="Stanza ${r}, ${_dayLabelIT(d)}"></button>`;
-      const lastCls = data.isLast ? " cal-cell-last" : "";
-      return `<button type="button" class="cal-cell cal-room-${r} cal-cell-booked${lastCls}" data-guest-id="${escapeHtml(data.gid)}" aria-label="Stanza ${r}, ${_dayLabelIT(d)}: ${escapeHtml(data.name)}">
-        <div class="cal-cell-content">
-          <div class="cal-initials">${escapeHtml(data.initials)}</div>
-          ${data.dots}
-        </div>
-      </button>`;
-    }).join("");
-    grid.appendChild(row);
-  });
-}
-
 
 function setupHeader(){
   const hb = $("#hamburgerBtn");
@@ -1559,8 +1298,6 @@ function renderGuestCards(){
   items.forEach(item => {
     const card = document.createElement("div");
     card.className = "guest-card";
-    const __gid = String(item.id || item.ID || item.ospite_id || item.ospiteId || item.guest_id || item.guestId || "").trim();
-    if (__gid) card.setAttribute("data-id", __gid);
 
     const nome = escapeHtml(item.nome || item.name || "Ospite");
 
@@ -1715,9 +1452,9 @@ async function init(){
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
+  setupCalendario();
 
     setupOspite();
-  setupCalendario();
   initFloatingLabels();
 // default period = this month
   const [from,to] = monthRangeISO(new Date());
@@ -1766,6 +1503,271 @@ async function init(){
   // avvio: mostra la HOME
   showPage("home");
 }
+
+
+// ===== CALENDARIO (dDAE_1.094) =====
+function setupCalendario(){
+  const pickBtn = document.getElementById("calPickBtn");
+  const todayBtn = document.getElementById("calTodayBtn");
+  const prevBtn = document.getElementById("calPrevBtn");
+  const nextBtn = document.getElementById("calNextBtn");
+  const input = document.getElementById("calDateInput");
+
+  if (!state.calendar) {
+    state.calendar = { anchor: new Date(), ready: false, guests: [] };
+  }
+
+  const openPicker = () => {
+    if (!input) return;
+    try { input.value = formatISODateLocal(state.calendar.anchor) || todayISO(); } catch(_) {}
+    input.click();
+  };
+
+  if (pickBtn) pickBtn.addEventListener("click", openPicker);
+  if (input) input.addEventListener("change", () => {
+    if (!input.value) return;
+    state.calendar.anchor = new Date(input.value + "T00:00:00");
+    renderCalendario();
+  });
+  if (todayBtn) todayBtn.addEventListener("click", () => {
+    state.calendar.anchor = new Date();
+    renderCalendario();
+  });
+  if (prevBtn) prevBtn.addEventListener("click", () => {
+    state.calendar.anchor = addDays(state.calendar.anchor, -7);
+    renderCalendario();
+  });
+  if (nextBtn) nextBtn.addEventListener("click", () => {
+    state.calendar.anchor = addDays(state.calendar.anchor, 7);
+    renderCalendario();
+  });
+}
+
+async function ensureCalendarData() {
+  if (!state.calendar) state.calendar = { anchor: new Date(), ready: false, guests: [] };
+  // ricarico sempre quando apro, così è sempre aggiornato
+  await loadStanze({ showLoader: true });
+  const data = await api("ospiti", { showLoader: true });
+  state.calendar.guests = Array.isArray(data) ? data : [];
+  state.calendar.ready = true;
+}
+
+function renderCalendario(){
+  const grid = document.getElementById("calGrid");
+  const title = document.getElementById("calWeekTitle");
+  if (!grid) return;
+
+  const anchor = (state.calendar && state.calendar.anchor) ? state.calendar.anchor : new Date();
+  const start = startOfWeekMonday(anchor);
+  const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+
+  if (title) {
+    const roman = romanWeekOfMonth(start);
+    const month = monthNameIT(start).toUpperCase();
+    title.textContent = `${roman} ${month}`;
+  }
+
+  const occ = buildWeekOccupancy(start);
+
+  grid.innerHTML = "";
+
+  const corner = document.createElement("div");
+  corner.className = "cal-pill";
+  corner.style.visibility = "hidden";
+  corner.textContent = ".";
+  grid.appendChild(corner);
+
+  for (let r = 1; r <= 6; r++) {
+    const pill = document.createElement("div");
+    pill.className = `cal-pill room room-${r}`;
+    pill.textContent = String(r);
+    grid.appendChild(pill);
+  }
+
+  for (let i = 0; i < 7; i++) {
+    const d = days[i];
+
+    const dayPill = document.createElement("div");
+    dayPill.className = "cal-pill day";
+    dayPill.textContent = `${weekdayShortIT(d)} ${d.getDate()}`;
+    grid.appendChild(dayPill);
+
+    const dIso = isoDate(d);
+    for (let r = 1; r <= 6; r++) {
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = `cal-cell room-${r}`;
+      cell.setAttribute("aria-label", `Stanza ${r}, ${weekdayShortIT(d)} ${d.getDate()}`);
+      cell.dataset.date = dIso;
+      cell.dataset.room = String(r);
+
+      const info = occ.get(`${dIso}:${r}`);
+      if (info) {
+        if (info.lastDay) cell.classList.add("last-day");
+
+        const inner = document.createElement("div");
+        inner.className = "cal-cell-inner";
+
+        const ini = document.createElement("div");
+        ini.className = "cal-initials";
+        ini.textContent = info.initials;
+        inner.appendChild(ini);
+
+        const dots = document.createElement("div");
+        dots.className = "cal-dots";
+        const arr = info.dots.slice(0, 4); // 2x2
+        for (const t of arr) {
+          const s = document.createElement("span");
+          s.className = `bed-dot ${t === "m" ? "bed-dot-m" : t === "s" ? "bed-dot-s" : "bed-dot-c"}`;
+          dots.appendChild(s);
+        }
+        inner.appendChild(dots);
+
+        cell.appendChild(inner);
+
+        cell.addEventListener("click", () => {
+          const ospite = findCalendarGuestById(info.guestId);
+          if (!ospite) return;
+          enterGuestEditMode(ospite);
+          showPage("ospite");
+        });
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function findCalendarGuestById(id){
+  const gid = String(id ?? "").trim();
+  const arr = (state.calendar && Array.isArray(state.calendar.guests)) ? state.calendar.guests : [];
+  return arr.find(o => String(o.id ?? o.ID ?? o.ospite_id ?? o.ospiteId ?? o.guest_id ?? o.guestId ?? "").trim() === gid) || null;
+}
+
+function buildWeekOccupancy(weekStart){
+  const map = new Map();
+  const guests = (state.calendar && Array.isArray(state.calendar.guests)) ? state.calendar.guests : [];
+  const weekEnd = addDays(weekStart, 7);
+
+  for (const g of guests){
+    const guestId = String(g.id ?? g.ID ?? g.ospite_id ?? g.ospiteId ?? g.guest_id ?? g.guestId ?? "").trim();
+    if (!guestId) continue;
+
+    const ciStr = formatISODateLocal(g.check_in || g.checkIn || "");
+    const coStr = formatISODateLocal(g.check_out || g.checkOut || "");
+    if (!ciStr || !coStr) continue;
+
+    const ci = new Date(ciStr + "T00:00:00");
+    const co = new Date(coStr + "T00:00:00");
+    const last = addDays(co, -1);
+
+    let roomsArr = [];
+    try {
+      const st = g.stanze;
+      if (Array.isArray(st)) roomsArr = st;
+      else if (st != null && String(st).trim().length) {
+        const m = String(st).match(/[1-6]/g) || [];
+        roomsArr = m.map(x => parseInt(x, 10));
+      }
+    } catch (_) {}
+    roomsArr = Array.from(new Set((roomsArr||[]).map(n=>parseInt(n,10)).filter(n=>isFinite(n) && n>=1 && n<=6))).sort((a,b)=>a-b);
+    if (!roomsArr.length) continue;
+
+    const initials = initialsFromName(g.nome || g.name || "");
+
+    for (let d = new Date(ci); d < co; d = addDays(d, 1)) {
+      if (d < weekStart || d >= weekEnd) continue;
+      const dIso = isoDate(d);
+      const isLast = isoDate(d) === isoDate(last);
+
+      for (const r of roomsArr) {
+        const dots = dotsForGuestRoom(guestId, r);
+        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: isLast });
+      }
+    }
+  }
+  return map;
+}
+
+function dotsForGuestRoom(guestId, room){
+  const key = `${guestId}:${room}`;
+  const info = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : { letto_m:0, letto_s:0, culla:0 };
+  const lettoM = Number(info.letto_m || 0) || 0;
+  const lettoS = Number(info.letto_s || 0) || 0;
+  const culla = Number(info.culla || 0) || 0;
+
+  const arr = [];
+  if (lettoM > 0) arr.push("m");
+  for (let i=0;i<lettoS;i++) arr.push("s");
+  if (culla > 0) arr.push("c");
+  return arr;
+}
+
+function initialsFromName(name){
+  const s = collapseSpaces(String(name||"").trim());
+  if (!s) return "";
+  const parts = s.split(" ").filter(Boolean);
+  if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  const a = parts[0].slice(0,1);
+  const b = parts[parts.length-1].slice(0,1);
+  return (a+b).toUpperCase();
+}
+
+function startOfWeekMonday(date){
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const day = d.getDay(); // 0 Sun..6 Sat
+  const diff = (day === 0 ? -6 : 1 - day);
+  return addDays(d, diff);
+}
+
+function addDays(date, days){
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function isoDate(date){
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const da = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+
+function weekdayShortIT(date){
+  const names = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+  return names[new Date(date).getDay()];
+}
+
+function monthNameIT(date){
+  const names = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+  return names[new Date(date).getMonth()];
+}
+
+function romanWeekOfMonth(weekStart){
+  const d = new Date(weekStart);
+  const y = d.getFullYear();
+  const m = d.getMonth();
+  const firstOfMonth = new Date(y, m, 1);
+  const firstWeekStart = startOfWeekMonday(firstOfMonth);
+  const diff = Math.floor((startOfWeekMonday(d) - firstWeekStart) / (7*24*60*60*1000));
+  const n = Math.max(1, diff + 1);
+  return toRoman(n);
+}
+
+function toRoman(n){
+  const map = [[10,"X"],[9,"IX"],[8,"VIII"],[7,"VII"],[6,"VI"],[5,"V"],[4,"IV"],[3,"III"],[2,"II"],[1,"I"]];
+  let out = "";
+  let x = Math.max(1, Math.min(10, n));
+  for (const [v,s] of map){
+    while (x >= v){ out += s; x -= v; }
+  }
+  return out || "I";
+}
+
 
 init();
 
@@ -1934,23 +1936,7 @@ function renderSpese(){
       await loadData({ showLoader:false }); renderGuestCards();
     });
     list.appendChild(el);
-  
-  // Se arrivo dal Calendario: apri automaticamente la scheda richiesta
-  if (state.pendingOpenGuestId){
-    const gid = String(state.pendingOpenGuestId);
-    state.pendingOpenGuestId = null;
-    const card = Array.from(document.querySelectorAll(".guest-card")).find(c => String(c.getAttribute("data-id")||"") === gid);
-    if (card){
-      const details = card.querySelector(".guest-details");
-      const btnOpen = card.querySelector("[data-open]");
-      if (details && details.hidden && btnOpen) btnOpen.click();
-      card.classList.add("flash");
-      card.scrollIntoView({ block:"center", behavior:"smooth" });
-      setTimeout(()=> card.classList.remove("flash"), 1200);
-    }
-  }
-
-});
+  });
 }
 
 
@@ -2007,9 +1993,3 @@ function attachDeleteOspite(card, ospite){
     });
   }
 })();
-  // HOME: icona Calendario
-  const goCal = document.getElementById("goCalendario");
-  if (goCal){
-    goCal.addEventListener("click", () => showPage("calendario"));
-  }
-
