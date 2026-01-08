@@ -1921,7 +1921,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.090 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
+/* dDAE_1.089 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
 
 .rooms-stack{
   display:flex;
@@ -2127,4 +2127,141 @@ body[data-page="ospiti"] .guest-card .actions {
 .guest-led.mini-led.led-off{
   opacity: 0.25;
   box-shadow: none !important;
+}
+
+
+/* ============================
+   CALENDARIO (solo grafica) — dDAE_1.090
+============================ */
+
+#page-calendario .calendar-page{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 10px 4px 18px;
+}
+
+#page-calendario .calendar-toolbar{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 8px 6px;
+}
+
+#page-calendario .cal-toolbar-spacer{ flex: 1; }
+
+#page-calendario .cal-btn{
+  border: 1px solid rgba(15,23,42,0.14);
+  background: rgba(255,255,255,0.74);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 10px 12px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(15,23,42,0.10);
+}
+
+#page-calendario .cal-btn.cal-icon{
+  width: 44px;
+  padding: 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 22px;
+  border-radius: 999px;
+}
+
+#page-calendario .calendar-title{
+  margin: 8px 10px 14px;
+  font-size: 34px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+  text-align:center;
+  color: rgba(15,23,42,0.92);
+}
+
+#page-calendario .cal-week-date{ font-weight: 900; opacity: 0.96; }
+
+#page-calendario .calendar-wrap{
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 6px 2px;
+}
+
+#page-calendario .cal-grid{
+  display:grid;
+  grid-template-columns: 78px repeat(6, minmax(92px, 1fr));
+  gap: 10px;
+  min-width: 720px;
+}
+
+#page-calendario .cal-corner{ height: 56px; }
+
+#page-calendario .cal-room-h{
+  height: 56px;
+  border-radius: 18px 18px 10px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 950;
+  font-size: 16px;
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 22px rgba(15,23,42,0.10);
+}
+
+#page-calendario .cal-day{
+  height: 78px;
+  border-radius: 18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 26px;
+  font-weight: 900;
+  color: rgba(15,23,42,0.62);
+  background: rgba(255,255,255,0.62);
+  border: 1px solid rgba(15,23,42,0.10);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+#page-calendario .cal-cell{
+  height: 78px;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,0.08);
+  background: rgba(255,255,255,0.52);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 22px rgba(15,23,42,0.06);
+}
+
+/* Colori colonne (simili al mock) */
+#page-calendario .r1{ --col: rgba(245, 152, 90, 0.22); }
+#page-calendario .r2{ --col: rgba(245, 199, 90, 0.22); }
+#page-calendario .r3{ --col: rgba(125, 204, 165, 0.22); }
+#page-calendario .r4{ --col: rgba(127, 170, 230, 0.22); }
+#page-calendario .r5{ --col: rgba(186, 140, 230, 0.22); }
+#page-calendario .r6{ --col: rgba(232, 118, 118, 0.22); }
+
+#page-calendario .cal-room-h.r1{ background: linear-gradient(to bottom, rgba(245,152,90,0.92), rgba(245,152,90,0.78)); }
+#page-calendario .cal-room-h.r2{ background: linear-gradient(to bottom, rgba(245,199,90,0.92), rgba(245,199,90,0.78)); }
+#page-calendario .cal-room-h.r3{ background: linear-gradient(to bottom, rgba(125,204,165,0.92), rgba(125,204,165,0.78)); }
+#page-calendario .cal-room-h.r4{ background: linear-gradient(to bottom, rgba(127,170,230,0.92), rgba(127,170,230,0.78)); }
+#page-calendario .cal-room-h.r5{ background: linear-gradient(to bottom, rgba(186,140,230,0.92), rgba(186,140,230,0.78)); }
+#page-calendario .cal-room-h.r6{ background: linear-gradient(to bottom, rgba(232,118,118,0.92), rgba(232,118,118,0.78)); }
+
+#page-calendario .cal-cell.r1{ background: linear-gradient(to bottom, var(--col), rgba(255,255,255,0.56)); }
+#page-calendario .cal-cell.r2{ background: linear-gradient(to bottom, var(--col), rgba(255,255,255,0.56)); }
+#page-calendario .cal-cell.r3{ background: linear-gradient(to bottom, var(--col), rgba(255,255,255,0.56)); }
+#page-calendario .cal-cell.r4{ background: linear-gradient(to bottom, var(--col), rgba(255,255,255,0.56)); }
+#page-calendario .cal-cell.r5{ background: linear-gradient(to bottom, var(--col), rgba(255,255,255,0.56)); }
+#page-calendario .cal-cell.r6{ background: linear-gradient(to bottom, var(--col), rgba(255,255,255,0.56)); }
+
+@media (max-width: 520px){
+  #page-calendario .calendar-title{ font-size: 30px; }
+  #page-calendario .cal-day{ font-size: 24px; }
 }

@@ -471,7 +471,7 @@ function bindHomeDelegation(){
     const o = e.target.closest && e.target.closest("#goOspite");
     if (o){ hideLauncher(); showPage("ospite"); return; }
     const cal = e.target.closest && e.target.closest("#goCalendario");
-    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
+    if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -526,7 +526,7 @@ function showPage(page){
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
   if (chip){
-    if (page === "home" || page === "ospite" || page === "ospiti") {
+    if (page === "home" || page === "ospite" || page === "ospiti" || page === "calendario") {
       chip.hidden = true;
     } else {
       chip.hidden = false;
@@ -660,8 +660,6 @@ async function loadStanze({ showLoader=true } = {}){
 }
 
 async function loadOspiti({ from="", to="" } = {}){
-  // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
-  await loadStanze({ showLoader:false });
   const data = await api("ospiti", { params: { from, to } });
   state.guests = Array.isArray(data) ? data : [];
   renderGuestCards();
