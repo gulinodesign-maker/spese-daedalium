@@ -2423,3 +2423,27 @@ body[data-page="ospiti"] .guest-card .actions {
   font-weight: 900;
   opacity: 0.85;
 }
+
+
+/* dDAE_1.104 — Ospiti: pulsante + in testata */
+.btn-add-guest{
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: var(--orange);
+  color: #fff;
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(15,23,42,0.18);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.btn-add-guest:active{
+  transform: scale(0.98);
+}

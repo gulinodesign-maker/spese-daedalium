@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.103";
+const BUILD_VERSION = "1.104";
 
 
 function genId(prefix){
@@ -489,7 +489,7 @@ function bindHomeDelegation(){
   homeDelegationBound = true;
   document.addEventListener("click", (e)=>{
     const o = e.target.closest && e.target.closest("#goOspite");
-    if (o){ hideLauncher(); showPage("ospite"); return; }
+    if (o){ hideLauncher(); showPage("ospiti"); return; }
     const cal = e.target.closest && e.target.closest("#goCalendario");
     if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
@@ -582,13 +582,20 @@ function setupHome(){
   // HOME: icona Ospite va alla pagina ospite
   const goO = $("#goOspite");
   if (goO){
-    goO.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
+    goO.addEventListener("click", () => { showPage("ospiti"); });
   }
   // HOME: icona Ospiti va alla pagina elenco ospiti
   const goOs = $("#goOspiti");
   if (goOs){
     goOs.addEventListener("click", () => showPage("ospiti"));
   }
+
+
+// OSPITI: pulsante + (nuovo ospite)
+const btnNewGuestOspiti = $("#btnNewGuestOspiti");
+if (btnNewGuestOspiti){
+  btnNewGuestOspiti.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
+}
 
   // HOME: icona Calendario (attiva e “tap-safe” su iOS PWA)
   const goCal = $("#goCalendario");

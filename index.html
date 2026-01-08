@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.103" rel="stylesheet"/>
-<link href="./manifest.json?v=1.103" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.103" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.103" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.103" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.103" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.104" rel="stylesheet"/>
+<link href="./manifest.json?v=1.104" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.104" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.104" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.104" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.104" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -40,13 +40,13 @@
 <div class="home-page">
 <div class="home-spacer"></div>
 <div aria-label="Sezioni" class="home-grid" role="navigation">
-<button aria-label="Nuovo ospite" class="home-main" id="goOspite" type="button">
+<button aria-label="Ospiti" class="home-main" id="goOspite" type="button">
 <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
 <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
 </svg></div>
-<div class="home-main-label">Nuovo ospite</div>
-</button><button aria-label="Ospiti" class="home-main" id="goOspiti" type="button"><div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg></div><div class="home-main-label">Ospiti</div></button>
+<div class="home-main-label">Ospiti</div>
+</button>
 <button aria-label="Apri Spese" class="home-main" id="openLauncher" type="button">
 <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M9 6.5h6"></path>
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.103</div>
+<div class="build" id="buildText">1.104</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -325,7 +325,7 @@
 </div>
 </div>
 </div>
-</section><section aria-label="Ospiti" class="page" hidden="" id="page-ospiti"><div class="content"><div class="ospite-wrap"><div class="card guest-cards-card"><div class="hd"><h2>Ospiti</h2></div><div class="bd">
+</section><section aria-label="Ospiti" class="page" hidden="" id="page-ospiti"><div class="content"><div class="ospite-wrap"><div class="card guest-cards-card"><div class="hd"><h2>Ospiti</h2><button id="btnNewGuestOspiti" class="btn-add-guest" type="button" aria-label="Nuovo ospite">+</button></div><div class="bd">
 <div class="guest-filter-grid" aria-label="Filtri ospiti">
   <div class="field gf-tile gf-sort" aria-label="Ordinamento">
     <select id="guestSortBy" aria-label="Ordina ospiti per">
@@ -414,8 +414,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.103"></script>
-<script defer="" src="./app.js?v=1.103"></script>
+<script defer="" src="./config.js?v=1.104"></script>
+<script defer="" src="./app.js?v=1.104"></script>
 <!-- Launcher (popup) con 4 icone interne -->
 <div aria-hidden="true" class="launcher" hidden="" id="launcherModal">
 <div class="launcher-backdrop" data-close="1"></div>
