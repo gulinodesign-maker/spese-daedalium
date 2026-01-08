@@ -2136,12 +2136,12 @@ body[data-page="ospiti"] .guest-card .actions {
   --cal-cell-h: 46px;
   --cal-day-w: 68px;
   --cal-gap: 6px;
-  --room1: rgba(255, 138, 0, .22);
-  --room2: rgba(120, 200, 255, .22);
-  --room3: rgba(160, 120, 255, .22);
-  --room4: rgba(120, 255, 190, .22);
-  --room5: rgba(255, 120, 200, .22);
-  --room6: rgba(255, 240, 120, .22);
+  --room1: rgba(255, 59, 48, .22);
+  --room2: rgba(255, 149, 0, .22);
+  --room3: rgba(255, 204, 0, .22);
+  --room4: rgba(52, 199, 89, .22);
+  --room5: rgba(0, 122, 255, .22);
+  --room6: rgba(88, 86, 214, .22);
 }
 
 .calendar-page .cal-nav{
@@ -2312,3 +2312,6 @@ body[data-page="ospiti"] .guest-card .actions {
 @media (max-width: 420px){
   :root{ --cal-day-w: 64px; --cal-cell-h: 44px; }
 }
+
+
+.cal-controls-row{ margin-bottom: 20px; }

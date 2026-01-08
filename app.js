@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.094";
+const BUILD_VERSION = "1.096";
 
 
 function genId(prefix){
@@ -1562,9 +1562,8 @@ function renderCalendario(){
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
   if (title) {
-    const roman = romanWeekOfMonth(start);
     const month = monthNameIT(start).toUpperCase();
-    title.textContent = `${roman} ${month}`;
+    title.textContent = month;
   }
 
   const occ = buildWeekOccupancy(start);
