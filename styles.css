@@ -2132,24 +2132,26 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* ===== CALENDARIO ===== */
 :root{
-  --cal-pill-h: 34px;
-  --cal-cell-h: 46px;
-  --cal-day-w: 68px;
-  --cal-gap: 6px;
+  /* Celle più grandi: riduco l'interspazio e alzo leggermente le altezze */
+  --cal-pill-h: 36px;
+  --cal-cell-h: 54px;
+  --cal-day-w: 66px;
+  --cal-gap: 3px;
   --room1: rgba(255, 59, 48, .22);
   --room2: rgba(255, 149, 0, .22);
   --room3: rgba(255, 204, 0, .22);
   --room4: rgba(52, 199, 89, .22);
-  --room5: rgba(0, 122, 255, .22);
+  --room5: rgba(90, 200, 250, .22);
   --room6: rgba(88, 86, 214, .22);
 }
 
 .calendar-page .cal-nav{
   display:flex;
   flex-direction:column;
-  gap:10px;
+  /* 20px tra tasti navigazione e scritta del mese */
+  gap:20px;
   align-items:center;
-  margin-bottom:10px;
+  margin-bottom:12px;
 }
 
 .cal-nav-row{
@@ -2217,6 +2219,15 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 .cal-pill.day{ justify-content:flex-start; padding-left:12px; }
 .cal-pill.room{ justify-content:center; padding:0; }
+
+/* Etichetta "STANZE" nell'angolo alto-sinistra */
+.cal-pill.corner{
+  justify-content:flex-start;
+  padding-left:12px;
+  font-size:11px;
+  letter-spacing:.10em;
+  opacity:.92;
+}
 
 .cal-cell{
   border-radius: 14px;
@@ -2310,7 +2321,7 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-legend-dot{ width:8px; height:8px; }
 
 @media (max-width: 420px){
-  :root{ --cal-day-w: 64px; --cal-cell-h: 44px; }
+  :root{ --cal-day-w: 62px; --cal-cell-h: 50px; --cal-pill-h: 34px; --cal-gap: 2px; }
 }
 
 

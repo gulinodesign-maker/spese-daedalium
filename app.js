@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.096";
+const BUILD_VERSION = "1.097";
 
 
 function genId(prefix){
@@ -568,6 +568,14 @@ function setupHome(){
   const goOs = $("#goOspiti");
   if (goOs){
     goOs.addEventListener("click", () => showPage("ospiti"));
+  }
+
+  // HOME: icona Calendario (attiva)
+  const goCal = $("#goCalendario");
+  if (goCal){
+    goCal.disabled = false;
+    goCal.removeAttribute("aria-disabled");
+    goCal.addEventListener("click", () => showPage("calendario"));
   }
 
 
@@ -1570,10 +1578,10 @@ function renderCalendario(){
 
   grid.innerHTML = "";
 
+  // Angolo alto-sinistra: etichetta "STANZE" (a sinistra della stanza 1, sopra Lunedì)
   const corner = document.createElement("div");
-  corner.className = "cal-pill";
-  corner.style.visibility = "hidden";
-  corner.textContent = ".";
+  corner.className = "cal-pill corner";
+  corner.textContent = "STANZE";
   grid.appendChild(corner);
 
   for (let r = 1; r <= 6; r++) {
