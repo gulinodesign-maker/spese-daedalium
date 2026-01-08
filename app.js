@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.097";
+const BUILD_VERSION = "1.098";
 
 
 function genId(prefix){
@@ -462,6 +462,26 @@ return json.data;
 
 /* Launcher modal (popup) */
 
+
+
+// iOS/PWA: elimina i “tap” persi (click non sempre affidabile su Safari PWA)
+function bindFastTap(el, fn){
+  if (!el) return;
+  let last = 0;
+  const handler = (e)=>{
+    const now = Date.now();
+    if (now - last < 450) return;
+    last = now;
+    try{ e.preventDefault(); }catch(_){ }
+    try{ e.stopPropagation(); }catch(_){ }
+    fn();
+  };
+  ["click","touchend","pointerup"].forEach(evt=>{
+    try{ el.addEventListener(evt, handler, { passive:false }); }
+    catch(_){ el.addEventListener(evt, handler); }
+  });
+}
+
 let launcherDelegationBound = false;
 let homeDelegationBound = false;
 function bindHomeDelegation(){
@@ -570,12 +590,12 @@ function setupHome(){
     goOs.addEventListener("click", () => showPage("ospiti"));
   }
 
-  // HOME: icona Calendario (attiva)
+  // HOME: icona Calendario (attiva e “tap-safe” su iOS PWA)
   const goCal = $("#goCalendario");
   if (goCal){
     goCal.disabled = false;
     goCal.removeAttribute("aria-disabled");
-    goCal.addEventListener("click", () => showPage("calendario"));
+    bindFastTap(goCal, () => showPage("calendario"));
   }
 
 

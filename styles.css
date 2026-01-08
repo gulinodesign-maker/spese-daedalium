@@ -2133,10 +2133,10 @@ body[data-page="ospiti"] .guest-card .actions {
 /* ===== CALENDARIO ===== */
 :root{
   /* Celle più grandi: riduco l'interspazio e alzo leggermente le altezze */
-  --cal-pill-h: 36px;
-  --cal-cell-h: 54px;
-  --cal-day-w: 66px;
-  --cal-gap: 3px;
+  --cal-pill-h: 34px;
+  --cal-cell-h: 62px;
+  --cal-day-w: 58px;
+  --cal-gap: 1px;
   --room1: rgba(255, 59, 48, .22);
   --room2: rgba(255, 149, 0, .22);
   --room3: rgba(255, 204, 0, .22);
@@ -2147,11 +2147,9 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .calendar-page .cal-nav{
   display:flex;
-  flex-direction:column;
-  /* 20px tra tasti navigazione e scritta del mese */
-  gap:20px;
   align-items:center;
-  margin-bottom:12px;
+  justify-content:center;
+  margin-top: 6px;
 }
 
 .cal-nav-row{
@@ -2161,6 +2159,14 @@ body[data-page="ospiti"] .guest-card .actions {
   gap:10px;
   width:100%;
   position:relative;
+}
+
+.calendar-page .cal-body{
+  margin-top: 20px; /* distanza tra icone e gruppo mese+calendario */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 10px;
 }
 
 .cal-date-input{
@@ -2321,8 +2327,12 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-legend-dot{ width:8px; height:8px; }
 
 @media (max-width: 420px){
-  :root{ --cal-day-w: 62px; --cal-cell-h: 50px; --cal-pill-h: 34px; --cal-gap: 2px; }
+  :root{ --cal-day-w: 58px; --cal-cell-h: 62px; --cal-pill-h: 34px; --cal-gap: 1px; }
 }
 
 
 .cal-controls-row{ margin-bottom: 20px; }
+
+
+/* iOS: tap responsiveness */
+.home-main, .cal-nav-btn{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }

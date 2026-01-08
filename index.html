@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.097" rel="stylesheet"/>
-<link href="./manifest.json?v=1.097" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.097" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.097" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.097" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.097" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.098" rel="stylesheet"/>
+<link href="./manifest.json?v=1.098" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.098" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.098" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.098" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.098" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -56,7 +56,7 @@
 </svg></div>
 <div class="home-main-label">Spese</div>
 </button>
-<button aria-label="Calendario" class="home-main" id="goCalendario" type="button">
+<button aria-label="Calendario" class="home-main" id="goCalendario" data-go="calendario" type="button">
 <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M7 3v3"></path>
 <path d="M17 3v3"></path>
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.097</div>
+<div class="build" id="buildText">1.098</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -375,12 +375,13 @@
 
         <input id="calDateInput" type="date" class="cal-date-input" aria-label="Data" />
       </div>
-
-      <div class="cal-week-title" id="calWeekTitle">GENNAIO</div>
     </div>
 
-    <div class="cal-grid-wrap">
+    <div class="cal-body">
+      <div class="cal-week-title" id="calWeekTitle">GENNAIO</div>
+      <div class="cal-grid-wrap">
       <div class="cal-grid" id="calGrid" aria-label="Calendario settimanale"></div>
+    </div>
     </div>
 
     <div class="cal-legend" aria-label="Legenda letti">
@@ -407,8 +408,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.097"></script>
-<script defer="" src="./app.js?v=1.097"></script>
+<script defer="" src="./config.js?v=1.098"></script>
+<script defer="" src="./app.js?v=1.098"></script>
 <!-- Launcher (popup) con 4 icone interne -->
 <div aria-hidden="true" class="launcher" hidden="" id="launcherModal">
 <div class="launcher-backdrop" data-close="1"></div>
