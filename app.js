@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.102";
+const BUILD_VERSION = "1.103";
 
 
 function genId(prefix){
@@ -1515,7 +1515,7 @@ function renderGuestCards(){
       <div class="guest-top">
         <div class="guest-left">
           <span class="guest-led ${led.cls}" aria-label="${led.label}" title="${led.label}"></span>
-          <div class="guest-name">${insNo ? `<span class="guest-insno">#${insNo}</span>` : ``}${nome}</div>
+          <div class="guest-name">${insNo ? `<span class="guest-insno">${insNo}</span>` : ``}${nome}</div>
         </div>
         <div class="guest-actions" role="group" aria-label="Azioni ospite">
           <button class="tl-btn tl-green" type="button" data-open aria-label="Apri/chiudi dettagli"><span class="sr-only">Apri</span></button>
