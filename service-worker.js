@@ -84,11 +84,10 @@ async function networkFirstHTML(req) {
 async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE_NAME);
   const url = new URL(req.url);
+  const hasSearch = !!url.search;
 
-  // Se l'asset è versionato (?v=...), NON ignorare la query:
-  // così un nuovo build non può ricevere JS/CSS vecchi su iOS.
-  const ignoreSearch = !url.searchParams.has("v");
-  const cached = await cache.match(req, { ignoreSearch });
+  // Per asset versionati (?v=...), NON ignorare la query: serve a forzare l'update su iOS.
+  const cached = await cache.match(req) || (!hasSearch ? await cache.match(req, { ignoreSearch: true }) : null);
 
   const fetchPromise = fetch(new Request(req.url, { cache: "no-store" }))
     .then((res) => {
