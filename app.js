@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.099";
+const BUILD_VERSION = "1.102";
 
 
 function genId(prefix){
@@ -640,6 +640,103 @@ function setupHome(){
 }
 
 
+function setupGuestListControls(){
+  const sortSel = $("#guestSortBy");
+  const dirBtn = $("#guestSortDir");
+  if (!sortSel) return;
+
+  const savedBy = localStorage.getItem("dDAE_guestSortBy");
+  const savedDir = localStorage.getItem("dDAE_guestSortDir");
+  state.guestSortBy = savedBy || state.guestSortBy || "arrivo";
+  state.guestSortDir = savedDir || state.guestSortDir || "asc";
+
+  try { sortSel.value = state.guestSortBy; } catch(_) {}
+
+  const paintDir = () => {
+    if (!dirBtn) return;
+    const asc = (state.guestSortDir !== "desc");
+    dirBtn.textContent = asc ? "↑" : "↓";
+    dirBtn.setAttribute("aria-pressed", asc ? "false" : "true");
+  };
+  paintDir();
+
+  sortSel.addEventListener("change", () => {
+    state.guestSortBy = sortSel.value;
+    try { localStorage.setItem("dDAE_guestSortBy", state.guestSortBy); } catch(_){}
+    renderGuestCards();
+  });
+
+  if (dirBtn){
+    dirBtn.addEventListener("click", () => {
+      state.guestSortDir = (state.guestSortDir === "desc") ? "asc" : "desc";
+      try { localStorage.setItem("dDAE_guestSortDir", state.guestSortDir); } catch(_){}
+      paintDir();
+      renderGuestCards();
+    });
+  }
+}
+
+function guestIdOf(g){
+  return String(g?.id ?? g?.ID ?? g?.ospite_id ?? g?.ospiteId ?? g?.guest_id ?? g?.guestId ?? "").trim();
+}
+
+function parseDateTs(v){
+  const s = String(v ?? "").trim();
+  if (!s) return null;
+  const t = Date.parse(s);
+  return Number.isFinite(t) ? t : null;
+}
+
+function computeInsertionMap(guests){
+  const arr = (guests || []).map((g, idx) => {
+    const id = guestIdOf(g);
+    const c = g?.created_at ?? g?.createdAt ?? "";
+    const t = parseDateTs(c);
+    return { id, idx, t };
+  });
+
+  arr.sort((a,b) => {
+    const at = a.t, bt = b.t;
+    if (at != null && bt != null) return at - bt;
+    if (at != null) return -1;
+    if (bt != null) return 1;
+    return a.idx - b.idx;
+  });
+
+  const map = {};
+  let n = 1;
+  for (const x of arr){
+    if (!x.id) continue;
+    map[x.id] = n++;
+  }
+  return map;
+}
+
+function sortGuestsList(items){
+  const by = state.guestSortBy || "arrivo";
+  const dir = (state.guestSortDir === "desc") ? -1 : 1;
+  const nameKey = (s) => String(s ?? "").trim().toLowerCase();
+
+  const out = items.slice();
+  out.sort((a,b) => {
+    if (by === "nome") {
+      return nameKey(a.nome).localeCompare(nameKey(b.nome), "it") * dir;
+    }
+    if (by === "inserimento") {
+      const aa = Number(a._insNo) || 1e18;
+      const bb = Number(b._insNo) || 1e18;
+      return (aa - bb) * dir;
+    }
+    const ta = parseDateTs(a.check_in ?? a.checkIn);
+    const tb = parseDateTs(b.check_in ?? b.checkIn);
+    if (ta == null && tb == null) return 0;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    return (ta - tb) * dir;
+  });
+  return out;
+}
+
 /* PERIOD SYNC */
 function setPeriod(from, to){
   state.period = { from, to };
@@ -1083,6 +1180,7 @@ function bindPeriodAutoGuests(fromSel, toSel){
 function enterGuestCreateMode(){
   state.guestMode = "create";
   state.guestEditId = null;
+  state.guestEditCreatedAt = null;
   // UI
   const title = document.getElementById("ospiteFormTitle");
   if (title) title.textContent = "Nuovo ospite";
@@ -1135,6 +1233,7 @@ state.guestRooms = state.guestRooms || new Set();
 function enterGuestEditMode(ospite){
   state.guestMode = "edit";
   state.guestEditId = ospite?.id ?? null;
+  state.guestEditCreatedAt = (ospite?.created_at ?? ospite?.createdAt ?? null);
 
   const title = document.getElementById("ospiteFormTitle");
   if (title) title.textContent = "Modifica ospite";
@@ -1228,6 +1327,12 @@ if (!name) return toast("Inserisci il nome");
   if (isEdit){
     if (!state.guestEditId) return toast("ID ospite mancante");
     payload.id = state.guestEditId;
+    // preserva la data di inserimento (non deve cambiare con le modifiche)
+    const ca = state.guestEditCreatedAt;
+    if (ca){
+      payload.createdAt = ca;
+      payload.created_at = ca;
+    }
   }
 
   
@@ -1329,7 +1434,7 @@ function renderGuestCards(){
   wrap.hidden = false;
   wrap.innerHTML = "";
 
-  const items = Array.isArray(state.ospiti) && state.ospiti.length
+  let items = Array.isArray(state.ospiti) && state.ospiti.length
     ? state.ospiti
     : (Array.isArray(state.guests) ? state.guests : []);
 
@@ -1338,11 +1443,22 @@ function renderGuestCards(){
     return;
   }
 
+  // Numero progressivo di inserimento (stabile) + sorting
+  const insMap = computeInsertionMap(items);
+  items.forEach((it) => {
+    const id = guestIdOf(it);
+    it._insNo = id ? insMap[id] : null;
+  });
+
+  items = sortGuestsList(items);
+
   items.forEach(item => {
     const card = document.createElement("div");
     card.className = "guest-card";
 
     const nome = escapeHtml(item.nome || item.name || "Ospite");
+
+    const insNo = (Number(item._insNo) && Number(item._insNo) > 0) ? Number(item._insNo) : null;
 
     const led = guestLedStatus(item);
     const depositTypeRaw = (item.acconto_tipo || item.depositType || item.guestDepositType || "contante").toString().toLowerCase();
@@ -1399,7 +1515,7 @@ function renderGuestCards(){
       <div class="guest-top">
         <div class="guest-left">
           <span class="guest-led ${led.cls}" aria-label="${led.label}" title="${led.label}"></span>
-          <div class="guest-name">${nome}</div>
+          <div class="guest-name">${insNo ? `<span class="guest-insno">#${insNo}</span>` : ``}${nome}</div>
         </div>
         <div class="guest-actions" role="group" aria-label="Azioni ospite">
           <button class="tl-btn tl-green" type="button" data-open aria-label="Apri/chiudi dettagli"><span class="sr-only">Apri</span></button>
@@ -1515,6 +1631,7 @@ async function init(){
   bindPeriodAuto("#fromDate2", "#toDate2");
   bindPeriodAuto("#fromDate3", "#toDate3");
   bindPeriodAutoGuests("#fromDate4", "#toDate4");
+  setupGuestListControls();
 
   $("#spesaData").value = todayISO();
 

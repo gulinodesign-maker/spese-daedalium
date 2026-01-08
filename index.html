@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.099" rel="stylesheet"/>
-<link href="./manifest.json?v=1.099" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.099" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.099" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.099" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.099" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.102" rel="stylesheet"/>
+<link href="./manifest.json?v=1.102" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.102" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.102" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.102" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.102" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.099</div>
+<div class="build" id="buildText">1.102</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -326,19 +326,25 @@
 </div>
 </div>
 </section><section aria-label="Ospiti" class="page" hidden="" id="page-ospiti"><div class="content"><div class="ospite-wrap"><div class="card guest-cards-card"><div class="hd"><h2>Ospiti</h2></div><div class="bd">
-<div class="field period-preset">
-  <select aria-label="Periodo" id="periodPreset4">
-    <!-- options injected by JS -->
-  </select>
-</div>
-<div class="period-row">
-  <div class="field">
-    
-    <input id="fromDate4" type="date"/>
+<div class="guest-filter-grid" aria-label="Filtri ospiti">
+  <div class="field gf-tile gf-sort" aria-label="Ordinamento">
+    <select id="guestSortBy" aria-label="Ordina ospiti per">
+      <option value="inserimento">Inserimento</option>
+      <option value="arrivo">Arrivo</option>
+      <option value="nome">Nome</option>
+    </select>
+    <button class="gf-dir" id="guestSortDir" type="button" aria-label="Direzione ordinamento" aria-pressed="false">↓</button>
   </div>
-  <div class="field">
-    <label>A</label>
-    <input id="toDate4" type="date"/>
+  <div class="field gf-tile" aria-label="Periodo rapido">
+    <select aria-label="Periodo" id="periodPreset4">
+      <!-- options injected by JS -->
+    </select>
+  </div>
+  <div class="field gf-tile" aria-label="Da">
+    <input id="fromDate4" type="date" aria-label="Da"/>
+  </div>
+  <div class="field gf-tile" aria-label="A">
+    <input id="toDate4" type="date" aria-label="A"/>
   </div>
 </div>
 <div class="guest-cards" id="guestCards"></div></div></div></div></div></section>
@@ -408,8 +414,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.099"></script>
-<script defer="" src="./app.js?v=1.099"></script>
+<script defer="" src="./config.js?v=1.102"></script>
+<script defer="" src="./app.js?v=1.102"></script>
 <!-- Launcher (popup) con 4 icone interne -->
 <div aria-hidden="true" class="launcher" hidden="" id="launcherModal">
 <div class="launcher-backdrop" data-close="1"></div>

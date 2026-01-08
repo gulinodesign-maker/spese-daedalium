@@ -2369,3 +2369,54 @@ body[data-page="ospiti"] .guest-card .actions {
   max-width: none !important;
   pointer-events: auto !important;
 }
+
+
+/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.102) ===== */
+.guest-filter-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.guest-filter-grid .gf-tile{
+  position: relative;
+  gap: 0;
+}
+.guest-filter-grid .gf-tile input,
+.guest-filter-grid .gf-tile select{
+  min-height: 52px;
+}
+.guest-filter-grid .gf-sort select{
+  padding-right: 56px; /* spazio per bottone direzione */
+}
+.gf-dir{
+  position:absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.78);
+  font-size: 18px;
+  font-weight: 900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.gf-dir:active{ transform: translateY(-50%) scale(0.98); }
+
+.guest-insno{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-right: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.55);
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.85;
+}
