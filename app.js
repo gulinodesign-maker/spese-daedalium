@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.098";
+const BUILD_VERSION = "1.099";
 
 
 function genId(prefix){
@@ -476,7 +476,7 @@ function bindFastTap(el, fn){
     try{ e.stopPropagation(); }catch(_){ }
     fn();
   };
-  ["click","touchend","pointerup"].forEach(evt=>{
+  ["click","touchstart","touchend","pointerdown","pointerup"].forEach(evt=>{
     try{ el.addEventListener(evt, handler, { passive:false }); }
     catch(_){ el.addEventListener(evt, handler); }
   });
@@ -596,6 +596,21 @@ function setupHome(){
     goCal.disabled = false;
     goCal.removeAttribute("aria-disabled");
     bindFastTap(goCal, () => showPage("calendario"));
+
+    // HARD FIX iOS PWA: alcuni tap finiscono su SVG/path e non generano click affidabile
+    let __calTapLock = 0;
+    const __go = (e)=>{
+      const now = Date.now();
+      if (now - __calTapLock < 450) return;
+      __calTapLock = now;
+      try{ e.preventDefault(); }catch(_){}
+      try{ e.stopPropagation(); }catch(_){}
+      showPage("calendario");
+    };
+    ["touchend","pointerup"].forEach(evt=>{
+      try{ goCal.addEventListener(evt, __go, { passive:false, capture:true }); }
+      catch(_){ goCal.addEventListener(evt, __go, true); }
+    });
   }
 
 
@@ -1601,7 +1616,7 @@ function renderCalendario(){
   // Angolo alto-sinistra: etichetta "STANZE" (a sinistra della stanza 1, sopra Lunedì)
   const corner = document.createElement("div");
   corner.className = "cal-pill corner";
-  corner.textContent = "STANZE";
+  corner.textContent = "ST";
   grid.appendChild(corner);
 
   for (let r = 1; r <= 6; r++) {

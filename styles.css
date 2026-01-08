@@ -2336,3 +2336,36 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* iOS: tap responsiveness */
 .home-main, .cal-nav-btn{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* ===== dDAE_1.099 FIX: HOME grid clickable (no flex override) ===== */
+#page-home .home-grid{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  justify-items: center !important;
+  align-items: stretch !important;
+  width: min(460px, 94vw) !important;
+  padding: 14px !important;
+}
+#page-home .home-main{
+  width: 100% !important;
+  max-width: none !important;
+  pointer-events: auto !important;
+}
+
+/* === dDAE_1.099 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
+#page-home .home-grid{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  justify-items: center !important;
+  align-items: stretch !important;
+  width: min(460px, 94vw) !important;
+  margin: 0 auto !important;
+  padding: 14px !important;
+}
+#page-home .home-main{
+  width: 100% !important;
+  max-width: none !important;
+  pointer-events: auto !important;
+}
