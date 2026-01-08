@@ -2128,3 +2128,141 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity: 0.25;
   box-shadow: none !important;
 }
+
+
+/* =========================
+   CALENDARIO (solo grafica)
+   ========================= */
+.cal-wrap{
+  width: 100%;
+  max-width: 980px;
+  margin: 14px auto;
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.60);
+  border: 1px solid rgba(15,23,42,0.10);
+  box-shadow: 0 14px 34px rgba(15,23,42,0.10);
+  backdrop-filter: blur(14px);
+}
+
+.cal-controls{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+
+.cal-spacer{ flex: 1; }
+
+.cal-btn{
+  appearance:none;
+  border: 1px solid rgba(15,23,42,0.10);
+  background: rgba(255,255,255,0.72);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+}
+
+.cal-btn:active{ transform: translateY(1px); }
+
+.cal-btn.cal-icon{
+  width: 44px;
+  padding: 10px 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.cal-title{
+  margin: 12px 0 10px;
+  text-align:center;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: rgba(15,23,42,0.86);
+  text-transform: uppercase;
+}
+
+.cal-board{
+  display: grid;
+  grid-template-columns: 64px repeat(6, 1fr);
+  gap: 6px;
+  align-items: stretch;
+}
+
+.cal-cell{
+  border-radius: 16px;
+  min-height: 54px;
+  overflow: hidden;
+}
+
+.cal-corner{
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.cal-day{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(15,23,42,0.70);
+  background: rgba(255,255,255,0.56);
+  border: 1px solid rgba(15,23,42,0.08);
+}
+
+.cal-room-hd{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 2px;
+  min-height: 54px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 2px 10px rgba(15,23,42,0.18);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.cal-room-hd span:first-child{ font-size: 10px; letter-spacing: 0.2px; }
+.cal-room-hd span:last-child{ font-size: 14px; }
+
+.cal-room{
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.22);
+}
+
+.cal-slot{
+  position:absolute;
+  inset: 6px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.60);
+  border: 1px solid rgba(15,23,42,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+}
+
+/* Colori colonne (pastello) */
+.c1{ background: linear-gradient(to bottom, rgba(244,159,86,0.55), rgba(255,255,255,0.18)); }
+.c2{ background: linear-gradient(to bottom, rgba(245,201,112,0.55), rgba(255,255,255,0.18)); }
+.c3{ background: linear-gradient(to bottom, rgba(153,214,186,0.55), rgba(255,255,255,0.18)); }
+.c4{ background: linear-gradient(to bottom, rgba(145,180,232,0.55), rgba(255,255,255,0.18)); }
+.c5{ background: linear-gradient(to bottom, rgba(196,164,235,0.55), rgba(255,255,255,0.18)); }
+.c6{ background: linear-gradient(to bottom, rgba(235,140,140,0.55), rgba(255,255,255,0.18)); }
+
+/* Fit iPhone: stringe tipografia e altezze */
+@media (max-width: 420px){
+  .cal-wrap{ padding: 10px; border-radius: 22px; }
+  .cal-title{ font-size: 22px; margin: 10px 0 8px; }
+  .cal-btn{ padding: 9px 10px; font-size: 11px; border-radius: 13px; }
+  .cal-btn.cal-icon{ width: 40px; font-size: 18px; }
+  .cal-board{ grid-template-columns: 60px repeat(6, 1fr); gap: 5px; }
+  .cal-cell{ min-height: 50px; border-radius: 14px; }
+  .cal-room-hd span:first-child{ font-size: 9px; }
+  .cal-room-hd span:last-child{ font-size: 13px; }
+  .cal-day{ font-size: 12px; }
+  .cal-slot{ inset: 5px; border-radius: 13px; }
+}

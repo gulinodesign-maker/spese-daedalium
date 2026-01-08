@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.090";
+const BUILD_VERSION = "1.091";
 
 
 function genId(prefix){
@@ -471,7 +471,7 @@ function bindHomeDelegation(){
     const o = e.target.closest && e.target.closest("#goOspite");
     if (o){ hideLauncher(); showPage("ospite"); return; }
     const cal = e.target.closest && e.target.closest("#goCalendario");
-    if (cal){ hideLauncher(); toast("Calendario: in arrivo"); return; }
+    if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -538,7 +538,55 @@ function showPage(page){
   if (page === "spese") renderSpese();
   if (page === "riepilogo") renderRiepilogo();
   if (page === "grafico") renderGrafico();
+  if (page === "calendario") renderCalendario();
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
+}
+
+
+/* Calendario (solo grafica) */
+function _calMonday(d){
+  const x = new Date(d);
+  const day = x.getDay(); // 0=Dom,1=Lun...
+  const diff = (day === 0 ? -6 : 1 - day); // porta a Lun
+  x.setHours(0,0,0,0);
+  x.setDate(x.getDate() + diff);
+  return x;
+}
+function _calRoman(n){
+  const r = ["I","II","III","IV","V","VI"];
+  return r[n-1] || String(n);
+}
+function _calMonthUpper(m){
+  const months = ["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
+  return months[m] || "";
+}
+function renderCalendario(){
+  const title = $("#calWeekTitle");
+  if (!title) return;
+
+  const now = new Date();
+  const monday = _calMonday(now);
+
+  // mese della settimana: usa il "centro" (giovedì) per gestire settimane a cavallo mese
+  const mid = new Date(monday);
+  mid.setDate(monday.getDate() + 3);
+
+  const y = mid.getFullYear();
+  const m = mid.getMonth();
+
+  const ref = _calMonday(new Date(y, m, 1));
+  const weekIndex = Math.floor((monday - ref) / (7 * 86400000)) + 1;
+
+  title.textContent = `${_calRoman(weekIndex)} ${_calMonthUpper(m)}`;
+
+  const dn = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+  for (let i = 0; i < 7; i++){
+    const el = $(`#calDay${i}`);
+    if (!el) continue;
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    el.textContent = `${dn[i]} ${d.getDate()}`;
+  }
 }
 
 function setupHeader(){

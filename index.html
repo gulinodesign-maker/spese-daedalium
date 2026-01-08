@@ -8,11 +8,11 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.090" rel="stylesheet"/>
-<link href="./manifest.json?v=1.090" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.090" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.090" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.090" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.091" rel="stylesheet"/>
+<link href="./manifest.json?v=1.091" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.091" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.091" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.091" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -101,10 +101,93 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.090</div>
+<div class="build" id="buildText">1.091</div>
 <div class="home-spacer"></div>
 </div>
 </section>
+
+<!-- CALENDARIO -->
+<section class="page" hidden="" id="page-calendario">
+  <div class="cal-wrap" aria-label="Calendario settimanale">
+    <div class="cal-controls" role="group" aria-label="Controlli calendario">
+      <button class="cal-btn" id="calPickDate" type="button" aria-label="Seleziona una data">Data</button>
+      <button class="cal-btn" id="calTodayWeek" type="button" aria-label="Settimana corrente">Settimana corrente</button>
+      <div class="cal-spacer" aria-hidden="true"></div>
+      <button class="cal-btn cal-icon" id="calPrevWeek" type="button" aria-label="Settimana precedente">‹</button>
+      <button class="cal-btn cal-icon" id="calNextWeek" type="button" aria-label="Settimana successiva">›</button>
+    </div>
+
+    <div class="cal-title" id="calWeekTitle">I APRILE</div>
+
+    <div class="cal-board" role="table" aria-label="Calendario settimanale - 6 stanze">
+      <div class="cal-cell cal-corner" role="columnheader" aria-hidden="true"></div>
+
+      <div class="cal-cell cal-room-hd c1" role="columnheader"><span>Stanza</span><span>1</span></div>
+      <div class="cal-cell cal-room-hd c2" role="columnheader"><span>Stanza</span><span>2</span></div>
+      <div class="cal-cell cal-room-hd c3" role="columnheader"><span>Stanza</span><span>3</span></div>
+      <div class="cal-cell cal-room-hd c4" role="columnheader"><span>Stanza</span><span>4</span></div>
+      <div class="cal-cell cal-room-hd c5" role="columnheader"><span>Stanza</span><span>5</span></div>
+      <div class="cal-cell cal-room-hd c6" role="columnheader"><span>Stanza</span><span>6</span></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay0">Lun 1</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay1">Mar 2</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay2">Mer 3</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay3">Gio 4</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay4">Ven 5</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay5">Sab 6</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+
+      <div class="cal-cell cal-day" role="rowheader" id="calDay6">Dom 7</div>
+      <div class="cal-cell cal-room c1"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c2"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c3"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c4"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c5"><div class="cal-slot" aria-hidden="true"></div></div>
+      <div class="cal-cell cal-room c6"><div class="cal-slot" aria-hidden="true"></div></div>
+    </div>
+  </div>
+</section>
+
 <!-- 1) INSERISCI -->
 <section class="page" hidden="" id="page-inserisci">
 <div class="card">
@@ -357,8 +440,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.090"></script>
-<script defer="" src="./app.js?v=1.090"></script>
+<script defer="" src="./config.js?v=1.091"></script>
+<script defer="" src="./app.js?v=1.091"></script>
 <!-- Launcher (popup) con 4 icone interne -->
 <div aria-hidden="true" class="launcher" hidden="" id="launcherModal">
 <div class="launcher-backdrop" data-close="1"></div>
