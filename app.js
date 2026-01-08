@@ -44,6 +44,23 @@ function setPayReceipt(containerId, on){
   btn.setAttribute("aria-pressed", active ? "true" : "false");
 }
 
+function updateRimanenza(){
+  const out = document.getElementById("guestRimanenza");
+  if (!out) return;
+
+  const total = parseFloat(document.getElementById("guestTotal")?.value || "0") || 0;
+  const deposit = parseFloat(document.getElementById("guestDeposit")?.value || "0") || 0;
+  const saldo = parseFloat(document.getElementById("guestSaldo")?.value || "0") || 0;
+
+  const r = total - deposit - saldo;
+  const rounded = Math.round((r + Number.EPSILON) * 100) / 100;
+
+  out.value = isFinite(rounded) ? String(rounded) : "0";
+  try { out.dispatchEvent(new Event("input", { bubbles: true })); } catch(e){}
+}
+
+
+
 function truthy(v){
   if (v === true) return true;
   if (v === false || v === undefined || v === null) return false;
@@ -1213,8 +1230,9 @@ function enterGuestCreateMode(){
   if (btn) btn.textContent = "Crea ospite";
 
   // reset fields
-  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit","guestSaldo"];
+  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit","guestSaldo","guestRimanenza"];
   fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  updateRimanenza();
 
   const ci = document.getElementById("guestCheckIn");
   if (ci) ci.value = todayISO();
@@ -1263,6 +1281,7 @@ function enterGuestEditMode(ospite){
   document.getElementById("guestBooking").value = ospite.importo_booking ?? ospite.booking ?? 0;
   document.getElementById("guestDeposit").value = ospite.acconto_importo ?? ospite.deposit ?? 0;
   document.getElementById("guestSaldo").value = ospite.saldo_pagato ?? ospite.saldoPagato ?? ospite.saldo ?? 0;
+  updateRimanenza();
 
   // matrimonio
   const mEl = document.getElementById("guestMarriage");
@@ -1435,6 +1454,17 @@ function setupOspite(){
   bindPayPill("depositType", "deposit");
   bindPayPill("saldoType", "saldo");
 
+  // Rimanenza = Importo prenotazione - Acconto - Saldo (auto)
+  ["guestTotal","guestDeposit","guestSaldo"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", updateRimanenza);
+    el.addEventListener("change", updateRimanenza);
+  });
+  updateRimanenza();
+
+
+  });
 
   const btnCreate = document.getElementById("createGuestCard");
   btnCreate?.addEventListener("click", async () => {

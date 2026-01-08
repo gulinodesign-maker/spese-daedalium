@@ -2507,3 +2507,7 @@ body[data-page="ospiti"] .guest-card .actions {
   border-color: rgba(255,59,48,0.60);
   box-shadow: 0 0 0 4px rgba(255,59,48,0.14) !important;
 }
+
+
+/* Ospite: placeholder colonna pillola (mantiene spazio ma invisibile) */
+#page-ospite .field.two-col.payment-row .subfield.paywrap.placeholder{ visibility: hidden; }
