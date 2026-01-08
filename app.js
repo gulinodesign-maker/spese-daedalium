@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.089";
+const BUILD_VERSION = "1.090";
 
 
 function genId(prefix){
@@ -660,6 +660,8 @@ async function loadStanze({ showLoader=true } = {}){
 }
 
 async function loadOspiti({ from="", to="" } = {}){
+  // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
+  await loadStanze({ showLoader:false });
   const data = await api("ospiti", { params: { from, to } });
   state.guests = Array.isArray(data) ? data : [];
   renderGuestCards();
