@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.092";
+const BUILD_VERSION = "1.093";
 
 
 function genId(prefix){
@@ -717,7 +717,7 @@ async function renderCalendario(){
   // header row
   const head = document.createElement("div");
   head.className = "cal-row cal-head";
-  head.innerHTML = `<div class="cal-day-head" aria-hidden="true"></div>` + rooms.map(r=>`<div class="cal-room-head">Stanza ${r}</div>`).join("");
+  head.innerHTML = `<div class="cal-day-head" aria-hidden="true"></div>` + rooms.map(r=>`<div class="cal-room-head cal-room-${r}">Stanza ${r}</div>`).join("");
   grid.appendChild(head);
 
   const days = [];
@@ -728,7 +728,7 @@ async function renderCalendario(){
   const guests = Array.isArray(state._calGuests) ? state._calGuests : [];
 
   // occupancy map
-  const occ = {}; // key: iso|room -> {gid, initials, dots, name}
+  const occ = {}; // key: iso|room -> {gid, initials, dots, name, isLast}
   const weekStartISO = _toISO(weekStart);
   const weekEndISO = _toISO(_addDays(weekStart, 6));
 
@@ -762,6 +762,7 @@ async function renderCalendario(){
 
     const fromNum = Math.max(stayStart, weekStartNum);
     const toNumEx = Math.min(stayEndEx, weekEndNum + 1);
+    const lastDayNum = stayEndEx - 1;
 
     for (let dn = fromNum; dn < toNumEx; dn++){
       // convert dayNum to Date
@@ -775,6 +776,7 @@ async function renderCalendario(){
           initials,
           name,
           dots: _dotsHTML(gid, r),
+          isLast: dn === lastDayNum,
         };
       }
     }
@@ -787,8 +789,9 @@ async function renderCalendario(){
     row.className = "cal-row";
     row.innerHTML = `<div class="cal-day">${_dayLabelIT(d)}</div>` + rooms.map(r=>{
       const data = occ[`${iso}|${r}`];
-      if (!data) return `<button type="button" class="cal-cell" aria-label="Stanza ${r}, ${_dayLabelIT(d)}"></button>`;
-      return `<button type="button" class="cal-cell cal-cell-booked" data-guest-id="${escapeHtml(data.gid)}" aria-label="Stanza ${r}, ${_dayLabelIT(d)}: ${escapeHtml(data.name)}">
+      if (!data) return `<button type="button" class="cal-cell cal-room-${r}" aria-label="Stanza ${r}, ${_dayLabelIT(d)}"></button>`;
+      const lastCls = data.isLast ? " cal-cell-last" : "";
+      return `<button type="button" class="cal-cell cal-room-${r} cal-cell-booked${lastCls}" data-guest-id="${escapeHtml(data.gid)}" aria-label="Stanza ${r}, ${_dayLabelIT(d)}: ${escapeHtml(data.name)}">
         <div class="cal-cell-content">
           <div class="cal-initials">${escapeHtml(data.initials)}</div>
           ${data.dots}

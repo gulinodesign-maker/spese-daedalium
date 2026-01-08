@@ -8,11 +8,11 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.092" rel="stylesheet"/>
-<link href="./manifest.json?v=1.092" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.092" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.092" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.092" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.093" rel="stylesheet"/>
+<link href="./manifest.json?v=1.093" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.093" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.093" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.093" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -101,7 +101,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.092</div>
+<div class="build" id="buildText">1.093</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -345,22 +345,33 @@
 <section class="page" hidden id="page-calendario">
   <div class="card">
     <div class="hd">
-      <div class="cal-hd">
-        <h2>Calendario</h2>
-        <div class="cal-week-title" id="calWeekTitle">—</div>
-      </div>
-
       <div class="cal-toolbar" role="group" aria-label="Controlli calendario">
-        <button class="btn btn-ghost btn-small" id="calPickDate" type="button">Data</button>
-        <button class="btn btn-ghost btn-small" id="calThisWeek" type="button">Settimana corrente</button>
-        <button class="btn btn-ghost btn-small" id="calPrevWeek" type="button" aria-label="Settimana precedente">‹</button>
-        <button class="btn btn-ghost btn-small" id="calNextWeek" type="button" aria-label="Settimana successiva">›</button>
+        <button class="cal-nav-btn" id="calPrevWeek" type="button" aria-label="Settimana precedente">
+          <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path></svg>
+        </button>
+        <button class="cal-nav-btn" id="calThisWeek" type="button" aria-label="Settimana corrente">
+          <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M12 6v6l4 2"></path><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path></svg>
+        </button>
+        <button class="cal-nav-btn" id="calPickDate" type="button" aria-label="Seleziona data">
+          <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M7 3v3"></path><path d="M17 3v3"></path><path d="M4.5 8h15"></path><path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path><path d="M8 12h.01"></path><path d="M12 12h.01"></path><path d="M16 12h.01"></path><path d="M8 16h.01"></path><path d="M12 16h.01"></path><path d="M16 16h.01"></path></svg>
+        </button>
+        <button class="cal-nav-btn" id="calNextWeek" type="button" aria-label="Settimana successiva">
+          <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
         <input id="calDateInput" type="date" class="cal-date-input" aria-label="Seleziona una data" />
       </div>
+
+      <div class="cal-week-title" id="calWeekTitle">—</div>
     </div>
 
     <div class="bd">
       <div class="cal-grid" id="calGrid" role="grid" aria-label="Calendario settimanale"></div>
+
+      <div class="cal-legend" aria-label="Legenda letti">
+        <div class="cal-legend-item"><span class="bed-dot bed-dot-m" aria-hidden="true"></span><span>Matrimoniale</span></div>
+        <div class="cal-legend-item"><span class="bed-dot bed-dot-s" aria-hidden="true"></span><span>Singolo</span></div>
+        <div class="cal-legend-item"><span class="bed-dot bed-dot-c" aria-hidden="true"></span><span>Culla</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -381,8 +392,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.092"></script>
-<script defer="" src="./app.js?v=1.092"></script>
+<script defer="" src="./config.js?v=1.093"></script>
+<script defer="" src="./app.js?v=1.093"></script>
 <!-- Launcher (popup) con 4 icone interne -->
 <div aria-hidden="true" class="launcher" hidden="" id="launcherModal">
 <div class="launcher-backdrop" data-close="1"></div>
