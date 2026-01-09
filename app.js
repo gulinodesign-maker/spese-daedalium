@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.115";
+const BUILD_VERSION = "1.116";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -2388,7 +2388,7 @@ function renderCalendario(){
         cell.addEventListener("click", () => {
           const ospite = findCalendarGuestById(info.guestId);
           if (!ospite) return;
-          enterGuestEditMode(ospite);
+          enterGuestViewMode(ospite);
           showPage("ospite");
         });
       }
