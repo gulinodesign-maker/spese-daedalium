@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.109";
+const BUILD_VERSION = "1.110";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -179,6 +179,23 @@ function setPayReceipt(containerId, on){
   btn.setAttribute("aria-pressed", active ? "true" : "false");
 }
 
+
+
+function setRegFlag(containerId, flag, on){
+  const wrap = document.getElementById(containerId);
+  if (!wrap) return;
+  const btn = wrap.querySelector(`.pay-dot[data-flag="${flag}"]`);
+  if (!btn) return;
+  const active = !!on;
+  btn.classList.toggle("selected", active);
+  btn.setAttribute("aria-pressed", active ? "true" : "false");
+}
+
+function setRegFlags(containerId, psOn, istatOn){
+  setRegFlag(containerId, "ps", psOn);
+  setRegFlag(containerId, "istat", istatOn);
+}
+
 function truthy(v){
   if (v === true) return true;
   if (v === false || v === undefined || v === null) return false;
@@ -220,6 +237,8 @@ const state = {
   lettiPerStanza: {},
   guestMarriage: false,
   guestSaldoType: "contante",
+  guestPSRegistered: false,
+  guestISTATRegistered: false,
 };
 
 const COLORS = {
@@ -1493,6 +1512,11 @@ function enterGuestCreateMode(){
   setPayReceipt("depositType", state.guestDepositReceipt);
   setPayReceipt("saldoType", state.guestSaldoReceipt);
 
+
+  // Registrazioni (PS/ISTAT): default OFF
+  state.guestPSRegistered = false;
+  state.guestISTATRegistered = false;
+  setRegFlags("regTags", state.guestPSRegistered, state.guestISTATRegistered);
   // refresh rooms UI if present
   try {
     document.querySelectorAll("#roomsPicker .room-dot").forEach(btn => {
@@ -1546,6 +1570,14 @@ function enterGuestEditMode(ospite){
   setPayReceipt("depositType", depRec);
   setPayReceipt("saldoType", saldoRec);
 
+
+
+  // registrazioni PS/ISTAT
+  const psReg = truthy(ospite.ps_registrato ?? ospite.psRegistrato);
+  const istatReg = truthy(ospite.istat_registrato ?? ospite.istatRegistrato);
+  state.guestPSRegistered = psReg;
+  state.guestISTATRegistered = istatReg;
+  setRegFlags("regTags", psReg, istatReg);
   // stanze: backend non espone GET stanze; se in futuro arrivano su ospite.stanze li applichiamo
   try {
     if (ospite.stanze) {
@@ -1592,6 +1624,8 @@ if (!name) return toast("Inserisci il nome");
     saldo_ricevuta: !!state.guestSaldoReceipt,
     saldo_ricevutain: !!state.guestSaldoReceipt,
     matrimonio,
+    ps_registrato: state.guestPSRegistered ? "1" : "",
+    istat_registrato: state.guestISTATRegistered ? "1" : "",
     stanze: rooms.join(",")
   };
 
@@ -1693,6 +1727,25 @@ function setupOspite(){
 
   bindPayPill("depositType", "deposit");
   bindPayPill("saldoType", "saldo");
+
+
+
+  function bindRegPill(containerId){
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    wrap.addEventListener("click", (e) => {
+      const btn = e.target.closest('.pay-dot[data-flag]');
+      if (!btn || !wrap.contains(btn)) return;
+
+      const flag = (btn.getAttribute("data-flag") || "").toLowerCase();
+      if (flag === "ps") state.guestPSRegistered = !state.guestPSRegistered;
+      if (flag === "istat") state.guestISTATRegistered = !state.guestISTATRegistered;
+
+      setRegFlags(containerId, state.guestPSRegistered, state.guestISTATRegistered);
+    });
+  }
+
+  bindRegPill("regTags");
 
   // Rimanenza da pagare (Importo prenotazione - Acconto - Saldo)
   ["guestTotal","guestDeposit","guestSaldo"].forEach((id) => {
