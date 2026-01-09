@@ -156,6 +156,50 @@ function setMarriage(on){
 }
 
 
+function renderRoomsPickerUI(){
+  const roomsWrap = document.getElementById("roomsPicker");
+  if (!roomsWrap) return;
+
+  // Bottoni stanza (selezione)
+  try {
+    roomsWrap.querySelectorAll('.room-dot[data-room]').forEach(btn => {
+      const n = parseInt(btn.getAttribute("data-room"), 10);
+      const on = !!(state.guestRooms && state.guestRooms.has(n));
+      btn.classList.toggle("selected", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  } catch (_) {}
+
+  // Dotazione letti per stanza (inline)
+  try {
+    roomsWrap.querySelectorAll('.room-line[data-room-row]').forEach(line => {
+      const roomKey = String(line.getAttribute("data-room-row") || "");
+      const n = parseInt(roomKey, 10);
+      const selected = !!(state.guestRooms && state.guestRooms.has(n));
+      line.classList.toggle("room-off", !selected);
+
+      const lp = state.lettiPerStanza || {};
+      const d = lp[roomKey] || lp[String(n)] || {};
+      const mOn = !!d.matrimoniale;
+      const cOn = !!d.culla;
+      const sNum = Math.max(0, Math.min(3, parseInt(d.singoli || 0, 10) || 0));
+
+      const mDot = line.querySelector('.bed-pick-dot[data-bed="m"]');
+      if (mDot) mDot.classList.toggle("on", mOn);
+
+      const cDot = line.querySelector('.bed-pick-dot[data-bed="c"]');
+      if (cDot) cDot.classList.toggle("on", cOn);
+
+      const sDots = Array.from(line.querySelectorAll('.bed-pick-dot[data-bed="s"]'));
+      sDots.forEach((sd, ix) => sd.classList.toggle("on", ix < sNum));
+    });
+  } catch (_) {}
+
+  // Matrimonio (flag globale)
+  try { setMarriage(state.guestMarriage); } catch (_) {}
+}
+
+
 function setPayType(containerId, type){
   const wrap = document.getElementById(containerId);
   if (!wrap) return;
@@ -1607,19 +1651,37 @@ function enterGuestEditMode(ospite){
   state.guestPSRegistered = psReg;
   state.guestISTATRegistered = istatReg;
   setRegFlags("regTags", psReg, istatReg);
-  // stanze: backend non espone GET stanze; se in futuro arrivano su ospite.stanze li applichiamo
-  try {
-    if (ospite.stanze) {
-      const rooms = Array.isArray(ospite.stanze) ? ospite.stanze : String(ospite.stanze).split(",").map(x=>x.trim()).filter(Boolean);
-      state.guestRooms = new Set(rooms.map(x=>parseInt(x,10)).filter(n=>isFinite(n)));
-      document.querySelectorAll("#roomsPicker .room-dot").forEach(btn => {
-        const n = parseInt(btn.getAttribute("data-room"), 10);
-        const on = state.guestRooms.has(n);
-        btn.classList.toggle("selected", on);
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-    }
-  } catch (_) {}
+// stanze + letti: ricava dal foglio "stanze" (più affidabile di ospite.stanze)
+try {
+  const gid = _guestIdOf(ospite);
+
+  // set matrimonio (flag)
+  try { setMarriage(!!(ospite.matrimonio)); } catch (_) {}
+
+  // default: pulisci stato
+  state.guestRooms = state.guestRooms || new Set();
+  state.guestRooms.clear();
+  state.lettiPerStanza = {};
+
+  // Carica (o ricarica) le stanze dal backend e applica solo quelle dell'ospite
+  loadStanze({ showLoader:false }).then(() => {
+    try {
+      const rows = (state.stanzeRows || []).filter(r => String(r.ospite_id ?? r.ospiteId ?? r.guest_id ?? r.guestId ?? "").trim() === gid);
+      if (rows.length) {
+        applyStanzeToState(rows);
+      } else if (ospite.stanze) {
+        // fallback: se manca il foglio stanze, usa campo stanze (senza letti)
+        const rooms = Array.isArray(ospite.stanze) ? ospite.stanze : String(ospite.stanze).split(",").map(x=>x.trim()).filter(Boolean);
+        state.guestRooms = new Set(rooms.map(x=>parseInt(x,10)).filter(n=>isFinite(n)));
+        state.lettiPerStanza = {};
+        for (const n of state.guestRooms) state.lettiPerStanza[String(n)] = { matrimoniale:false, singoli:0, culla:false, note:"" };
+      }
+      renderRoomsPickerUI();
+    } catch (_) {}
+  }).catch(() => {
+    try { renderRoomsPickerUI(); } catch (_) {}
+  });
+} catch (_) {}
   try { updateOspiteHdActions(); } catch (_) {}
 }
 
@@ -1701,19 +1763,6 @@ function updateOspiteHdActions(){
   if (btnDel) btnDel.hidden = !(mode === "view" || mode === "edit");
 }
 
-function calcNightsISO(checkInISO, checkOutISO){
-  try{
-    if (!checkInISO || !checkOutISO) return null;
-    const a = new Date(String(checkInISO).slice(0,10) + "T00:00:00");
-    const b = new Date(String(checkOutISO).slice(0,10) + "T00:00:00");
-    const diff = Math.round((b - a) / (24 * 60 * 60 * 1000));
-    if (!isFinite(diff) || diff <= 0) return null;
-    return diff;
-  }catch(_){
-    return null;
-  }
-}
-
 function setGuestFormViewOnly(isView, ospite){
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
@@ -1729,25 +1778,6 @@ function setGuestFormViewOnly(isView, ospite){
     ro.hidden = !isView;
     if (isView) renderRoomsReadOnly(ospite);
     else ro.innerHTML = "";
-  }
-
-  // Notti (solo in sola lettura)
-  const nightsWrap = document.getElementById("guestNightsWrap");
-  if (nightsWrap){
-    if (isView){
-      const ciVal = (document.getElementById("guestCheckIn")?.value || "").trim();
-      const coVal = (document.getElementById("guestCheckOut")?.value || "").trim();
-      const n = calcNightsISO(ciVal, coVal);
-      if (n == null){
-        nightsWrap.hidden = true;
-      } else {
-        nightsWrap.hidden = false;
-        const v = document.getElementById("guestNightsValue");
-        if (v) v.textContent = String(n);
-      }
-    } else {
-      nightsWrap.hidden = true;
-    }
   }
 
   // Aggiorna i pallini in testata in base alla modalità corrente
@@ -1830,7 +1860,7 @@ if (!name) return toast("Inserisci il nome");
   // stanze: backend gestisce POST e sovrascrive (deleteWhere + append)
   const ospiteId = payload.id;
   const stanze = buildStanzeArrayFromState();
-  try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
+  try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); invalidateApiCache("stanze|"); } catch (_) {}
 
   await loadOspiti(state.period || {});
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
@@ -1900,35 +1930,76 @@ function setupOspite(){
     });
 }
 
-  const roomsWrap = document.getElementById("roomsPicker");
-  const roomsOut = null; // removed UI string output
 
-  function renderRooms(){
-    const arr = Array.from(state.guestRooms).sort((a,b)=>a-b);
-    roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
-      const n = parseInt(btn.getAttribute("data-room"), 10);
-      const on = state.guestRooms.has(n);
-      btn.classList.toggle("selected", on);
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-    });
-  // matrimonio dot
-  setMarriage(state.guestMarriage);
+const roomsWrap = document.getElementById("roomsPicker");
+const roomsOut = null; // removed UI string output
 
+// Inizializza stato (safety)
+state.guestRooms = state.guestRooms || new Set();
+state.lettiPerStanza = state.lettiPerStanza || {};
+
+function renderRooms(){
+  renderRoomsPickerUI();
+}
+try { renderRooms(); } catch (_) {}
+
+roomsWrap?.addEventListener("click", (e) => {
+  // 1) Click su pallini letti (inline): NON apre popup, aggiorna direttamente lo stato
+  const bed = e.target.closest && e.target.closest(".bed-pick-dot");
+  if (bed && roomsWrap.contains(bed)) {
+    const line = bed.closest && bed.closest(".room-line[data-room-row]");
+    const roomKey = String(line?.getAttribute("data-room-row") || "");
+    const n = parseInt(roomKey, 10);
+    if (!isFinite(n) || n < 1 || n > 6) return;
+
+    state.guestRooms = state.guestRooms || new Set();
+    state.lettiPerStanza = state.lettiPerStanza || {};
+    state.guestRooms.add(n);
+
+    const key = String(n);
+    const d = state.lettiPerStanza[key] || { matrimoniale:false, singoli:0, culla:false, note:"" };
+
+    const type = bed.getAttribute("data-bed");
+    if (type === "m") {
+      d.matrimoniale = !d.matrimoniale; // max 1 per stanza
+    } else if (type === "c") {
+      d.culla = !d.culla; // max 1 per stanza
+    } else if (type === "s") {
+      const i = Math.max(1, Math.min(3, parseInt(bed.getAttribute("data-i") || "1", 10) || 1));
+      const cur = Math.max(0, Math.min(3, parseInt(d.singoli || 0, 10) || 0));
+      // click su dot i: imposta i; se già i, scala di 1 (per tornare indietro)
+      d.singoli = (cur === i) ? (i - 1) : i;
+    }
+
+    d.singoli = Math.max(0, Math.min(3, parseInt(d.singoli || 0, 10) || 0));
+    state.lettiPerStanza[key] = d;
+
+    renderRoomsPickerUI();
+    return;
   }
 
-  roomsWrap?.addEventListener("click", (e) => {
-    const b = e.target.closest(".room-dot");
-    if (!b) return;
-    if (b.id === "roomMarriage") { setMarriage(!state.guestMarriage); return; }
-    const n = parseInt(b.getAttribute("data-room"), 10);
-    if (state.guestRooms.has(n)) {
-      state.guestRooms.delete(n);
-      if (state.lettiPerStanza) delete state.lettiPerStanza[String(n)];
-    } else {
-      state.guestRooms.add(n);
-    }
-    renderRooms();
-  });
+  // 2) Click su numero stanza / matrimonio
+  const b = e.target.closest(".room-dot");
+  if (!b) return;
+
+  if (b.id === "roomMarriage") { setMarriage(!state.guestMarriage); return; }
+
+  const n = parseInt(b.getAttribute("data-room"), 10);
+  if (!isFinite(n)) return;
+
+  state.guestRooms = state.guestRooms || new Set();
+  state.lettiPerStanza = state.lettiPerStanza || {};
+
+  if (state.guestRooms.has(n)) {
+    state.guestRooms.delete(n);
+    delete state.lettiPerStanza[String(n)];
+  } else {
+    state.guestRooms.add(n);
+    state.lettiPerStanza[String(n)] = state.lettiPerStanza[String(n)] || { matrimoniale:false, singoli:0, culla:false, note:"" };
+  }
+
+  renderRoomsPickerUI();
+});
 
   function bindPayPill(containerId, kind){
     const wrap = document.getElementById(containerId);
@@ -2600,28 +2671,8 @@ function __rc_renderSingoli(el, n){
   }
 }
 
-function openRoomConfig(room){
-  __rc_room = String(room);
-  const d = state.lettiPerStanza[__rc_room] || {matrimoniale:false,singoli:0,culla:false};
-  document.getElementById('roomConfigTitle').textContent = 'Stanza '+room;
-  __rc_renderToggle(document.getElementById('rc_matrimoniale'), d.matrimoniale);
-  __rc_renderSingoli(document.getElementById('rc_singoli'), d.singoli);
-  __rc_renderToggle(document.getElementById('rc_culla'), d.culla);
-  document.getElementById('roomConfigModal').hidden = false;
-}
+// --- Room beds config: popup rimosso (dDAE_1.115) ---
 
-document.addEventListener('click', (e)=>{
-  const b = e.target.closest && e.target.closest('[data-room]');
-  if(b){ openRoomConfig(b.getAttribute('data-room')); }
-});
-
-document.getElementById('rc_save')?.addEventListener('click', ()=>{
-  const matrimoniale = document.querySelector('#rc_matrimoniale .dot')?.classList.contains('on')||false;
-  const culla = document.querySelector('#rc_culla .dot')?.classList.contains('on')||false;
-  const singoli = document.querySelectorAll('#rc_singoli .dot.on').length;
-  state.lettiPerStanza[__rc_room] = {matrimoniale, singoli, culla};
-  document.getElementById('roomConfigModal').hidden = true;
-});
 // --- end room beds config ---
 
 

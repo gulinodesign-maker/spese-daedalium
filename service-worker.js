@@ -13,13 +13,13 @@ const CORE_ASSETS = [
   "./app.js?v=1.115",
   "./config.js?v=1.115",
   "./manifest.json?v=1.115",
-  "./assets/logo.jpg",
-  "./assets/bg-daedalium.png",
-  "./assets/icons/icon-192.png",
-  "./assets/icons/icon-512.png",
-  "./assets/icons/favicon-32.png",
-  "./assets/icons/favicon-16.png",
-  "./assets/icons/apple-touch-icon.png",
+  "./assets/logo.jpg?v=1.115",
+  "./assets/bg-daedalium.jpeg?v=1.115",
+  "./assets/icons/icon-192.png?v=1.115",
+  "./assets/icons/icon-512.png?v=1.115",
+  "./assets/icons/favicon-32.png?v=1.115",
+  "./assets/icons/favicon-16.png?v=1.115",
+  "./assets/icons/apple-touch-icon.png?v=1.115",
 ];
 
 // Install: precache + skipWaiting (fix aggiornamenti su iOS)
