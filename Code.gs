@@ -270,6 +270,41 @@ function normalizeDateCell_(v) {
   return s;
 }
 
+
+function dayNum_(v) {
+  if (v === undefined || v === null || v === "") return null;
+
+  const dt = normalizeDateCell_(v);
+  if (Object.prototype.toString.call(dt) === "[object Date]" && !isNaN(dt.getTime())) {
+    return Math.floor(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()) / 86400000);
+  }
+
+  const s = String(dt).trim();
+  if (!s) return null;
+
+  // YYYY-MM-DD
+  const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m1) {
+    const y = Number(m1[1]), mo = Number(m1[2]) - 1, d = Number(m1[3]);
+    return Math.floor(Date.UTC(y, mo, d) / 86400000);
+  }
+
+  // DD/MM/YYYY
+  const m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m2) {
+    const d = Number(m2[1]), mo = Number(m2[2]) - 1, y = Number(m2[3]);
+    return Math.floor(Date.UTC(y, mo, d) / 86400000);
+  }
+
+  const dt2 = new Date(s);
+  if (!isNaN(dt2.getTime())) {
+    return Math.floor(Date.UTC(dt2.getUTCFullYear(), dt2.getUTCMonth(), dt2.getUTCDate()) / 86400000);
+  }
+
+  return null;
+}
+
+
 /* =========================
    OSPITI
 ========================= */
@@ -278,8 +313,36 @@ function handleOspiti_(e, method) {
   const sh = getSheet_(SHEETS.OSPITI);
 
   if (method === "GET") {
+    const from = String(e.parameter.from || "").trim();
+    const to = String(e.parameter.to || "").trim();
+    const fromN = from ? dayNum_(from) : null;
+    const toN = to ? dayNum_(to) : null;
+
     const { rows } = readAll_(sh);
-    return jsonOk_(rows);
+
+    // Se non c’è filtro, mantieni comportamento legacy
+    if (fromN == null && toN == null) return jsonOk_(rows);
+
+    const filtered = (rows || []).filter(r => {
+      const ciN = dayNum_(r.check_in);
+      const coN = dayNum_(r.check_out);
+
+      // overlap: (check_in <= to) && (check_out >= from)
+      if (fromN != null && toN != null) {
+        const leftOk = (ciN == null) ? true : (ciN <= toN);
+        const rightOk = (coN == null) ? true : (coN >= fromN);
+        return leftOk && rightOk;
+      }
+      if (fromN != null) {
+        return (coN == null) ? true : (coN >= fromN);
+      }
+      if (toN != null) {
+        return (ciN == null) ? true : (ciN <= toN);
+      }
+      return true;
+    });
+
+    return jsonOk_(filtered);
   }
 
   if (method === "POST" || method === "PUT") {

@@ -3,7 +3,141 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.107";
+const BUILD_VERSION = "1.108";
+
+
+// ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
+const __RESTORE_KEY = "__ddae_restore_state";
+
+function __readRestoreState(){
+  try {
+    const raw = sessionStorage.getItem(__RESTORE_KEY);
+    if (!raw) return null;
+    sessionStorage.removeItem(__RESTORE_KEY);
+    return JSON.parse(raw);
+  } catch (_) { return null; }
+}
+
+function __writeRestoreState(obj){
+  try { sessionStorage.setItem(__RESTORE_KEY, JSON.stringify(obj || {})); } catch (_) {}
+}
+
+function __captureFormValue(id){
+  try {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    return (el.type === "checkbox") ? !!el.checked : (el.value ?? "");
+  } catch (_) { return null; }
+}
+
+function __applyFormValue(id, v){
+  try {
+    const el = document.getElementById(id);
+    if (!el || v == null) return;
+    if (el.type === "checkbox") el.checked = !!v;
+    else el.value = String(v);
+  } catch (_) {}
+}
+
+function __captureUiState(){
+  const out = {
+    page: state.page || "home",
+    period: state.period || { from:"", to:"" },
+    preset: state.periodPreset || "this_month",
+    guest: {
+      mode: state.guestMode || "create",
+      editId: state.guestEditId || null,
+      depositType: state.guestDepositType || "contante",
+      saldoType: state.guestSaldoType || "contante",
+      depositReceipt: !!state.guestDepositReceipt,
+      saldoReceipt: !!state.guestSaldoReceipt,
+      marriage: !!state.guestMarriage,
+      rooms: Array.from(state.guestRooms || []),
+      lettiPerStanza: state.lettiPerStanza || {},
+      form: {
+        guestName: __captureFormValue("guestName"),
+        guestAdults: __captureFormValue("guestAdults"),
+        guestKidsU10: __captureFormValue("guestKidsU10"),
+        guestCheckIn: __captureFormValue("guestCheckIn"),
+        guestCheckOut: __captureFormValue("guestCheckOut"),
+        guestTotal: __captureFormValue("guestTotal"),
+        guestBooking: __captureFormValue("guestBooking"),
+        guestDeposit: __captureFormValue("guestDeposit"),
+        guestSaldo: __captureFormValue("guestSaldo"),
+      }
+    },
+    calendar: {
+      anchor: (state.calendar && state.calendar.anchor) ? toISO(state.calendar.anchor) : ""
+    }
+  };
+  return out;
+}
+
+function __applyUiState(restore){
+  if (!restore || typeof restore !== "object") return;
+
+  try {
+    // periodo
+    const p = restore.period || null;
+    if (p && p.from && p.to) {
+      setPeriod(p.from, p.to);
+    }
+
+    if (restore.preset) setPresetValue(restore.preset);
+
+    // calendario
+    if (restore.calendar?.anchor) {
+      if (!state.calendar) state.calendar = { anchor: new Date(), ready:false, guests:[], rangeKey:"" };
+      state.calendar.anchor = new Date(restore.calendar.anchor + "T00:00:00");
+      state.calendar.ready = false;
+    }
+
+    // ospite (solo se eri in quella sezione)
+    if (restore.guest) {
+      state.guestMode = restore.guest.mode || state.guestMode;
+      state.guestEditId = restore.guest.editId || state.guestEditId;
+      state.guestDepositType = restore.guest.depositType || state.guestDepositType;
+      state.guestSaldoType = restore.guest.saldoType || state.guestSaldoType;
+      state.guestDepositReceipt = !!restore.guest.depositReceipt;
+      state.guestSaldoReceipt = !!restore.guest.saldoReceipt;
+      state.guestMarriage = !!restore.guest.marriage;
+
+      // stanze selezionate
+      try {
+        state.guestRooms = new Set((restore.guest.rooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)));
+        state.lettiPerStanza = restore.guest.lettiPerStanza || {};
+      } catch (_) {}
+
+      // campi form
+      const f = restore.guest.form || {};
+      __applyFormValue("guestName", f.guestName);
+      __applyFormValue("guestAdults", f.guestAdults);
+      __applyFormValue("guestKidsU10", f.guestKidsU10);
+      __applyFormValue("guestCheckIn", f.guestCheckIn);
+      __applyFormValue("guestCheckOut", f.guestCheckOut);
+      __applyFormValue("guestTotal", f.guestTotal);
+      __applyFormValue("guestBooking", f.guestBooking);
+      __applyFormValue("guestDeposit", f.guestDeposit);
+      __applyFormValue("guestSaldo", f.guestSaldo);
+
+      // UI rooms + pills
+      try {
+        document.querySelectorAll("#roomsPicker .room-dot").forEach(btn => {
+          const n = parseInt(btn.getAttribute("data-room"), 10);
+          const on = state.guestRooms.has(n);
+          btn.classList.toggle("selected", on);
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+      } catch (_) {}
+      try { setPayType("depositType", state.guestDepositType); } catch (_) {}
+      try { setPayType("saldoType", state.guestSaldoType); } catch (_) {}
+      try { setPayReceipt("depositType", state.guestDepositReceipt); } catch (_) {}
+      try { setPayReceipt("saldoType", state.guestSaldoReceipt); } catch (_) {}
+      try { setMarriage(state.guestMarriage); } catch (_) {}
+    }
+
+  } catch (_) {}
+}
 
 
 function genId(prefix){
@@ -71,6 +205,7 @@ const state = {
   motivazioni: [],
   spese: [],
   report: null,
+  _dataKey: "",
   period: { from: "", to: "" },
   periodPreset: "this_month",
   page: "home",
@@ -391,13 +526,7 @@ function bindPresetSelect(sel){
 
     setPeriod(from,to);
 
-  // Preset periodo (scroll iOS)
-  bindPresetSelect("#periodPreset1");
-  bindPresetSelect("#periodPreset2");
-  bindPresetSelect("#periodPreset3");
-  bindPresetSelect("#periodPreset4");
-  setPresetValue(state.periodPreset || "this_month");
-    try { await loadData({ showLoader:false }); renderGuestCards(); } catch (e) { toast(e.message); }
+    try { await onPeriodChanged({ showLoader:false }); } catch (e) { toast(e.message); }
   });
 }
 
@@ -477,6 +606,50 @@ return json.data;
   } finally { if (showLoader) if (showLoader) endRequest(); }
 }
 
+
+
+// ===== API Cache (speed + dedupe richieste) =====
+const __apiCache = new Map();      // key -> { t:number, data:any }
+const __apiInflight = new Map();   // key -> Promise
+
+function __cacheKey(action, params){
+  try { return action + "|" + JSON.stringify(params || {}); }
+  catch (_) { return action + "|{}"; }
+}
+
+function invalidateApiCache(prefix){
+  try{
+    for (const k of Array.from(__apiCache.keys())){
+      if (!prefix || k.startsWith(prefix)) __apiCache.delete(k);
+    }
+  } catch (_) {}
+}
+
+// GET con cache in-memory (non tocca SW): evita chiamate duplicate e loader continui
+async function cachedGet(action, params = {}, { ttlMs = 30000, showLoader = true, force = false } = {}){
+  const key = __cacheKey(action, params);
+
+  if (!force) {
+    const hit = __apiCache.get(key);
+    if (hit && (Date.now() - hit.t) < ttlMs) return hit.data;
+  }
+
+  if (__apiInflight.has(key)) return __apiInflight.get(key);
+
+  const p = (async () => {
+    const data = await api(action, { params, showLoader });
+    __apiCache.set(key, { t: Date.now(), data });
+    return data;
+  })();
+
+  __apiInflight.set(key, p);
+
+  try {
+    return await p;
+  } finally {
+    __apiInflight.delete(key);
+  }
+}
 
 /* Launcher modal (popup) */
 
@@ -573,9 +746,9 @@ function showPage(page){
   }
 
   // render on demand
-  if (page === "spese") renderSpese();
-  if (page === "riepilogo") renderRiepilogo();
-  if (page === "grafico") renderGrafico();
+  if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
+  if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
+  if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
 }
@@ -787,9 +960,42 @@ function setPeriod(from, to){
   if (chip && state.page !== "home") chip.textContent = `${from} → ${to}`;
 }
 
+
+async function onPeriodChanged({ showLoader=false } = {}){
+  // Quando cambia il periodo, i dati “period-based” vanno considerati obsoleti
+  state._dataKey = "";
+
+  // Aggiorna solo ciò che serve (evita chiamate inutili e loader continui)
+  if (state.page === "ospiti") {
+    await loadOspiti(state.period || {});
+    return;
+  }
+  if (state.page === "calendario") {
+    if (state.calendar) state.calendar.ready = false;
+    await ensureCalendarData();
+    renderCalendario();
+    return;
+  }
+  if (state.page === "spese") {
+    await ensurePeriodData({ showLoader });
+    renderSpese();
+    return;
+  }
+  if (state.page === "riepilogo") {
+    await ensurePeriodData({ showLoader });
+    renderRiepilogo();
+    return;
+  }
+  if (state.page === "grafico") {
+    await ensurePeriodData({ showLoader });
+    renderGrafico();
+    return;
+  }
+}
+
 /* DATA LOAD */
 async function loadMotivazioni(){
-  const data = await api("motivazioni", { showLoader:false });
+  const data = await cachedGet("motivazioni", {}, { showLoader:false, ttlMs: 5*60*1000 });
   state.motivazioni = data;
 
   const list = $("#motivazioniList");
@@ -805,7 +1011,7 @@ async function loadMotivazioni(){
 
 
 async function loadStanze({ showLoader=true } = {}){
-  const data = await api("stanze", { showLoader });
+  const data = await cachedGet("stanze", {}, { showLoader, ttlMs: 60*1000 });
   const rows = Array.isArray(data) ? data : [];
   state.stanzeRows = rows;
 
@@ -828,25 +1034,35 @@ async function loadStanze({ showLoader=true } = {}){
 async function loadOspiti({ from="", to="" } = {}){
   // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
   await loadStanze({ showLoader:false });
-  const data = await api("ospiti", { params: { from, to } });
+  const data = await cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
   state.guests = Array.isArray(data) ? data : [];
   renderGuestCards();
 }
 
-async function loadData({ showLoader=true } = {}){
+
+async function ensurePeriodData({ showLoader=true, force=false } = {}){
   const { from, to } = state.period;
+  const key = `${from}|${to}`;
+
+  if (!force && state._dataKey === key && state.report && Array.isArray(state.spese)) {
+    return;
+  }
+
   const [report, spese] = await Promise.all([
-    api("report", { params: { from, to }, showLoader }),
-    api("spese", { params: { from, to }, showLoader }),
+    cachedGet("report", { from, to }, { showLoader, ttlMs: 15*1000, force }),
+    cachedGet("spese", { from, to }, { showLoader, ttlMs: 15*1000, force }),
   ]);
+
   state.report = report;
   state.spese = spese;
-
-  // refresh current page
-  if (state.page === "spese") renderSpese();
-  if (state.page === "riepilogo") renderRiepilogo();
-  if (state.page === "grafico") renderGrafico();
+  state._dataKey = key;
 }
+
+// Compat: vecchi call-site
+async function loadData({ showLoader=true } = {}){
+  return ensurePeriodData({ showLoader });
+}
+
 
 /* 1) INSERISCI */
 function resetInserisci(){
@@ -921,7 +1137,14 @@ async function saveSpesa(){
   resetInserisci();
 
   // aggiorna dati
-  try { await loadData({ showLoader:false }); renderGuestCards(); } catch(_) {}
+  try {
+    invalidateApiCache("spese|");
+    invalidateApiCache("report|");
+    await ensurePeriodData({ showLoader:false, force:true });
+    if (state.page === "spese") renderSpese();
+    if (state.page === "riepilogo") renderRiepilogo();
+    if (state.page === "grafico") renderGrafico();
+  } catch(_) {}
 }
 
 /* 2) SPESE */
@@ -960,7 +1183,10 @@ function renderSpese(){
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData({ showLoader:false }); renderGuestCards();
+      invalidateApiCache("spese|");
+      invalidateApiCache("report|");
+      await ensurePeriodData({ showLoader:false, force:true });
+      renderSpese();
     });
 
     list.appendChild(el);
@@ -1158,7 +1384,7 @@ function bindPeriodAuto(fromSel, toSel){
       setPresetValue("custom");
       setPeriod(from, to);
 
-      try { await loadData({ showLoader:false }); renderGuestCards(); } catch (e) { toast(e.message); }
+      try { await onPeriodChanged({ showLoader:false }); } catch (e) { toast(e.message); }
     }, 220);
   };
 
@@ -1598,7 +1824,9 @@ function renderGuestCards(){
       if (!confirm("Eliminare definitivamente questo ospite?")) return;
       await api("ospiti", { method:"DELETE", params:{ id: item.id }});
       toast("Ospite eliminato");
-      await loadData({ showLoader:false }); renderGuestCards();
+      invalidateApiCache("ospiti|");
+      invalidateApiCache("stanze|");
+      await loadOspiti(state.period || {});
     });
 
     wrap.appendChild(card);
@@ -1638,6 +1866,7 @@ function refreshFloatingLabels(){
 
 
 async function init(){
+  const __restore = __readRestoreState();
   document.body.dataset.page = "home";
   setupHeader();
   setupHome();
@@ -1645,9 +1874,14 @@ async function init(){
 
     setupOspite();
   initFloatingLabels();
-// default period = this month
-  const [from,to] = monthRangeISO(new Date());
-  setPeriod(from,to);
+// periodo iniziale
+  if (__restore && __restore.preset) state.periodPreset = __restore.preset;
+  if (__restore && __restore.period && __restore.period.from && __restore.period.to) {
+    setPeriod(__restore.period.from, __restore.period.to);
+  } else {
+    const [from,to] = monthRangeISO(new Date());
+    setPeriod(from,to);
+  }
 
   // Preset periodo (scroll iOS)
   bindPresetSelect("#periodPreset1");
@@ -1682,16 +1916,13 @@ async function init(){
   });
 
 
-  // pre-carico dati (non cambia flusso API)
-  try {
-    await loadMotivazioni();
-    await loadData({ showLoader:false }); renderGuestCards();
-  } catch(e){
-    toast(e.message);
-  }
+  // prefetch leggero (evita lentezza all'avvio)
+  try { await loadMotivazioni(); } catch(e){ toast(e.message); }
 
-  // avvio: mostra la HOME
-  showPage("home");
+  // avvio: ripristina sezione se il SW ha forzato un reload su iOS
+  const targetPage = (__restore && __restore.page) ? __restore.page : "home";
+  showPage(targetPage);
+  if (__restore) setTimeout(() => { try { __applyUiState(__restore); } catch(_) {} }, 0);
 }
 
 
@@ -1733,14 +1964,28 @@ function setupCalendario(){
   });
 }
 
+
 async function ensureCalendarData() {
-  if (!state.calendar) state.calendar = { anchor: new Date(), ready: false, guests: [] };
-  // ricarico sempre quando apro, così è sempre aggiornato
-  await loadStanze({ showLoader: true });
-  const data = await api("ospiti", { showLoader: true });
+  if (!state.calendar) state.calendar = { anchor: new Date(), ready: false, guests: [], rangeKey: "" };
+
+  const anchor = (state.calendar && state.calendar.anchor) ? state.calendar.anchor : new Date();
+  const start = startOfWeekMonday(anchor);
+
+  // Finestra dati: 2 settimane prima + 2 settimane dopo (evita payload enormi)
+  const winFrom = toISO(addDays(start, -14));
+  const winTo = toISO(addDays(start, 7 + 14));
+  const rangeKey = `${winFrom}|${winTo}`;
+
+  // Se ho già i dati per questa finestra, non ricarico
+  if (state.calendar.ready && state.calendar.rangeKey === rangeKey) return;
+
+  await loadStanze({ showLoader: true }); // necessario per i pallini letti
+  const data = await cachedGet("ospiti", { from: winFrom, to: winTo }, { showLoader: true, ttlMs: 30*1000 });
   state.calendar.guests = Array.isArray(data) ? data : [];
   state.calendar.ready = true;
+  state.calendar.rangeKey = rangeKey;
 }
+
 
 function renderCalendario(){
   const grid = document.getElementById("calGrid");
@@ -1999,6 +2244,7 @@ async function registerSW(){
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (reloaded) return;
       reloaded = true;
+      try { __writeRestoreState(__captureUiState()); } catch (_) {}
       location.reload();
     });
   } catch (_) {}
@@ -2122,7 +2368,10 @@ function renderSpese(){
       if (!confirm("Eliminare questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
       toast("Eliminata");
-      await loadData({ showLoader:false }); renderGuestCards();
+      invalidateApiCache("spese|");
+      invalidateApiCache("report|");
+      await ensurePeriodData({ showLoader:false, force:true });
+      renderSpese();
     });
     list.appendChild(el);
   });
@@ -2138,7 +2387,9 @@ function attachDeleteOspite(card, ospite){
     if (!confirm("Eliminare definitivamente questo ospite?")) return;
     await api("ospiti", { method:"DELETE", params:{ id: ospite.id } });
     toast("Ospite eliminato");
-    await loadData({ showLoader:false }); renderGuestCards();
+    invalidateApiCache("ospiti|");
+    invalidateApiCache("stanze|");
+    await loadOspiti(state.period || {});
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
