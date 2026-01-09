@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.114";
+const BUILD_VERSION = "1.115";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -1701,6 +1701,19 @@ function updateOspiteHdActions(){
   if (btnDel) btnDel.hidden = !(mode === "view" || mode === "edit");
 }
 
+function calcNightsISO(checkInISO, checkOutISO){
+  try{
+    if (!checkInISO || !checkOutISO) return null;
+    const a = new Date(String(checkInISO).slice(0,10) + "T00:00:00");
+    const b = new Date(String(checkOutISO).slice(0,10) + "T00:00:00");
+    const diff = Math.round((b - a) / (24 * 60 * 60 * 1000));
+    if (!isFinite(diff) || diff <= 0) return null;
+    return diff;
+  }catch(_){
+    return null;
+  }
+}
+
 function setGuestFormViewOnly(isView, ospite){
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
@@ -1716,6 +1729,25 @@ function setGuestFormViewOnly(isView, ospite){
     ro.hidden = !isView;
     if (isView) renderRoomsReadOnly(ospite);
     else ro.innerHTML = "";
+  }
+
+  // Notti (solo in sola lettura)
+  const nightsWrap = document.getElementById("guestNightsWrap");
+  if (nightsWrap){
+    if (isView){
+      const ciVal = (document.getElementById("guestCheckIn")?.value || "").trim();
+      const coVal = (document.getElementById("guestCheckOut")?.value || "").trim();
+      const n = calcNightsISO(ciVal, coVal);
+      if (n == null){
+        nightsWrap.hidden = true;
+      } else {
+        nightsWrap.hidden = false;
+        const v = document.getElementById("guestNightsValue");
+        if (v) v.textContent = String(n);
+      }
+    } else {
+      nightsWrap.hidden = true;
+    }
   }
 
   // Aggiorna i pallini in testata in base alla modalità corrente

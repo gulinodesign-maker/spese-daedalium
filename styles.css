@@ -1781,6 +1781,13 @@ body[data-page="ospiti"] .guest-card .actions {
   border-color: #2b7cb4;
 }
 
+
+/* Culla: pallino giallo quando attivo */
+#rc_culla .dot.on{
+  background: rgba(255,204,0,0.95);
+  border-color: rgba(255,204,0,0.95);
+}
+
 #page-ospiti .guest-top{
   display:flex;
   justify-content:space-between;
@@ -1949,7 +1956,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 .bed-dot-m{ background: rgba(255,59,48,0.95); border-color: rgba(255,59,48,0.55); }   /* rosso */
 .bed-dot-s{ background: rgba(50,173,230,0.95); border-color: rgba(50,173,230,0.55); } /* azzurro */
-.bed-dot-c{ background: rgba(52,199,89,0.95); border-color: rgba(52,199,89,0.55); }   /* verde */
+.bed-dot-c{ background: rgba(255,204,0,0.95); border-color: rgba(255,204,0,0.55); }   /* giallo */
 
 
 /* dDAE_1.067 — Matrimonio: pallino verde 'M' nella riga stanze */
