@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.118";
+const BUILD_VERSION = "1.119";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -236,7 +236,9 @@ const state = {
   guestEditId: null,
   guestMode: "create",
   lettiPerStanza: {},
-  guestMarriage: false,
+    bedsDirty: false,
+  stanzeSnapshotOriginal: "",
+guestMarriage: false,
   guestSaldoType: "contante",
   guestPSRegistered: false,
   guestISTATRegistered: false,
@@ -1589,6 +1591,8 @@ function enterGuestCreateMode(){
   state.guestRooms = state.guestRooms || new Set();
   state.guestRooms.clear();
   state.lettiPerStanza = {};
+  state.bedsDirty = false;
+  state.stanzeSnapshotOriginal = "";
 
   // Pagamenti (pillole): default contanti + ricevuta OFF
   state.guestDepositType = "contante";
@@ -1685,6 +1689,31 @@ function enterGuestEditMode(ospite){
       });
     }
   } catch (_) {}
+
+  // --- FIX A+B (dDAE): preserva la configurazione letti esistente e non riscrivere "stanze" se non è cambiata ---
+  try {
+    state.bedsDirty = false;
+
+    // Ricostruisci lettiPerStanza dai dati già salvati sul foglio "stanze" (state.stanzeByKey)
+    const gid = String(guestIdOf(ospite) || ospite?.id || "").trim();
+    const next = {};
+    const roomsNow = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n));
+    for (const rn of roomsNow){
+      const key = `${gid}:${String(rn)}`;
+      const d = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : {};
+      next[String(rn)] = {
+        matrimoniale: !!(d.letto_m),
+        singoli: parseInt(d.letto_s || 0, 10) || 0,
+        culla: !!(d.culla),
+        note: ""
+      };
+    }
+    state.lettiPerStanza = next;
+
+    // Snapshot originale per evitare riscritture inutili su salvataggio
+    state.stanzeSnapshotOriginal = JSON.stringify(buildStanzeArrayFromState());
+  } catch (_) {}
+
   try { updateOspiteHdActions(); } catch (_) {}
 }
 
@@ -1863,7 +1892,21 @@ if (!name) return toast("Inserisci il nome");
   // stanze: backend gestisce POST e sovrascrive (deleteWhere + append)
   const ospiteId = payload.id;
   const stanze = buildStanzeArrayFromState();
-  try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
+
+  let shouldSaveStanze = true;
+  if (isEdit){
+    try {
+      const snapNow = JSON.stringify(stanze);
+      const snapOrig = state.stanzeSnapshotOriginal || "";
+      shouldSaveStanze = (snapNow !== snapOrig);
+    } catch (_) {
+      shouldSaveStanze = true;
+    }
+  }
+
+  if (shouldSaveStanze){
+    try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
+  }
 
   await loadOspiti(state.period || {});
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
@@ -2608,6 +2651,8 @@ function buildStanzeArrayFromState(){
 function applyStanzeToState(rows){
   state.guestRooms = state.guestRooms || new Set();
   state.lettiPerStanza = {};
+  state.bedsDirty = false;
+  state.stanzeSnapshotOriginal = "";
   state.guestRooms.clear();
   (Array.isArray(rows) ? rows : []).forEach(r=>{
     const n = parseInt(r.stanza_num ?? r.stanzaNum ?? r.room ?? r.stanza, 10);
@@ -2662,6 +2707,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
   const culla = document.querySelector('#rc_culla .dot')?.classList.contains('on')||false;
   const singoli = document.querySelectorAll('#rc_singoli .dot.on').length;
   state.lettiPerStanza[__rc_room] = {matrimoniale, singoli, culla};
+  state.bedsDirty = true;
   document.getElementById('roomConfigModal').hidden = true;
 });
 // --- end room beds config ---
