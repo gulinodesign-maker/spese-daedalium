@@ -1,7 +1,7 @@
 {
   "name": "Daedalium PMS",
   "short_name": "Daedalium PMS",
-  "start_url": "./?v=1.113",
+  "start_url": "./?v=1.114",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -1,18 +1,18 @@
 /* dDAE - Service Worker (PWA) */
-/* Build: dDAE_1.113 */
+/* Build: dDAE_1.114 */
 
-const BUILD = "1.113";
-const CACHE_NAME = "dDAE_1.113"; // cambia ad ogni build
+const BUILD = "1.114";
+const CACHE_NAME = "dDAE_1.114"; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./index.html?v=1.113",
-  "./styles.css?v=1.113",
-  "./app.js?v=1.113",
-  "./config.js?v=1.113",
-  "./manifest.json?v=1.113",
+  "./index.html?v=1.114",
+  "./styles.css?v=1.114",
+  "./app.js?v=1.114",
+  "./config.js?v=1.114",
+  "./manifest.json?v=1.114",
   "./assets/logo.jpg",
   "./assets/bg-daedalium.png",
   "./assets/icons/icon-192.png",

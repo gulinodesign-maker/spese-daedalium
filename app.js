@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.113";
+const BUILD_VERSION = "1.114";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -1548,6 +1548,7 @@ function enterGuestCreateMode(){
       btn.setAttribute("aria-pressed", "false");
     });
   } catch (_) {}
+  try { updateOspiteHdActions(); } catch (_) {}
 }
 
 function enterGuestEditMode(ospite){
@@ -1619,6 +1620,7 @@ function enterGuestEditMode(ospite){
       });
     }
   } catch (_) {}
+  try { updateOspiteHdActions(); } catch (_) {}
 }
 
 function _guestIdOf(item){
@@ -1676,12 +1678,32 @@ function renderRoomsReadOnly(ospite){
   ro.innerHTML = buildRoomsStackHTML(guestId, roomsArr);
 }
 
+function updateOspiteHdActions(){
+  const hdActions = document.getElementById("ospiteHdActions");
+  if (!hdActions) return;
+
+  // Mostra il contenitore (poi nascondiamo i singoli pallini senza azione)
+  hdActions.hidden = false;
+
+  const btnBack = hdActions.querySelector("[data-guest-back]");
+  const btnEdit = hdActions.querySelector("[data-guest-edit]");
+  const btnDel  = hdActions.querySelector("[data-guest-del]");
+
+  const mode = state.guestMode; // "create" | "edit" | "view"
+
+  // Verde: sempre presente (torna alla lista ospiti)
+  if (btnBack) btnBack.hidden = false;
+
+  // Giallo: solo in sola lettura (azione: passa a modifica)
+  if (btnEdit) btnEdit.hidden = (mode !== "view");
+
+  // Rosso: in sola lettura e in modifica (azione: elimina ospite)
+  if (btnDel) btnDel.hidden = !(mode === "view" || mode === "edit");
+}
+
 function setGuestFormViewOnly(isView, ospite){
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
-
-  const hdActions = document.getElementById("ospiteHdActions");
-  if (hdActions) hdActions.hidden = !isView;
 
   const btn = document.getElementById("createGuestCard");
   if (btn) btn.hidden = !!isView;
@@ -1695,6 +1717,9 @@ function setGuestFormViewOnly(isView, ospite){
     if (isView) renderRoomsReadOnly(ospite);
     else ro.innerHTML = "";
   }
+
+  // Aggiorna i pallini in testata in base alla modalità corrente
+  try { updateOspiteHdActions(); } catch (_) {}
 }
 
 function enterGuestViewMode(ospite){
@@ -1707,6 +1732,7 @@ function enterGuestViewMode(ospite){
   if (title) title.textContent = "Scheda ospite";
 
   setGuestFormViewOnly(true, ospite);
+  try { updateOspiteHdActions(); } catch (_) {}
 }
 
 
@@ -1794,26 +1820,41 @@ function setupOspite(){
     hdActions.__bound = true;
     hdActions.addEventListener("click", async (e) => {
       const btn = e.target.closest("button");
-      if (!btn || !hdActions.contains(btn)) return;
+      if (!btn || !hdActions.contains(btn) || btn.hidden) return;
 
-      const item = state.guestViewItem;
-      if (!item) return;
-
+      // Verde: torna sempre alla lista ospiti (anche in Nuovo/Modifica)
       if (btn.hasAttribute("data-guest-back")){
         showPage("ospiti");
         return;
       }
 
+      const mode = state.guestMode;
+      const item = state.guestViewItem;
+
+      // Giallo: dalla sola lettura passa a modifica
       if (btn.hasAttribute("data-guest-edit")){
+        if (!item) return;
         enterGuestEditMode(item);
+        try { updateOspiteHdActions(); } catch (_) {}
         return;
       }
 
+      // Rosso: elimina (solo in sola lettura o modifica)
       if (btn.hasAttribute("data-guest-del")){
+        let gid = null;
+
+        if (mode === "view"){
+          if (!item) return;
+          gid = guestIdOf(item) || item.id;
+        } else if (mode === "edit"){
+          gid = state.guestEditId || null;
+        }
+
+        if (!gid) return;
         if (!confirm("Eliminare definitivamente questo ospite?")) return;
+
         try {
-          const gid = guestIdOf(item);
-          await api("ospiti", { method:"DELETE", params:{ id: gid || item.id }});
+          await api("ospiti", { method:"DELETE", params:{ id: gid }});
           toast("Ospite eliminato");
           invalidateApiCache("ospiti|");
           invalidateApiCache("stanze|");
@@ -1825,7 +1866,7 @@ function setupOspite(){
         return;
       }
     });
-  }
+}
 
   const roomsWrap = document.getElementById("roomsPicker");
   const roomsOut = null; // removed UI string output

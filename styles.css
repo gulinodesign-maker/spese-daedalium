@@ -2539,7 +2539,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.113 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.114 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
