@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.121";
+const BUILD_VERSION = "1.120";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -2409,6 +2409,7 @@ function renderCalendario(){
 
       const info = occ.get(`${dIso}:${r}`);
       if (info) {
+        cell.classList.add("has-booking");
         if (info.lastDay) cell.classList.add("last-day");
 
         const inner = document.createElement("div");

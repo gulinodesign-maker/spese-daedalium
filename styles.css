@@ -2235,12 +2235,9 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity:.92;
 }
 
-.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; display:flex; justify-content:center; }
-
+.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; }
 
 .cal-grid{
-  margin: 0 auto;
-
   display:grid;
   /* Invertito: stanze in verticale (prima colonna), giorni in orizzontale */
   grid-template-columns: var(--cal-room-w) repeat(7, var(--cal-day-w));
@@ -2379,6 +2376,28 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* iOS: tap responsiveness */
 .home-main, .cal-nav-btn{ touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+
+
+/* === dDAE: Calendario - celle stanza e celle prenotate === */
+/* Prima colonna (numero stanza): stessa forma delle celle, leggermente più scura */
+.cal-pill.room{
+  height: var(--cal-cell-h);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.16); /* più scura delle celle normali */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  font-weight: 800;
+}
+
+/* Cella con prenotazione: leggermente più chiara */
+.cal-cell.has-booking{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.16);
+}
 
 /* ===== dDAE_1.099 FIX: HOME grid clickable (no flex override) ===== */
 #page-home .home-grid{
