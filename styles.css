@@ -2381,24 +2381,45 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* === dDAE: Calendario - celle stanza e celle prenotate === */
-/* Prima colonna (numero stanza): stessa forma delle celle, leggermente più scura */
+
+
+
+/* === dDAE: Calendario - celle stanza e celle prenotate (preserva colori originali) === */
+/* Obiettivo: scurire/schiarire SENZA cambiare il colore di base (solo luminanza) */
+
+/* Base: prepara overlay non invasivo */
+.cal-pill.room,
+.cal-cell{
+  position: relative;
+}
+
+/* Overlay comune */
+.cal-pill.room::before,
+.cal-cell.has-booking::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: inherit;
+  pointer-events:none;
+}
+
+/* Celle "numero stanza": identiche alle altre ma leggermente più scure */
 .cal-pill.room{
   height: var(--cal-cell-h);
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(0,0,0,.16); /* più scura delle celle normali */
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  /* NON cambiamo background/border originali: usiamo solo overlay */
   font-weight: 800;
 }
+.cal-pill.room::before{
+  background: rgba(0,0,0,.06);
+}
 
-/* Cella con prenotazione: leggermente più chiara */
-.cal-cell.has-booking{
-  background: rgba(255,255,255,.08);
-  border-color: rgba(255,255,255,.16);
+/* Celle prenotate: leggermente più chiare */
+.cal-cell.has-booking::before{
+  background: rgba(255,255,255,.06);
 }
 
 /* ===== dDAE_1.099 FIX: HOME grid clickable (no flex override) ===== */
