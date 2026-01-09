@@ -2539,28 +2539,62 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.112 — Lista ospiti compatta + Scheda sola lettura */
-#page-ospiti .guest-name{
+/* dDAE_1.113 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+#page-ospiti .guest-card{
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#page-ospiti .guest-card:active{ transform: scale(0.995); }
+
+#page-ospiti .guest-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+#page-ospiti .guest-main{
   display:flex;
   align-items:baseline;
-  gap:10px;
-  min-width:0;
-  white-space:nowrap;
+  gap: 10px;
+  min-width: 0;
+  white-space: nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
-#page-ospiti .guest-dates{
+#page-ospiti .guest-name-text{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size: 18px;
+  font-weight: 900;
+}
+#page-ospiti .guest-meta-right{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+#page-ospiti .guest-arrivo{
   font-size:12px;
   font-weight:800;
   opacity:0.75;
-  flex:0 0 auto;
+  white-space: nowrap;
 }
-#page-ospiti .guest-top{ gap:12px; }
 
+#page-ospite .guest-hd-actions{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+/* Scheda sola lettura: blocca solo i controlli del form (ma lascia attivi i pallini in testata) */
 .guest-form-card.is-view input,
-.guest-form-card.is-view button,
-.guest-form-card.is-view textarea{
+.guest-form-card.is-view textarea,
+.guest-form-card.is-view .bd button{
   pointer-events:none;
+}
+.guest-form-card.is-view .guest-hd-actions,
+.guest-form-card.is-view .guest-hd-actions button{
+  pointer-events:auto !important;
 }
 
 /* In sola lettura, le stanze diventano una lista "stack" come nel vecchio menù */

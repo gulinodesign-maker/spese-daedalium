@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.112";
+const BUILD_VERSION = "1.113";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -239,6 +239,8 @@ const state = {
   guestSaldoType: "contante",
   guestPSRegistered: false,
   guestISTATRegistered: false,
+  // Scheda ospite (sola lettura): ultimo ospite aperto
+  guestViewItem: null,
 };
 
 const COLORS = {
@@ -424,6 +426,24 @@ function formatISODateLocal(value){
 
   // Last resort: cut
   return s.slice(0,10);
+}
+
+// 2026-01-01 -> "1 Gennaio 2026" (mese con iniziale maiuscola)
+function formatLongDateIT(value){
+  const iso = formatISODateLocal(value);
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+  const [y,m,d] = iso.split("-").map(n=>parseInt(n,10));
+  const dt = new Date(y, (m-1), d);
+  if (isNaN(dt)) return "";
+  const s = dt.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
+  // capitalizza il mese (in it-IT normalmente è minuscolo)
+  // es: "1 gennaio 2026" -> "1 Gennaio 2026"
+  const parts = s.split(" ");
+  if (parts.length >= 3) {
+    parts[1] = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+    return parts.join(" ");
+  }
+  return s;
 }
 
 
@@ -1481,6 +1501,8 @@ function updateGuestRemaining(){
 function enterGuestCreateMode(){
   setGuestFormViewOnly(false);
 
+  state.guestViewItem = null;
+
   state.guestMode = "create";
   state.guestEditId = null;
   state.guestEditCreatedAt = null;
@@ -1530,6 +1552,8 @@ function enterGuestCreateMode(){
 
 function enterGuestEditMode(ospite){
   setGuestFormViewOnly(false);
+
+  state.guestViewItem = null;
 
   state.guestMode = "edit";
   state.guestEditId = ospite?.id ?? null;
@@ -1656,6 +1680,9 @@ function setGuestFormViewOnly(isView, ospite){
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
 
+  const hdActions = document.getElementById("ospiteHdActions");
+  if (hdActions) hdActions.hidden = !isView;
+
   const btn = document.getElementById("createGuestCard");
   if (btn) btn.hidden = !!isView;
 
@@ -1674,6 +1701,7 @@ function enterGuestViewMode(ospite){
   // Riempiamo la maschera usando la stessa logica dell'edit, poi blocchiamo tutto in sola lettura
   enterGuestEditMode(ospite);
   state.guestMode = "view";
+  state.guestViewItem = ospite || null;
 
   const title = document.getElementById("ospiteFormTitle");
   if (title) title.textContent = "Scheda ospite";
@@ -1759,6 +1787,45 @@ if (!name) return toast("Inserisci il nome");
 function setupOspite(){
   const hb = document.getElementById("hamburgerBtnOspite");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
+
+  // Azioni Scheda ospite (solo lettura): verde=indietro, giallo=modifica, rosso=elimina
+  const hdActions = document.getElementById("ospiteHdActions");
+  if (hdActions && !hdActions.__bound){
+    hdActions.__bound = true;
+    hdActions.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button");
+      if (!btn || !hdActions.contains(btn)) return;
+
+      const item = state.guestViewItem;
+      if (!item) return;
+
+      if (btn.hasAttribute("data-guest-back")){
+        showPage("ospiti");
+        return;
+      }
+
+      if (btn.hasAttribute("data-guest-edit")){
+        enterGuestEditMode(item);
+        return;
+      }
+
+      if (btn.hasAttribute("data-guest-del")){
+        if (!confirm("Eliminare definitivamente questo ospite?")) return;
+        try {
+          const gid = guestIdOf(item);
+          await api("ospiti", { method:"DELETE", params:{ id: gid || item.id }});
+          toast("Ospite eliminato");
+          invalidateApiCache("ospiti|");
+          invalidateApiCache("stanze|");
+          await loadOspiti(state.period || {});
+          showPage("ospiti");
+        } catch (err) {
+          toast(err?.message || "Errore");
+        }
+        return;
+      }
+    });
+  }
 
   const roomsWrap = document.getElementById("roomsPicker");
   const roomsOut = null; // removed UI string output
@@ -1951,49 +2018,35 @@ function renderGuestCards(){
 
 
 
-        const ciText = formatISODateLocal(item.check_in || item.checkIn || "") || "—";
-    const coText = formatISODateLocal(item.check_out || item.checkOut || "") || "—";
+    const arrivoText = formatLongDateIT(item.check_in || item.checkIn || "") || "—";
 
-card.innerHTML = `
-      <div class="guest-top">
-        <div class="guest-left">
-          <span class="guest-led ${led.cls}" aria-label="${led.label}" title="${led.label}"></span>
-          <div class="guest-name">
-            ${insNo ? `<span class="guest-insno">${insNo}</span>` : ``}${nome}
-            <span class="guest-dates" aria-label="Arrivo e uscita">${ciText} → ${coText}</span>
-          </div>
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", `Apri scheda ospite: ${nome}`);
+
+    card.innerHTML = `
+      <div class="guest-row">
+        <div class="guest-main">
+          ${insNo ? `<span class="guest-insno">${insNo}</span>` : ``}
+          <span class="guest-name-text">${nome}</span>
         </div>
-        <div class="guest-actions" role="group" aria-label="Azioni ospite">
-          <button class="tl-btn tl-green" type="button" data-open aria-label="Apri scheda (sola lettura)"><span class="sr-only">Apri</span></button>
-          <button class="tl-btn tl-yellow" type="button" data-edit aria-label="Modifica ospite"><span class="sr-only">Modifica</span></button>
-          <button class="tl-btn tl-red" type="button" data-del aria-label="Elimina ospite"><span class="sr-only">Elimina</span></button>
+        <div class="guest-meta-right" aria-label="Arrivo e stato">
+          <span class="guest-arrivo" aria-label="Arrivo">${arrivoText}</span>
+          <span class="guest-led ${led.cls}" aria-label="${led.label}" title="${led.label}"></span>
         </div>
       </div>
     `;
 
-    const btnOpen = card.querySelector("[data-open]");
-    if (btnOpen){
-      btnOpen.addEventListener("click", ()=>{
-        enterGuestViewMode(item);
-        showPage("ospite");
-      });
-    }
-
-    card.querySelector("[data-edit]").addEventListener("click", ()=>{
-      enterGuestEditMode(item);
+    const open = () => {
+      enterGuestViewMode(item);
       showPage("ospite");
-    });
-
-    const __btnDel = card.querySelector("[data-del]");
-
-
-    if (__btnDel) __btnDel.addEventListener("click", async ()=>{
-      if (!confirm("Eliminare definitivamente questo ospite?")) return;
-      await api("ospiti", { method:"DELETE", params:{ id: item.id }});
-      toast("Ospite eliminato");
-      invalidateApiCache("ospiti|");
-      invalidateApiCache("stanze|");
-      await loadOspiti(state.period || {});
+    };
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
     });
 
     wrap.appendChild(card);
