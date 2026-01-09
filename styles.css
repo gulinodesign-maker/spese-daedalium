@@ -163,6 +163,43 @@ body{
   font-size: 14px;
   margin:0;
 }
+
+/* Pulsanti quadrati (Spese: + e Grafico+Riepilogo) */
+.hd-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.sq-btn{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.10);
+  display:grid;
+  place-items:center;
+  padding:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sq-btn:active{ transform: scale(0.98); }
+.sq-btn .sq-ico{ display:grid; place-items:center; }
+.sq-btn .ui-ico{
+  width:20px;
+  height:20px;
+  stroke: #ffffff;
+  fill: none;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sq-btn-orange{ background: var(--orange); }
+.sq-btn-blue{ background: var(--blue2); }
+.sq-btn.is-active{
+  outline: 2px solid rgba(255,255,255,0.65);
+  outline-offset: 2px;
+}
+
 .card .bd{ padding: 14px; }
 
 .field{ display:flex; flex-direction:column; gap:6px; width:100%; }
@@ -2539,7 +2576,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.114 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.115 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;

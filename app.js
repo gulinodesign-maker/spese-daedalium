@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.114";
+const BUILD_VERSION = "1.115";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -227,6 +227,7 @@ const state = {
   period: { from: "", to: "" },
   periodPreset: "this_month",
   page: "home",
+  speseView: "list",
   guests: [],
   stanzeRows: [],
   stanzeByKey: {},
@@ -765,14 +766,50 @@ function hideLauncher(){
   m.setAttribute("aria-hidden", "true");
 }
 
+
+function setSpeseView(view, { render=false } = {}){
+  state.speseView = view;
+  const list = document.getElementById("speseViewList");
+  const ins = document.getElementById("speseViewInsights");
+  if (list) list.hidden = (view !== "list");
+  if (ins) ins.hidden = (view !== "insights");
+
+  const btn = document.getElementById("btnSpeseInsights");
+  if (btn){
+    btn.setAttribute("aria-pressed", view === "insights" ? "true" : "false");
+    btn.classList.toggle("is-active", view === "insights");
+  }
+
+  if (render){
+    if (view === "list") {
+      try{ renderSpese(); }catch(_){}
+    } else {
+      try{ renderRiepilogo(); }catch(_){}
+      try{ renderGrafico(); }catch(_){}
+    }
+  }
+}
+
 /* NAV pages (5 pagine interne: home + 4 funzioni) */
 function showPage(page){
+  // Redirect: grafico/riepilogo ora sono dentro "Spese" (videata unica)
+  if (page === "riepilogo" || page === "grafico"){
+    page = "spese";
+    state.speseView = "insights";
+  }
+  if (page === "spese" && !state.speseView) state.speseView = "list";
+
   state.page = page;
   document.body.dataset.page = page;
 
   document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
   if (el) el.hidden = false;
+
+  // Sotto-viste della pagina Spese (lista ↔ grafico+riepilogo)
+  if (page === "spese") {
+    try { setSpeseView(state.speseView || "list"); } catch (_) {}
+  }
 
   // Period chip: nascosto in HOME (per rispettare "nessun altro testo" sulla home)
   const chip = $("#periodChip");
@@ -804,10 +841,32 @@ function setupHome(){
   const build = $("#buildText");
   if (build) build.textContent = `${BUILD_VERSION}`;
 
-  // HOME: icona principale apre il launcher
+  // SPESE: pulsante + (nuova spesa) e pulsante grafico+riepilogo
+  const btnAdd = $("#btnAddSpesa");
+  if (btnAdd){
+    bindFastTap(btnAdd, () => { hideLauncher(); showPage("inserisci"); });
+  }
+  const btnInsights = $("#btnSpeseInsights");
+  if (btnInsights){
+    bindFastTap(btnInsights, async () => {
+      // toggle vista
+      const next = (state.speseView === "insights") ? "list" : "insights";
+      if (next === "insights"){
+        try{
+          await ensurePeriodData({ showLoader:true });
+          setSpeseView("insights", { render:true });
+        }catch(e){ toast(e.message); }
+      } else {
+        setSpeseView("list");
+      }
+    });
+  }
+
+
+  // HOME: tasto Spese apre direttamente la pagina "spese" (senza launcher)
   const openBtn = $("#openLauncher");
   if (openBtn){
-    openBtn.addEventListener("click", () => showLauncher());
+    bindFastTap(openBtn, () => { try{ setSpeseView("list"); }catch(_){} hideLauncher(); showPage("spese"); });
   }
 
   // HOME: icona Ospite va alla pagina ospite
@@ -1018,7 +1077,13 @@ async function onPeriodChanged({ showLoader=false } = {}){
   }
   if (state.page === "spese") {
     await ensurePeriodData({ showLoader });
-    renderSpese();
+    // Se siamo nella sotto-vista "grafico+riepilogo", aggiorna anche quella
+    if (state.speseView === "insights") {
+      renderRiepilogo();
+      renderGrafico();
+    } else {
+      renderSpese();
+    }
     return;
   }
   if (state.page === "riepilogo") {

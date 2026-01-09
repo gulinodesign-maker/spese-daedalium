@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.114" rel="stylesheet"/>
-<link href="./manifest.json?v=1.114" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.114" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.114" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.114" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.114" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.115" rel="stylesheet"/>
+<link href="./manifest.json?v=1.115" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.115" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.115" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.115" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.115" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.114</div>
+<div class="build" id="buildText">1.115</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -146,6 +146,21 @@
 <div class="card">
 <div class="hd">
 <h2>Spese</h2>
+<div class="hd-actions">
+<button aria-label="Grafico e riepilogo" class="sq-btn sq-btn-blue" id="btnSpeseInsights" type="button">
+<div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+<path d="M4 19V5"></path>
+<path d="M4 19h16"></path>
+<path d="M7 16v-4"></path>
+<path d="M11 16v-7"></path>
+<path d="M15 16v-3"></path>
+<path d="M19 16v-9"></path>
+</svg></div>
+</button>
+<button aria-label="Aggiungi spesa" class="sq-btn sq-btn-orange" id="btnAddSpesa" type="button">
+<div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></div>
+</button>
+</div>
 </div>
 <div class="bd">
 <div class="field period-preset">
@@ -163,32 +178,10 @@
 <input id="toDate" type="date"/>
 </div>
 </div>
+<div id="speseViewList">
 <div class="list" id="speseList"></div>
 </div>
-</div>
-</section>
-<!-- 3) RIEPILOGO -->
-<section class="page" hidden="" id="page-riepilogo">
-<div class="card">
-<div class="hd">
-<h2>Riepilogo</h2>
-</div>
-<div class="bd">
-<div class="field period-preset">
-<select aria-label="Periodo" id="periodPreset2">
-<!-- options injected by JS -->
-</select>
-</div>
-<div class="period-row">
-<div class="field">
-<label>Da</label>
-<input id="fromDate2" type="date"/>
-</div>
-<div class="field">
-<label>A</label>
-<input id="toDate2" type="date"/>
-</div>
-</div>
+<div id="speseViewInsights" hidden>
 <div class="kpi-stack kpi-top" style="margin-top:12px;">
 <div class="kpi-card">
 <div class="kpi-label">Totale spese</div>
@@ -206,38 +199,21 @@
 <div style="height:12px;"></div>
 <div class="subhead">Totali per categoria</div>
 <div class="catlist" id="byCat"></div>
-</div>
-</div>
-</section>
-<!-- 4) GRAFICO -->
-<section class="page" hidden="" id="page-grafico">
-<div class="card">
-<div class="hd">
-<h2>Grafico</h2>
-</div>
-<div class="bd">
-<div class="field period-preset">
-<select aria-label="Periodo" id="periodPreset3">
-<!-- options injected by JS -->
-</select>
-</div>
-<div class="period-row">
-<div class="field">
-<label>Da</label>
-<input id="fromDate3" type="date"/>
-</div>
-<div class="field">
-<label>A</label>
-<input id="toDate3" type="date"/>
-</div>
-</div>
+<div style="height:14px;"></div>
 <div class="chart-wrap">
-<canvas aria-label="Grafico a torta per categoria" height="320" id="pieCanvas" width="320"></canvas>
+<canvas aria-label="Grafico a torta per categoria" id="pieCanvas" width="320" height="320"></canvas>
 </div>
 <div class="legend" id="pieLegend"></div>
 </div>
 </div>
+</div>
 </section>
+<!-- 3) RIEPILOGO -->
+
+
+<!-- 4) GRAFICO -->
+
+
 <!-- Pagina Ospite (DB) -->
 <section aria-label="Nuovo ospite" class="page" hidden="" id="page-ospite">
 <div class="content">
@@ -437,53 +413,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.114"></script>
-<script defer="" src="./app.js?v=1.114"></script>
-<!-- Launcher (popup) con 4 icone interne -->
-<div aria-hidden="true" class="launcher" hidden="" id="launcherModal">
-<div class="launcher-backdrop" data-close="1"></div>
-<div aria-label="Sezioni Spese" aria-modal="true" class="launcher-shell" role="dialog">
-<button aria-label="Chiudi" class="launcher-close" id="closeLauncher" type="button">✕</button>
-<div class="launcher-card">
-<div aria-label="Sezioni" class="launcher-grid" role="navigation">
-<button aria-label="Inserisci" class="launcher-icon primary" data-go="inserisci" type="button">
-<div aria-hidden="true" class="glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M12 5v14"></path>
-<path d="M5 12h14"></path>
-</svg></div>
-<div class="label">Inserisci</div>
-</button>
-<button aria-label="Spese" class="launcher-icon" data-go="spese" type="button">
-<div aria-hidden="true" class="glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M7 6h14"></path>
-<path d="M7 12h14"></path>
-<path d="M7 18h14"></path>
-<path d="M3.5 6h.01"></path>
-<path d="M3.5 12h.01"></path>
-<path d="M3.5 18h.01"></path>
-</svg></div>
-<div class="label">Spese</div>
-</button>
-<button aria-label="Riepilogo" class="launcher-icon" data-go="riepilogo" type="button">
-<div aria-hidden="true" class="glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M4 4h7v7H4z"></path>
-<path d="M13 4h7v7h-7z"></path>
-<path d="M4 13h7v7H4z"></path>
-<path d="M13 13h7v7h-7z"></path>
-</svg></div>
-<div class="label">Riepilogo</div>
-</button>
-<button aria-label="Grafico" class="launcher-icon" data-go="grafico" type="button">
-<div aria-hidden="true" class="glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M12 12V3a9 9 0 1 1-9 9h9Z"></path>
-<path d="M12 3a9 9 0 0 1 9 9h-9V3Z"></path>
-</svg></div>
-<div class="label">Grafico</div>
-</button>
-</div>
-</div>
-</div>
-</div>
+<script defer="" src="./config.js?v=1.115"></script>
+<script defer="" src="./app.js?v=1.115"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
