@@ -1,83 +1,105 @@
-/* dDAE - Service Worker (PWA) */
-/* Build: dDAE_1.116 */
+/* dDAE - Service Worker (PWA)
+ * Build: dDAE_1.117
+ *
+ * Obiettivi:
+ * - cache name cambia ad ogni build
+ * - network-first per index.html / navigazioni
+ * - no-cache per chiamate API
+ * - cleanup cache vecchie
+ * - fix iOS/Safari cache aggressiva (cache:"reload"/"no-store" + query ?v)
+ */
 
-const BUILD = "1.116";
-const CACHE_NAME = "dDAE_1.116"; // cambia ad ogni build
+const BUILD = "1.117";
+const CACHE_NAME = "dDAE_" + BUILD; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
 const CORE_ASSETS = [
   "./",
   "./index.html",
-  "./index.html?v=1.116",
-  "./styles.css?v=1.116",
-  "./app.js?v=1.116",
-  "./config.js?v=1.116",
-  "./manifest.json?v=1.116",
+  `./index.html?v=${BUILD}`,
+  `./styles.css?v=${BUILD}`,
+  `./app.js?v=${BUILD}`,
+  `./config.js?v=${BUILD}`,
+  `./manifest.json?v=${BUILD}`,
+
+  // Immagini / icone (alcune linkate con ?v=... da index.html)
   "./assets/logo.jpg",
   "./assets/bg-daedalium.png",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
-  "./assets/icons/favicon-32.png",
-  "./assets/icons/favicon-16.png",
-  "./assets/icons/apple-touch-icon.png",
+  `./assets/icons/favicon-32.png?v=${BUILD}`,
+  `./assets/icons/favicon-16.png?v=${BUILD}`,
+  `./assets/icons/apple-touch-icon.png?v=${BUILD}`,
 ];
 
-// Install: precache + skipWaiting (fix aggiornamenti su iOS)
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // "reload" bypassa la HTTP cache del browser
+
+    // "reload" bypassa la HTTP cache del browser (utile su iOS/Safari)
     const reqs = CORE_ASSETS.map((url) => new Request(url, { cache: "reload" }));
-    await cache.addAll(reqs);
-    self.skipWaiting();
+
+    // Mettiamo in cache ciò che risponde ok
+    await Promise.all(reqs.map(async (req) => {
+      try {
+        const res = await fetch(req);
+        if (res && res.ok) {
+          await cache.put(req, res.clone());
+        }
+      } catch (_) {
+        // offline durante install: ok, si prosegue
+      }
+    }));
+
+    // Applica subito il nuovo SW (poi l'app invia anche SKIP_WAITING)
+    await self.skipWaiting();
   })());
 });
 
-// Activate: cleanup cache vecchie + claim
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
+    // cleanup cache vecchie
     const keys = await caches.keys();
-    await Promise.all(keys.map((k) => {
-      if (k !== CACHE_NAME) return caches.delete(k);
-    }));
+    await Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : Promise.resolve())));
+
+    // prendi controllo immediato
     await self.clients.claim();
   })());
 });
 
-// Messaggi (fallback)
 self.addEventListener("message", (event) => {
-  if (event?.data?.type === "SKIP_WAITING") {
+  if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-function isApiRequest(req) {
-  const url = new URL(req.url);
+function isApiRequest(url) {
+  // Evita cache per chiamate a Google Apps Script / Googleusercontent
   return (
-    url.origin.includes("script.google.com") ||
-    url.origin.includes("script.googleusercontent.com")
+    url.hostname.includes("script.google.com") ||
+    url.hostname.includes("script.googleusercontent.com")
   );
 }
 
 async function networkFirstHTML(req) {
   const cache = await caches.open(CACHE_NAME);
-
   try {
-    // no-store per HTML/navigazioni: evita cache aggressiva iOS/Safari
-    const fresh = await fetch(new Request(req.url, { cache: "no-store" }));
+    // no-store per evitare cache aggressiva iOS sulla navigazione
+    const fresh = await fetch(new Request(req, { cache: "no-store" }));
     if (fresh && fresh.ok) {
-      // salva una copia (match con ignoreSearch durante il fetch)
       await cache.put(req, fresh.clone());
+      return fresh;
     }
-    return fresh;
-  } catch (e) {
-    // fallback: prova cache ignorando querystring
-    const cached =
+    throw new Error("bad response");
+  } catch (_) {
+    // fallback: prova a servire l'HTML dalla cache (anche ignorando la query)
+    return (
+      (await cache.match(req)) ||
+      (await cache.match("./index.html")) ||
+      (await cache.match(`./index.html?v=${BUILD}`)) ||
       (await cache.match(req, { ignoreSearch: true })) ||
-      (await cache.match("./index.html", { ignoreSearch: true })) ||
-      (await cache.match("./", { ignoreSearch: true }));
-    if (cached) return cached;
-    throw e;
+      new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } })
+    );
   }
 }
 
@@ -87,16 +109,32 @@ async function staleWhileRevalidate(req) {
   const hasSearch = !!url.search;
 
   // Per asset versionati (?v=...), NON ignorare la query: serve a forzare l'update su iOS.
-  const cached = await cache.match(req) || (!hasSearch ? await cache.match(req, { ignoreSearch: true }) : null);
+  const cached =
+    (await cache.match(req)) ||
+    (!hasSearch ? await cache.match(req, { ignoreSearch: true }) : null);
 
-  const fetchPromise = fetch(new Request(req.url, { cache: "no-store" }))
-    .then((res) => {
-      if (res && res.ok) cache.put(req, res.clone());
+  const fetchPromise = (async () => {
+    try {
+      // no-store per minimizzare problemi di cache aggressiva
+      const res = await fetch(new Request(req, { cache: "no-store" }));
+      if (res && res.ok) {
+        await cache.put(req, res.clone());
+      }
       return res;
-    })
-    .catch(() => null);
+    } catch (_) {
+      return null;
+    }
+  })();
 
-  return cached || (await fetchPromise);
+  // Se c'è cache, rispondi subito e aggiorna in background
+  if (cached) {
+    fetchPromise.catch(() => {});
+    return cached;
+  }
+
+  // Altrimenti prova rete, poi fallback
+  const net = await fetchPromise;
+  return net || new Response("Offline", { status: 503 });
 }
 
 self.addEventListener("fetch", (event) => {
@@ -105,9 +143,11 @@ self.addEventListener("fetch", (event) => {
   // Solo GET
   if (req.method !== "GET") return;
 
-  // API: mai in cache
-  if (isApiRequest(req)) {
-    event.respondWith(fetch(new Request(req.url, { cache: "no-store" })));
+  const url = new URL(req.url);
+
+  // Non cache API
+  if (isApiRequest(url)) {
+    event.respondWith(fetch(new Request(req, { cache: "no-store" })));
     return;
   }
 

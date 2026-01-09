@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.116";
+const BUILD_VERSION = "1.117";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -2385,7 +2385,12 @@ function renderCalendario(){
 
         cell.appendChild(inner);
 
-        cell.addEventListener("click", () => {
+        cell.addEventListener("click", (ev) => {
+          // Se la cella ha una prenotazione, apri la scheda in SOLA LETTURA
+          // e blocca la propagazione per evitare l'apertura del popup letto (listener globale [data-room]).
+          try { ev.preventDefault(); } catch (_) {}
+          try { ev.stopPropagation(); } catch (_) {}
+
           const ospite = findCalendarGuestById(info.guestId);
           if (!ospite) return;
           enterGuestViewMode(ospite);
