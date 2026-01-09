@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.117";
+const BUILD_VERSION = "1.118";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -2331,29 +2331,32 @@ function renderCalendario(){
 
   grid.innerHTML = "";
 
-  // Angolo alto-sinistra: etichetta "STANZE" (a sinistra della stanza 1, sopra Lunedì)
+  // Angolo alto-sinistra: etichetta "ST" (sopra la colonna stanze, a sinistra dei giorni)
   const corner = document.createElement("div");
   corner.className = "cal-pill corner";
   corner.textContent = "ST";
   grid.appendChild(corner);
 
+  // Prima riga: giorni (colonne)
+  for (let i = 0; i < 7; i++) {
+    const d = days[i];
+    const dayPill = document.createElement("div");
+    dayPill.className = "cal-pill day";
+    dayPill.textContent = `${weekdayShortIT(d)} ${d.getDate()}`;
+    grid.appendChild(dayPill);
+  }
+
+  // Righe: stanze (prima colonna) + celle per ogni giorno
   for (let r = 1; r <= 6; r++) {
     const pill = document.createElement("div");
     pill.className = `cal-pill room room-${r}`;
     pill.textContent = String(r);
     grid.appendChild(pill);
-  }
 
-  for (let i = 0; i < 7; i++) {
-    const d = days[i];
+    for (let i = 0; i < 7; i++) {
+      const d = days[i];
+      const dIso = isoDate(d);
 
-    const dayPill = document.createElement("div");
-    dayPill.className = "cal-pill day";
-    dayPill.textContent = `${weekdayShortIT(d)} ${d.getDate()}`;
-    grid.appendChild(dayPill);
-
-    const dIso = isoDate(d);
-    for (let r = 1; r <= 6; r++) {
       const cell = document.createElement("button");
       cell.type = "button";
       cell.className = `cal-cell room-${r}`;
@@ -2402,6 +2405,7 @@ function renderCalendario(){
     }
   }
 }
+
 
 function findCalendarGuestById(id){
   const gid = String(id ?? "").trim();

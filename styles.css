@@ -2172,6 +2172,7 @@ body[data-page="ospiti"] .guest-card .actions {
   --cal-pill-h: 34px;
   --cal-cell-h: 62px;
   --cal-day-w: 58px;
+  --cal-room-w: var(--cal-day-w);
   --cal-gap: 1px;
   --room1: rgba(255, 59, 48, .22);
   --room2: rgba(255, 149, 0, .22);
@@ -2234,15 +2235,18 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity:.92;
 }
 
-.cal-grid-wrap{ width:100%; }
+.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; }
 
 .cal-grid{
   display:grid;
-  grid-template-columns: var(--cal-day-w) repeat(6, 1fr);
+  /* Invertito: stanze in verticale (prima colonna), giorni in orizzontale */
+  grid-template-columns: var(--cal-room-w) repeat(7, var(--cal-day-w));
   grid-auto-rows: var(--cal-cell-h);
   gap: var(--cal-gap);
-  width:100%;
+  width: max-content;
+  min-width: 100%;
 }
+
 
 .cal-pill{
   height: var(--cal-pill-h);
@@ -2363,7 +2367,7 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-legend-dot{ width:8px; height:8px; }
 
 @media (max-width: 420px){
-  :root{ --cal-day-w: 58px; --cal-cell-h: 62px; --cal-pill-h: 34px; --cal-gap: 1px; }
+  :root{ --cal-day-w: 58px; --cal-room-w: 58px; --cal-cell-h: 62px; --cal-pill-h: 34px; --cal-gap: 1px; }
 }
 
 
