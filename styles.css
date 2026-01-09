@@ -2537,3 +2537,36 @@ body[data-page="ospiti"] .guest-card .actions {
   border-color: rgba(43,124,180,0.92);
   color: rgba(255,255,255,0.98);
 }
+
+
+/* dDAE_1.112 — Lista ospiti compatta + Scheda sola lettura */
+#page-ospiti .guest-name{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#page-ospiti .guest-dates{
+  font-size:12px;
+  font-weight:800;
+  opacity:0.75;
+  flex:0 0 auto;
+}
+#page-ospiti .guest-top{ gap:12px; }
+
+.guest-form-card.is-view input,
+.guest-form-card.is-view button,
+.guest-form-card.is-view textarea{
+  pointer-events:none;
+}
+
+/* In sola lettura, le stanze diventano una lista "stack" come nel vecchio menù */
+.guest-form-card.is-view #roomsPicker{ display:none !important; }
+.guest-form-card.is-view #roomsReadOnly{ display:block !important; }
+
+#roomsReadOnly{
+  margin-top:10px;
+}

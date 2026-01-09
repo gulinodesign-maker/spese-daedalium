@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.110";
+const BUILD_VERSION = "1.112";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -1479,6 +1479,8 @@ function updateGuestRemaining(){
 }
 
 function enterGuestCreateMode(){
+  setGuestFormViewOnly(false);
+
   state.guestMode = "create";
   state.guestEditId = null;
   state.guestEditCreatedAt = null;
@@ -1527,6 +1529,8 @@ function enterGuestCreateMode(){
 }
 
 function enterGuestEditMode(ospite){
+  setGuestFormViewOnly(false);
+
   state.guestMode = "edit";
   state.guestEditId = ospite?.id ?? null;
   state.guestEditCreatedAt = (ospite?.created_at ?? ospite?.createdAt ?? null);
@@ -1592,6 +1596,91 @@ function enterGuestEditMode(ospite){
     }
   } catch (_) {}
 }
+
+function _guestIdOf(item){
+  return String(item?.id || item?.ID || item?.ospite_id || item?.ospiteId || item?.guest_id || item?.guestId || "").trim();
+}
+
+function _parseRoomsArr(stanzeField){
+  let roomsArr = [];
+  try {
+    const st = stanzeField;
+    if (Array.isArray(st)) roomsArr = st;
+    else if (st != null && String(st).trim().length) {
+      const s = String(st);
+      const m = s.match(/[1-6]/g) || [];
+      roomsArr = m.map(x => parseInt(x, 10));
+    }
+  } catch (_) {}
+  roomsArr = Array.from(new Set((roomsArr||[]).map(n => parseInt(n,10)).filter(n => isFinite(n) && n>=1 && n<=6))).sort((a,b)=>a-b);
+  return roomsArr;
+}
+
+function buildRoomsStackHTML(guestId, roomsArr){
+  if (!roomsArr || !roomsArr.length) return `<span class="room-dot-badge is-empty" aria-label="Nessuna stanza">—</span>`;
+  return `<div class="rooms-stack" aria-label="Stanze e letti">` + roomsArr.map((n) => {
+    const key = `${guestId}:${n}`;
+    const info = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : { letto_m: 0, letto_s: 0, culla: 0 };
+    const lettoM = Number(info.letto_m || 0) || 0;
+    const lettoS = Number(info.letto_s || 0) || 0;
+    const culla  = Number(info.culla  || 0) || 0;
+
+    let dots = "";
+    if (lettoM > 0) dots += `<span class="bed-dot bed-dot-m" aria-label="Letto matrimoniale"></span>`;
+    for (let i = 0; i < lettoS; i++) dots += `<span class="bed-dot bed-dot-s" aria-label="Letto singolo"></span>`;
+    if (culla > 0) dots += `<span class="bed-dot bed-dot-c" aria-label="Culla"></span>`;
+
+    return `<div class="room-row">
+      <span class="room-dot-badge">${n}</span>
+      <div class="bed-dots" aria-label="Letti">${dots || `<span class="bed-dot bed-dot-empty" aria-label="Nessun letto"></span>`}</div>
+    </div>`;
+  }).join("") + `</div>`;
+}
+
+function renderRoomsReadOnly(ospite){
+  const ro = document.getElementById("roomsReadOnly");
+  if (!ro) return;
+
+  const guestId = _guestIdOf(ospite);
+  let roomsArr = _parseRoomsArr(ospite?.stanze);
+
+  // fallback: se per qualche motivo non arriva 'stanze' dal backend, usa lo stato locale
+  if (!roomsArr.length && state.guestRooms && state.guestRooms.size){
+    roomsArr = Array.from(state.guestRooms).map(n => parseInt(n,10)).filter(n => isFinite(n) && n>=1 && n<=6).sort((a,b)=>a-b);
+  }
+
+  ro.innerHTML = buildRoomsStackHTML(guestId, roomsArr);
+}
+
+function setGuestFormViewOnly(isView, ospite){
+  const card = document.querySelector("#page-ospite .guest-form-card");
+  if (card) card.classList.toggle("is-view", !!isView);
+
+  const btn = document.getElementById("createGuestCard");
+  if (btn) btn.hidden = !!isView;
+
+  const picker = document.getElementById("roomsPicker");
+  if (picker) picker.hidden = !!isView;
+
+  const ro = document.getElementById("roomsReadOnly");
+  if (ro) {
+    ro.hidden = !isView;
+    if (isView) renderRoomsReadOnly(ospite);
+    else ro.innerHTML = "";
+  }
+}
+
+function enterGuestViewMode(ospite){
+  // Riempiamo la maschera usando la stessa logica dell'edit, poi blocchiamo tutto in sola lettura
+  enterGuestEditMode(ospite);
+  state.guestMode = "view";
+
+  const title = document.getElementById("ospiteFormTitle");
+  if (title) title.textContent = "Scheda ospite";
+
+  setGuestFormViewOnly(true, ospite);
+}
+
 
 async function saveGuest(){
   const name = (document.getElementById("guestName")?.value || "").trim();
@@ -1862,50 +1951,33 @@ function renderGuestCards(){
 
 
 
-    card.innerHTML = `
+        const ciText = formatISODateLocal(item.check_in || item.checkIn || "") || "—";
+    const coText = formatISODateLocal(item.check_out || item.checkOut || "") || "—";
+
+card.innerHTML = `
       <div class="guest-top">
         <div class="guest-left">
           <span class="guest-led ${led.cls}" aria-label="${led.label}" title="${led.label}"></span>
-          <div class="guest-name">${insNo ? `<span class="guest-insno">${insNo}</span>` : ``}${nome}</div>
+          <div class="guest-name">
+            ${insNo ? `<span class="guest-insno">${insNo}</span>` : ``}${nome}
+            <span class="guest-dates" aria-label="Arrivo e uscita">${ciText} → ${coText}</span>
+          </div>
         </div>
         <div class="guest-actions" role="group" aria-label="Azioni ospite">
-          <button class="tl-btn tl-green" type="button" data-open aria-label="Apri/chiudi dettagli"><span class="sr-only">Apri</span></button>
+          <button class="tl-btn tl-green" type="button" data-open aria-label="Apri scheda (sola lettura)"><span class="sr-only">Apri</span></button>
           <button class="tl-btn tl-yellow" type="button" data-edit aria-label="Modifica ospite"><span class="sr-only">Modifica</span></button>
           <button class="tl-btn tl-red" type="button" data-del aria-label="Elimina ospite"><span class="sr-only">Elimina</span></button>
-        </div>
-      </div>
-
-      <div class="guest-details" hidden>
-        <div class="guest-badges" style="display:flex; gap:8px; flex-wrap:wrap; margin: 2px 0 10px;">
-<div class="rooms-dots" aria-label="Stanze prenotate">${roomsDotsHTML}</div>
-        </div>
-        <div class="detail-grid">
-          <div><b>Check-in</b><br>${formatISODateLocal(item.check_in || item.checkIn || "") || "—"}</div>
-          <div><b>Check-out</b><br>${formatISODateLocal(item.check_out || item.checkOut || "") || "—"}</div>
-          <div><b>Adulti</b><br>${item.adulti ?? "—"}</div>
-          <div><b>Bambini &lt;10</b><br>${item.bambini_u10 ?? "—"}</div>
-          <div><b>Prenotazione</b><br>${euro(item.importo_prenotazione || 0)}</div>
-          <div><b>Booking</b><br>${euro(item.importo_booking || 0)}</div>
-          <div><b>Acconto</b><br><span class="guest-led mini-led ${depLedCls}" aria-hidden="true"></span> ${euro(item.acconto_importo || 0)}</div>
-          <div><b>Saldo</b><br><span class="guest-led mini-led ${saldoLedCls}" aria-hidden="true"></span> ${euro(item.saldo_pagato ?? item.saldoPagato ?? item.saldo ?? 0)}</div>
         </div>
       </div>
     `;
 
     const btnOpen = card.querySelector("[data-open]");
-    const details = card.querySelector(".guest-details");
-
-    if (!btnOpen || !details){
-      console.warn("dDAE guest card: elementi mancanti", { btnOpen: !!btnOpen, details: !!details });
-      return;
+    if (btnOpen){
+      btnOpen.addEventListener("click", ()=>{
+        enterGuestViewMode(item);
+        showPage("ospite");
+      });
     }
-
-    btnOpen.addEventListener("click", ()=>{
-      const willOpen = details.hidden;
-      details.hidden = !willOpen;
-      btnOpen.classList.toggle("is-open", willOpen);
-      btnOpen.setAttribute("aria-pressed", willOpen ? "true" : "false");
-    });
 
     card.querySelector("[data-edit]").addEventListener("click", ()=>{
       enterGuestEditMode(item);
