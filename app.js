@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.108";
+const BUILD_VERSION = "1.109";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -119,6 +119,7 @@ function __applyUiState(restore){
       __applyFormValue("guestBooking", f.guestBooking);
       __applyFormValue("guestDeposit", f.guestDeposit);
       __applyFormValue("guestSaldo", f.guestSaldo);
+      try { updateGuestRemaining(); } catch (_) {}
 
       // UI rooms + pills
       try {
@@ -1428,6 +1429,36 @@ function bindPeriodAutoGuests(fromSel, toSel){
 
 
 
+
+
+function updateGuestRemaining(){
+  const out = document.getElementById("guestRemaining");
+  if (!out) return;
+
+  const totalEl = document.getElementById("guestTotal");
+  const depEl = document.getElementById("guestDeposit");
+  const saldoEl = document.getElementById("guestSaldo");
+
+  const totalStr = (totalEl?.value ?? "");
+  const depStr = (depEl?.value ?? "");
+  const saldoStr = (saldoEl?.value ?? "");
+
+  const anyFilled = [totalStr, depStr, saldoStr].some(s => String(s).trim().length > 0);
+  if (!anyFilled) {
+    out.value = "";
+    try { refreshFloatingLabels(); } catch (_) {}
+    return;
+  }
+
+  const total = parseFloat(totalStr || "0") || 0;
+  const deposit = parseFloat(depStr || "0") || 0;
+  const saldo = parseFloat(saldoStr || "0") || 0;
+  const remaining = total - deposit - saldo;
+
+  out.value = (isFinite(remaining) ? remaining.toFixed(2) : "");
+  try { refreshFloatingLabels(); } catch (_) {}
+}
+
 function enterGuestCreateMode(){
   state.guestMode = "create";
   state.guestEditId = null;
@@ -1439,8 +1470,9 @@ function enterGuestCreateMode(){
   if (btn) btn.textContent = "Crea ospite";
 
   // reset fields
-  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit","guestSaldo"];
+  const fields = ["guestName","guestAdults","guestKidsU10","guestCheckOut","guestTotal","guestBooking","guestDeposit","guestSaldo","guestRemaining"];
   fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+  try { updateGuestRemaining(); } catch (_) {}
 
   const ci = document.getElementById("guestCheckIn");
   if (ci) ci.value = todayISO();
@@ -1494,6 +1526,7 @@ function enterGuestEditMode(ospite){
   const mEl = document.getElementById("guestMarriage");
   if (mEl) mEl.checked = !!(ospite.matrimonio);
   refreshFloatingLabels();
+  try { updateGuestRemaining(); } catch (_) {}
 
 
   // deposit type (se disponibile)
@@ -1660,6 +1693,15 @@ function setupOspite(){
 
   bindPayPill("depositType", "deposit");
   bindPayPill("saldoType", "saldo");
+
+  // Rimanenza da pagare (Importo prenotazione - Acconto - Saldo)
+  ["guestTotal","guestDeposit","guestSaldo"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => { try { updateGuestRemaining(); } catch (_) {} });
+    el.addEventListener("change", () => { try { updateGuestRemaining(); } catch (_) {} });
+  });
+  try { updateGuestRemaining(); } catch (_) {}
 
 
   const btnCreate = document.getElementById("createGuestCard");

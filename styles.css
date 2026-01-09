@@ -1343,6 +1343,15 @@ body::before{
   margin-top: 6px;
 }
 
+/* Rimanenza da pagare: readonly ma stesso look */
+#page-ospite #guestRemaining[readonly]{
+  background: rgba(255,255,255,0.78);
+  color: rgba(15,23,42,0.92);
+}
+#page-ospite #guestRemaining{
+  font-weight: 950;
+}
+
 
 
 /* ============================
