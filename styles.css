@@ -2235,9 +2235,12 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity:.92;
 }
 
-.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; }
+.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; display:flex; justify-content:center; }
+
 
 .cal-grid{
+  margin: 0 auto;
+
   display:grid;
   /* Invertito: stanze in verticale (prima colonna), giorni in orizzontale */
   grid-template-columns: var(--cal-room-w) repeat(7, var(--cal-day-w));
