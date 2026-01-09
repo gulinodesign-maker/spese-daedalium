@@ -26,7 +26,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.115"),
+    url("./assets/bg-daedalium.png"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -601,7 +601,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.115"),
+    url("./assets/bg-daedalium.png"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2539,7 +2539,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.115 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.114 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2604,91 +2604,3 @@ body[data-page="ospiti"] .guest-card .actions {
 #roomsReadOnly{
   margin-top:10px;
 }
-
-
-/* dDAE_1.115 - Stanze e letti inline (no popup) */
-#roomsPicker.rooms{
-  display:flex;
-  flex-direction:column;
-  gap: 10px;
-}
-
-.room-line{
-  display:flex;
-  align-items:flex-start;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.62);
-  backdrop-filter: blur(16px);
-}
-
-.room-line.selected{
-  border-color: rgba(15,23,42,0.22);
-}
-
-.room-bed-controls{
-  flex: 1;
-  display:flex;
-  flex-wrap:wrap;
-  gap: 12px 16px;
-}
-
-.bedpick{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-}
-
-.bedpick-text{
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(15,23,42,0.80);
-  white-space:nowrap;
-}
-
-.bedpick-dots{
-  display:flex;
-  gap: 8px;
-}
-
-.bedpick-dot{
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 2px solid rgba(15,23,42,0.28);
-  background: rgba(148,163,184,0.45); /* grigio */
-  padding:0;
-  line-height:0;
-}
-
-.room-line.beds-disabled .bedpick-dot{
-  opacity: 0.55;
-}
-
-.bedpick-dot-m.on{
-  background: #ef4444; /* rosso */
-  border-color: rgba(239,68,68,0.85);
-}
-
-.bedpick-dot-s.on{
-  background: #38bdf8; /* azzurro */
-  border-color: rgba(56,189,248,0.85);
-}
-
-.bedpick-dot-c.on{
-  background: #fbbf24; /* giallo */
-  border-color: rgba(251,191,36,0.85);
-}
-
-.room-line-marriage{
-  align-items:center;
-}
-
-.room-marriage-label{
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(15,23,42,0.75);
-}
-
