@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.145";
+const BUILD_VERSION = "1.146";
 
 
 // Aggiornamento "hard" anti-cache iOS:

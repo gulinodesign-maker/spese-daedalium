@@ -1,5 +1,5 @@
 /* dDAE - Service Worker (PWA)
- * Build: dDAE_1.145
+ * Build: dDAE_1.146
  *
  * Obiettivi:
  * - cache name cambia ad ogni build
@@ -9,7 +9,7 @@
  * - fix iOS/Safari cache aggressiva (cache:"reload"/"no-store" + query ?v)
  */
 
-const BUILD = "1.145";
+const BUILD = "1.146";
 const CACHE_NAME = "dDAE_" + BUILD; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
@@ -83,6 +83,20 @@ function isApiRequest(url) {
   );
 }
 
+
+
+async function networkFirstAsset(req){
+  const cache = await caches.open(CACHE_NAME);
+  try{
+    const fresh = await fetch(req, { cache: "no-store" });
+    if (fresh && fresh.ok) cache.put(req, fresh.clone());
+    return fresh;
+  }catch(_){
+    const cached = await cache.match(req);
+    if (cached) return cached;
+    throw _;
+  }
+}
 async function networkFirstHTML(req) {
   const cache = await caches.open(CACHE_NAME);
   try {
@@ -144,6 +158,17 @@ self.addEventListener("fetch", (event) => {
     const u = new URL(event.request.url);
     if (u.origin === self.location.origin && u.pathname.endsWith("/version.json")) {
       event.respondWith(fetch(event.request, { cache: "no-store" }));
+      return;
+    }
+  } catch (_) {}
+  // Core assets: sempre network-first (evita JS/CSS vecchi su iOS)
+  try {
+    const u2 = new URL(event.request.url);
+    const p = u2.pathname;
+    const isSame = u2.origin === self.location.origin;
+    const coreAssets = ["/app.js","/styles.css","/config.js","/manifest.json","/version.json"];
+    if (isSame && coreAssets.some(a => p.endsWith(a))) {
+      event.respondWith(networkFirstAsset(event.request));
       return;
     }
   } catch (_) {}
