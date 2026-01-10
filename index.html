@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.137" rel="stylesheet"/>
-<link href="./manifest.json?v=1.137" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.137" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.137" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.137" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.137" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.138" rel="stylesheet"/>
+<link href="./manifest.json?v=1.138" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.138" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.138" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.138" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.138" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.137"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.138"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.137</div>
+<div class="build" id="buildText">1.138</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -397,6 +397,49 @@
   </div>
 </section>
 
+<section aria-label="Pulizie" class="page" hidden="" id="page-pulizie">
+  <div class="content calendar-page">
+    <div class="cal-nav">
+      <div class="cal-nav-row" role="group" aria-label="Navigazione pulizie">
+        <button class="cal-nav-btn" id="pulPickBtn" type="button" aria-label="Seleziona data">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 3v3"></path>
+            <path d="M17 3v3"></path>
+            <path d="M4.5 8h15"></path>
+            <path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
+          </svg>
+        </button>
+        <button class="cal-nav-btn" id="pulTodayBtn" type="button" aria-label="Oggi">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+          </svg>
+        </button>
+        <button class="cal-nav-btn" id="pulPrevBtn" type="button" aria-label="Giorno precedente">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+        </button>
+        <button class="cal-nav-btn" id="pulNextBtn" type="button" aria-label="Giorno successivo">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 18l6-6-6-6"></path>
+          </svg>
+        </button>
+
+        <input id="pulDateInput" type="date" class="cal-date-input" aria-label="Data" />
+      </div>
+    </div>
+
+    <div class="cal-body">
+      <div class="cal-week-title" id="pulDayTitle">1 GENNAIO 2026</div>
+      <div class="cal-grid-wrap">
+      <div class="pul-grid" id="pulGrid" aria-label="Pulizie giornaliere"></div>
+    </div>
+    </div>
+  </div>
+</section>
+
+
 </main>
 <div class="toast" id="toast"></div>
 <!-- Loader globale -->
@@ -413,8 +456,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.137"></script>
-<script defer="" src="./app.js?v=1.137"></script>
+<script defer="" src="./config.js?v=1.138"></script>
+<script defer="" src="./app.js?v=1.138"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
