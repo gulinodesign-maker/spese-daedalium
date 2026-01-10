@@ -365,11 +365,11 @@ guestMarriage: false,
 };
 
 const COLORS = {
-  CONTANTI: "#2b7cb4",          // azzurro
-  TASSA_SOGGIORNO: "#d8bd97",   // beige
-  IVA_22: "#c9772b",            // arancio
-  IVA_10: "#7ac0db",            // azzurro chiaro
-  IVA_4: "#1f2937",             // scuro
+  CONTANTI: "#447aaf",          // azzurro
+  TASSA_SOGGIORNO: "#d5be9c",   // beige
+  IVA_22: "#bf7b3d",            // arancio
+  IVA_10: "#8abdd9",            // azzurro chiaro
+  IVA_4: "#212936",             // scuro
 };
 
 
@@ -586,20 +586,6 @@ function formatLongDateIT(value){
   }
   return s;
 }
-
-function formatShortDateIT(value){
-  const iso = formatISODateLocal(value);
-  if (!iso) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
-    const [y,m,d] = iso.split("-");
-    return `${d}/${m}/${y}`;
-  }
-  // If already DD/MM/YYYY
-  const s = String(value);
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
-  return s;
-}
-
 
 
 
@@ -1520,28 +1506,72 @@ function renderSpese(){
     return;
   }
 
+  const fmtDate = (v) => {
+    if (v == null) return "";
+    const s = String(v).trim();
+    // già dd/mm/yyyy
+    if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
+      const [d,m,y] = s.split("/");
+      const yy = y.length === 2 ? ("20"+y) : y;
+      return `${d.padStart(2,"0")}/${m.padStart(2,"0")}/${yy}`;
+    }
+    // ISO yyyy-mm-dd
+    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+      const [yy,mm,dd] = s.split("-");
+      return `${dd.padStart(2,"0")}/${mm.padStart(2,"0")}/${yy}`;
+    }
+    // fallback Date parse
+    const dt = new Date(s);
+    if (!isNaN(dt.getTime())) {
+      const dd = String(dt.getDate()).padStart(2,"0");
+      const mm = String(dt.getMonth()+1).padStart(2,"0");
+      const yy = String(dt.getFullYear());
+      return `${dd}/${mm}/${yy}`;
+    }
+    return s;
+  };
+
+  const getDotColor = (sp) => {
+    const cat = String(sp.categoria||"").toUpperCase();
+    if (cat.includes("CONT")) return COLORS.CONTANTI;
+    if (cat.includes("SOGG") || cat.includes("TASSA")) return COLORS.TASSA_SOGGIORNO;
+    const ali = Number(sp.aliquotaIva ?? sp.aliquotaIVA ?? sp.ivaAliquota);
+    if (ali === 22) return COLORS.IVA_22;
+    if (ali === 10) return COLORS.IVA_10;
+    if (ali === 4) return COLORS.IVA_4;
+    // fallback: se categoria è già una chiave
+    if (COLORS[sp.categoria]) return COLORS[sp.categoria];
+    return COLORS.TASSA_SOGGIORNO;
+  };
+
   for (const s of state.spese){
     const el = document.createElement("div");
-    el.className = "item expense";
+    el.className = "item";
+
+    const date = fmtDate(s.dataSpesa);
+    const dot = getDotColor(s);
+    const mot = escapeHtml((s.motivazione ?? "").toString());
 
     el.innerHTML = `
-      <div class="expense-row">
-        <span class="catdot" aria-hidden="true" style="background:${COLORS[s.categoria] || "#d8bd97"}"></span>
-        <span class="expense-date">${formatShortDateIT(s.dataSpesa)}</span>
-        <span class="expense-mot" title="${escapeHtml(s.motivazione || "")}">${escapeHtml(s.motivazione || "")}</span>
-        <span class="expense-amount">${euro(s.importoLordo)}</span>
-        ${Number(s.iva) ? `<span class="expense-iva">IVA ${euro(s.iva)}</span>` : ``}
-        <button class="delbtn deldot" type="button" data-del="${s.id}" aria-label="Elimina"></button>
+      <div class="spesa-row">
+        <div class="spesa-left">
+          <span class="spesa-dot" style="background:${dot}"></span>
+          <span class="spesa-date">${date}</span>
+          <span class="spesa-mot">${mot}</span>
+        </div>
+        <div class="spesa-right">
+          <span class="spesa-amt">${euro(s.importoLordo)}</span>
+          <button class="delbtn" type="button" data-del="${s.id}" aria-label="Elimina"></button>
+        </div>
       </div>
     `;
 
     const __btnDel = el.querySelector("[data-del]");
-
-
-    if (__btnDel) __btnDel.addEventListener("click", async () => {
-      if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"DELETE", params:{ id: s.id } });
-      toast("Eliminata");
+    __btnDel?.addEventListener("click", async () => {
+      const id = __btnDel.getAttribute("data-del");
+      if (!id) return;
+      if (!confirm("Eliminare la spesa?")) return;
+      await apiDeleteSpesa(id);
       invalidateApiCache("spese|");
       invalidateApiCache("report|");
       await ensurePeriodData({ showLoader:false, force:true });
@@ -1552,7 +1582,7 @@ function renderSpese(){
   }
 }
 
-/* 3) RIEPILOGO */
+ /* 3) RIEPILOGO */
 function renderRiepilogo(){
   const r = state.report;
   if (!r) return;

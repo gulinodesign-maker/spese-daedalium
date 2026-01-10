@@ -318,18 +318,25 @@ input[type="date"]{
   font-weight: 900;
 }
 .delbtn{
-  border: 1px solid rgba(201,119,43,0.40);
-  background: rgba(255,255,255,0.78);
-  border-radius: 16px;
-  padding: 10px 12px;
+  border: 0;
+  background: rgba(239, 68, 68, 0.95);
+  border-radius: 999px;
   min-height: 44px;
   min-width: 44px;
-  font-size: 15px;
-  cursor:pointer;
-  font-weight: 900;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(15,23,42,0.18);
+}
+.delbtn::after{
+  content:"";
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.22);
 }
 
 /* Riepilogo KPIs */
@@ -2884,7 +2891,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.143 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.142 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -2900,79 +2907,49 @@ body.perf-lite *::after{
 }
 
 
-/* ===== Spese: record su una sola riga (dot + data + motivazione + importi) ===== */
-.item.expense{
-  padding: 10px 12px;
-}
-.item.expense .expense-row{
+/* Spese: record 1 riga + pallino colore */
+.spesa-row{
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:space-between;
   gap: 10px;
-  flex-wrap: nowrap;
 }
-.item.expense .catdot{
-  width: 18px;
-  height: 18px;
+.spesa-left{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  min-width: 0;
+}
+.spesa-dot{
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
+  border: 4px solid rgba(15,23,42,0.85);
   flex: 0 0 auto;
-  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.65), 0 8px 18px rgba(15,23,42,0.12);
 }
-.item.expense .expense-date{
-  font-size: 13px;
-  font-weight: 950;
-  letter-spacing: .2px;
+.spesa-date{
+  font-size: 12px;
+  font-weight: 900;
   opacity: .85;
-  flex: 0 0 auto;
   white-space: nowrap;
 }
-.item.expense .expense-mot{
-  font-size: 14px;
+.spesa-mot{
+  font-size: 12px;
   font-weight: 900;
-  opacity: .9;
-  flex: 1 1 auto;
-  min-width: 0;
+  opacity: .85;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
 }
-.item.expense .expense-amount{
-  font-size: 14px;
-  font-weight: 950;
+.spesa-right{
+  display:flex;
+  align-items:center;
+  gap: 10px;
   flex: 0 0 auto;
-  white-space: nowrap;
 }
-.item.expense .expense-iva{
+.spesa-amt{
   font-size: 13px;
-  font-weight: 850;
-  opacity: .72;
-  flex: 0 0 auto;
+  font-weight: 900;
   white-space: nowrap;
-}
-
-/* Tasto elimina: pallino rosso (tap target 44x44 su iPhone) */
-.item.expense .delbtn.deldot{
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-.item.expense .delbtn.deldot::before{
-  content:"";
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: rgba(239,68,68,0.95);
-  box-shadow: 0 8px 18px rgba(239,68,68,0.35);
-}
-.item.expense .delbtn.deldot:active::before{
-  transform: scale(0.95);
 }
