@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.138";
+const BUILD_VERSION = "1.139";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -2607,6 +2607,8 @@ function renderCalendario(){
   const start = startOfWeekMonday(anchor);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
+  const todayIso = isoDate(new Date());
+
   if (title) {
     const month = monthNameIT(start).toUpperCase();
     title.textContent = month;
@@ -2669,7 +2671,10 @@ function renderCalendario(){
       const info = occ.get(`${dIso}:${r}`);
       if (info) {
         cell.classList.add("has-booking");
-        if (info.lastDay) cell.classList.add("last-day");
+        if (info.lastDay) {
+          cell.classList.add("last-day");
+          if (dIso >= todayIso) cell.classList.add("last-day-pulse");
+        }
 
         const inner = document.createElement("div");
         inner.className = "cal-cell-inner";
@@ -2690,19 +2695,20 @@ function renderCalendario(){
         inner.appendChild(dots);
 
         cell.appendChild(inner);
+}
 
-        cell.addEventListener("click", (ev) => {
-          // Se la cella ha una prenotazione, apri la scheda in SOLA LETTURA
-          // e blocca la propagazione per evitare l'apertura del popup letto (listener globale [data-room]).
-          try { ev.preventDefault(); } catch (_) {}
-          try { ev.stopPropagation(); } catch (_) {}
 
-          const ospite = findCalendarGuestById(info.guestId);
-          if (!ospite) return;
-          enterGuestViewMode(ospite);
-          showPage("ospite");
-        });
-      }
+      cell.addEventListener("click", (ev) => {
+        // Cella vuota: nessuna azione (blocca propagazione per evitare listener globali).
+        try { ev.preventDefault(); } catch (_) {}
+        try { ev.stopPropagation(); } catch (_) {}
+        if (!info || !info.guestId) return;
+
+        const ospite = findCalendarGuestById(info.guestId);
+        if (!ospite) return;
+        enterGuestViewMode(ospite);
+        showPage("ospite");
+      });
 
       frag.appendChild(cell);
     }
