@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.139";
+const BUILD_VERSION = "1.140";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -12,6 +12,9 @@ const IS_IOS = (() => {
   const iPadOS = (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
   return iOS || iPadOS;
 })();
+
+// Marca l'ambiente iOS (utile per CSS mirati)
+try{ document.documentElement.classList.toggle("is-ios", IS_IOS); }catch(_){ }
 
 function applyPerfMode(){
   try{
@@ -1940,11 +1943,15 @@ function updateOspiteHdActions(){
   // Mostra il contenitore (poi nascondiamo i singoli pallini senza azione)
   hdActions.hidden = false;
 
+  const btnCal  = hdActions.querySelector("[data-guest-cal]");
   const btnBack = hdActions.querySelector("[data-guest-back]");
   const btnEdit = hdActions.querySelector("[data-guest-edit]");
   const btnDel  = hdActions.querySelector("[data-guest-del]");
 
   const mode = state.guestMode; // "create" | "edit" | "view"
+
+  // Indaco: vai al calendario (sempre presente)
+  if (btnCal) btnCal.hidden = false;
 
   // Verde: sempre presente (torna alla lista ospiti)
   if (btnBack) btnBack.hidden = false;
@@ -2090,6 +2097,12 @@ function setupOspite(){
     hdActions.addEventListener("click", async (e) => {
       const btn = e.target.closest("button");
       if (!btn || !hdActions.contains(btn) || btn.hidden) return;
+
+      // Indaco: vai al calendario
+      if (btn.hasAttribute("data-guest-cal")){
+        showPage("calendario");
+        return;
+      }
 
       // Verde: torna sempre alla lista ospiti (anche in Nuovo/Modifica)
       if (btn.hasAttribute("data-guest-back")){
@@ -2601,17 +2614,22 @@ function renderCalendario(){
       cell.dataset.room = String(r);
       const info = occ.get(`${dIso}:${r}`);
       if (!info) {
-        // Casella vuota: nessuna azione (evita anche handler globali tipo [data-room]).
-        // Su tap: mostra solo un bordo nero spesso come feedback visivo, senza aprire nulla.
+        // Casella vuota: nessuna azione (evita anche handler globali tipo [data-room])
         cell.addEventListener("click", (ev)=>{
           try { ev.preventDefault(); } catch (_) {}
           try { ev.stopPropagation(); } catch (_) {}
-          selectEmptyCalendarCell(cell);
+
+          // Feedback minimo: solo bordo nero spesso (nessuna azione / nessuna apertura schede)
+          try{
+            const prev = grid.querySelector(".cal-cell.empty-selected");
+            if (prev && prev !== cell) prev.classList.remove("empty-selected");
+            cell.classList.toggle("empty-selected");
+          }catch(_){}
         });
       }
       if (info) {
         cell.classList.add("has-booking");
-        if (info.lastDay && IS_IOS) cell.classList.add("last-day");
+        if (info.lastDay) cell.classList.add("last-day");
 
         const inner = document.createElement("div");
         inner.className = "cal-cell-inner";
@@ -2634,12 +2652,13 @@ function renderCalendario(){
         cell.appendChild(inner);
 
         cell.addEventListener("click", (ev) => {
+          // Pulisci eventuale selezione su casella vuota
+          try{ const prev = grid.querySelector(".cal-cell.empty-selected"); if (prev) prev.classList.remove("empty-selected"); }catch(_){}
+
           // Se la cella ha una prenotazione, apri la scheda in SOLA LETTURA
           // e blocca la propagazione per evitare l'apertura del popup letto (listener globale [data-room]).
           try { ev.preventDefault(); } catch (_) {}
           try { ev.stopPropagation(); } catch (_) {}
-
-          clearEmptyCalendarSelection();
 
           const ospite = findCalendarGuestById(info.guestId);
           if (!ospite) return;
@@ -2660,21 +2679,6 @@ function findCalendarGuestById(id){
   const arr = (state.calendar && Array.isArray(state.calendar.guests)) ? state.calendar.guests : [];
   return arr.find(o => String(o.id ?? o.ID ?? o.ospite_id ?? o.ospiteId ?? o.guest_id ?? o.guestId ?? "").trim() === gid) || null;
 }
-
-
-// ===== Calendario: selezione casella vuota (nessuna azione) =====
-function clearEmptyCalendarSelection(){
-  const grid = document.getElementById("calGrid");
-  if (!grid) return;
-  grid.querySelectorAll(".cal-cell.empty-selected").forEach(el => el.classList.remove("empty-selected"));
-}
-
-function selectEmptyCalendarCell(cell){
-  if (!cell) return;
-  clearEmptyCalendarSelection();
-  cell.classList.add("empty-selected");
-}
-
 
 function buildWeekOccupancy(weekStart){
   const map = new Map();
@@ -2718,7 +2722,7 @@ function buildWeekOccupancy(weekStart){
 
       for (const r of roomsArr) {
         const dots = dotsForGuestRoom(guestId, r);
-        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: (isLast && lastIsPresentOrFuture) });
+        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: (IS_IOS && isLast && lastIsPresentOrFuture) });
       }
     }
   }
