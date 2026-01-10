@@ -1988,6 +1988,15 @@ body[data-page="ospiti"] .guest-card .actions {
 .bed-dot-s{ background: rgba(50,173,230,0.95); border-color: rgba(50,173,230,0.55); } /* azzurro */
 .bed-dot-c{ background: rgba(52,199,89,0.95); border-color: rgba(52,199,89,0.55); }   /* verde */
 
+/* === dDAE: Pallino CULLA sempre giallo (globale) === */
+.bed-dot.bed-dot-c,
+.bed-dot-c{
+  background: rgba(255, 210, 0, 1) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.18) inset;
+}
+
+
+
 
 /* dDAE_1.067 — Matrimonio: pallino verde 'M' nella riga stanze */
 
@@ -2381,45 +2390,24 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-
-
-
-/* === dDAE: Calendario - celle stanza e celle prenotate (preserva colori originali) === */
-/* Obiettivo: scurire/schiarire SENZA cambiare il colore di base (solo luminanza) */
-
-/* Base: prepara overlay non invasivo */
-.cal-pill.room,
-.cal-cell{
-  position: relative;
-}
-
-/* Overlay comune */
-.cal-pill.room::before,
-.cal-cell.has-booking::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius: inherit;
-  pointer-events:none;
-}
-
-/* Celle "numero stanza": identiche alle altre ma leggermente più scure */
+/* === dDAE: Calendario - celle stanza e celle prenotate === */
+/* Prima colonna (numero stanza): stessa forma delle celle, leggermente più scura */
 .cal-pill.room{
   height: var(--cal-cell-h);
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius: 14px;
-  /* NON cambiamo background/border originali: usiamo solo overlay */
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.16); /* più scura delle celle normali */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
   font-weight: 800;
 }
-.cal-pill.room::before{
-  background: rgba(0,0,0,.06);
-}
 
-/* Celle prenotate: leggermente più chiare */
-.cal-cell.has-booking::before{
-  background: rgba(255,255,255,.06);
+/* Cella con prenotazione: leggermente più chiara */
+.cal-cell.has-booking{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.16);
 }
 
 /* ===== dDAE_1.099 FIX: HOME grid clickable (no flex override) ===== */
