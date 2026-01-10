@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.126";
+const BUILD_VERSION = "1.125";
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -228,8 +228,7 @@ const state = {
   periodPreset: "this_month",
   page: "home",
   speseView: "list",
-    speseFilters: { iva: "all", q: "" },
-guests: [],
+  guests: [],
   stanzeRows: [],
   stanzeByKey: {},
   guestRooms: new Set(),
@@ -1256,132 +1255,17 @@ async function saveSpesa(){
 }
 
 /* 2) SPESE */
-
-
-/* === dDAE: Spese - filtri (IVA + nome) === */
-function _spesaIvaRate(s){
-  // Preferisci il campo se presente (backend/sheet), altrimenti calcola da iva/imponibile.
-  let r = s && (s.aliquotaIva ?? s.aliquota ?? s.aliquota_iva);
-  if (r != null && r !== "") {
-    const n = parseFloat(String(r).replace(",", ".").replace("%","").trim());
-    if (isFinite(n)) return String(Math.round(n));
-  }
-  const imp = Number(s?.imponibile);
-  const iva = Number(s?.iva);
-  if (isFinite(imp) && imp > 0 && isFinite(iva)) {
-    return String(Math.round((iva / imp) * 100));
-  }
-  // fallback: se iva=0, consideriamo 0%
-  if (isFinite(iva) && iva === 0) return "0";
-  return ""; // sconosciuta
-}
-
-function _spesaMatchesQuery(s, q){
-  if (!q) return true;
-  const needle = q.toLowerCase();
-  const a = String(s?.motivazione ?? "").toLowerCase();
-  const b = String(s?.categoria ?? "").toLowerCase();
-  const bl = (typeof categoriaLabel === "function") ? String(categoriaLabel(s?.categoria ?? "")).toLowerCase() : "";
-  return a.includes(needle) || b.includes(needle) || bl.includes(needle);
-}
-
-function getFilteredSpese(){
-  const all = Array.isArray(state.spese) ? state.spese : [];
-  const f = state.speseFilters || { iva:"all", q:"" };
-  const ivaSel = (f.iva || "all").trim();
-  const q = (f.q || "").trim();
-
-  return all.filter(s => {
-    if (ivaSel !== "all") {
-      const r = _spesaIvaRate(s);
-      if (r !== ivaSel) return false;
-    }
-    if (!_spesaMatchesQuery(s, q)) return false;
-    return true;
-  });
-}
-
-function updateSpeseIvaFilterOptions(){
-  const sel = document.getElementById("speseIvaFilter");
-  if (!sel) return;
-  const all = Array.isArray(state.spese) ? state.spese : [];
-  const rates = new Set();
-  for (const s of all){
-    const r = _spesaIvaRate(s);
-    if (r) rates.add(r);
-  }
-  const sorted = Array.from(rates).sort((a,b)=>parseInt(b,10)-parseInt(a,10));
-
-  // Preserve current selection
-  const current = (state.speseFilters && state.speseFilters.iva) ? state.speseFilters.iva : (sel.value || "all");
-
-  // Build options (avoid rebuilding if identical)
-  const wanted = ["all", ...sorted];
-  const existing = Array.from(sel.options).map(o=>o.value);
-  const same = wanted.length === existing.length && wanted.every((v,i)=>v===existing[i]);
-  if (!same){
-    sel.innerHTML = "";
-    const optAll = document.createElement("option");
-    optAll.value = "all";
-    optAll.textContent = "Tutte";
-    sel.appendChild(optAll);
-
-    for (const r of sorted){
-      const o = document.createElement("option");
-      o.value = r;
-      o.textContent = `IVA ${r}%`;
-      sel.appendChild(o);
-    }
-  }
-
-  // Restore selection if possible
-  try {
-    if (wanted.includes(current)) sel.value = current;
-  } catch (_) {}
-}
-
-function setupSpeseFilters(){
-  const sel = document.getElementById("speseIvaFilter");
-  const q = document.getElementById("speseSearch");
-
-  if (!state.speseFilters) state.speseFilters = { iva:"all", q:"" };
-
-  if (sel){
-    sel.addEventListener("change", () => {
-      state.speseFilters.iva = sel.value || "all";
-      renderSpese();
-    });
-  }
-
-  let __t = null;
-  if (q){
-    q.addEventListener("input", () => {
-      state.speseFilters.q = q.value || "";
-      if (__t) clearTimeout(__t);
-      __t = setTimeout(() => renderSpese(), 120);
-    });
-  }
-}
-
 function renderSpese(){
-  updateSpeseIvaFilterOptions();
   const list = $("#speseList");
   if (!list) return;
   list.innerHTML = "";
-
-  const __rows = getFilteredSpese();
 
   if (!state.spese || !state.spese.length){
     list.innerHTML = `<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa nel periodo.</div>`;
     return;
   }
 
-  if (!__rows.length){
-    list.innerHTML = `<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa per i filtri selezionati.</div>`;
-    return;
-  }
-
-  for (const s of __rows){
+  for (const s of state.spese){
     const el = document.createElement("div");
     el.className = "item";
 
@@ -2395,8 +2279,6 @@ async function init(){
       else mot.value = v; // pulizia spazi multipli
     });
   }
-
-  setupSpeseFilters();
 
   $("#btnSaveSpesa").addEventListener("click", async () => {
     try { await saveSpesa(); } catch(e){ toast(e.message); }
