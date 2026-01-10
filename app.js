@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.142";
+const BUILD_VERSION = "1.143";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -586,6 +586,20 @@ function formatLongDateIT(value){
   }
   return s;
 }
+
+function formatShortDateIT(value){
+  const iso = formatISODateLocal(value);
+  if (!iso) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+    const [y,m,d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+  }
+  // If already DD/MM/YYYY
+  const s = String(value);
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  return s;
+}
+
 
 
 
@@ -1508,19 +1522,16 @@ function renderSpese(){
 
   for (const s of state.spese){
     const el = document.createElement("div");
-    el.className = "item";
+    el.className = "item expense";
 
     el.innerHTML = `
-      <div class="item-top">
-        <div>
-          <div class="item-title">${euro(s.importoLordo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(s.iva)}</span></div>
-          <div class="item-sub">
-            <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 0.20)}">${categoriaLabel(s.categoria)}</span>
-            <span class="mini">${s.dataSpesa}</span>
-            <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione)}</span>
-          </div>
-        </div>
-        <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
+      <div class="expense-row">
+        <span class="catdot" aria-hidden="true" style="background:${COLORS[s.categoria] || "#d8bd97"}"></span>
+        <span class="expense-date">${formatShortDateIT(s.dataSpesa)}</span>
+        <span class="expense-mot" title="${escapeHtml(s.motivazione || "")}">${escapeHtml(s.motivazione || "")}</span>
+        <span class="expense-amount">${euro(s.importoLordo)}</span>
+        ${Number(s.iva) ? `<span class="expense-iva">IVA ${euro(s.iva)}</span>` : ``}
+        <button class="delbtn deldot" type="button" data-del="${s.id}" aria-label="Elimina"></button>
       </div>
     `;
 

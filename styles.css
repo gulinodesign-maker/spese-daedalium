@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.142"),
+    url("./assets/bg-daedalium.png?v=1.143"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.142"),
+    url("./assets/bg-daedalium.png?v=1.143"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2884,7 +2884,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.142 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.143 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -2897,4 +2897,82 @@ body.perf-lite *::after{
   box-shadow: inset 0 0 0 3px rgba(0,0,0,.95) !important;
   outline: 3px solid rgba(0,0,0,.95) !important;
   outline-offset: -3px;
+}
+
+
+/* ===== Spese: record su una sola riga (dot + data + motivazione + importi) ===== */
+.item.expense{
+  padding: 10px 12px;
+}
+.item.expense .expense-row{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.item.expense .catdot{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.65), 0 8px 18px rgba(15,23,42,0.12);
+}
+.item.expense .expense-date{
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: .2px;
+  opacity: .85;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.item.expense .expense-mot{
+  font-size: 14px;
+  font-weight: 900;
+  opacity: .9;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.item.expense .expense-amount{
+  font-size: 14px;
+  font-weight: 950;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.item.expense .expense-iva{
+  font-size: 13px;
+  font-weight: 850;
+  opacity: .72;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Tasto elimina: pallino rosso (tap target 44x44 su iPhone) */
+.item.expense .delbtn.deldot{
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.item.expense .delbtn.deldot::before{
+  content:"";
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(239,68,68,0.95);
+  box-shadow: 0 8px 18px rgba(239,68,68,0.35);
+}
+.item.expense .delbtn.deldot:active::before{
+  transform: scale(0.95);
 }
