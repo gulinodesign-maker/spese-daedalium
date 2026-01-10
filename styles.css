@@ -2684,3 +2684,11 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-cell.has-booking{
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
 }
+
+
+/* === dDAE: Spese - filtri (IVA + nome) === */
+.spese-filters .field .lbl{ font-size:12px; opacity:.85; margin-bottom:6px; display:block; }
+.spese-filters select,
+.spese-filters input[type="search"]{
+  width:100%;
+}

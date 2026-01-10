@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.125" rel="stylesheet"/>
-<link href="./manifest.json?v=1.125" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.125" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.125" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.125" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.125" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.126" rel="stylesheet"/>
+<link href="./manifest.json?v=1.126" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.126" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.126" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.126" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.126" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.125</div>
+<div class="build" id="buildText">1.126</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -179,6 +179,20 @@
 </div>
 </div>
 <div id="speseViewList">
+
+<div class="spese-filters" style="display:flex; gap:10px; align-items:flex-end; margin:10px 0 6px;">
+  <div class="field" style="min-width:120px; flex:0 0 auto;">
+    <label class="lbl" for="speseIvaFilter">IVA</label>
+    <select id="speseIvaFilter" aria-label="Filtro IVA">
+      <option value="all">Tutte</option>
+    </select>
+  </div>
+  <div class="field" style="flex:1 1 auto;">
+    <label class="lbl" for="speseSearch">Nome</label>
+    <input id="speseSearch" type="search" inputmode="search" placeholder="Cerca per nome/motivazione…" aria-label="Cerca spese per nome o motivazione">
+  </div>
+</div>
+
 <div class="list" id="speseList"></div>
 </div>
 <div id="speseViewInsights" hidden>
@@ -413,8 +427,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.125"></script>
-<script defer="" src="./app.js?v=1.125"></script>
+<script defer="" src="./config.js?v=1.126"></script>
+<script defer="" src="./app.js?v=1.126"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
