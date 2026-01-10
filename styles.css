@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.160"),
+    url("./assets/bg-daedalium.png?v=1.161"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.160"),
+    url("./assets/bg-daedalium.png?v=1.161"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3078,4 +3078,42 @@ body.perf-lite *::after{
 /* Stanza RES (grigio) */
 .clean-grid .cell.room.rres{
   color: rgba(80,80,80,1);
+}
+
+
+/* Pulizie: celle colorate per stanza (sfondo della cella) */
+.clean-grid .cell.slot{
+  position: relative;
+  overflow: hidden;
+}
+.clean-grid .cell.slot::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity: .18;
+  pointer-events:none;
+  background: transparent;
+}
+.clean-grid .cell.slot::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0));
+  opacity:.28;
+  mix-blend-mode: soft-light;
+}
+
+/* Mapping colori stanze -> sfondo */
+.clean-grid .cell.slot[data-room="1"]::before{ background: rgba(208,0,0,1); }       /* rosso */
+.clean-grid .cell.slot[data-room="2"]::before{ background: rgba(255,122,0,1); }     /* arancio */
+.clean-grid .cell.slot[data-room="3"]::before{ background: rgba(255,180,0,1); }     /* giallo */
+.clean-grid .cell.slot[data-room="4"]::before{ background: rgba(30,142,62,1); }     /* verde */
+.clean-grid .cell.slot[data-room="5"]::before{ background: rgba(26,115,232,1); }    /* azzurro */
+.clean-grid .cell.slot[data-room="6"]::before{ background: rgba(75,42,173,1); }     /* indaco */
+.clean-grid .cell.slot[data-room="RES"]::before{ background: rgba(120,120,120,1); opacity:.14; } /* grigio */
+
+/* Bordo leggermente più marcato per distinguere le celle */
+.clean-grid .cell.slot{
+  border-color: rgba(0,0,0,.16);
 }
