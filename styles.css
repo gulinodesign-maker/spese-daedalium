@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.136"),
+    url("./assets/bg-daedalium.png?v=1.137"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -207,7 +207,8 @@ body{
 
 .field{ display:flex; flex-direction:column; gap:6px; width:100%; }
 .field label{ font-size: 12px; opacity:0.86; }
-.field{ min-width:0; overflow:hidden; }
+.field{ min-width:0; overflow: visible;
+}
 .field input, .field select, .field textarea{
   display:block;
   width: 100%;
@@ -641,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.136"),
+    url("./assets/bg-daedalium.png?v=1.137"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1320,6 +1321,10 @@ body::before{
   max-width:100%;
   box-sizing:border-box;
   -webkit-appearance: none;
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 12px;
+  min-height: 52px;
 }
 
 
@@ -1478,6 +1483,10 @@ body::before{
   max-width:100%;
   box-sizing:border-box;
   -webkit-appearance:none;
+  text-align: center;
+  padding-left: 12px;
+  padding-right: 12px;
+  min-height: 52px;
 }
 
 /* select: allineamento label */
@@ -1846,6 +1855,8 @@ body[data-page="ospiti"] .guest-card .actions {
 #page-ospiti .guest-led.led-gray{ background: rgba(148,163,184,0.9); }
 #page-ospiti .guest-led.led-green{ background: #34c759; box-shadow: 0 0 0 3px rgba(52,199,89,0.16), 0 0 12px rgba(52,199,89,0.42); }
 #page-ospiti .guest-led.led-orange{ background: #ff9500; box-shadow: 0 0 0 3px rgba(255,149,0,0.16), 0 0 12px rgba(255,149,0,0.42); }
+#page-ospiti .guest-led.led-yellow{ background: #ffcc00; box-shadow: 0 0 0 3px rgba(255,204,0,0.16), 0 0 12px rgba(255,204,0,0.42); }
+
 #page-ospiti .guest-led.led-red{ background: #ff3b30; box-shadow: 0 0 0 3px rgba(255,59,48,0.16), 0 0 12px rgba(255,59,48,0.42); }
 #page-ospiti .guest-led.led-greenorange-blink{
   animation: ledGreenOrangeBlink 1.05s infinite;
@@ -2031,7 +2042,7 @@ body[data-page="ospiti"] .guest-card .actions {
   line-height: 1;
   border: 1px solid rgba(255,255,255,0.18);
   box-shadow: 0 8px 18px rgba(15,23,42,0.10);
-  text-transform: lowercase;
+  text-transform: uppercase;
 }
 .stay-pill__sep{ opacity: 0.85; font-weight: 800; }
 .stay-pill__n{ font-weight: 950; }
@@ -2861,4 +2872,10 @@ body.perf-lite *::before,
 body.perf-lite *::after{
   transition: none !important;
   animation: none !important;
+}
+
+
+/* iPhone/iPad: evita taglio e centra le date */
+@media (max-width: 820px){
+  .two-col{ grid-template-columns: 1fr; }
 }

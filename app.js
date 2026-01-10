@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.136";
+const BUILD_VERSION = "1.137";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -409,7 +409,7 @@ function guestLedStatus(item){
     if (t === (dOut - 1)) {
       // Caso speciale: 1 notte -> il giorno prima del check-out coincide col check-in
       if (isOneNight && dIn === (dOut - 1)) {
-        return { cls: "led-greenorange-blink", label: "1 notte: check-in oggi, check-out domani" };
+        return { cls: "led-yellow", label: "1 notte: arrivo oggi (LED giallo)" };
       }
       return { cls: "led-orange", label: "Check-out domani" };
     }
@@ -1927,7 +1927,7 @@ function renderRoomsReadOnly(ospite){
   const marriageOn = !!(ospite?.matrimonio);
 
   const rightHTML = pillHTML
-    ? `<div class="stay-right">${marriageOn ? `<span class="marriage-dot" aria-label="Matrimonio">m</span>` : ``}${pillHTML}</div>`
+    ? `<div class="stay-right">${marriageOn ? `<span class="marriage-dot" aria-label="Matrimonio">M</span>` : ``}${pillHTML}</div>`
     : ``;
 
   ro.innerHTML = `<div class="rooms-readonly-wrap">${stackHTML}${rightHTML}</div>`;
