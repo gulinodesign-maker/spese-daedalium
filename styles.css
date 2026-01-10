@@ -26,7 +26,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.126"),
+    url("./assets/bg-daedalium.png?v=1.128"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -638,7 +638,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.126"),
+    url("./assets/bg-daedalium.png?v=1.128"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2274,8 +2274,22 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
 }
-.cal-pill.day{ justify-content:flex-start; padding-left:12px; }
+.cal-pill.day{ flex-direction:column; justify-content:center; align-items:center; padding:0; background: rgba(140,140,140,.30); border:1px solid rgba(255,255,255,.20); }
 .cal-pill.room{ justify-content:center; padding:0; }
+
+.cal-day-abbrev{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.10em;
+  line-height:1;
+  text-transform:uppercase;
+}
+.cal-day-num{
+  margin-top:4px;
+  font-size:14px;
+  font-weight:900;
+  line-height:1;
+}
 
 /* Etichetta "STANZE" nell'angolo alto-sinistra */
 .cal-pill.corner{
@@ -2403,16 +2417,40 @@ body[data-page="ospiti"] .guest-card .actions {
   justify-content:center;
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,.10);
+  position: relative;
+  overflow:hidden;
 
-  /* Base colore stanza (ereditato da .room-X) */
-  background-color: var(--room-bg, rgba(255,255,255,.08));
-
-  /* 40% più scuro */
-  background-image: linear-gradient(rgba(0,0,0,.40), rgba(0,0,0,.40));
-
+  /* La base colore stanza viene da .room-X (var(--room-bg)) */
+  background: transparent;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-  font-weight: 800;
+  font-weight: 900;
+  color: rgba(255,255,255,.96);
 }
+
+.cal-pill.room::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-color: var(--room-bg, rgba(255,255,255,.08));
+  /* +30% saturazione rispetto alle celle standard */
+  filter: saturate(1.3);
+  transform: translateZ(0);
+}
+
+.cal-room-num{
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%;
+  text-align:center;
+  padding:0 6px;
+  line-height:1;
+  font-size: clamp(14px, calc(var(--cal-cell-h) * 0.38), 28px);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
 /* Cella con prenotazione:
    - stesso colore delle celle vuote (base stanza)
    - 40% più chiara (overlay bianco al 40%)
@@ -2695,4 +2733,43 @@ body[data-page="ospiti"] .guest-card .actions {
 /* Cella prenotata: contrasto leggermente maggiore (senza cambiare tinta) */
 .cal-cell.has-booking{
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
+}
+
+/* ===== Performance mode (iOS/Safari PWA) =====
+   Disattiva blur/backdrop-filter e alleggerisce ombre/transizioni sugli elementi ripetuti.
+   Attivato da JS con: document.body.classList.add('perf-lite')
+*/
+body.perf-lite *{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.perf-lite .topbar,
+body.perf-lite .card,
+body.perf-lite .btn,
+body.perf-lite .icon-btn,
+body.perf-lite .top-pill,
+body.perf-lite .pill,
+body.perf-lite .modal-card,
+body.perf-lite .panel,
+body.perf-lite .glass{
+  background: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08) !important;
+}
+
+body.perf-lite .btn,
+body.perf-lite .icon-btn{
+  box-shadow: 0 8px 18px rgba(15,23,42,0.08) !important;
+}
+
+body.perf-lite .card,
+body.perf-lite .panel{
+  border-color: rgba(15,23,42,0.08) !important;
+}
+
+body.perf-lite *,
+body.perf-lite *::before,
+body.perf-lite *::after{
+  transition: none !important;
+  animation: none !important;
 }

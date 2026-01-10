@@ -3,7 +3,28 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.126";
+const BUILD_VERSION = "1.129";
+
+// ===== Performance mode (iOS/Safari PWA) =====
+const IS_IOS = (() => {
+  const ua = navigator.userAgent || "";
+  const iOS = /iPad|iPhone|iPod/.test(ua);
+  const iPadOS = (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
+  return iOS || iPadOS;
+})();
+
+function applyPerfMode(){
+  try{
+    const saved = localStorage.getItem("ddae_perf_mode"); // "full" | "lite"
+    const mode = saved ? saved : (IS_IOS ? "lite" : "full");
+    document.body.classList.toggle("perf-lite", mode === "lite");
+  } catch(_){
+    // fallback: su iOS attiva comunque lite
+    if (IS_IOS) document.body.classList.add("perf-lite");
+  }
+}
+
+
 
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
@@ -668,6 +689,23 @@ function invalidateApiCache(prefix){
   } catch (_) {}
 }
 
+// ===== LocalStorage cache (perceived speed on iOS) =====
+const __lsPrefix = "ddae_cache_v1:";
+function __lsGet(key){
+  try{
+    const raw = localStorage.getItem(__lsPrefix + key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(_){ return null; }
+}
+function __lsSet(key, data){
+  try{
+    localStorage.setItem(__lsPrefix + key, JSON.stringify({ t: Date.now(), data }));
+  } catch(_){}
+}
+
+
+
 // GET con cache in-memory (non tocca SW): evita chiamate duplicate e loader continui
 async function cachedGet(action, params = {}, { ttlMs = 30000, showLoader = true, force = false } = {}){
   const key = __cacheKey(action, params);
@@ -1118,6 +1156,30 @@ async function loadMotivazioni(){
 
 
 async function loadStanze({ showLoader=true } = {}){
+  // Prefill rapido da cache locale (aiuta dopo reload PWA)
+  if (!state.stanzeRows || !state.stanzeRows.length){
+    const hit = __lsGet("stanze");
+    if (hit && Array.isArray(hit.data) && hit.data.length){
+      try{
+        const rows0 = hit.data;
+        state.stanzeRows = rows0;
+        // ricostruisci indicizzazione
+        const map0 = {};
+        for (const r of rows0){
+          const gid = String(r.ospite_id ?? r.ospiteId ?? r.guest_id ?? r.guestId ?? "").trim();
+          const sn = String(r.stanza_num ?? r.stanzaNum ?? r.room_number ?? r.roomNumber ?? r.stanza ?? r.room ?? "").trim();
+          if (!gid || !sn) continue;
+          const key = `${gid}:${sn}`;
+          map0[key] = {
+            letto_m: Number(r.letto_m ?? r.lettoM ?? 0) || 0,
+            letto_s: Number(r.letto_s ?? r.lettoS ?? 0) || 0,
+            culla: Number(r.culla ?? r.crib ?? 0) || 0,
+          };
+        }
+        state.stanzeByKey = map0;
+      } catch(_){}
+    }
+  }
   const data = await cachedGet("stanze", {}, { showLoader, ttlMs: 60*1000 });
   const rows = Array.isArray(data) ? data : [];
   state.stanzeRows = rows;
@@ -1136,13 +1198,26 @@ async function loadStanze({ showLoader=true } = {}){
     };
   }
   state.stanzeByKey = map;
+  __lsSet("stanze", rows);
 }
 
 async function loadOspiti({ from="", to="" } = {}){
+  // Prefill rapido da cache locale (poi refresh in background)
+  const lsKey = `ospiti|${from}|${to}`;
+  const hit = __lsGet(lsKey);
+  if (hit && Array.isArray(hit.data) && hit.data.length){
+    state.guests = hit.data;
+    // render subito (perceived speed)
+    try{ requestAnimationFrame(renderGuestCards); } catch(_){ renderGuestCards(); }
+  }
+
   // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
-  await loadStanze({ showLoader:false });
-  const data = await cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
+  const pStanze = loadStanze({ showLoader:false });
+  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
+
+  const [ , data ] = await Promise.all([pStanze, pOspiti]);
   state.guests = Array.isArray(data) ? data : [];
+  __lsSet(lsKey, state.guests);
   renderGuestCards();
 }
 
@@ -2088,14 +2163,23 @@ function renderGuestCards(){
   const wrap = document.getElementById("guestCards");
   if (!wrap) return;
   wrap.hidden = false;
-  wrap.innerHTML = "";
+  wrap.replaceChildren();
+
+  const frag = document.createDocumentFragment();
 
   let items = Array.isArray(state.ospiti) && state.ospiti.length
     ? state.ospiti
     : (Array.isArray(state.guests) ? state.guests : []);
 
   if (!items.length){
-    wrap.innerHTML = '<div style="opacity:.7;font-size:14px;padding:8px;">Nessun ospite nel periodo.</div>';
+    wrap.replaceChildren();
+    const empty = document.createElement("div");
+    empty.style.opacity = ".7";
+    empty.style.fontSize = "14px";
+    empty.style.padding = "8px";
+    empty.textContent = "Nessun ospite nel periodo.";
+    frag.appendChild(empty);
+    wrap.appendChild(frag);
     return;
   }
 
@@ -2198,8 +2282,9 @@ function renderGuestCards(){
       }
     });
 
-    wrap.appendChild(card);
+    frag.appendChild(card);
   });
+  wrap.appendChild(frag);
 }
 
 
@@ -2235,6 +2320,8 @@ function refreshFloatingLabels(){
 
 
 async function init(){
+  // Perf mode: deve girare DOPO che body esiste e DOPO init delle costanti
+  applyPerfMode();
   const __restore = __readRestoreState();
   document.body.dataset.page = "home";
   setupHeader();
@@ -2361,6 +2448,9 @@ function renderCalendario(){
   const title = document.getElementById("calWeekTitle");
   if (!grid) return;
 
+  grid.replaceChildren();
+  const frag = document.createDocumentFragment();
+
   const anchor = (state.calendar && state.calendar.anchor) ? state.calendar.anchor : new Date();
   const start = startOfWeekMonday(anchor);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -2378,23 +2468,40 @@ function renderCalendario(){
   const corner = document.createElement("div");
   corner.className = "cal-pill corner";
   corner.textContent = "ST";
-  grid.appendChild(corner);
+  frag.appendChild(corner);
 
   // Prima riga: giorni (colonne)
   for (let i = 0; i < 7; i++) {
     const d = days[i];
     const dayPill = document.createElement("div");
     dayPill.className = "cal-pill day";
-    dayPill.textContent = `${weekdayShortIT(d)} ${d.getDate()}`;
-    grid.appendChild(dayPill);
+
+    // Abbreviazione (LUN, MAR...) sopra, numero giorno sotto
+    const ab = document.createElement("div");
+    ab.className = "cal-day-abbrev";
+    ab.textContent = weekdayShortIT(d).toUpperCase();
+
+    const num = document.createElement("div");
+    num.className = "cal-day-num";
+    num.textContent = String(d.getDate());
+
+    dayPill.appendChild(ab);
+    dayPill.appendChild(num);
+
+    frag.appendChild(dayPill);
   }
 
   // Righe: stanze (prima colonna) + celle per ogni giorno
   for (let r = 1; r <= 6; r++) {
     const pill = document.createElement("div");
     pill.className = `cal-pill room room-${r}`;
-    pill.textContent = String(r);
-    grid.appendChild(pill);
+
+    const rn = document.createElement("span");
+    rn.className = "cal-room-num";
+    rn.textContent = String(r);
+    pill.appendChild(rn);
+
+    frag.appendChild(pill);
 
     for (let i = 0; i < 7; i++) {
       const d = days[i];
@@ -2445,9 +2552,10 @@ function renderCalendario(){
         });
       }
 
-      grid.appendChild(cell);
+      frag.appendChild(cell);
     }
   }
+  grid.appendChild(frag);
 }
 
 
@@ -2582,7 +2690,7 @@ function toRoman(n){
 }
 
 
-init();
+(async ()=>{ try{ await init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
 
 
 /* Service Worker: forza update su iOS (cache-bust via query) */
