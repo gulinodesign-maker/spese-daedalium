@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.140";
+const BUILD_VERSION = "1.141";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
