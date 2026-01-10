@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.134"),
+    url("./assets/bg-daedalium.png?v=1.135"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -641,7 +641,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.134"),
+    url("./assets/bg-daedalium.png?v=1.135"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1847,6 +1847,21 @@ body[data-page="ospiti"] .guest-card .actions {
 #page-ospiti .guest-led.led-green{ background: #34c759; box-shadow: 0 0 0 3px rgba(52,199,89,0.16), 0 0 12px rgba(52,199,89,0.42); }
 #page-ospiti .guest-led.led-orange{ background: #ff9500; box-shadow: 0 0 0 3px rgba(255,149,0,0.16), 0 0 12px rgba(255,149,0,0.42); }
 #page-ospiti .guest-led.led-red{ background: #ff3b30; box-shadow: 0 0 0 3px rgba(255,59,48,0.16), 0 0 12px rgba(255,59,48,0.42); }
+#page-ospiti .guest-led.led-greenorange-blink{
+  animation: ledGreenOrangeBlink 1.05s infinite;
+}
+
+@keyframes ledGreenOrangeBlink{
+  0%, 49%{
+    background: #34c759;
+    box-shadow: 0 0 0 3px rgba(52,199,89,0.16), 0 0 12px rgba(52,199,89,0.42);
+  }
+  50%, 100%{
+    background: #ff9500;
+    box-shadow: 0 0 0 3px rgba(255,149,0,0.16), 0 0 12px rgba(255,149,0,0.42);
+  }
+}
+
 
 /* tap target: resta comodo anche su iPhone */
 @media (max-width: 480px){

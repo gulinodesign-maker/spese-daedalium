@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.134";
+const BUILD_VERSION = "1.135";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -396,13 +396,23 @@ function guestLedStatus(item){
   const dIn = _dayNumFromISO(ci);
   const dOut = _dayNumFromISO(co);
 
+  const isOneNight = (dIn != null && dOut != null && (dOut - dIn) === 1);
+
   if (t == null) return { cls: "led-gray", label: "Nessuna scadenza" };
 
   // Priorità: check-out (rosso) > giorno prima check-out (arancione) > dopo check-in (verde) > grigio
   if (dOut != null) {
     if (t === dOut) return { cls: "led-red", label: "Check-out oggi" };
     if (t > dOut) return { cls: "led-red", label: "Check-out passato" };
-    if (t === (dOut - 1)) return { cls: "led-orange", label: "Check-out domani" };
+
+    // Giorno prima del check-out
+    if (t === (dOut - 1)) {
+      // Caso speciale: 1 notte -> il giorno prima del check-out coincide col check-in
+      if (isOneNight && dIn === (dOut - 1)) {
+        return { cls: "led-greenorange-blink", label: "1 notte: check-in oggi, check-out domani" };
+      }
+      return { cls: "led-orange", label: "Check-out domani" };
+    }
   }
 
   if (dIn != null) {
@@ -413,6 +423,7 @@ function guestLedStatus(item){
 
   return { cls: "led-gray", label: "Nessuna data" };
 }
+
 
 
 
