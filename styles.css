@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.149"),
+    url("./assets/bg-daedalium.png?v=1.150"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.149"),
+    url("./assets/bg-daedalium.png?v=1.150"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2916,3 +2916,43 @@ body.perf-lite *::after{
   text-overflow:ellipsis;
 }
 .spesa-sep{ opacity:.45; }
+
+
+/* dDAE — Spese: card colorate per categoria (sfondo della card, non pallino) */
+.item.spesa-bg{
+  position: relative;
+  overflow: hidden;
+}
+
+/* Tinta "soft" in stile Liquid Glass */
+.item.spesa-bg::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity: .22;
+  pointer-events:none;
+  background: transparent;
+}
+.item.spesa-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0));
+  opacity:.35;
+  mix-blend-mode: soft-light;
+}
+
+/* Mapping colori (ispirati allo screenshot) */
+.item.spesa-bg-contanti::before{ background: rgba(46,125,183,1); }        /* blu */
+.item.spesa-bg-tassa::before{ background: rgba(215,185,139,1); }          /* beige */
+.item.spesa-bg-iva22::before{ background: rgba(199,119,45,1); }           /* arancio */
+.item.spesa-bg-iva10::before{ background: rgba(107,183,201,1); }          /* azzurro */
+.item.spesa-bg-iva4::before{ background: rgba(28,36,48,1); opacity:.16; } /* scuro più leggero */
+
+/* Bordo leggermente colorato */
+.item.spesa-bg-contanti{ border-color: rgba(46,125,183,.22) !important; }
+.item.spesa-bg-tassa{ border-color: rgba(215,185,139,.22) !important; }
+.item.spesa-bg-iva22{ border-color: rgba(199,119,45,.22) !important; }
+.item.spesa-bg-iva10{ border-color: rgba(107,183,201,.22) !important; }
+.item.spesa-bg-iva4{ border-color: rgba(28,36,48,.20) !important; }

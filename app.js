@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.149";
+const BUILD_VERSION = "1.150";
 
 
 
@@ -648,6 +648,34 @@ function formatShortDateIT(input){
     return "";
   }
 }
+
+function spesaCategoryClass(s){
+  // "campo X": categoria (fallback: aliquotaIva)
+  const catRaw = (s?.categoria ?? s?.cat ?? "").toString().trim().toLowerCase();
+  const aliq = (s?.aliquotaIva ?? s?.aliquota_iva ?? "").toString().trim();
+
+  // Normalizza varianti
+  if (catRaw.includes("contant")) return "spesa-bg-contanti";
+  if (catRaw.includes("tassa") && catRaw.includes("sogg")) return "spesa-bg-tassa";
+
+  // IVA
+  if (catRaw.includes("iva")){
+    if (catRaw.includes("22")) return "spesa-bg-iva22";
+    if (catRaw.includes("10")) return "spesa-bg-iva10";
+    if (catRaw.includes("4")) return "spesa-bg-iva4";
+  }
+
+  // Fallback su aliquota numerica
+  const n = parseFloat(String(aliq).replace(",", "."));
+  if (!isNaN(n)){
+    if (n >= 21.5) return "spesa-bg-iva22";
+    if (n >= 9.5 && n < 11.5) return "spesa-bg-iva10";
+    if (n >= 3.5 && n < 5.5) return "spesa-bg-iva4";
+  }
+
+  return ""; // nessun colore
+}
+
 
 
 
@@ -3132,7 +3160,9 @@ function renderSpese(){
 
   items.forEach(s => {
     const el = document.createElement("div");
-    el.className = "item";
+    el.className = "item spesa-bg";
+    const cls = spesaCategoryClass(s);
+    if (cls) el.classList.add(cls);
 
     const importo = Number(s.importoLordo || 0);
     const data = formatShortDateIT(s.dataSpesa || s.data || s.data_spesa || "");
