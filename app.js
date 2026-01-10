@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.138";
+const BUILD_VERSION = "1.139";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -2601,15 +2601,17 @@ function renderCalendario(){
       cell.dataset.room = String(r);
       const info = occ.get(`${dIso}:${r}`);
       if (!info) {
-        // Casella vuota: nessuna azione (evita anche handler globali tipo [data-room])
+        // Casella vuota: nessuna azione (evita anche handler globali tipo [data-room]).
+        // Su tap: mostra solo un bordo nero spesso come feedback visivo, senza aprire nulla.
         cell.addEventListener("click", (ev)=>{
           try { ev.preventDefault(); } catch (_) {}
           try { ev.stopPropagation(); } catch (_) {}
+          selectEmptyCalendarCell(cell);
         });
       }
       if (info) {
         cell.classList.add("has-booking");
-        if (info.lastDay) cell.classList.add("last-day");
+        if (info.lastDay && IS_IOS) cell.classList.add("last-day");
 
         const inner = document.createElement("div");
         inner.className = "cal-cell-inner";
@@ -2637,6 +2639,8 @@ function renderCalendario(){
           try { ev.preventDefault(); } catch (_) {}
           try { ev.stopPropagation(); } catch (_) {}
 
+          clearEmptyCalendarSelection();
+
           const ospite = findCalendarGuestById(info.guestId);
           if (!ospite) return;
           enterGuestViewMode(ospite);
@@ -2656,6 +2660,21 @@ function findCalendarGuestById(id){
   const arr = (state.calendar && Array.isArray(state.calendar.guests)) ? state.calendar.guests : [];
   return arr.find(o => String(o.id ?? o.ID ?? o.ospite_id ?? o.ospiteId ?? o.guest_id ?? o.guestId ?? "").trim() === gid) || null;
 }
+
+
+// ===== Calendario: selezione casella vuota (nessuna azione) =====
+function clearEmptyCalendarSelection(){
+  const grid = document.getElementById("calGrid");
+  if (!grid) return;
+  grid.querySelectorAll(".cal-cell.empty-selected").forEach(el => el.classList.remove("empty-selected"));
+}
+
+function selectEmptyCalendarCell(cell){
+  if (!cell) return;
+  clearEmptyCalendarSelection();
+  cell.classList.add("empty-selected");
+}
+
 
 function buildWeekOccupancy(weekStart){
   const map = new Map();
