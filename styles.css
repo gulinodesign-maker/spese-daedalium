@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.146"),
+    url("./assets/bg-daedalium.png?v=1.147"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -304,32 +304,6 @@ input[type="date"]{
   display:flex;
   flex-wrap:wrap;
   gap: 8px 10px;
-}
-
-
-/* Spese: riga singola (importo · data · motivazione) */
-.spesa-line{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  flex-wrap:nowrap;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  font-size: 13px;
-  font-weight: 900;
-}
-.spesa-imp{ flex: 0 0 auto; }
-.spesa-date{ flex: 0 0 auto; font-weight: 800; opacity: .85; }
-.spesa-sep{ flex: 0 0 auto; opacity: .65; font-weight: 900; }
-.spesa-motivo{
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-weight: 700;
-  opacity: .85;
 }
 .badge{
   display:inline-flex;
@@ -668,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.146"),
+    url("./assets/bg-daedalium.png?v=1.147"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2910,7 +2884,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.143 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.142 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -2924,3 +2898,21 @@ body.perf-lite *::after{
   outline: 3px solid rgba(0,0,0,.95) !important;
   outline-offset: -3px;
 }
+
+
+/* dDAE_1.147: riga spesa compatta (importo · data · motivazione) */
+.spesa-line{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.spesa-imp{ font-weight:800; }
+.spesa-date{ opacity:.85; }
+.spesa-motivo{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.spesa-sep{ opacity:.45; }

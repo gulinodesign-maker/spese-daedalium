@@ -3,7 +3,8 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.146";
+const BUILD_VERSION = "1.147";
+
 
 
 // Aggiornamento "hard" anti-cache iOS:
@@ -19,7 +20,6 @@ async function hardUpdateCheck(){
 
     try{ toast(`Aggiornamento ${remote}…`); } catch(_) {}
 
-    // Unregister SW
     try{
       if ("serviceWorker" in navigator){
         const regs = await navigator.serviceWorker.getRegistrations();
@@ -27,7 +27,6 @@ async function hardUpdateCheck(){
       }
     }catch(_){}
 
-    // Clear caches
     try{
       if (window.caches){
         const keys = await caches.keys();
@@ -35,11 +34,9 @@ async function hardUpdateCheck(){
       }
     }catch(_){}
 
-    // Reload with cache-bust
     location.href = `./?v=${encodeURIComponent(remote)}&r=${Date.now()}`;
   }catch(_){}
 }
-
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
   const ua = navigator.userAgent || "";
@@ -622,13 +619,28 @@ function formatLongDateIT(value){
   return s;
 }
 
-
-function formatShortDateIT(value){
-  const iso = formatISODateLocal(value);
-  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return String(value ?? "");
-  const [y,m,d] = iso.split("-");
-  return `${d}/${m}/${y.slice(2)}`;
+function formatShortDateIT(input){
+  try{
+    if (!input) return "";
+    const s = String(input);
+    const iso = s.slice(0, 10); // YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+      const [y,m,d] = iso.split("-");
+      return `${d}/${m}/${y.slice(-2)}`;
+    }
+    const dt = new Date(s);
+    if (!isNaN(dt)){
+      const dd = String(dt.getDate()).padStart(2,"0");
+      const mm = String(dt.getMonth()+1).padStart(2,"0");
+      const yy = String(dt.getFullYear()).slice(-2);
+      return `${dd}/${mm}/${yy}`;
+    }
+    return iso;
+  }catch(_){
+    return "";
+  }
 }
+
 
 
 
@@ -1540,50 +1552,54 @@ async function saveSpesa(){
 
 /* 2) SPESE */
 function renderSpese(){
-  const list = $("#speseList");
+  const list = document.getElementById("speseList");
   if (!list) return;
   list.innerHTML = "";
 
-  if (!state.spese || !state.spese.length){
-    list.innerHTML = `<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa nel periodo.</div>`;
+  const items = Array.isArray(state.spese) ? state.spese : [];
+  if (!items.length){
+    list.innerHTML = '<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa nel periodo.</div>';
     return;
   }
 
-  for (const s of state.spese){
+  items.forEach(s => {
     const el = document.createElement("div");
     el.className = "item";
 
+    const importo = Number(s.importoLordo || 0);
+    const data = formatShortDateIT(s.dataSpesa || s.data || s.data_spesa || "");
+    const motivo = escapeHtml((s.motivazione || s.motivo || "").toString());
+
     el.innerHTML = `
       <div class="item-top">
-        <div style="min-width:0; flex:1;">
-          <div class="spesa-line">
-            <span class="spesa-imp">${euro(s.importoLordo)}</span>
-            <span class="spesa-sep">·</span>
-            <span class="spesa-date">${formatShortDateIT(s.dataSpesa)}</span>
-            <span class="spesa-sep">·</span>
-            <span class="spesa-motivo">${escapeHtml(s.motivazione)}</span>
-          </div>
+        <div class="spesa-line" title="${motivo}">
+          <span class="spesa-imp">${euro(importo)}</span>
+          <span class="spesa-sep">·</span>
+          <span class="spesa-date">${data}</span>
+          <span class="spesa-sep">·</span>
+          <span class="spesa-motivo">${motivo}</span>
         </div>
         <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
       </div>
     `;
 
-    const __btnDel = el.querySelector("[data-del]");
-
-
-    if (__btnDel) __btnDel.addEventListener("click", async () => {
-      if (!confirm("Eliminare questa spesa?")) return;
-      await api("spese", { method:"DELETE", params:{ id: s.id } });
-      toast("Eliminata");
-      invalidateApiCache("spese|");
-      invalidateApiCache("report|");
-      await ensurePeriodData({ showLoader:false, force:true });
-      renderSpese();
-    });
+    const btn = el.querySelector("[data-del]");
+    if (btn){
+      btn.addEventListener("click", async () => {
+        if (!confirm("Eliminare definitivamente questa spesa?")) return;
+        await api("spese", { method:"DELETE", params:{ id: s.id } });
+        toast("Spesa eliminata");
+        invalidateApiCache("spese|");
+        invalidateApiCache("report|");
+        await ensurePeriodData({ showLoader:false, force:true });
+        renderSpese();
+      });
+    }
 
     list.appendChild(el);
-  }
+  });
 }
+
 
 /* 3) RIEPILOGO */
 function renderRiepilogo(){
@@ -2957,8 +2973,7 @@ function toRoman(n){
 }
 
 
-(async ()=>{ try{ await hardUpdateCheck();
-init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
+(async ()=>{ try{ await init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
 
 
 /* Service Worker: forza update su iOS (cache-bust via query) */
@@ -3008,6 +3023,8 @@ registerSW();
 
 
 
+
+try{ hardUpdateCheck(); }catch(_){}
 // ---  helpers (sheet "stanze") ---
 function buildArrayFromState(){
   const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);

@@ -1,5 +1,5 @@
 /* dDAE - Service Worker (PWA)
- * Build: dDAE_1.146
+ * Build: dDAE_1.147
  *
  * Obiettivi:
  * - cache name cambia ad ogni build
@@ -9,7 +9,7 @@
  * - fix iOS/Safari cache aggressiva (cache:"reload"/"no-store" + query ?v)
  */
 
-const BUILD = "1.146";
+const BUILD = "1.147";
 const CACHE_NAME = "dDAE_" + BUILD; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
@@ -154,6 +154,7 @@ async function staleWhileRevalidate(req) {
 }
 
 self.addEventListener("fetch", (event) => {
+  // version.json: mai cache, sempre rete
   try {
     const u = new URL(event.request.url);
     if (u.origin === self.location.origin && u.pathname.endsWith("/version.json")) {
@@ -161,12 +162,13 @@ self.addEventListener("fetch", (event) => {
       return;
     }
   } catch (_) {}
+
   // Core assets: sempre network-first (evita JS/CSS vecchi su iOS)
   try {
     const u2 = new URL(event.request.url);
     const p = u2.pathname;
     const isSame = u2.origin === self.location.origin;
-    const coreAssets = ["/app.js","/styles.css","/config.js","/manifest.json","/version.json"];
+    const coreAssets = ["/app.js","/styles.css","/config.js","/manifest.json"];
     if (isSame && coreAssets.some(a => p.endsWith(a))) {
       event.respondWith(networkFirstAsset(event.request));
       return;
