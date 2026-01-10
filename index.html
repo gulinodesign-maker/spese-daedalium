@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.155" rel="stylesheet"/>
-<link href="./manifest.json?v=1.155" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.155" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.155" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.155" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.155" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.156" rel="stylesheet"/>
+<link href="./manifest.json?v=1.156" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.156" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.156" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.156" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.156" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.155"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.156"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.155</div>
+<div class="build" id="buildText">1.156</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -254,7 +254,96 @@
 <label for="guestCheckOut">Check-out</label>
 </div>
 </div>
-<div class="field gf-tile" aria-label="A">
+<div class="field">
+<label>Stanze</label>
+<div aria-label="Seleziona stanze" class="rooms" id="roomsPicker" role="group">
+<button aria-pressed="false" class="room-dot" data-room="1" type="button">1</button>
+<button aria-pressed="false" class="room-dot" data-room="2" type="button">2</button>
+<button aria-pressed="false" class="room-dot" data-room="3" type="button">3</button>
+<button aria-pressed="false" class="room-dot" data-room="4" type="button">4</button>
+<button aria-pressed="false" class="room-dot" data-room="5" type="button">5</button>
+<button aria-pressed="false" class="room-dot" data-room="6" type="button">6</button>
+<button aria-pressed="false" class="room-dot room-dot-marriage" id="roomMarriage" type="button" title="Matrimonio">M</button>
+</div>
+<div id="roomsReadOnly" class="rooms-readonly" hidden></div>
+</div>
+
+<div class="field float">
+<input id="guestTotal" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
+<label for="guestTotal">Importo prenotazione (€)</label>
+</div>
+<div class="field float">
+<input id="guestBooking" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
+<label for="guestBooking">Importo booking (€)</label>
+</div>
+<div class="field two-col payment-row">
+<div class="subfield field float">
+<input id="guestDeposit" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
+<label for="guestDeposit">Acconto (€)</label>
+</div>
+<div class="subfield paywrap">
+    <div aria-label="Tipo acconto" class="pay-pill" id="depositType" role="group">
+  <button class="pay-dot pay-cash selected" data-type="contante" aria-pressed="true" type="button" title="Contanti"></button>
+  <button class="pay-dot pay-elec" data-type="elettronico" aria-pressed="false" type="button" title="Elettronico"></button>
+  <button class="pay-dot pay-receipt" data-receipt="1" aria-pressed="false" type="button" title="Ricevuta"></button>
+</div>
+</div>
+</div>
+<div class="field two-col payment-row">
+  <div class="subfield field float">
+    <input id="guestSaldo" inputmode="decimal" placeholder="0" type="number" min="0" step="0.01"/>
+    
+  
+    <label for="guestSaldo">Saldo (€)</label>
+</div>
+  <div class="subfield paywrap">
+    <div aria-label="Saldo" class="pay-pill" id="saldoType" role="group">
+      <button class="pay-dot pay-cash selected" data-type="contante" aria-pressed="true" type="button" title="Contanti"></button>
+      <button class="pay-dot pay-elec" data-type="elettronico" aria-pressed="false" type="button" title="Elettronico"></button>
+      <button class="pay-dot pay-receipt" data-receipt="1" aria-pressed="false" type="button" title="Ricevuta"></button>
+    </div>
+    
+  </div>
+</div>
+
+<div class="field two-col payment-row">
+  <div class="subfield field float">
+    <input id="guestRemaining" inputmode="decimal" placeholder=" " type="number" min="0" step="0.01" readonly/>
+    <label for="guestRemaining">Rimanenza da pagare (€)</label>
+  </div>
+  <div class="subfield paywrap">
+    <div aria-label="Registrazioni" class="pay-pill" id="regTags" role="group">
+      <button class="pay-dot pay-ps" data-flag="ps" aria-pressed="false" type="button" title="Polizia di Stato"></button>
+      <span class="pay-dot pay-gap" aria-hidden="true"></span>
+      <button class="pay-dot pay-istat" data-flag="istat" aria-pressed="false" type="button" title="ISTAT"></button>
+    </div>
+  </div>
+</div>
+
+
+<button class="btn primary" id="createGuestCard" type="button">Crea scheda cliente</button>
+</div>
+</div>
+</div>
+</div>
+</section><section aria-label="Ospiti" class="page" hidden="" id="page-ospiti"><div class="content"><div class="ospite-wrap"><div class="card guest-cards-card"><div class="hd"><h2>Ospiti</h2><button id="btnNewGuestOspiti" class="btn-add-guest" type="button" aria-label="Nuovo ospite">+</button></div><div class="bd">
+<div class="guest-filter-grid" aria-label="Filtri ospiti">
+  <div class="field gf-tile gf-sort" aria-label="Ordinamento">
+    <select id="guestSortBy" aria-label="Ordina ospiti per">
+      <option value="inserimento">Inserimento</option>
+      <option value="arrivo">Arrivo</option>
+      <option value="nome">Nome</option>
+    </select>
+    <button class="gf-dir" id="guestSortDir" type="button" aria-label="Direzione ordinamento" aria-pressed="false">↓</button>
+  </div>
+  <div class="field gf-tile" aria-label="Periodo rapido">
+    <select aria-label="Periodo" id="periodPreset4">
+      <!-- options injected by JS -->
+    </select>
+  </div>
+  <div class="field gf-tile" aria-label="Da">
+</div>
+  <div class="field gf-tile" aria-label="A">
 </div>
 </div>
 <div class="guest-cards" id="guestCards"></div></div></div></div></div></section>
@@ -324,8 +413,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.155"></script>
-<script defer="" src="./app.js?v=1.155"></script>
+<script defer="" src="./config.js?v=1.156"></script>
+<script defer="" src="./app.js?v=1.156"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
