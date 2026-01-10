@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.135";
+const BUILD_VERSION = "1.136";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -1900,7 +1900,10 @@ function renderRoomsReadOnly(ospite){
 
   // fallback: se per qualche motivo non arriva 'stanze' dal backend, usa lo stato locale
   if (!roomsArr.length && state.guestRooms && state.guestRooms.size){
-    roomsArr = Array.from(state.guestRooms).map(n => parseInt(n,10)).filter(n => isFinite(n) && n>=1 && n<=6).sort((a,b)=>a-b);
+    roomsArr = Array.from(state.guestRooms)
+      .map(n => parseInt(n,10))
+      .filter(n => isFinite(n) && n>=1 && n<=6)
+      .sort((a,b)=>a-b);
   }
 
   const stackHTML = buildRoomsStackHTML(guestId, roomsArr);
@@ -1908,6 +1911,7 @@ function renderRoomsReadOnly(ospite){
   // Pillola: notti + tassa di soggiorno (solo in sola lettura)
   const nights = calcStayNights(ospite);
   let pillHTML = ``;
+
   if (nights != null){
     const tt = calcTouristTax(ospite, nights);
     const nightsLabel = (nights === 1) ? `1 notte` : `${nights} notti`;
@@ -1919,7 +1923,14 @@ function renderRoomsReadOnly(ospite){
     </span>`;
   }
 
-  ro.innerHTML = `<div class="rooms-readonly-wrap">${stackHTML}${pillHTML}</div>`;
+  // Matrimonio: pallino verde con "m" bianca, a sinistra della pillola (solo in sola lettura)
+  const marriageOn = !!(ospite?.matrimonio);
+
+  const rightHTML = pillHTML
+    ? `<div class="stay-right">${marriageOn ? `<span class="marriage-dot" aria-label="Matrimonio">m</span>` : ``}${pillHTML}</div>`
+    : ``;
+
+  ro.innerHTML = `<div class="rooms-readonly-wrap">${stackHTML}${rightHTML}</div>`;
 }
 
 function updateOspiteHdActions(){

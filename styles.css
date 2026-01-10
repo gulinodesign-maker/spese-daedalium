@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.135"),
+    url("./assets/bg-daedalium.png?v=1.136"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -641,7 +641,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.135"),
+    url("./assets/bg-daedalium.png?v=1.136"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2008,6 +2008,30 @@ body[data-page="ospiti"] .guest-card .actions {
   box-shadow: 0 8px 18px rgba(15,23,42,0.10);
   flex: 0 0 auto;
   white-space: nowrap;
+}
+
+.stay-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex: 0 0 auto;
+}
+
+.marriage-dot{
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #34c759;
+  color: rgba(255,255,255,0.98);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 950;
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 18px rgba(15,23,42,0.10);
+  text-transform: lowercase;
 }
 .stay-pill__sep{ opacity: 0.85; font-weight: 800; }
 .stay-pill__n{ font-weight: 950; }
