@@ -2678,3 +2678,9 @@ body[data-page="ospiti"] .guest-card .actions {
 #roomsReadOnly{
   margin-top:10px;
 }
+
+
+/* Cella prenotata: contrasto leggermente maggiore (senza cambiare tinta) */
+.cal-cell.has-booking{
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.10);
+}
