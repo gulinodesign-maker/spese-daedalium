@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.141";
+const BUILD_VERSION = "1.142";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -32,18 +32,112 @@ function applyPerfMode(){
 
 // ===== Stato UI: evita "torna in HOME" quando iOS aggiorna il Service Worker =====
 const __RESTORE_KEY = "__ddae_restore_state";
+const __LAST_PAGE_KEY = "__ddae_last_page";
+const __HASH_PREFIX = "#p=";
+
+function __sanitizePage(p){
+  try{
+    if (!p) return null;
+    const page = String(p).trim();
+    if (!page) return null;
+    const el = document.getElementById(`page-${page}`);
+    return el ? page : null;
+  } catch(_) { return null; }
+}
+
+function __readHashPage(){
+  try{
+    const h = (location.hash || "").trim();
+    if (!h.startsWith(__HASH_PREFIX)) return null;
+    const p = decodeURIComponent(h.slice(__HASH_PREFIX.length));
+    return __sanitizePage(p);
+  } catch(_) { return null; }
+}
+
+function __writeHashPage(page){
+  try{
+    const p = __sanitizePage(page) || "home";
+    const newHash = __HASH_PREFIX + encodeURIComponent(p);
+    if (location.hash !== newHash){
+      history.replaceState(null, document.title, newHash);
+    }
+  } catch(_) {}
+}
 
 function __readRestoreState(){
-  try {
-    const raw = sessionStorage.getItem(__RESTORE_KEY);
-    if (!raw) return null;
-    sessionStorage.removeItem(__RESTORE_KEY);
-    return JSON.parse(raw);
-  } catch (_) { return null; }
+  try{
+    // 1) restore "one-shot" (session -> local)
+    let raw = null;
+    try { raw = sessionStorage.getItem(__RESTORE_KEY); } catch(_) {}
+    if (!raw){
+      try { raw = localStorage.getItem(__RESTORE_KEY); } catch(_) {}
+    }
+    if (raw){
+      try { sessionStorage.removeItem(__RESTORE_KEY); } catch(_) {}
+      try { localStorage.removeItem(__RESTORE_KEY); } catch(_) {}
+      const obj = JSON.parse(raw);
+      if (obj && typeof obj === "object"){
+        if (!obj.page){
+          let last = null;
+          try { last = __sanitizePage(localStorage.getItem(__LAST_PAGE_KEY)); } catch(_) {}
+          obj.page = __readHashPage() || last || "home";
+        } else {
+          obj.page = __sanitizePage(obj.page) || "home";
+        }
+        return obj;
+      }
+    }
+
+    // 2) fallback: hash / last page (persistente)
+    const pHash = __readHashPage();
+    if (pHash) return { page: pHash };
+    let pLast = null;
+    try { pLast = __sanitizePage(localStorage.getItem(__LAST_PAGE_KEY)); } catch(_) {}
+    if (pLast) return { page: pLast };
+    return null;
+  } catch(_) { return null; }
 }
 
 function __writeRestoreState(obj){
-  try { sessionStorage.setItem(__RESTORE_KEY, JSON.stringify(obj || {})); } catch (_) {}
+  const o = (obj && typeof obj === "object") ? obj : {};
+  const page = __sanitizePage(o.page) || __sanitizePage(state.page) || "home";
+  o.page = page;
+
+  // 1) one-shot restore for SW reload (session + local for iOS reliability)
+  try { sessionStorage.setItem(__RESTORE_KEY, JSON.stringify(o)); } catch(_) {}
+  try { localStorage.setItem(__RESTORE_KEY, JSON.stringify(o)); } catch(_) {}
+
+  // 2) persistent page memory (so even if iOS drops sessionStorage we stay on page)
+  try { localStorage.setItem(__LAST_PAGE_KEY, page); } catch(_) {}
+  __writeHashPage(page);
+}
+
+function __rememberPage(page){
+  const p = __sanitizePage(page) || "home";
+  try { localStorage.setItem(__LAST_PAGE_KEY, p); } catch(_) {}
+  __writeHashPage(p);
+}
+
+
+// ===== Service Worker reload "safe": non interrompere i caricamenti DB =====
+let __SW_RELOAD_PENDING = false;
+let __SW_RELOADING = false;
+
+function __performSwReload(){
+  if (__SW_RELOADING) return;
+  __SW_RELOADING = true;
+  try { __writeRestoreState(__captureUiState()); } catch (_) {}
+  location.reload();
+}
+
+function __requestSwReload(){
+  try { __writeRestoreState(__captureUiState()); } catch (_) {}
+  // Se stiamo caricando dati (API), rimanda il reload a fine richieste
+  if (loadingState && loadingState.requestCount > 0){
+    __SW_RELOAD_PENDING = true;
+    return;
+  }
+  __performSwReload();
 }
 
 function __captureFormValue(id){
@@ -324,6 +418,15 @@ function endRequest(){
   if (loadingState.showTimer) {
     clearTimeout(loadingState.showTimer);
     loadingState.showTimer = null;
+  }
+
+  // Se il SW ha chiesto un reload mentre caricavamo, fallo ora che siamo "idle"
+  if (__SW_RELOAD_PENDING && !__SW_RELOADING){
+    __SW_RELOAD_PENDING = false;
+    // micro-delay: lascia aggiornare UI/loader
+    setTimeout(() => __performSwReload(), 50);
+    // non serve gestire ulteriormente il loader
+    return;
   }
 
   // Se non è mai comparso, fine.
@@ -904,6 +1007,7 @@ function showPage(page){
   state.page = page;
   document.body.dataset.page = page;
 
+  try { __rememberPage(page); } catch (_) {}
   document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
   if (el) el.hidden = false;
@@ -2850,8 +2954,7 @@ async function registerSW(){
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (reloaded) return;
       reloaded = true;
-      try { __writeRestoreState(__captureUiState()); } catch (_) {}
-      location.reload();
+      __requestSwReload();
     });
   } catch (_) {}
 }
