@@ -1,4 +1,7 @@
 :root{
+  --brand-orange: #9B5C20;
+  --brand-orange-2: rgba(155,92,32,0.65);
+
   /* Palette coerente col logo */
   --bg: #ffffff;
   --text: #0f172a;
@@ -26,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.131"),
+    url("./assets/bg-daedalium.png?v=1.134"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -638,7 +641,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.131"),
+    url("./assets/bg-daedalium.png?v=1.134"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1979,14 +1982,14 @@ body[data-page="ospiti"] .guest-card .actions {
 .stay-pill{
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(249,115,22,0.95);
+  background: var(--brand-orange);
   color: rgba(255,255,255,0.98);
   display:flex;
   align-items:center;
   gap:8px;
   font-weight: 950;
   font-size: 12px;
-  border: 1px solid rgba(249,115,22,0.60);
+  border: 1px solid var(--brand-orange-2);
   box-shadow: 0 8px 18px rgba(15,23,42,0.10);
   flex: 0 0 auto;
   white-space: nowrap;
@@ -1999,14 +2002,14 @@ body[data-page="ospiti"] .guest-card .actions {
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  background: rgba(249,115,22,0.95);
+  background: var(--brand-orange);
   color: rgba(255,255,255,0.98);
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight: 950;
   font-size: 13px;
-  border: 1px solid rgba(249,115,22,0.60);
+  border: 1px solid var(--brand-orange-2);
   box-shadow: 0 8px 18px rgba(15,23,42,0.10);
   flex: 0 0 auto;
 }

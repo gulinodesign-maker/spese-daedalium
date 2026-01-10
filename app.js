@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.131";
+const BUILD_VERSION = "1.134";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -1203,7 +1203,7 @@ async function loadMotivazioni(){
 }
 
 
-async function loadStanze({ showLoader=true } = {}){
+async function load({ showLoader=true } = {}){
   // Prefill rapido da cache locale (aiuta dopo reload PWA)
   if (!state.stanzeRows || !state.stanzeRows.length){
     const hit = __lsGet("stanze");
@@ -1260,10 +1260,10 @@ async function loadOspiti({ from="", to="" } = {}){
   }
 
   // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
-  const pStanze = loadStanze({ showLoader:false });
+  const p = load({ showLoader:false });
   const pOspiti = cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
 
-  const [ , data ] = await Promise.all([pStanze, pOspiti]);
+  const [ , data ] = await Promise.all([p, pOspiti]);
   state.guests = Array.isArray(data) ? data : [];
   __lsSet(lsKey, state.guests);
   renderGuestCards();
@@ -1834,7 +1834,7 @@ function enterGuestEditMode(ospite){
     state.lettiPerStanza = next;
 
     // Snapshot originale per evitare riscritture inutili su salvataggio
-    state.stanzeSnapshotOriginal = JSON.stringify(buildStanzeArrayFromState());
+    state.stanzeSnapshotOriginal = JSON.stringify(buildArrayFromState());
   } catch (_) {}
 
   try { updateOspiteHdActions(); } catch (_) {}
@@ -1861,7 +1861,7 @@ function _parseRoomsArr(stanzeField){
 
 function buildRoomsStackHTML(guestId, roomsArr){
   if (!roomsArr || !roomsArr.length) return `<span class="room-dot-badge is-empty" aria-label="Nessuna stanza">—</span>`;
-  return `<div class="rooms-stack" aria-label="Stanze e letti">` + roomsArr.map((n) => {
+  return `<div class="rooms-stack" aria-label=" e letti">` + roomsArr.map((n) => {
     const key = `${guestId}:${n}`;
     const info = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : { letto_m: 0, letto_s: 0, culla: 0 };
     const lettoM = Number(info.letto_m || 0) || 0;
@@ -2030,20 +2030,20 @@ if (!name) return toast("Inserisci il nome");
 
   // stanze: backend gestisce POST e sovrascrive (deleteWhere + append)
   const ospiteId = payload.id;
-  const stanze = buildStanzeArrayFromState();
+  const stanze = buildArrayFromState();
 
-  let shouldSaveStanze = true;
+  let shouldSave = true;
   if (isEdit){
     try {
       const snapNow = JSON.stringify(stanze);
       const snapOrig = state.stanzeSnapshotOriginal || "";
-      shouldSaveStanze = (snapNow !== snapOrig);
+      shouldSave = (snapNow !== snapOrig);
     } catch (_) {
-      shouldSaveStanze = true;
+      shouldSave = true;
     }
   }
 
-  if (shouldSaveStanze){
+  if (shouldSave){
     try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
   }
 
@@ -2275,7 +2275,7 @@ function renderGuestCards(){
     const depLedCls = (!depAmount) ? "led-gray led-off" : (depositTypeRaw.includes("elet") ? "led-green" : "led-red");
     const saldoLedCls = (!saldoAmount) ? "led-gray led-off" : (saldoTypeRaw.includes("elet") ? "led-green" : "led-red");
 
-    // Stanze prenotate (campo 'stanze' se presente: "1,2", "[1,2]", "1 2", ecc.)
+    //  prenotate (campo 'stanze' se presente: "1,2", "[1,2]", "1 2", ecc.)
     let roomsArr = [];
     try {
       const st = item.stanze;
@@ -2293,7 +2293,7 @@ function renderGuestCards(){
     const guestId = String(item.id || item.ID || item.ospite_id || item.ospiteId || item.guest_id || item.guestId || "").trim();
 
     const roomsDotsHTML = roomsArr.length
-      ? `<div class="rooms-stack" aria-label="Stanze e letti">` + roomsArr.map((n) => {
+      ? `<div class="rooms-stack" aria-label=" e letti">` + roomsArr.map((n) => {
           const key = `${guestId}:${n}`;
           const info = (state.stanzeByKey && state.stanzeByKey[key]) ? state.stanzeByKey[key] : { letto_m: 0, letto_s: 0, culla: 0 };
           const lettoM = Number(info.letto_m || 0) || 0;
@@ -2499,7 +2499,7 @@ async function ensureCalendarData() {
   // Se ho già i dati per questa finestra, non ricarico
   if (state.calendar.ready && state.calendar.rangeKey === rangeKey) return;
 
-  await loadStanze({ showLoader: true }); // necessario per i pallini letti
+  await load({ showLoader: true }); // necessario per i pallini letti
   const data = await cachedGet("ospiti", { from: winFrom, to: winTo }, { showLoader: true, ttlMs: 30*1000 });
   state.calendar.guests = Array.isArray(data) ? data : [];
   state.calendar.ready = true;
@@ -2805,8 +2805,8 @@ registerSW();
 
 
 
-// --- Stanze helpers (sheet "stanze") ---
-function buildStanzeArrayFromState(){
+// ---  helpers (sheet "stanze") ---
+function buildArrayFromState(){
   const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
   const lp = state.lettiPerStanza || {};
   return rooms.map((n)=>{
@@ -2821,7 +2821,7 @@ function buildStanzeArrayFromState(){
   });
 }
 
-function applyStanzeToState(rows){
+function applyToState(rows){
   state.guestRooms = state.guestRooms || new Set();
   state.lettiPerStanza = {};
   state.bedsDirty = false;
