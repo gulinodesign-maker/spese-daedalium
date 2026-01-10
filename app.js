@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.157";
+const BUILD_VERSION = "1.158";
 
 
 
@@ -378,6 +378,8 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 
 const state = {
+  cleanDay: null,
+
   motivazioni: [],
   spese: [],
   report: null,
@@ -648,6 +650,25 @@ function formatShortDateIT(input){
     return "";
   }
 }
+
+function formatFullDateIT(d){
+  try{
+    const dt = (d instanceof Date) ? d : new Date(d);
+    if (isNaN(dt)) return "";
+    const months = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+    const day = dt.getDate();
+    const month = months[dt.getMonth()];
+    const year = dt.getFullYear();
+    return `${day} ${month} ${year}`;
+  }catch(_){ return ""; }
+}
+
+function startOfLocalDay(d){
+  const dt = (d instanceof Date) ? new Date(d) : new Date(d);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
 
 function spesaCategoryClass(s){
   // "campo X": categoria (fallback: aliquotaIva)
@@ -2689,6 +2710,38 @@ async function init(){
   const targetPage = (__restore && __restore.page) ? __restore.page : "home";
   showPage(targetPage);
   if (__restore) setTimeout(() => { try { __applyUiState(__restore); } catch(_) {} }, 0);
+
+
+  // --- Pulizie (solo grafica) ---
+  const cleanPrev = document.getElementById("cleanPrev");
+  const cleanNext = document.getElementById("cleanNext");
+  const cleanToday = document.getElementById("cleanToday");
+
+  const updateCleanLabel = () => {
+    const lab = document.getElementById("cleanDateLabel");
+    if (!lab) return;
+    const base = state.cleanDay ? new Date(state.cleanDay) : new Date();
+    lab.textContent = formatFullDateIT(startOfLocalDay(base));
+  };
+
+  const shiftClean = (deltaDays) => {
+    const base = state.cleanDay ? new Date(state.cleanDay) : new Date();
+    const d = startOfLocalDay(base);
+    d.setDate(d.getDate() + deltaDays);
+    state.cleanDay = d.toISOString();
+    updateCleanLabel();
+  };
+
+  if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
+  if (cleanNext) cleanNext.addEventListener("click", () => shiftClean(1));
+  if (cleanToday) cleanToday.addEventListener("click", () => {
+    state.cleanDay = startOfLocalDay(new Date()).toISOString();
+    updateCleanLabel();
+  });
+
+  // inizializza label se apri direttamente la pagina
+  if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
+  updateCleanLabel();
 }
 
 
