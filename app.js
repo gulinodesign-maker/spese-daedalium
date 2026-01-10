@@ -3,7 +3,42 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.142";
+const BUILD_VERSION = "1.145";
+
+
+// Aggiornamento "hard" anti-cache iOS:
+// Legge ./version.json (sempre no-store) e se il build remoto è diverso
+// svuota cache, deregistra SW e ricarica con cache-bust.
+async function hardUpdateCheck(){
+  try{
+    const res = await fetch(`./version.json?ts=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    const remote = String(data?.build || "").trim();
+    if (!remote || remote === BUILD_VERSION) return;
+
+    try{ toast(`Aggiornamento ${remote}…`); } catch(_) {}
+
+    // Unregister SW
+    try{
+      if ("serviceWorker" in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+    }catch(_){}
+
+    // Clear caches
+    try{
+      if (window.caches){
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    }catch(_){}
+
+    // Reload with cache-bust
+    location.href = `./?v=${encodeURIComponent(remote)}&r=${Date.now()}`;
+  }catch(_){}
+}
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -585,6 +620,14 @@ function formatLongDateIT(value){
     return parts.join(" ");
   }
   return s;
+}
+
+
+function formatShortDateIT(value){
+  const iso = formatISODateLocal(value);
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return String(value ?? "");
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}/${y.slice(2)}`;
 }
 
 
@@ -1512,12 +1555,13 @@ function renderSpese(){
 
     el.innerHTML = `
       <div class="item-top">
-        <div>
-          <div class="item-title">${euro(s.importoLordo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(s.iva)}</span></div>
-          <div class="item-sub">
-            <span class="badge" style="background:${hexToRgba(COLORS[s.categoria] || "#d8bd97", 0.20)}">${categoriaLabel(s.categoria)}</span>
-            <span class="mini">${s.dataSpesa}</span>
-            <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione)}</span>
+        <div style="min-width:0; flex:1;">
+          <div class="spesa-line">
+            <span class="spesa-imp">${euro(s.importoLordo)}</span>
+            <span class="spesa-sep">·</span>
+            <span class="spesa-date">${formatShortDateIT(s.dataSpesa)}</span>
+            <span class="spesa-sep">·</span>
+            <span class="spesa-motivo">${escapeHtml(s.motivazione)}</span>
           </div>
         </div>
         <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
@@ -2913,7 +2957,8 @@ function toRoman(n){
 }
 
 
-(async ()=>{ try{ await init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
+(async ()=>{ try{ await hardUpdateCheck();
+init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
 
 
 /* Service Worker: forza update su iOS (cache-bust via query) */

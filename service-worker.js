@@ -1,5 +1,5 @@
 /* dDAE - Service Worker (PWA)
- * Build: dDAE_1.142
+ * Build: dDAE_1.145
  *
  * Obiettivi:
  * - cache name cambia ad ogni build
@@ -9,7 +9,7 @@
  * - fix iOS/Safari cache aggressiva (cache:"reload"/"no-store" + query ?v)
  */
 
-const BUILD = "1.142";
+const BUILD = "1.145";
 const CACHE_NAME = "dDAE_" + BUILD; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
@@ -140,6 +140,14 @@ async function staleWhileRevalidate(req) {
 }
 
 self.addEventListener("fetch", (event) => {
+  try {
+    const u = new URL(event.request.url);
+    if (u.origin === self.location.origin && u.pathname.endsWith("/version.json")) {
+      event.respondWith(fetch(event.request, { cache: "no-store" }));
+      return;
+    }
+  } catch (_) {}
+
   const req = event.request;
 
   // Solo GET
