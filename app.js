@@ -3,10 +3,18 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.147";
+const BUILD_VERSION = "1.149";
 
 
 
+
+// Mostra la build a runtime (se il JS è vecchio, lo vedi subito)
+(function syncBuildLabel(){
+  try{
+    const el = document.getElementById("buildText");
+    if (el) el.textContent = BUILD_VERSION;
+  }catch(_){}
+})();
 // Aggiornamento "hard" anti-cache iOS:
 // Legge ./version.json (sempre no-store) e se il build remoto è diverso
 // svuota cache, deregistra SW e ricarica con cache-bust.
@@ -3110,6 +3118,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 
 
 // --- FIX dDAE_1.057: renderSpese allineato al backend ---
+// --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -3124,35 +3133,40 @@ function renderSpese(){
   items.forEach(s => {
     const el = document.createElement("div");
     el.className = "item";
+
     const importo = Number(s.importoLordo || 0);
-    const iva = Number(s.iva || 0);
+    const data = formatShortDateIT(s.dataSpesa || s.data || s.data_spesa || "");
+    const motivoTxt = (s.motivazione || s.motivo || "").toString();
+    const motivo = escapeHtml(motivoTxt);
+
     el.innerHTML = `
-      <div class="item-top">
-        <div>
-          <div class="item-title">${euro(importo)} <span style="opacity:.7; font-weight:800;">· IVA ${euro(iva)}</span></div>
-          <div class="item-sub">
-            <span class="badge">${categoriaLabel(s.categoria)}</span>
-            <span class="mini">${s.dataSpesa || ""}</span>
-            <span class="mini" style="opacity:.75;">${escapeHtml(s.motivazione || "")}</span>
-          </div>
+      <div class="item-top" style="align-items:center;">
+        <div class="spesa-line" title="${motivo}">
+          <span class="spesa-imp">${euro(importo)}</span>
+          <span class="spesa-sep">·</span>
+          <span class="spesa-date">${data}</span>
+          <span class="spesa-sep">·</span>
+          <span class="spesa-motivo">${motivo}</span>
         </div>
         <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
       </div>
     `;
-    const __btnDel = el.querySelector("[data-del]");
 
-    if (__btnDel) __btnDel.addEventListener("click", async () => {
-      if (!confirm("Eliminare questa spesa?")) return;
+    const btn = el.querySelector("[data-del]");
+    if (btn) btn.addEventListener("click", async () => {
+      if (!confirm("Eliminare definitivamente questa spesa?")) return;
       await api("spese", { method:"DELETE", params:{ id: s.id } });
-      toast("Eliminata");
+      toast("Spesa eliminata");
       invalidateApiCache("spese|");
       invalidateApiCache("report|");
       await ensurePeriodData({ showLoader:false, force:true });
       renderSpese();
     });
+
     list.appendChild(el);
   });
 }
+
 
 
 // --- FIX dDAE_1.057: delete reale ospiti ---
