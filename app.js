@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.161";
+const BUILD_VERSION = "1.162";
 
 
 
@@ -2725,6 +2725,18 @@ async function init(){
   const cleanPrev = document.getElementById("cleanPrev");
   const cleanNext = document.getElementById("cleanNext");
   const cleanToday = document.getElementById("cleanToday");
+
+  const cleanGrid = document.getElementById("cleanGrid");
+  if (cleanGrid){
+    // Per ora cliccare le celle non deve fare nulla
+    cleanGrid.addEventListener("click", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+  }
+
 
   const updateCleanLabel = () => {
     const lab = document.getElementById("cleanDateLabel");
