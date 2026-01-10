@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.129";
+const BUILD_VERSION = "1.131";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -468,6 +468,54 @@ function formatLongDateIT(value){
     return parts.join(" ");
   }
   return s;
+}
+
+
+
+function calcStayNights(ospite){
+  // Calcola le notti tra check-in e check-out (date ISO), robusto per Safari/iOS (usa Date.UTC)
+  const inRaw  = ospite?.check_in ?? ospite?.checkIn ?? "";
+  const outRaw = ospite?.check_out ?? ospite?.checkOut ?? "";
+  const inISO  = formatISODateLocal(inRaw);
+  const outISO = formatISODateLocal(outRaw);
+
+  if (!inISO || !outISO) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(inISO) || !/^\d{4}-\d{2}-\d{2}$/.test(outISO)) return null;
+
+  const [yi, mi, di] = inISO.split("-").map(n => parseInt(n, 10));
+  const [yo, mo, do_] = outISO.split("-").map(n => parseInt(n, 10));
+
+  const tIn  = Date.UTC(yi, mi - 1, di);
+  const tOut = Date.UTC(yo, mo - 1, do_);
+
+  const diff = Math.round((tOut - tIn) / 86400000);
+  if (!isFinite(diff) || diff <= 0) return null;
+  return diff;
+}
+
+function formatEUR(value){
+  const n = Number(value || 0);
+  try{
+    return n.toLocaleString("it-IT", { style: "currency", currency: "EUR" });
+  }catch(_){
+    // fallback
+    return "€" + (Math.round(n * 100) / 100).toFixed(2).replace(".", ",");
+  }
+}
+
+function calcTouristTax(ospite, nights){
+  // Tassa di soggiorno: per persona > 10 anni (usa 'adulti'), max 3 giorni consecutivi
+  const adultsRaw = ospite?.adulti ?? ospite?.adults ?? 0;
+  const adults = Math.max(0, parseInt(adultsRaw, 10) || 0);
+
+  const nNights = Math.max(0, parseInt(nights, 10) || 0);
+  const taxableDays = Math.min(nNights, 3);
+
+  const rate = (typeof TOURIST_TAX_EUR_PPN !== "undefined") ? Number(TOURIST_TAX_EUR_PPN) : 0;
+  const r = isFinite(rate) ? Math.max(0, rate) : 0;
+
+  const total = adults * taxableDays * r;
+  return { total, adults, taxableDays, rate: r };
 }
 
 
@@ -1844,7 +1892,23 @@ function renderRoomsReadOnly(ospite){
     roomsArr = Array.from(state.guestRooms).map(n => parseInt(n,10)).filter(n => isFinite(n) && n>=1 && n<=6).sort((a,b)=>a-b);
   }
 
-  ro.innerHTML = buildRoomsStackHTML(guestId, roomsArr);
+  const stackHTML = buildRoomsStackHTML(guestId, roomsArr);
+
+  // Pillola: notti + tassa di soggiorno (solo in sola lettura)
+  const nights = calcStayNights(ospite);
+  let pillHTML = ``;
+  if (nights != null){
+    const tt = calcTouristTax(ospite, nights);
+    const nightsLabel = (nights === 1) ? `1 notte` : `${nights} notti`;
+    const taxLabel = `Tassa ${formatEUR(tt.total)}`;
+    pillHTML = `<span class="stay-pill" aria-label="Pernottamenti e tassa di soggiorno">
+      <span class="stay-pill__n">${nightsLabel}</span>
+      <span class="stay-pill__sep">•</span>
+      <span class="stay-pill__t">${taxLabel}</span>
+    </span>`;
+  }
+
+  ro.innerHTML = `<div class="rooms-readonly-wrap">${stackHTML}${pillHTML}</div>`;
 }
 
 function updateOspiteHdActions(){
