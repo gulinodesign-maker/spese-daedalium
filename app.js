@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.137";
+const BUILD_VERSION = "1.138";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -2599,8 +2599,14 @@ function renderCalendario(){
       cell.setAttribute("aria-label", `Stanza ${r}, ${weekdayShortIT(d)} ${d.getDate()}`);
       cell.dataset.date = dIso;
       cell.dataset.room = String(r);
-
       const info = occ.get(`${dIso}:${r}`);
+      if (!info) {
+        // Casella vuota: nessuna azione (evita anche handler globali tipo [data-room])
+        cell.addEventListener("click", (ev)=>{
+          try { ev.preventDefault(); } catch (_) {}
+          try { ev.stopPropagation(); } catch (_) {}
+        });
+      }
       if (info) {
         cell.classList.add("has-booking");
         if (info.lastDay) cell.classList.add("last-day");
@@ -2655,6 +2661,8 @@ function buildWeekOccupancy(weekStart){
   const map = new Map();
   const guests = (state.calendar && Array.isArray(state.calendar.guests)) ? state.calendar.guests : [];
   const weekEnd = addDays(weekStart, 7);
+  const todayIso = isoDate(new Date());
+
 
   for (const g of guests){
     const guestId = String(g.id ?? g.ID ?? g.ospite_id ?? g.ospiteId ?? g.guest_id ?? g.guestId ?? "").trim();
@@ -2667,6 +2675,8 @@ function buildWeekOccupancy(weekStart){
     const ci = new Date(ciStr + "T00:00:00");
     const co = new Date(coStr + "T00:00:00");
     const last = addDays(co, -1);
+    const lastIso = isoDate(last);
+    const lastIsPresentOrFuture = (lastIso >= todayIso);
 
     let roomsArr = [];
     try {
@@ -2685,11 +2695,11 @@ function buildWeekOccupancy(weekStart){
     for (let d = new Date(ci); d < co; d = addDays(d, 1)) {
       if (d < weekStart || d >= weekEnd) continue;
       const dIso = isoDate(d);
-      const isLast = isoDate(d) === isoDate(last);
+      const isLast = isoDate(d) === lastIso;
 
       for (const r of roomsArr) {
         const dots = dotsForGuestRoom(guestId, r);
-        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: isLast });
+        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: (isLast && lastIsPresentOrFuture) });
       }
     }
   }
@@ -2894,7 +2904,10 @@ function openRoomConfig(room){
 
 document.addEventListener('click', (e)=>{
   const b = e.target.closest && e.target.closest('[data-room]');
-  if(b){ openRoomConfig(b.getAttribute('data-room')); }
+  if(!b) return;
+  // Le celle del calendario settimanale usano data-room: qui NON deve aprirsi la config stanza
+  if (b.closest && b.closest('#calGrid')) return;
+  openRoomConfig(b.getAttribute('data-room'));
 });
 
 document.getElementById('rc_save')?.addEventListener('click', ()=>{
