@@ -321,7 +321,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.143 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -371,41 +371,6 @@ const COLORS = {
   IVA_10: "#7ac0db",            // azzurro chiaro
   IVA_4: "#1f2937",             // scuro
 };
-
-// Normalizza la categoria spese (accetta chiavi interne o etichette umane)
-function normalizeCategoria(value){
-  if (value == null) return "CONTANTI";
-  const s = String(value).trim();
-  if (!s) return "CONTANTI";
-  const up = s.toUpperCase().replace(/\s+/g,"_");
-  const map = {
-    "CONTANTI":"CONTANTI",
-    "CASH":"CONTANTI",
-    "TASSA_SOGGIORNO":"TASSA_SOGGIORNO",
-    "TASSA_DI_SOGGIORNO":"TASSA_SOGGIORNO",
-    "TASSA":"TASSA_SOGGIORNO",
-    "IVA_22":"IVA_22",
-    "IVA22":"IVA_22",
-    "IVA_10":"IVA_10",
-    "IVA10":"IVA_10",
-    "IVA_4":"IVA_4",
-    "IVA4":"IVA_4",
-  };
-  if (map[up]) return map[up];
-
-  if (up.includes("SOGGIORNO")) return "TASSA_SOGGIORNO";
-  if (up.includes("CONT")) return "CONTANTI";
-  if (up.includes("IVA") && up.includes("22")) return "IVA_22";
-  if (up.includes("IVA") && up.includes("10")) return "IVA_10";
-  if (up.includes("IVA") && (up.endsWith("_4") || up.includes("IVA_4") || up.includes("IVA4") || up.includes(" 4"))) return "IVA_4";
-  // fallback: prova a beccare numeri
-  if (up.includes("22")) return "IVA_22";
-  if (up.includes("10")) return "IVA_10";
-  if (up.match(/(^|_)4($|_)/)) return "IVA_4";
-
-  return "CONTANTI";
-}
-
 
 
 // Loader globale (gestisce richieste parallele + anti-flicker)
@@ -622,12 +587,12 @@ function formatLongDateIT(value){
   return s;
 }
 
-// Data in formato dd/mm/yyyy (es: 01/01/2026)
+
 function formatShortDateIT(value){
   const iso = formatISODateLocal(value);
-  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return String(value ?? "");
   const [y,m,d] = iso.split("-");
-  return `${d}/${m}/${y}`;
+  return `${d}/${m}/${y.slice(2)}`;
 }
 
 
@@ -1554,14 +1519,20 @@ function renderSpese(){
     el.className = "item";
 
     el.innerHTML = `
-      <div class="spese-row">
-        <span class="spese-dot" style="background:${COLORS[normalizeCategoria(s.categoria)] || COLORS.CONTANTI};"></span>
-        <span class="spese-date">${formatShortDateIT(s.dataSpesa) || ""}</span>
-        <span class="spese-mot">${escapeHtml(s.motivazione || "")}</span>
-        <span class="spese-amt">${euro(s.importoLordo)}</span>
-        <button class="delbtn deldot" type="button" data-del="${s.id}" aria-label="Elimina" title="Elimina"></button>
+      <div class="item-top">
+        <div style="min-width:0; flex:1;">
+          <div class="spesa-line">
+            <span class="spesa-imp">${euro(s.importoLordo)}</span>
+            <span class="spesa-sep">·</span>
+            <span class="spesa-date">${formatShortDateIT(s.dataSpesa)}</span>
+            <span class="spesa-sep">·</span>
+            <span class="spesa-motivo">${escapeHtml(s.motivazione)}</span>
+          </div>
+        </div>
+        <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
       </div>
     `;
+
     const __btnDel = el.querySelector("[data-del]");
 
 
@@ -2623,7 +2594,7 @@ async function init(){
 }
 
 
-// ===== CALENDARIO (dDAE_1.143) =====
+// ===== CALENDARIO (dDAE_1.094) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3085,7 +3056,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.143: renderSpese allineato al backend ---
+// --- FIX dDAE_1.057: renderSpese allineato al backend ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -3131,7 +3102,7 @@ function renderSpese(){
 }
 
 
-// --- FIX dDAE_1.143: delete reale ospiti ---
+// --- FIX dDAE_1.057: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3165,7 +3136,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.143: mostra nome ospite ---
+// --- FIX dDAE_1.057: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;

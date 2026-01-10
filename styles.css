@@ -305,6 +305,32 @@ input[type="date"]{
   flex-wrap:wrap;
   gap: 8px 10px;
 }
+
+
+/* Spese: riga singola (importo · data · motivazione) */
+.spesa-line{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:nowrap;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size: 13px;
+  font-weight: 900;
+}
+.spesa-imp{ flex: 0 0 auto; }
+.spesa-date{ flex: 0 0 auto; font-weight: 800; opacity: .85; }
+.spesa-sep{ flex: 0 0 auto; opacity: .65; font-weight: 900; }
+.spesa-motivo{
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight: 700;
+  opacity: .85;
+}
 .badge{
   display:inline-flex;
   padding: 4px 8px;
@@ -2884,7 +2910,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.142 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.143 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -2897,63 +2923,4 @@ body.perf-lite *::after{
   box-shadow: inset 0 0 0 3px rgba(0,0,0,.95) !important;
   outline: 3px solid rgba(0,0,0,.95) !important;
   outline-offset: -3px;
-}
-
-
-/* ===== Spese (lista record) ===== */
-.spese-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:100%;
-}
-.spese-dot{
-  width:18px;
-  height:18px;
-  border-radius:999px;
-  flex:0 0 18px;
-  border:2px solid rgba(0,0,0,0.10);
-}
-.spese-date{
-  font-weight:900;
-  font-size:14px;
-  letter-spacing:0.2px;
-  opacity:.90;
-  flex:0 0 auto;
-}
-.spese-mot{
-  flex:1 1 auto;
-  min-width:0;
-  font-size:14px;
-  opacity:.78;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.spese-amt{
-  flex:0 0 auto;
-  font-weight:900;
-  font-size:14px;
-}
-.delbtn.deldot{
-  position:relative;
-  background:transparent !important;
-  border:none !important;
-  padding:0;
-  min-width:44px;
-  min-height:44px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-.delbtn.deldot::before{
-  content:"";
-  width:12px;
-  height:12px;
-  border-radius:999px;
-  background:#e11d48;
-  box-shadow:0 0 0 2px rgba(255,255,255,0.85);
-}
-.delbtn.deldot:active::before{
-  transform:scale(0.92);
 }
