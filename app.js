@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.150";
+const BUILD_VERSION = "1.151";
 
 
 
@@ -2645,6 +2645,18 @@ async function init(){
   bindPresetSelect("#periodPreset4");
   setPresetValue(state.periodPreset || "this_month");
 
+  // Ordinamento Spese (lista)
+  if (!state.speseSort) state.speseSort = "date";
+  const spSort = document.getElementById("speseSort");
+  if (spSort){
+    spSort.value = state.speseSort;
+    spSort.addEventListener("change", () => {
+      state.speseSort = spSort.value || "date";
+      try { if (state.page === "spese" && state.speseView === "list") renderSpese(); } catch(_){}
+    });
+  }
+
+
   // Periodo automatico (niente tasto Applica)
   bindPeriodAuto("#fromDate", "#toDate");
   bindPeriodAuto("#fromDate2", "#toDate2");
@@ -3152,7 +3164,49 @@ function renderSpese(){
   if (!list) return;
   list.innerHTML = "";
 
-  const items = Array.isArray(state.spese) ? state.spese : [];
+  let items = Array.isArray(state.spese) ? [...state.spese] : [];
+
+  // Ordina: data / inserimento / motivazione
+  const mode = String(state.speseSort || "date");
+  const withIdx = items.map((s, idx) => ({ s, idx }));
+
+  const toTime = (v) => {
+    if (!v) return null;
+    const s = String(v);
+    const iso = s.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+      const t = Date.parse(iso + "T00:00:00Z");
+      return isNaN(t) ? null : t;
+    }
+    const t = Date.parse(s);
+    return isNaN(t) ? null : t;
+  };
+
+  withIdx.sort((a, b) => {
+    if (mode === "motivazione"){
+      const am = (a.s.motivazione || a.s.motivo || "").toString().trim().toLowerCase();
+      const bm = (b.s.motivazione || b.s.motivo || "").toString().trim().toLowerCase();
+      const c = am.localeCompare(bm, "it", { sensitivity: "base" });
+      return c !== 0 ? c : (a.idx - b.idx);
+    }
+
+    if (mode === "insert"){
+      const ta = toTime(a.s.createdAt || a.s.created_at) ?? a.idx;
+      const tb = toTime(b.s.createdAt || b.s.created_at) ?? b.idx;
+      // Nuovi prima
+      return (tb - ta);
+    }
+
+    // mode === "date" (default): più recenti prima
+    const da = toTime(a.s.dataSpesa || a.s.data || a.s.data_spesa);
+    const db = toTime(b.s.dataSpesa || b.s.data || b.s.data_spesa);
+    if (da == null && db == null) return a.idx - b.idx;
+    if (da == null) return 1;
+    if (db == null) return -1;
+    return (db - da);
+  });
+
+  items = withIdx.map(x => x.s);
   if (!items.length){
     list.innerHTML = '<div style="font-size:13px; opacity:.75; padding:8px 2px;">Nessuna spesa nel periodo.</div>';
     return;
