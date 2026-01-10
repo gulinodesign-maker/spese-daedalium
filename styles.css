@@ -318,25 +318,18 @@ input[type="date"]{
   font-weight: 900;
 }
 .delbtn{
-  border: 0;
-  background: rgba(239, 68, 68, 0.95);
-  border-radius: 999px;
+  border: 1px solid rgba(201,119,43,0.40);
+  background: rgba(255,255,255,0.78);
+  border-radius: 16px;
+  padding: 10px 12px;
   min-height: 44px;
   min-width: 44px;
-  width: 44px;
-  height: 44px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 18px rgba(15,23,42,0.18);
-}
-.delbtn::after{
-  content:"";
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.22);
+  font-size: 15px;
+  cursor:pointer;
+  font-weight: 900;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* Riepilogo KPIs */
@@ -2907,49 +2900,60 @@ body.perf-lite *::after{
 }
 
 
-/* Spese: record 1 riga + pallino colore */
-.spesa-row{
+/* ===== Spese (lista record) ===== */
+.spese-row{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap: 10px;
+  gap:10px;
+  width:100%;
 }
-.spesa-left{
-  display:flex;
+.spese-dot{
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  flex:0 0 18px;
+  border:2px solid rgba(0,0,0,0.10);
+}
+.spese-date{
+  font-weight:900;
+  font-size:14px;
+  letter-spacing:0.2px;
+  opacity:.90;
+  flex:0 0 auto;
+}
+.spese-mot{
+  flex:1 1 auto;
+  min-width:0;
+  font-size:14px;
+  opacity:.78;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.spese-amt{
+  flex:0 0 auto;
+  font-weight:900;
+  font-size:14px;
+}
+.delbtn.deldot{
+  position:relative;
+  background:transparent !important;
+  border:none !important;
+  padding:0;
+  min-width:44px;
+  min-height:44px;
+  display:inline-flex;
   align-items:center;
-  gap: 10px;
-  min-width: 0;
+  justify-content:center;
 }
-.spesa-dot{
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 4px solid rgba(15,23,42,0.85);
-  flex: 0 0 auto;
+.delbtn.deldot::before{
+  content:"";
+  width:12px;
+  height:12px;
+  border-radius:999px;
+  background:#e11d48;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.85);
 }
-.spesa-date{
-  font-size: 12px;
-  font-weight: 900;
-  opacity: .85;
-  white-space: nowrap;
-}
-.spesa-mot{
-  font-size: 12px;
-  font-weight: 900;
-  opacity: .85;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.spesa-right{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  flex: 0 0 auto;
-}
-.spesa-amt{
-  font-size: 13px;
-  font-weight: 900;
-  white-space: nowrap;
+.delbtn.deldot:active::before{
+  transform:scale(0.92);
 }

@@ -321,7 +321,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.143 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -365,12 +365,47 @@ guestMarriage: false,
 };
 
 const COLORS = {
-  CONTANTI: "#447aaf",          // azzurro
-  TASSA_SOGGIORNO: "#d5be9c",   // beige
-  IVA_22: "#bf7b3d",            // arancio
-  IVA_10: "#8abdd9",            // azzurro chiaro
-  IVA_4: "#212936",             // scuro
+  CONTANTI: "#2b7cb4",          // azzurro
+  TASSA_SOGGIORNO: "#d8bd97",   // beige
+  IVA_22: "#c9772b",            // arancio
+  IVA_10: "#7ac0db",            // azzurro chiaro
+  IVA_4: "#1f2937",             // scuro
 };
+
+// Normalizza la categoria spese (accetta chiavi interne o etichette umane)
+function normalizeCategoria(value){
+  if (value == null) return "CONTANTI";
+  const s = String(value).trim();
+  if (!s) return "CONTANTI";
+  const up = s.toUpperCase().replace(/\s+/g,"_");
+  const map = {
+    "CONTANTI":"CONTANTI",
+    "CASH":"CONTANTI",
+    "TASSA_SOGGIORNO":"TASSA_SOGGIORNO",
+    "TASSA_DI_SOGGIORNO":"TASSA_SOGGIORNO",
+    "TASSA":"TASSA_SOGGIORNO",
+    "IVA_22":"IVA_22",
+    "IVA22":"IVA_22",
+    "IVA_10":"IVA_10",
+    "IVA10":"IVA_10",
+    "IVA_4":"IVA_4",
+    "IVA4":"IVA_4",
+  };
+  if (map[up]) return map[up];
+
+  if (up.includes("SOGGIORNO")) return "TASSA_SOGGIORNO";
+  if (up.includes("CONT")) return "CONTANTI";
+  if (up.includes("IVA") && up.includes("22")) return "IVA_22";
+  if (up.includes("IVA") && up.includes("10")) return "IVA_10";
+  if (up.includes("IVA") && (up.endsWith("_4") || up.includes("IVA_4") || up.includes("IVA4") || up.includes(" 4"))) return "IVA_4";
+  // fallback: prova a beccare numeri
+  if (up.includes("22")) return "IVA_22";
+  if (up.includes("10")) return "IVA_10";
+  if (up.match(/(^|_)4($|_)/)) return "IVA_4";
+
+  return "CONTANTI";
+}
+
 
 
 // Loader globale (gestisce richieste parallele + anti-flicker)
@@ -585,6 +620,14 @@ function formatLongDateIT(value){
     return parts.join(" ");
   }
   return s;
+}
+
+// Data in formato dd/mm/yyyy (es: 01/01/2026)
+function formatShortDateIT(value){
+  const iso = formatISODateLocal(value);
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+  const [y,m,d] = iso.split("-");
+  return `${d}/${m}/${y}`;
 }
 
 
@@ -1506,72 +1549,26 @@ function renderSpese(){
     return;
   }
 
-  const fmtDate = (v) => {
-    if (v == null) return "";
-    const s = String(v).trim();
-    // già dd/mm/yyyy
-    if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(s)) {
-      const [d,m,y] = s.split("/");
-      const yy = y.length === 2 ? ("20"+y) : y;
-      return `${d.padStart(2,"0")}/${m.padStart(2,"0")}/${yy}`;
-    }
-    // ISO yyyy-mm-dd
-    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
-      const [yy,mm,dd] = s.split("-");
-      return `${dd.padStart(2,"0")}/${mm.padStart(2,"0")}/${yy}`;
-    }
-    // fallback Date parse
-    const dt = new Date(s);
-    if (!isNaN(dt.getTime())) {
-      const dd = String(dt.getDate()).padStart(2,"0");
-      const mm = String(dt.getMonth()+1).padStart(2,"0");
-      const yy = String(dt.getFullYear());
-      return `${dd}/${mm}/${yy}`;
-    }
-    return s;
-  };
-
-  const getDotColor = (sp) => {
-    const cat = String(sp.categoria||"").toUpperCase();
-    if (cat.includes("CONT")) return COLORS.CONTANTI;
-    if (cat.includes("SOGG") || cat.includes("TASSA")) return COLORS.TASSA_SOGGIORNO;
-    const ali = Number(sp.aliquotaIva ?? sp.aliquotaIVA ?? sp.ivaAliquota);
-    if (ali === 22) return COLORS.IVA_22;
-    if (ali === 10) return COLORS.IVA_10;
-    if (ali === 4) return COLORS.IVA_4;
-    // fallback: se categoria è già una chiave
-    if (COLORS[sp.categoria]) return COLORS[sp.categoria];
-    return COLORS.TASSA_SOGGIORNO;
-  };
-
   for (const s of state.spese){
     const el = document.createElement("div");
     el.className = "item";
 
-    const date = fmtDate(s.dataSpesa);
-    const dot = getDotColor(s);
-    const mot = escapeHtml((s.motivazione ?? "").toString());
-
     el.innerHTML = `
-      <div class="spesa-row">
-        <div class="spesa-left">
-          <span class="spesa-dot" style="background:${dot}"></span>
-          <span class="spesa-date">${date}</span>
-          <span class="spesa-mot">${mot}</span>
-        </div>
-        <div class="spesa-right">
-          <span class="spesa-amt">${euro(s.importoLordo)}</span>
-          <button class="delbtn" type="button" data-del="${s.id}" aria-label="Elimina"></button>
-        </div>
+      <div class="spese-row">
+        <span class="spese-dot" style="background:${COLORS[normalizeCategoria(s.categoria)] || COLORS.CONTANTI};"></span>
+        <span class="spese-date">${formatShortDateIT(s.dataSpesa) || ""}</span>
+        <span class="spese-mot">${escapeHtml(s.motivazione || "")}</span>
+        <span class="spese-amt">${euro(s.importoLordo)}</span>
+        <button class="delbtn deldot" type="button" data-del="${s.id}" aria-label="Elimina" title="Elimina"></button>
       </div>
     `;
-
     const __btnDel = el.querySelector("[data-del]");
-    __btnDel?.addEventListener("click", async () => {
-      const id = __btnDel.getAttribute("data-del");
-      if (!id) return;
-      if (!confirm("Eliminare la spesa?")) return;
-      await apiDeleteSpesa(id);
+
+
+    if (__btnDel) __btnDel.addEventListener("click", async () => {
+      if (!confirm("Eliminare questa spesa?")) return;
+      await api("spese", { method:"DELETE", params:{ id: s.id } });
+      toast("Eliminata");
       invalidateApiCache("spese|");
       invalidateApiCache("report|");
       await ensurePeriodData({ showLoader:false, force:true });
@@ -1582,7 +1579,7 @@ function renderSpese(){
   }
 }
 
- /* 3) RIEPILOGO */
+/* 3) RIEPILOGO */
 function renderRiepilogo(){
   const r = state.report;
   if (!r) return;
@@ -2626,7 +2623,7 @@ async function init(){
 }
 
 
-// ===== CALENDARIO (dDAE_1.094) =====
+// ===== CALENDARIO (dDAE_1.143) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3088,7 +3085,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.057: renderSpese allineato al backend ---
+// --- FIX dDAE_1.143: renderSpese allineato al backend ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -3134,7 +3131,7 @@ function renderSpese(){
 }
 
 
-// --- FIX dDAE_1.057: delete reale ospiti ---
+// --- FIX dDAE_1.143: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3168,7 +3165,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.057: mostra nome ospite ---
+// --- FIX dDAE_1.143: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
