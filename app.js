@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.158";
+const BUILD_VERSION = "1.159";
 
 
 
@@ -1044,8 +1044,8 @@ function bindHomeDelegation(){
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
-    if (pul){ hideLauncher(); toast("Pulizie: in arrivo"); return; }
-    const g = e.target.closest && e.target.closest("#goGuadagni");
+    if (pul){ hideLauncher(); showPage("pulizie"); return; }
+const g = e.target.closest && e.target.closest("#goGuadagni");
     if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
 
   });
