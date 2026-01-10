@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.138";
+const BUILD_VERSION = "1.139";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -224,7 +224,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.139 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1940,11 +1940,15 @@ function updateOspiteHdActions(){
   // Mostra il contenitore (poi nascondiamo i singoli pallini senza azione)
   hdActions.hidden = false;
 
+  const btnCal  = hdActions.querySelector("[data-guest-cal]");
   const btnBack = hdActions.querySelector("[data-guest-back]");
   const btnEdit = hdActions.querySelector("[data-guest-edit]");
   const btnDel  = hdActions.querySelector("[data-guest-del]");
 
   const mode = state.guestMode; // "create" | "edit" | "view"
+
+  // Calendario: solo in sola lettura (vai al calendario)
+  if (btnCal) btnCal.hidden = (mode !== "view");
 
   // Verde: sempre presente (torna alla lista ospiti)
   if (btnBack) btnBack.hidden = false;
@@ -2094,6 +2098,17 @@ function setupOspite(){
       // Verde: torna sempre alla lista ospiti (anche in Nuovo/Modifica)
       if (btn.hasAttribute("data-guest-back")){
         showPage("ospiti");
+        return;
+      }
+
+      // Calendario: dalla scheda ospite (sola lettura) vai al calendario
+      if (btn.hasAttribute("data-guest-cal")){
+        const item = state.guestViewItem;
+        try {
+          state.calendar = state.calendar || {};
+          state.calendar.anchor = item ? pickCalendarAnchorForGuest(item) : new Date();
+        } catch (_) {}
+        showPage("calendario");
         return;
       }
 
@@ -2468,7 +2483,7 @@ async function init(){
 }
 
 
-// ===== CALENDARIO (dDAE_1.094) =====
+// ===== CALENDARIO (dDAE_1.139) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -2528,6 +2543,26 @@ async function ensureCalendarData() {
   state.calendar.rangeKey = rangeKey;
 }
 
+
+
+function pickCalendarAnchorForGuest(ospite){
+  try{
+    const ciStr = formatISODateLocal(ospite?.check_in || ospite?.checkIn || "");
+    const coStr = formatISODateLocal(ospite?.check_out || ospite?.checkOut || "");
+    const today0 = new Date();
+    const today = new Date(today0.getFullYear(), today0.getMonth(), today0.getDate());
+
+    if (!ciStr) return today;
+    const ci = new Date(ciStr + "T00:00:00");
+    const co = coStr ? new Date(coStr + "T00:00:00") : null;
+
+    // Se siamo dentro la permanenza, ancora su oggi; altrimenti su check-in
+    if (co && today >= ci && today < co) return today;
+    return ci;
+  } catch (_) {
+    return new Date();
+  }
+}
 
 function renderCalendario(){
   const grid = document.getElementById("calGrid");
@@ -2599,14 +2634,9 @@ function renderCalendario(){
       cell.setAttribute("aria-label", `Stanza ${r}, ${weekdayShortIT(d)} ${d.getDate()}`);
       cell.dataset.date = dIso;
       cell.dataset.room = String(r);
+
       const info = occ.get(`${dIso}:${r}`);
-      if (!info) {
-        // Casella vuota: nessuna azione (evita anche handler globali tipo [data-room])
-        cell.addEventListener("click", (ev)=>{
-          try { ev.preventDefault(); } catch (_) {}
-          try { ev.stopPropagation(); } catch (_) {}
-        });
-      }
+
       if (info) {
         cell.classList.add("has-booking");
         if (info.lastDay) cell.classList.add("last-day");
@@ -2630,19 +2660,21 @@ function renderCalendario(){
         inner.appendChild(dots);
 
         cell.appendChild(inner);
-
-        cell.addEventListener("click", (ev) => {
-          // Se la cella ha una prenotazione, apri la scheda in SOLA LETTURA
-          // e blocca la propagazione per evitare l'apertura del popup letto (listener globale [data-room]).
-          try { ev.preventDefault(); } catch (_) {}
-          try { ev.stopPropagation(); } catch (_) {}
-
-          const ospite = findCalendarGuestById(info.guestId);
-          if (!ospite) return;
-          enterGuestViewMode(ospite);
-          showPage("ospite");
-        });
       }
+
+      // Celle vuote: nessuna azione. Blocca sempre la propagazione per evitare
+      // il listener globale [data-room] (popup letto).
+      cell.addEventListener("click", (ev) => {
+        try { ev.preventDefault(); } catch (_) {}
+        try { ev.stopPropagation(); } catch (_) {}
+
+        if (!info) return;
+
+        const ospite = findCalendarGuestById(info.guestId);
+        if (!ospite) return;
+        enterGuestViewMode(ospite);
+        showPage("ospite");
+      });
 
       frag.appendChild(cell);
     }
@@ -2661,8 +2693,6 @@ function buildWeekOccupancy(weekStart){
   const map = new Map();
   const guests = (state.calendar && Array.isArray(state.calendar.guests)) ? state.calendar.guests : [];
   const weekEnd = addDays(weekStart, 7);
-  const todayIso = isoDate(new Date());
-
 
   for (const g of guests){
     const guestId = String(g.id ?? g.ID ?? g.ospite_id ?? g.ospiteId ?? g.guest_id ?? g.guestId ?? "").trim();
@@ -2675,8 +2705,13 @@ function buildWeekOccupancy(weekStart){
     const ci = new Date(ciStr + "T00:00:00");
     const co = new Date(coStr + "T00:00:00");
     const last = addDays(co, -1);
+
+    // Evidenziazione ultimo giorno: SOLO se l'ultimo giorno è oggi o futuro
+    const today0 = new Date();
+    const todayStart = new Date(today0.getFullYear(), today0.getMonth(), today0.getDate());
+    const todayIso = isoDate(todayStart);
     const lastIso = isoDate(last);
-    const lastIsPresentOrFuture = (lastIso >= todayIso);
+    const lastEligible = (lastIso >= todayIso);
 
     let roomsArr = [];
     try {
@@ -2695,11 +2730,11 @@ function buildWeekOccupancy(weekStart){
     for (let d = new Date(ci); d < co; d = addDays(d, 1)) {
       if (d < weekStart || d >= weekEnd) continue;
       const dIso = isoDate(d);
-      const isLast = isoDate(d) === lastIso;
+      const isLast = lastEligible && (isoDate(d) === lastIso);
 
       for (const r of roomsArr) {
         const dots = dotsForGuestRoom(guestId, r);
-        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: (isLast && lastIsPresentOrFuture) });
+        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: isLast });
       }
     }
   }
@@ -2904,10 +2939,7 @@ function openRoomConfig(room){
 
 document.addEventListener('click', (e)=>{
   const b = e.target.closest && e.target.closest('[data-room]');
-  if(!b) return;
-  // Le celle del calendario settimanale usano data-room: qui NON deve aprirsi la config stanza
-  if (b.closest && b.closest('#calGrid')) return;
-  openRoomConfig(b.getAttribute('data-room'));
+  if(b){ openRoomConfig(b.getAttribute('data-room')); }
 });
 
 document.getElementById('rc_save')?.addEventListener('click', ()=>{
@@ -2921,7 +2953,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.057: renderSpese allineato al backend ---
+// --- FIX dDAE_1.139: renderSpese allineato al backend ---
 function renderSpese(){
   const list = document.getElementById("speseList");
   if (!list) return;
@@ -2967,7 +2999,7 @@ function renderSpese(){
 }
 
 
-// --- FIX dDAE_1.057: delete reale ospiti ---
+// --- FIX dDAE_1.139: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3001,7 +3033,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.057: mostra nome ospite ---
+// --- FIX dDAE_1.139: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
