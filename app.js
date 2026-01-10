@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.139";
+const BUILD_VERSION = "1.137";
 
 // ===== Performance mode (iOS/Safari PWA) =====
 const IS_IOS = (() => {
@@ -826,7 +826,7 @@ function bindHomeDelegation(){
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
-    if (pul){ hideLauncher(); showPage("pulizie"); return; }
+    if (pul){ hideLauncher(); toast("Pulizie: in arrivo"); return; }
     const g = e.target.closest && e.target.closest("#goGuadagni");
     if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
 
@@ -926,7 +926,6 @@ function showPage(page){
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
-  if (page === "pulizie") { renderPulizie(); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
 }
 
@@ -2414,7 +2413,6 @@ async function init(){
   setupHeader();
   setupHome();
   setupCalendario();
-  setupPulizie();
 
     setupOspite();
   initFloatingLabels();
@@ -2506,70 +2504,6 @@ function setupCalendario(){
     state.calendar.anchor = addDays(state.calendar.anchor, 7);
     renderCalendario();
   });
-
-function setupPulizie(){
-  const pickBtn = document.getElementById("pulPickBtn");
-  const todayBtn = document.getElementById("pulTodayBtn");
-  const prevBtn = document.getElementById("pulPrevBtn");
-  const nextBtn = document.getElementById("pulNextBtn");
-  const input = document.getElementById("pulDateInput");
-
-  if (!state.pulizie) {
-    state.pulizie = { anchor: new Date() };
-  }
-
-  const openPicker = () => {
-    if (!input) return;
-    try { input.value = formatISODateLocal(state.pulizie.anchor) || todayISO(); } catch(_) {}
-    input.click();
-  };
-
-  if (pickBtn) pickBtn.addEventListener("click", openPicker);
-  if (input) input.addEventListener("change", () => {
-    if (!input.value) return;
-    state.pulizie.anchor = new Date(input.value + "T00:00:00");
-    renderPulizie();
-  });
-  if (todayBtn) todayBtn.addEventListener("click", () => {
-    state.pulizie.anchor = new Date();
-    renderPulizie();
-  });
-  if (prevBtn) prevBtn.addEventListener("click", () => {
-    state.pulizie.anchor = addDays(state.pulizie.anchor, -1);
-    renderPulizie();
-  });
-  if (nextBtn) nextBtn.addEventListener("click", () => {
-    state.pulizie.anchor = addDays(state.pulizie.anchor, 1);
-    renderPulizie();
-  });
-}
-
-function renderPulizie(){
-  const grid = document.getElementById("pulGrid");
-  const title = document.getElementById("pulDayTitle");
-  const input = document.getElementById("pulDateInput");
-  if (!grid) return;
-
-  const anchor = (state.pulizie && state.pulizie.anchor) ? state.pulizie.anchor : new Date();
-  const yyyy = anchor.getFullYear();
-  const dd = anchor.getDate();
-  const month = monthNameIT(anchor).toUpperCase();
-
-  if (title) title.textContent = `${dd} ${month} ${yyyy}`;
-  if (input) {
-    try { input.value = formatISODateLocal(anchor); } catch(_) {}
-  }
-
-  grid.replaceChildren();
-  const labels = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","HAI"];
-  labels.forEach((lab) => {
-    const pill = document.createElement("div");
-    pill.className = "cal-pill pul-pill";
-    pill.textContent = lab;
-    grid.appendChild(pill);
-  });
-}
-
 }
 
 
@@ -2606,8 +2540,6 @@ function renderCalendario(){
   const anchor = (state.calendar && state.calendar.anchor) ? state.calendar.anchor : new Date();
   const start = startOfWeekMonday(anchor);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
-
-  const todayIso = isoDate(new Date());
 
   if (title) {
     const month = monthNameIT(start).toUpperCase();
@@ -2671,10 +2603,7 @@ function renderCalendario(){
       const info = occ.get(`${dIso}:${r}`);
       if (info) {
         cell.classList.add("has-booking");
-        if (info.lastDay) {
-          cell.classList.add("last-day");
-          if (dIso >= todayIso) cell.classList.add("last-day-pulse");
-        }
+        if (info.lastDay) cell.classList.add("last-day");
 
         const inner = document.createElement("div");
         inner.className = "cal-cell-inner";
@@ -2695,20 +2624,19 @@ function renderCalendario(){
         inner.appendChild(dots);
 
         cell.appendChild(inner);
-}
 
+        cell.addEventListener("click", (ev) => {
+          // Se la cella ha una prenotazione, apri la scheda in SOLA LETTURA
+          // e blocca la propagazione per evitare l'apertura del popup letto (listener globale [data-room]).
+          try { ev.preventDefault(); } catch (_) {}
+          try { ev.stopPropagation(); } catch (_) {}
 
-      cell.addEventListener("click", (ev) => {
-        // Cella vuota: nessuna azione (blocca propagazione per evitare listener globali).
-        try { ev.preventDefault(); } catch (_) {}
-        try { ev.stopPropagation(); } catch (_) {}
-        if (!info || !info.guestId) return;
-
-        const ospite = findCalendarGuestById(info.guestId);
-        if (!ospite) return;
-        enterGuestViewMode(ospite);
-        showPage("ospite");
-      });
+          const ospite = findCalendarGuestById(info.guestId);
+          if (!ospite) return;
+          enterGuestViewMode(ospite);
+          showPage("ospite");
+        });
+      }
 
       frag.appendChild(cell);
     }
