@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.156";
+const BUILD_VERSION = "1.157";
 
 
 
@@ -2933,7 +2933,7 @@ function buildWeekOccupancy(weekStart){
 
       for (const r of roomsArr) {
         const dots = dotsForGuestRoom(guestId, r);
-        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: (IS_IOS && isLast && lastIsPresentOrFuture) });
+        map.set(`${dIso}:${r}`, { guestId, initials, dots, lastDay: isLast });
       }
     }
   }
