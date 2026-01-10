@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.159";
+const BUILD_VERSION = "1.160";
 
 
 
@@ -1146,6 +1146,15 @@ function showPage(page){
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
+
+  // dDAE_1.160: fallback visualizzazione Pulizie
+  try{
+    if (page === "pulizie"){
+      const el = document.getElementById("page-pulizie");
+      if (el) el.style.display = "block";
+    }
+  }catch(_){}
+
 }
 
 function setupHeader(){
