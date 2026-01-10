@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.154";
+const BUILD_VERSION = "1.155";
 
 
 
@@ -2661,7 +2661,6 @@ async function init(){
   bindPeriodAuto("#fromDate", "#toDate");
   bindPeriodAuto("#fromDate2", "#toDate2");
   bindPeriodAuto("#fromDate3", "#toDate3");
-  bindPeriodAutoGuests("#fromDate4", "#toDate4");
   setupGuestListControls();
 
   $("#spesaData").value = todayISO();
