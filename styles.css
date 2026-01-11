@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.174"),
+    url("./assets/bg-daedalium.png?v=1.175"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.174"),
+    url("./assets/bg-daedalium.png?v=1.175"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3012,15 +3012,14 @@ body.perf-lite *::after{
 
 .clean-grid-wrap{
   width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
 }
 .clean-grid{
   display:grid;
   grid-template-columns: 44px repeat(8, minmax(42px, 1fr));
 grid-template-rows: 34px repeat(7, 54px);
   gap: 8px;
-  min-width: 480px;
+  min-width: 0;
 }
 
 .clean-grid .cell{
@@ -3187,4 +3186,63 @@ grid-template-rows: 34px repeat(7, 54px);
   line-height: 1 !important;
   letter-spacing: .2px;
   color: rgba(0,0,0,.86);
+}
+
+
+/* Pulizie: grid hard override (stabile su iPhone, 8 colonne incl. TPI) */
+#page-pulizie .clean-grid-wrap{ width:100%; overflow:hidden; }
+#page-pulizie .clean-grid{
+  --cg-gap: 6px;
+  --cg-corner: 40px;
+  --cg-head-h: 32px;
+  --cg-row-h: 50px;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: var(--cg-corner) repeat(8, minmax(0, 1fr)) !important;
+  grid-template-rows: var(--cg-head-h) repeat(7, var(--cg-row-h)) !important;
+  gap: var(--cg-gap) !important;
+}
+
+#page-pulizie .clean-grid .cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow:hidden;
+}
+
+#page-pulizie .clean-grid .cell.head{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .6px;
+}
+
+#page-pulizie .clean-grid .cell.room{
+  font-size: 14px;
+  font-weight: 900;
+}
+
+@media (max-width: 520px){
+  #page-pulizie .clean-grid{
+    --cg-gap: 4px;
+    --cg-corner: 34px;
+    --cg-head-h: 28px;
+    --cg-row-h: 44px;
+  }
+  #page-pulizie .clean-grid .cell.head{ font-size: 11px; }
+  #page-pulizie .clean-grid .cell.room{ font-size: 13px; }
+}
+
+@media (max-width: 390px){
+  #page-pulizie .clean-grid{
+    --cg-gap: 3px;
+    --cg-corner: 30px;
+    --cg-head-h: 26px;
+    --cg-row-h: 40px;
+  }
+  #page-pulizie .clean-grid .cell.head{ font-size: 10px; }
 }
