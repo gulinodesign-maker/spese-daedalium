@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.167";
+const BUILD_VERSION = "1.168";
 
 
 
@@ -2753,7 +2753,43 @@ async function init(){
     return toISODateLocal(d);
   };
 
-  const buildPuliziePayload = () => {
+  
+  const clearAllSlots = () => {
+    document.querySelectorAll(".clean-grid .cell.slot").forEach(el => { el.textContent = ""; });
+  };
+
+  const applyPulizieRows = (rows) => {
+    clearAllSlots();
+    if (!Array.isArray(rows)) return;
+    rows.forEach(r => {
+      const room = String(r.stanza || r.room || "").trim();
+      if (!room) return;
+      ["MAT","SIN","FED","TDO","TFA","TBI","TAP"].forEach(c => {
+        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${room}"][data-col="${c}"]`);
+        if (!cell) return;
+        const n = parseInt(r[c] ?? 0, 10);
+        cell.textContent = (!isNaN(n) && n>0) ? String(n) : "";
+      });
+    });
+  };
+
+  const loadPulizieForDay = async () => {
+    // Regola: quando cambi giorno, la griglia deve essere SUBITO vuota.
+    // Poi, se ci sono dati salvati per quel giorno, li carichiamo.
+    clearAllSlots();
+    try{
+      const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
+      const data = toISODateLocal(day);
+      const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
+      if (Array.isArray(res) && res.length) applyPulizieRows(res);
+      // altrimenti resta vuota
+    }catch(_){
+      // offline/errore: resta vuota (coerente con "vuoto finché non salvato")
+      clearAllSlots();
+    }
+  };
+
+const buildPuliziePayload = () => {
     const data = getCleanDate();
     const rooms = ["1","2","3","4","5","6","RES"];
     const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP"];
@@ -2858,6 +2894,7 @@ async function init(){
     d.setDate(d.getDate() + deltaDays);
     state.cleanDay = d.toISOString();
     updateCleanLabel();
+    try{ loadPulizieForDay(); }catch(_){ }
   };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
@@ -2865,11 +2902,14 @@ async function init(){
   if (cleanToday) cleanToday.addEventListener("click", () => {
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
+    try{ loadPulizieForDay(); }catch(_){ }
   });
 
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
+  try{ loadPulizieForDay(); }catch(_){ }
+
 }
 
 
