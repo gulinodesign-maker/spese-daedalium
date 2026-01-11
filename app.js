@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.164";
+const BUILD_VERSION = "1.165";
 
 
 
@@ -2786,8 +2786,8 @@ async function init(){
     pressTimer = setTimeout(() => {
       longFired = true;
       writeCell(slot, 0);
-    }, 2000);
-  };
+    }, 1000);
+};
 
   const tapSlot = (slot) => {
     writeCell(slot, readCell(slot) + 1);
