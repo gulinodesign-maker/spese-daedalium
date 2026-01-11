@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.184";
+const BUILD_VERSION = "1.185";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.184 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.185 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -635,19 +635,20 @@ function formatLongDateIT(value){
 function formatShortDateIT(input){
   try{
     if (!input) return "";
-    const iso = formatISODateLocal(input);
-    if (iso && /^\d{4}-\d{2}-\d{2}$/.test(iso)){
+    const s = String(input);
+    const iso = s.slice(0, 10); // YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
       const [y,m,d] = iso.split("-");
       return `${d}/${m}/${y.slice(-2)}`;
     }
-    const dt = new Date(String(input));
+    const dt = new Date(s);
     if (!isNaN(dt)){
       const dd = String(dt.getDate()).padStart(2,"0");
       const mm = String(dt.getMonth()+1).padStart(2,"0");
       const yy = String(dt.getFullYear()).slice(-2);
       return `${dd}/${mm}/${yy}`;
     }
-    return "";
+    return iso;
   }catch(_){
     return "";
   }
@@ -657,9 +658,9 @@ function formatFullDateIT(d){
   try{
     const dt = (d instanceof Date) ? d : new Date(d);
     if (isNaN(dt)) return "";
-    const weekdays = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
     const months = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-    const wd = weekdays[dt.getDay()];
+    const weekdays = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+    const wd = weekdays[dt.getDay()] || "";
     const day = dt.getDate();
     const month = months[dt.getMonth()];
     const year = dt.getFullYear();
@@ -1058,6 +1059,8 @@ function bindHomeDelegation(){
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
+    const lav = e.target.closest && e.target.closest("#goLavanderia");
+    if (lav){ hideLauncher(); showPage("lavanderia"); return; }
 
 const g = e.target.closest && e.target.closest("#goGuadagni");
     if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
@@ -1162,7 +1165,7 @@ function showPage(page){
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.184: fallback visualizzazione Pulizie
+  // dDAE_1.185: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2928,21 +2931,21 @@ const buildPuliziePayload = () => {
 
 
 // --- Lavanderia ---
-const btnLaundryCreate = document.getElementById("btnLaundryCreate");
-const btnLaundryPrint = document.getElementById("btnLaundryPrint");
+  const btnLaundryCreate = document.getElementById("btnLaundryCreate");
+  const btnLaundryPrint = document.getElementById("btnLaundryPrint");
 
-if (btnLaundryCreate){
-  bindFastTap(btnLaundryCreate, async () => {
-    try{
-      // Crea il report SOLO qui, usando l'intervallo "Da → A"
-      await createLavanderiaReport_();
-    }catch(e){
-      console.error(e);
-      try{ toast(e.message || "Errore"); }catch(_){}
-    }
-  });
-}
-if (btnLaundryPrint){
+  if (btnLaundryCreate){
+    bindFastTap(btnLaundryCreate, async () => {
+      try{
+        showPage("lavanderia");
+        await createLavanderiaReport_();
+      }catch(e){
+        console.error(e);
+        try{ toast(e.message || "Errore"); }catch(_){}
+      }
+    });
+  }
+  if (btnLaundryPrint){
     bindFastTap(btnLaundryPrint, () => {
       try{ window.print(); }catch(_){}
     });
@@ -2951,7 +2954,7 @@ if (btnLaundryPrint){
     bindFastTap(btnLaundryFromPulizie, async () => {
       try{
         showPage("lavanderia");
-}catch(e){
+        }catch(e){
         console.error(e);
         try{ toast(e.message || "Errore"); }catch(_){}
       }
@@ -2961,7 +2964,7 @@ if (btnLaundryPrint){
 }
 
 
-// ===== CALENDARIO (dDAE_1.184) =====
+// ===== CALENDARIO (dDAE_1.185) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3295,17 +3298,19 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.184)
+   Lavanderia (dDAE_1.185)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
   MAT: "Matrimoniale",
   SIN: "Singolo",
   FED: "Federe",
-  TDO: "Teli doccia",
-  TFA: "Teli faccia",
+  // Teli (arancio)
+  TDO: "Telo doccia",
+  TFA: "Telo viso",
   TBI: "Telo bidet",
-  TAP: "Tappeti",
+  // Eccezioni
+  TAP: "Tappeto",
   TPI: "Telo piscina",
 };
 
@@ -3356,15 +3361,6 @@ function renderLaundry_(item){
   if (rangeEl) rangeEl.textContent = rangeText;
   if (printRangeEl) printRangeEl.textContent = rangeText;
 
-  // sincronizza inputs range con il report selezionato (solo visuale)
-  try{
-    const fromEl = document.getElementById("laundryFrom");
-    const toEl = document.getElementById("laundryTo");
-    if (fromEl && item.startDate && /^\d{4}-\d{2}-\d{2}$/.test(item.startDate)) fromEl.value = item.startDate;
-    if (toEl && item.endDate && /^\d{4}-\d{2}-\d{2}$/.test(item.endDate)) toEl.value = item.endDate;
-  }catch(_){}
-
-
   for (const k of LAUNDRY_COLS){
     const v = document.getElementById("laundryVal"+k);
     if (v) v.textContent = String(item[k] || 0);
@@ -3389,59 +3385,68 @@ function renderLaundryHistory_(list){
     const empty = document.createElement("div");
     empty.className = "item";
     empty.style.opacity = "0.8";
-    empty.textContent = "Nessun report ancora.";
+    empty.textContent = "Nessun resoconto ancora.";
     host.appendChild(empty);
     return;
   }
 
   list.forEach((raw) => {
     const it = sanitizeLaundryItem_(raw);
-
-    const row = document.createElement("div");
-    row.className = "laundry-history-row";
-
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "item laundry-history-item";
-    btn.setAttribute("aria-label", `Apri report ${it.startDate} - ${it.endDate}`);
+    btn.className = "item";
+    btn.style.width = "100%";
+    btn.style.textAlign = "left";
+    btn.style.cursor = "pointer";
+    btn.style.display = "flex";
+    btn.style.justifyContent = "space-between";
+    btn.style.alignItems = "center";
+    btn.style.gap = "10px";
 
     const left = document.createElement("div");
-    left.className = "laundry-history-left";
     const startLbl = it.startDate ? formatShortDateIT(it.startDate) : "";
     const endLbl = it.endDate ? formatShortDateIT(it.endDate) : "";
-    left.innerHTML = `<div class="laundry-history-title">${startLbl} → ${endLbl}</div>
-      <div class="laundry-history-sub">${LAUNDRY_COLS.map(k=>`${k}:${it[k]||0}`).join(" · ")}</div>`;
-    btn.appendChild(left);
+    left.innerHTML = `<div style="font-weight:950">${startLbl} → ${endLbl}</div><div style="font-size:12px;opacity:.75">${LAUNDRY_COLS.map(k=>`${k}:${it[k]||0}`).join(" · ")}</div>`;
 
-    btn.addEventListener("click", () => {
-      renderLaundry_(it);
-    });
 
     const del = document.createElement("button");
     del.type = "button";
     del.className = "laundry-del";
-    del.setAttribute("aria-label", "Elimina report lavanderia");
+    del.setAttribute("aria-label", "Elimina report");
     del.innerHTML = "✕";
 
-    del.addEventListener("click", async (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
+    bindFastTap(del, async (ev) => {
+      try {
+        ev && ev.preventDefault && ev.preventDefault();
+        ev && ev.stopPropagation && ev.stopPropagation();
+      } catch(_){}
+      if (!confirm("Eliminare questo report lavanderia?")) return;
       try{
-        if (!it.id) return;
-        const ok = confirm("Eliminare questo report? (Pulizie non verrà modificato)");
-        if (!ok) return;
         await api("lavanderia", { method:"DELETE", body:{ id: it.id }, showLoader:true });
         await loadLavanderia();
         toast("Report eliminato");
       }catch(e){
         console.error(e);
-        toast(e.message || "Errore eliminazione");
+        toast(e && e.message ? e.message : "Errore eliminazione");
+      }
+    }, true);
+
+    const che = document.createElement("div");
+    che.innerHTML = `<svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M9 6l6 6-6 6"></path></svg>`;
+
+    btn.appendChild(left);
+    btn.appendChild(del);
+    btn.appendChild(che);
+
+    bindFastTap(btn, () => {
+      renderLaundry_(it);
+      // scroll su
+      try{ window.scrollTo({ top: 0, behavior: "smooth" }); }catch(_){
+        window.scrollTo(0,0);
       }
     });
 
-    row.appendChild(btn);
-    row.appendChild(del);
-    host.appendChild(row);
+    host.appendChild(btn);
   });
 }
 
@@ -3459,7 +3464,7 @@ async function loadLavanderia() {
     state.laundry.list = list;
     renderLaundryHistory_(list);
     renderLaundry_(list[0] || null);
-    if (hint) hint.textContent = "Seleziona un intervallo (Da → A) e crea il report per la lavanderia.";
+    if (hint) hint.textContent = "Seleziona un intervallo (Da/A) e crea il report da consegnare alla lavanderia.";
   } catch (e) {
     if (hint) hint.textContent = "Offline o errore: non riesco a caricare lo storico.";
     throw e;
@@ -3470,15 +3475,18 @@ async function createLavanderiaReport_() {
   const hint = document.getElementById("laundryHint");
   const fromEl = document.getElementById("laundryFrom");
   const toEl = document.getElementById("laundryTo");
-  const startDate = String(fromEl?.value || "").trim();
-  const endDate = String(toEl?.value || "").trim();
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)){
-    toast("Seleziona sia 'Da' che 'A'");
+  const startDate = (fromEl && fromEl.value) ? String(fromEl.value).trim() : "";
+  const endDate = (toEl && toEl.value) ? String(toEl.value).trim() : "";
+
+  if (!startDate || !endDate) {
+    if (hint) hint.textContent = "Seleziona prima l'intervallo (Da e A).";
+    toast("Seleziona Da e A");
     return null;
   }
-  if (startDate > endDate){
-    toast("Intervallo non valido: 'Da' deve essere ≤ 'A'");
+  if (startDate > endDate) {
+    if (hint) hint.textContent = "Intervallo non valido: 'Da' non può essere dopo 'A'.";
+    toast("Intervallo non valido");
     return null;
   }
 
@@ -3627,7 +3635,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.184: renderSpese allineato al backend ---
+// --- FIX dDAE_1.185: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3723,7 +3731,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.184: delete reale ospiti ---
+// --- FIX dDAE_1.185: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3757,7 +3765,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.184: mostra nome ospite ---
+// --- FIX dDAE_1.185: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;

@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.184" rel="stylesheet"/>
-<link href="./manifest.json?v=1.184" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.184" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.184" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.184" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.184" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.185" rel="stylesheet"/>
+<link href="./manifest.json?v=1.185" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.185" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.185" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.185" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.185" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.184"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.185"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.184</div>
+<div class="build" id="buildText">1.185</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -518,7 +518,7 @@
     <div class="hd">
       <h2>Lavanderia</h2>
       <div class="hd-actions">
-        <button aria-label="Crea report lavanderia" class="sq-btn sq-btn-orange" id="btnLaundryCreate" type="button">
+        <button aria-label="Crea foglio lavanderia" class="sq-btn sq-btn-orange" id="btnLaundryCreate" type="button">
           <div aria-hidden="true" class="sq-ico">
             <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
               <path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path>
@@ -546,83 +546,76 @@
     <div class="bd">
       <div class="laundry-sub">
         <div class="laundry-period" id="laundryPeriodLabel">—</div>
-        
-        <div class="laundry-range-row" aria-label="Intervallo report lavanderia">
-          <label class="laundry-range-label">Da
-            <input id="laundryFrom" type="date" inputmode="numeric" />
-          </label>
-          <label class="laundry-range-label">A
-            <input id="laundryTo" type="date" inputmode="numeric" />
-          </label>
-        </div>
-
-        <div class="laundry-hint" id="laundryHint">Seleziona un intervallo (Da → A) e crea il report per la lavanderia.</div>
+        <div class="laundry-hint" id="laundryHint">Crea un foglio per il ritiro settimanale. Il conteggio riparte automaticamente.</div>
       </div>
 
-      <div class="laundry-grid" id="laundryGrid" aria-label="Totali lavanderia">
+      
+      <div class="laundry-range" aria-label="Intervallo report lavanderia">
+        <label class="laundry-range-field">
+          <span>Da</span>
+          <input type="date" id="laundryFrom" />
+        </label>
+        <label class="laundry-range-field">
+          <span>A</span>
+          <input type="date" id="laundryTo" />
+        </label>
+      </div>
+<div class="laundry-grid" id="laundryGrid" aria-label="Totali lavanderia">
 <div class="laundry-tile" data-key="MAT">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"></path><path d="M3 12h18a2 2 0 0 1 2 2v5"></path><path d="M3 19v-5a2 2 0 0 1 2-2"></path><path d="M7 19v-2"></path><path d="M17 19v-2"></path></svg></div>
     <div class="laundry-code">MAT</div>
+    <div class="laundry-label" id="laundryLblMAT">Matr.</div>
   </div>
   <div class="laundry-value" id="laundryValMAT">0</div>
-  <div class="laundry-label" id="laundryLblMAT">Matr.</div>
 </div>
 <div class="laundry-tile" data-key="SIN">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M6 12V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"></path><path d="M4 12h16a2 2 0 0 1 2 2v5"></path><path d="M4 19v-5a2 2 0 0 1 2-2"></path><path d="M8 19v-2"></path><path d="M16 19v-2"></path></svg></div>
     <div class="laundry-code">SIN</div>
+    <div class="laundry-label" id="laundryLblSIN">Sing.</div>
   </div>
   <div class="laundry-value" id="laundryValSIN">0</div>
-  <div class="laundry-label" id="laundryLblSIN">Sing.</div>
 </div>
 <div class="laundry-tile" data-key="FED">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M7 4h10v6a5 5 0 0 1-5 5H7z"></path><path d="M7 15h10v5H7z"></path></svg></div>
     <div class="laundry-code">FED</div>
+    <div class="laundry-label" id="laundryLblFED">Fed.</div>
   </div>
   <div class="laundry-value" id="laundryValFED">0</div>
-  <div class="laundry-label" id="laundryLblFED">Fed.</div>
 </div>
 <div class="laundry-tile" data-key="TDO">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M8 3h8"></path><path d="M10 3v4"></path><path d="M14 3v4"></path><path d="M6 7h12"></path><path d="M7 7v14h10V7"></path></svg></div>
     <div class="laundry-code">TDO</div>
+    <div class="laundry-label" id="laundryLblTDO">Doccia</div>
   </div>
   <div class="laundry-value" id="laundryValTDO">0</div>
-  <div class="laundry-label" id="laundryLblTDO">Doccia</div>
 </div>
 <div class="laundry-tile" data-key="TFA">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M7 4h10"></path><path d="M7 4v16a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4"></path><path d="M9 8h6"></path></svg></div>
     <div class="laundry-code">TFA</div>
+    <div class="laundry-label" id="laundryLblTFA">Faccia</div>
   </div>
   <div class="laundry-value" id="laundryValTFA">0</div>
-  <div class="laundry-label" id="laundryLblTFA">Faccia</div>
 </div>
 <div class="laundry-tile" data-key="TBI">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M6 8h12"></path><path d="M7 8v12"></path><path d="M17 8v12"></path><path d="M7 20h10"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg></div>
     <div class="laundry-code">TBI</div>
+    <div class="laundry-label" id="laundryLblTBI">Bagno</div>
   </div>
   <div class="laundry-value" id="laundryValTBI">0</div>
-  <div class="laundry-label" id="laundryLblTBI">Bagno</div>
 </div>
 <div class="laundry-tile" data-key="TAP">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M7 4h10"></path><path d="M6 8h12"></path><path d="M6 8v12"></path><path d="M18 8v12"></path><path d="M7 20h10"></path></svg></div>
     <div class="laundry-code">TAP</div>
+    <div class="laundry-label" id="laundryLblTAP">Tapp.</div>
   </div>
   <div class="laundry-value" id="laundryValTAP">0</div>
-  <div class="laundry-label" id="laundryLblTAP">Tapp.</div>
 </div>
 <div class="laundry-tile" data-key="TPI">
   <div class="laundry-tile-top">
-    <div class="laundry-tile-icon"><svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24"><path d="M8 6h8"></path><path d="M7 10h10"></path><path d="M7 10v10"></path><path d="M17 10v10"></path><path d="M8 20h8"></path></svg></div>
     <div class="laundry-code">TPI</div>
+    <div class="laundry-label" id="laundryLblTPI">Picc.</div>
   </div>
   <div class="laundry-value" id="laundryValTPI">0</div>
-  <div class="laundry-label" id="laundryLblTPI">Picc.</div>
 </div>
       </div>
 
@@ -662,8 +655,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.184"></script>
-<script defer="" src="./app.js?v=1.184"></script>
+<script defer="" src="./config.js?v=1.185"></script>
+<script defer="" src="./app.js?v=1.185"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">

@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.184"),
+    url("./assets/bg-daedalium.png?v=1.177"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.184"),
+    url("./assets/bg-daedalium.png?v=1.177"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1787,7 +1787,7 @@ body::before{
 #page-home #goTassaSoggiorno .home-main-glyph{ color: rgba(201,119,43,0.92); }
 #page-home #goPulizie .home-main-glyph{ color: rgba(15,23,42,0.92); }
 #page-home #goGuadagni .home-main-glyph{ color: rgba(176,92,18,0.92); }
-/* dDAE_1.184 - Ospiti: solo consultazione (azioni nascoste per ora) */
+/* dDAE_1.038 - Ospiti: solo consultazione (azioni nascoste per ora) */
 body[data-page="ospiti"] .guest-card .actions {
   display: flex !important;
 }
@@ -1897,7 +1897,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
+/* dDAE_1.059 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
 .sr-only{
   position:absolute !important;
   width:1px !important;
@@ -1958,7 +1958,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Ospiti: stanze come pallini azzurri */
+/* dDAE_1.066 — Ospiti: stanze come pallini azzurri */
 
 .rooms-dots{
   display:flex;
@@ -1989,7 +1989,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.184 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
+/* dDAE_1.090 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
 
 .rooms-stack{
   display:flex;
@@ -2101,7 +2101,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.184 — Matrimonio: pallino verde 'M' nella riga stanze */
+/* dDAE_1.067 — Matrimonio: pallino verde 'M' nella riga stanze */
 
 #page-ospite .room-dot-marriage{
   margin-left: 14px; /* un po' più a destra dopo la stanza 6 */
@@ -2114,7 +2114,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Acconto: pallini C/E come stanze */
+/* dDAE_1.068 — Acconto: pallini C/E come stanze */
 
 #page-ospite .pay-dots{
   display:grid;
@@ -2142,7 +2142,7 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* dDAE_1.184 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
+/* dDAE_1.080 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
 #page-ospite .pay-dots{
   place-items: center;
 }
@@ -2152,9 +2152,9 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.184 — Pay dots: bianchi quando non selezionati + più distanziati */
+/* dDAE_1.069 — Pay dots: bianchi quando non selezionati + più distanziati */
 
-/* dDAE_1.184 — Pay dots: niente riflesso/ombra e allineamento verticale */
+/* dDAE_1.072 — Pay dots: niente riflesso/ombra e allineamento verticale */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2162,7 +2162,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Colori pallini pagamento (bianchi se off) + niente ombre */
+/* dDAE_1.073 — Colori pallini pagamento (bianchi se off) + niente ombre */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2189,7 +2189,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — iOS: evita accavallamento label/value su date/number */
+/* dDAE_1.073 — iOS: evita accavallamento label/value su date/number */
 
 .field.float input[type="date"],
 .field.float input[type="number"],
@@ -2207,7 +2207,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.184 — Fix definitivo allineamento pallini pagamento */
+/* dDAE_1.076 — Fix definitivo allineamento pallini pagamento */
 
 #page-ospite .field.two-col.payment-row{
   display: grid;
@@ -2229,7 +2229,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Override anti-vincoli: nessun offset fisso su C/E */
+/* dDAE_1.077 — Override anti-vincoli: nessun offset fisso su C/E */
 
 #page-ospite #depositType,
 #page-ospite #saldoType{
@@ -2255,7 +2255,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Eliminazione totale label tipo saldo + paywrap pulito */
+/* dDAE_1.078 — Eliminazione totale label tipo saldo + paywrap pulito */
 
 #page-ospite .subfield.paywrap::before,
 #page-ospite .subfield.paywrap::after{
@@ -2264,7 +2264,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — mini led accanto ai prezzi (Acconto/Saldo) */
+/* dDAE_1.081 — mini led accanto ai prezzi (Acconto/Saldo) */
 .guest-led.mini-led{
   width: 10px;
   height: 10px;
@@ -2564,7 +2564,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background-image: linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40));
   border-color: rgba(255,255,255,.16);
 }
-/* ===== dDAE_1.184 FIX: HOME grid clickable (no flex override) ===== */
+/* ===== dDAE_1.099 FIX: HOME grid clickable (no flex override) ===== */
 #page-home .home-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2580,7 +2580,7 @@ body[data-page="ospiti"] .guest-card .actions {
   pointer-events: auto !important;
 }
 
-/* === dDAE_1.184 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
+/* === dDAE_1.099 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
 #page-home .home-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2598,7 +2598,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.184) ===== */
+/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.102) ===== */
 .guest-filter-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -2618,7 +2618,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
+/* dDAE_1.103 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
 .guest-filter-grid .gf-tile select{
   -webkit-appearance: none;
   appearance: none;
@@ -2662,7 +2662,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Ospiti: pulsante + in testata */
+/* dDAE_1.104 — Ospiti: pulsante + in testata */
 .btn-add-guest{
   width: 40px;
   height: 40px;
@@ -2686,7 +2686,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
+/* dDAE_1.106 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
 #page-ospite .field.two-col.payment-row{
   grid-template-columns: minmax(0,1fr) 170px !important;
 }
@@ -2746,7 +2746,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
+/* dDAE_1.110 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
 #page-ospite .pay-gap{
   opacity: 0;
   pointer-events: none;
@@ -2767,7 +2767,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.184 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.115 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2885,7 +2885,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.184 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.142 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -2901,7 +2901,7 @@ body.perf-lite *::after{
 }
 
 
-/* dDAE_1.184: riga spesa compatta (importo · data · motivazione) */
+/* dDAE_1.147: riga spesa compatta (importo · data · motivazione) */
 .spesa-line{
   display:flex;
   align-items:baseline;
@@ -3255,7 +3255,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   Lavanderia (dDAE_1.184)
+   Lavanderia (dDAE_1.185)
 ========================= */
 #page-lavanderia .bd{ padding-bottom: 18px; }
 .laundry-sub{ margin: 2px 0 14px 0; }
@@ -3284,11 +3284,10 @@ grid-template-rows: 34px repeat(7, 54px);
 @media (max-width: 520px){
   .laundry-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
-\.laundry-tile{
+.laundry-tile{
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: rgba(255,255,255,0.72);
-  color: var(--text);
+  background: var(--tile-bg, rgba(255,255,255,0.72));
   backdrop-filter: blur(16px);
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
   padding: 12px;
@@ -3297,25 +3296,6 @@ grid-template-rows: 34px repeat(7, 54px);
   flex-direction:column;
   justify-content:space-between;
 }
-
-/* Lavanderia: colori logici (chiari, senza sfumature)
-   - Lenzuola: MAT/SIN/FED (3 azzurri)
-   - Teli: TDO/TFA/TBI (3 arancioni)
-   - TPI: grigio (telo piscina)
-   - TAP: marrone (tappeto)
-*/
-.laundry-tile[data-key="MAT"]{ background:#D9F2FF; }
-.laundry-tile[data-key="SIN"]{ background:#C9EBFF; }
-.laundry-tile[data-key="FED"]{ background:#B9E4FF; }
-
-.laundry-tile[data-key="TDO"]{ background:#FFE7D1; }
-.laundry-tile[data-key="TFA"]{ background:#FFDEBF; }
-.laundry-tile[data-key="TBI"]{ background:#FFD5AD; }
-
-.laundry-tile[data-key="TPI"]{ background:#E8EAED; }
-.laundry-tile[data-key="TAP"]{ background:#E6D2BF; }
-
-
 .laundry-tile-top{
   display:flex;
   align-items:center;
@@ -3348,6 +3328,95 @@ grid-template-rows: 34px repeat(7, 54px);
   font-weight: 900;
   opacity: .78;
 }
+
+/* Lavanderia: colori logici (flat, chiari) */
+.laundry-tile[data-key="MAT"]{ --tile-bg:#D8EFFC; }
+.laundry-tile[data-key="SIN"]{ --tile-bg:#C7E6FB; }
+.laundry-tile[data-key="FED"]{ --tile-bg:#B6DDF8; }
+
+.laundry-tile[data-key="TDO"]{ --tile-bg:#FFE3C7; }
+.laundry-tile[data-key="TFA"]{ --tile-bg:#FFD8B2; }
+.laundry-tile[data-key="TBI"]{ --tile-bg:#FFCC9C; }
+
+.laundry-tile[data-key="TPI"]{ --tile-bg:#E6E8EC; }
+.laundry-tile[data-key="TAP"]{ --tile-bg:#EBD8C6; }
+
+/* Nuovo layout tile */
+.laundry-tile-top{
+  align-items:flex-start;
+}
+.laundry-code{
+  font-weight: 950;
+  letter-spacing: .14em;
+  font-size: 12px;
+  opacity: .70;
+}
+.laundry-label{
+  margin-left:auto;
+  text-align:right;
+  font-size: 12px;
+  font-weight: 950;
+  opacity: .85;
+}
+.laundry-value{
+  flex: 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size: 40px;
+  font-weight: 950;
+  line-height: 1.0;
+}
+
+/* Nascondi vecchie iconcine se rimangono da qualche parte */
+.laundry-tile-icon{ display:none !important; }
+
+/* Range date (Da/A) */
+.laundry-range{
+  display:flex;
+  gap: 10px;
+  margin: 10px 0 12px 0;
+}
+.laundry-range-field{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(12px);
+}
+.laundry-range-field span{
+  font-weight: 900;
+  opacity: .8;
+  min-width: 22px;
+}
+.laundry-range-field input[type="date"]{
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  color: inherit;
+  outline: none;
+}
+
+/* Pulsante elimina report (pallino rosso con X bianca) */
+.laundry-del{
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 0;
+  background: #E11D48;
+  color: #fff;
+  font-weight: 950;
+  display:grid;
+  place-items:center;
+  flex: 0 0 auto;
+}
+
 .laundry-history-wrap{ margin-top: 14px; }
 .laundry-history-wrap .section-title{ margin: 0 0 8px 0; }
 
@@ -3375,92 +3444,4 @@ grid-template-rows: 34px repeat(7, 54px);
   #page-lavanderia .laundry-grid{ display:none !important; }
   #page-lavanderia .laundry-sub{ display:none !important; }
   #page-lavanderia .laundry-print{ display:block !important; }
-}
-
-
-/* ===== Lavanderia (dDAE_1.184) ===== */
-.laundry-range-row{
-  display:flex;
-  gap:10px;
-  margin: 10px 0 6px 0;
-}
-.laundry-range-label{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  font-weight: 900;
-  font-size: 13px;
-  color: rgba(15,23,42,.85);
-}
-.laundry-range-label input[type="date"]{
-  width:100%;
-  min-height:44px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.78);
-  color: var(--text);
-  font-weight: 900;
-}
-
-.laundry-history-row{
-  display:flex;
-  align-items:stretch;
-  gap:10px;
-  margin: 10px 0;
-}
-.laundry-history-item{
-  flex:1;
-  display:flex;
-  align-items:center;
-}
-.laundry-history-left{ flex:1; }
-.laundry-history-title{ font-weight: 950; }
-.laundry-history-sub{ font-size: 12px; opacity:.75; margin-top:4px; }
-
-.laundry-del{
-  width: 38px;
-  min-width: 38px;
-  border-radius: 999px;
-  border: 0;
-  background: #d92d20;
-  color: #fff;
-  font-weight: 950;
-  font-size: 18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow: 0 10px 24px rgba(217,45,32,.25);
-}
-
-.laundry-tile{
-    background: rgba(255,255,255,0.70);
-  border: 1px solid rgba(0,0,0,.10);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-/* 8 colori diversi (piatti) */
-.laundry-tile[data-key="MAT"] .laundry-tile-icon,
-.laundry-tile[data-key="SIN"] .laundry-tile-icon,
-.laundry-tile[data-key="TBI"] .laundry-tile-icon,
-.laundry-tile[data-key="TAP"] .laundry-tile-icon{
-  background: rgba(255,255,255,.18);
-}
-.laundry-tile[data-key="FED"] .laundry-tile-icon,
-.laundry-tile[data-key="TDO"] .laundry-tile-icon,
-.laundry-tile[data-key="TFA"] .laundry-tile-icon,
-.laundry-tile[data-key="TPI"] .laundry-tile-icon{
-  background: rgba(15,23,42,.08);
-}
-
-/* Pulizie: ripristina visibilità frecce nav */
-.clean-nav .btn.ghost{
-  min-width: 46px;
-  min-height: 46px;
-  font-size: 18px;
-  padding: 0 10px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.78);
-  color: var(--text);
 }
