@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.167";
+const BUILD_VERSION = "1.168";
 
 
 
@@ -2769,7 +2769,83 @@ async function init(){
     return { data, rows };
   };
 
-  // Intercetta i tap sulle celle Pulizie a livello documento (capture) così NON scattano handler di altre pagine.
+  
+  const cleanGrid = document.getElementById("cleanGrid");
+  const cleanSave = document.getElementById("cleanSave");
+
+  const readCell = (el) => {
+    const v = String(el.textContent || "").trim();
+    const n = parseInt(v, 10);
+    return isNaN(n) ? 0 : n;
+  };
+  const writeCell = (el, n) => {
+    const val = Math.max(0, parseInt(n || 0, 10) || 0);
+    el.textContent = val ? String(val) : "";
+  };
+  const clearCleanGrid = () => {
+    document.querySelectorAll("#page-pulizie .clean-grid .cell.slot").forEach(el => writeCell(el, 0));
+  };
+
+  const getCleanDate = () => {
+    const d = state.cleanDay ? new Date(state.cleanDay) : new Date();
+    return toISODateLocal(d);
+  };
+
+  const buildPuliziePayload = () => {
+    const data = getCleanDate();
+    const rooms = ["1","2","3","4","5","6","RES"];
+    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP"];
+    const rows = rooms.map(stanza => {
+      const row = { data, stanza };
+      cols.forEach(c => {
+        const cell = document.querySelector(`#page-pulizie .clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
+        row[c] = cell ? readCell(cell) : 0;
+      });
+      return row;
+    });
+    return { data, rows };
+  };
+
+  const applyPulizieRows = (rows) => {
+    clearCleanGrid();
+    if (!Array.isArray(rows) || !rows.length) return;
+    rows.forEach(r => {
+      const stanza = String(r.stanza || "").trim();
+      if (!stanza) return;
+      ["MAT","SIN","FED","TDO","TFA","TBI","TAP"].forEach(c => {
+        const cell = document.querySelector(`#page-pulizie .clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
+        if (!cell) return;
+        const n = parseInt(r[c] ?? 0, 10);
+        writeCell(cell, isNaN(n) ? 0 : n);
+      });
+    });
+  };
+
+  const loadPulizieForDay = async () => {
+    // Regola richiesta: al cambio giorno la griglia DEVE essere subito vuota,
+    // e resta vuota finché non esistono dati salvati per quel giorno.
+    clearCleanGrid();
+    try{
+      const data = getCleanDate();
+      const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
+      if (Array.isArray(res) && res.length) applyPulizieRows(res);
+      // se res vuoto -> resta vuota
+    }catch(_){
+      // se errore rete -> resta vuota (non trascina valori dal giorno prima)
+      clearCleanGrid();
+    }
+  };
+
+  // Intercetta tap/press SOLO quando la pagina corrente è "pulizie"
+  const isPulizieActive = () => {
+    try{
+      const p = String(document.body.dataset.page || "");
+      const sec = document.getElementById("page-pulizie");
+      return (p === "pulizie") && sec && !sec.hidden;
+    }catch(_){ return false; }
+  };
+
+  // Touch iPhone
   let pressTimer = null;
   let longFired = false;
   let lastTouchAt = 0;
@@ -2791,14 +2867,16 @@ async function init(){
     }, 1000); // 1 secondo
   };
 
-  const isPulizieSlot = (target) => {
-    const slot = target && target.closest && target.closest("#page-pulizie .clean-grid .cell.slot");
-    return slot || null;
+  const getSlotFromEvent = (target) => {
+    try{
+      if (!isPulizieActive()) return null;
+      const slot = target && target.closest && target.closest("#page-pulizie .clean-grid .cell.slot");
+      return slot || null;
+    }catch(_){ return null; }
   };
 
-  // Touch iPhone
   document.addEventListener("touchstart", (e) => {
-    const slot = isPulizieSlot(e.target);
+    const slot = getSlotFromEvent(e.target);
     if (!slot) return;
     lastTouchAt = Date.now();
     startLongPress(slot);
@@ -2807,7 +2885,7 @@ async function init(){
   }, { capture:true, passive:false });
 
   document.addEventListener("touchend", (e) => {
-    const slot = isPulizieSlot(e.target);
+    const slot = getSlotFromEvent(e.target);
     if (!slot) return;
     if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
     if (!longFired) tapSlot(slot);
@@ -2817,15 +2895,14 @@ async function init(){
   }, { capture:true, passive:false });
 
   document.addEventListener("touchcancel", (e) => {
-    const slot = isPulizieSlot(e.target);
+    const slot = getSlotFromEvent(e.target);
     if (!slot) return;
     clearPress();
     try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
   }, { capture:true, passive:false });
 
-  // Click desktop + ghost click protection dopo touch
   document.addEventListener("click", (e) => {
-    const slot = isPulizieSlot(e.target);
+    const slot = getSlotFromEvent(e.target);
     if (!slot) return;
     if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
     tapSlot(slot);
@@ -2846,6 +2923,29 @@ async function init(){
       }
     }, true);
   }
+
+  // Aggancia loadPulizieForDay ai controlli giorno (prev/next/oggi)
+  try{
+    const _oldShift = shiftClean;
+    shiftClean = (deltaDays) => {
+      _oldShift(deltaDays);
+      try{ loadPulizieForDay(); }catch(_){}
+    };
+  }catch(_){}
+
+  try{
+    if (cleanToday){
+      cleanToday.addEventListener("click", () => {
+        // handler già esistente, qui solo refresh dati
+        setTimeout(() => { try{ loadPulizieForDay(); }catch(_){} }, 0);
+      }, true);
+    }
+  }catch(_){}
+
+  // Primo ingresso: carica subito i dati del giorno selezionato (o vuoto se non esiste)
+  try{ loadPulizieForDay(); }catch(_){}
+    }, true);
+  }
     }, true);
   }
 
@@ -2862,7 +2962,9 @@ async function init(){
     d.setDate(d.getDate() + deltaDays);
     state.cleanDay = d.toISOString();
     updateCleanLabel();
-  };
+    try{ loadPulizieForDay(); }catch(_){ }
+      try{ loadPulizieForDay(); }catch(_){ }
+};
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
   if (cleanNext) cleanNext.addEventListener("click", () => shiftClean(1));
