@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.169";
+const BUILD_VERSION = "1.170";
 
 
 
@@ -378,6 +378,7 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 
 const state = {
+  cleanCache: {},
   cleanDay: null,
 
   motivazioni: [],
@@ -2843,6 +2844,10 @@ async function init(){
       const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
       const data = toISODateLocal(day);
       const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
+      if ((!Array.isArray(res) || !res.length) && state.cleanCache && state.cleanCache[data]){
+        applyPulizieRows(state.cleanCache[data]);
+        return;
+      }
       if (Array.isArray(res) && res.length) applyPulizieRows(res);
       // altrimenti resta vuota
     }catch(_){
@@ -2936,6 +2941,12 @@ const buildPuliziePayload = () => {
       try{
         const payload = buildPuliziePayload();
         await api("pulizie", { method:"POST", body: payload });
+        // Mantieni visibile la configurazione salvata SOLO per questo giorno
+        try{
+          const dKey = payload && payload.data ? String(payload.data) : "";
+          if (dKey){ state.cleanCache[dKey] = payload.rows; }
+          if (typeof applyPulizieRows === "function") applyPulizieRows(payload.rows);
+        }catch(_){ }
         toast("Pulizie salvate");
       }catch(err){
         toast(String(err && err.message || "Errore salvataggio pulizie"));
