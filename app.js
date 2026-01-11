@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.162";
+const BUILD_VERSION = "1.164";
 
 
 
@@ -668,6 +668,15 @@ function startOfLocalDay(d){
   dt.setHours(0,0,0,0);
   return dt;
 }
+
+function toISODateLocal(d){
+  const dt = startOfLocalDay(d);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth()+1).padStart(2,"0");
+  const da = String(dt.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+
 
 
 function spesaCategoryClass(s){
@@ -2727,16 +2736,114 @@ async function init(){
   const cleanToday = document.getElementById("cleanToday");
 
   const cleanGrid = document.getElementById("cleanGrid");
+  const cleanSave = document.getElementById("cleanSave");
+
+  const readCell = (el) => {
+    const v = String(el.textContent || "").trim();
+    const n = parseInt(v, 10);
+    return isNaN(n) ? 0 : n;
+  };
+  const writeCell = (el, n) => {
+    const val = Math.max(0, parseInt(n || 0, 10) || 0);
+    el.textContent = val ? String(val) : "";
+  };
+
+  const getCleanDate = () => {
+    const d = state.cleanDay ? new Date(state.cleanDay) : new Date();
+    return toISODateLocal(d);
+  };
+
+  const buildPuliziePayload = () => {
+    const data = getCleanDate();
+    const rooms = ["1","2","3","4","5","6","RES"];
+    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP"];
+    const rows = rooms.map(stanza => {
+      const row = { data, stanza };
+      cols.forEach(c => {
+        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
+        row[c] = cell ? readCell(cell) : 0;
+      });
+      return row;
+    });
+    return { data, rows };
+  };
+
+  // Tap incrementa, long press (2s) azzera
+  let pressTimer = null;
+  let pressTarget = null;
+  let longFired = false;
+  let lastTouchAt = 0;
+
+  const clearPress = () => {
+    if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+    pressTarget = null;
+    longFired = false;
+  };
+
+  const startPress = (slot) => {
+    clearPress();
+    pressTarget = slot;
+    pressTimer = setTimeout(() => {
+      longFired = true;
+      writeCell(slot, 0);
+    }, 2000);
+  };
+
+  const tapSlot = (slot) => {
+    writeCell(slot, readCell(slot) + 1);
+  };
+
   if (cleanGrid){
-    // Per ora cliccare le celle non deve fare nulla
+    // Touch (iPhone)
+    cleanGrid.addEventListener("touchstart", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      lastTouchAt = Date.now();
+      startPress(slot);
+      // blocca altri handler globali
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false, capture: true });
+
+    cleanGrid.addEventListener("touchend", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+      if (!longFired) tapSlot(slot);
+      clearPress();
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false, capture: true });
+
+    cleanGrid.addEventListener("touchcancel", (e) => {
+      clearPress();
+      try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
+    }, { passive: false, capture: true });
+
+    // Click (desktop) + anti ghost-click dopo touch
     cleanGrid.addEventListener("click", (e) => {
       const slot = e.target.closest && e.target.closest(".cell.slot");
       if (!slot) return;
+      if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
+      tapSlot(slot);
       e.preventDefault();
       e.stopPropagation();
     }, true);
   }
 
+  if (cleanSave){
+    cleanSave.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try{
+        const payload = buildPuliziePayload();
+        await api("pulizie", { method:"POST", body: payload });
+        toast("Pulizie salvate");
+      }catch(err){
+        toast(String(err && err.message || "Errore salvataggio pulizie"));
+      }
+    }, true);
+  }
 
   const updateCleanLabel = () => {
     const lab = document.getElementById("cleanDateLabel");
