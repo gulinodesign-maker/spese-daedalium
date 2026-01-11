@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.180" rel="stylesheet"/>
-<link href="./manifest.json?v=1.180" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.180" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.180" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.180" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.180" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.181" rel="stylesheet"/>
+<link href="./manifest.json?v=1.181" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.181" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.181" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.181" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.181" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.180"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.181"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -103,7 +103,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.180</div>
+<div class="build" id="buildText">1.181</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -114,7 +114,7 @@
 <div class="bd">
 <div class="field float">
 <input id="spesaImporto" inputmode="decimal" min="0" placeholder=" " step="0.01" type="number"/>
-<label for="spesaImporto">Importo (€)</label>
+<label for="spesaImporto">Importo (â¬)</label>
 </div>
 <div class="field float" style="margin-top:10px;">
 <input autocomplete="off" id="spesaMotivazione" list="motivazioniList" placeholder=" "/>
@@ -127,7 +127,7 @@
 </div>
 <div class="field float" style="margin-top:10px;">
 <select id="spesaCategoria" required="">
-<option value="">Seleziona…</option>
+<option value="">Selezionaâ¦</option>
 <option value="CONTANTI">Contanti</option>
 <option value="TASSA_SOGGIORNO">Tassa soggiorno</option>
 <option value="IVA_22">IVA 22%</option>
@@ -187,15 +187,15 @@
 <div class="kpi-stack kpi-top" style="margin-top:12px;">
 <div class="kpi-card">
 <div class="kpi-label">Totale spese</div>
-<div class="kpi-value" id="kpiTotSpese">€ 0,00</div>
+<div class="kpi-value" id="kpiTotSpese">â¬ 0,00</div>
 </div>
 <div class="kpi-card accent">
 <div class="kpi-label">IVA detraibile</div>
-<div class="kpi-value" id="kpiIvaDetraibile">€ 0,00</div>
+<div class="kpi-value" id="kpiIvaDetraibile">â¬ 0,00</div>
 </div>
 <div class="kpi-card">
 <div class="kpi-label">Totale imponibile</div>
-<div class="kpi-value" id="kpiImponibile">€ 0,00</div>
+<div class="kpi-value" id="kpiImponibile">â¬ 0,00</div>
 </div>
 </div>
 <div style="height:12px;"></div>
@@ -271,16 +271,16 @@
 
 <div class="field float">
 <input id="guestTotal" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
-<label for="guestTotal">Importo prenotazione (€)</label>
+<label for="guestTotal">Importo prenotazione (â¬)</label>
 </div>
 <div class="field float">
 <input id="guestBooking" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
-<label for="guestBooking">Importo booking (€)</label>
+<label for="guestBooking">Importo booking (â¬)</label>
 </div>
 <div class="field two-col payment-row">
 <div class="subfield field float">
 <input id="guestDeposit" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
-<label for="guestDeposit">Acconto (€)</label>
+<label for="guestDeposit">Acconto (â¬)</label>
 </div>
 <div class="subfield paywrap">
     <div aria-label="Tipo acconto" class="pay-pill" id="depositType" role="group">
@@ -295,7 +295,7 @@
     <input id="guestSaldo" inputmode="decimal" placeholder="0" type="number" min="0" step="0.01"/>
     
   
-    <label for="guestSaldo">Saldo (€)</label>
+    <label for="guestSaldo">Saldo (â¬)</label>
 </div>
   <div class="subfield paywrap">
     <div aria-label="Saldo" class="pay-pill" id="saldoType" role="group">
@@ -310,7 +310,7 @@
 <div class="field two-col payment-row">
   <div class="subfield field float">
     <input id="guestRemaining" inputmode="decimal" placeholder=" " type="number" min="0" step="0.01" readonly/>
-    <label for="guestRemaining">Rimanenza da pagare (€)</label>
+    <label for="guestRemaining">Rimanenza da pagare (â¬)</label>
   </div>
   <div class="subfield paywrap">
     <div aria-label="Registrazioni" class="pay-pill" id="regTags" role="group">
@@ -335,7 +335,7 @@
       <option value="arrivo">Arrivo</option>
       <option value="nome">Nome</option>
     </select>
-    <button class="gf-dir" id="guestSortDir" type="button" aria-label="Direzione ordinamento" aria-pressed="false">↓</button>
+    <button class="gf-dir" id="guestSortDir" type="button" aria-label="Direzione ordinamento" aria-pressed="false">â</button>
   </div>
   <div class="field gf-tile" aria-label="Periodo rapido">
     <select aria-label="Periodo" id="periodPreset4">
@@ -408,9 +408,9 @@
   <div class="bd">
     <div class="clean-topbar">
   <div class="clean-nav">
-    <button class="btn ghost" id="cleanPrev" type="button">←</button>
+    <button class="btn ghost" id="cleanPrev" type="button">â</button>
     <button class="btn" id="cleanToday" type="button">Oggi</button>
-    <button class="btn ghost" id="cleanNext" type="button">→</button>
+    <button class="btn ghost" id="cleanNext" type="button">â</button>
   </div>
   <div class="clean-actions">
     <button aria-label="Foglio lavanderia" class="sq-btn sq-btn-blue" id="btnLaundryFromPulizie" type="button">
@@ -428,7 +428,7 @@
     <div class="clean-date" id="cleanDateLabel">1 Gennaio 2026</div>
 
     <!-- Griglia: riga header (MAT..TAP) + 6 righe stanze (1..6) = 7 righe totali.
-         La prima cella in alto a sinistra è vuota. -->
+         La prima cella in alto a sinistra Ã¨ vuota. -->
         <div class="clean-grid-wrap">
       <div class="clean-grid" id="cleanGrid">
         <div class="c cell head corner"></div>
@@ -519,7 +519,7 @@
     <div class="hd">
       <h2>Lavanderia</h2>
       <div class="hd-actions">
-        <button aria-label="Crea foglio lavanderia" class="sq-btn sq-btn-orange" id="btnLaundryCreate" type="button">
+        <button aria-label="Crea report lavanderia" class="sq-btn sq-btn-orange" id="btnLaundryCreate" type="button">
           <div aria-hidden="true" class="sq-ico">
             <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
               <path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path>
@@ -547,7 +547,17 @@
     <div class="bd">
       <div class="laundry-sub">
         <div class="laundry-period" id="laundryPeriodLabel">—</div>
-        <div class="laundry-hint" id="laundryHint">Crea un foglio per il ritiro settimanale. Il conteggio riparte automaticamente.</div>
+        <div class="laundry-hint" id="laundryHint">Seleziona un intervallo (Da → A) e premi il tasto arancione per creare il report da dare alla lavanderia.</div>
+        <div class="laundry-range-row" aria-label="Intervallo report lavanderia">
+          <label class="laundry-range-field">
+            <span>Da</span>
+            <input id="laundryFrom" type="date" />
+          </label>
+          <label class="laundry-range-field">
+            <span>A</span>
+            <input id="laundryTo" type="date" />
+          </label>
+        </div>
       </div>
 
       <div class="laundry-grid" id="laundryGrid" aria-label="Totali lavanderia">
@@ -597,7 +607,7 @@
     <div class="laundry-code">TBI</div>
   </div>
   <div class="laundry-value" id="laundryValTBI">0</div>
-  <div class="laundry-label" id="laundryLblTBI">Bagno</div>
+  <div class="laundry-label" id="laundryLblTBI">Telo bidet</div>
 </div>
 <div class="laundry-tile" data-key="TAP">
   <div class="laundry-tile-top">
@@ -613,14 +623,14 @@
     <div class="laundry-code">TPI</div>
   </div>
   <div class="laundry-value" id="laundryValTPI">0</div>
-  <div class="laundry-label" id="laundryLblTPI">Picc.</div>
+  <div class="laundry-label" id="laundryLblTPI">Telo piscina</div>
 </div>
       </div>
 
       <!-- Print-friendly area -->
       <div class="laundry-print" id="laundryPrintArea" aria-hidden="true">
         <h3 class="laundry-print-title">Resoconto Lavanderia</h3>
-        <div class="laundry-print-range" id="laundryPrintRange">—</div>
+        <div class="laundry-print-range" id="laundryPrintRange">â</div>
         <table class="laundry-table" aria-label="Tabella totali lavanderia">
           <thead>
             <tr>
@@ -653,8 +663,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.180"></script>
-<script defer="" src="./app.js?v=1.180"></script>
+<script defer="" src="./config.js?v=1.181"></script>
+<script defer="" src="./app.js?v=1.181"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">

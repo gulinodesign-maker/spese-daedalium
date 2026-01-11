@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.180";
+const BUILD_VERSION = "1.181";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.180 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.181 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1160,7 +1160,7 @@ function showPage(page){
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.180: fallback visualizzazione Pulizie
+  // dDAE_1.181: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2958,7 +2958,7 @@ const buildPuliziePayload = () => {
 }
 
 
-// ===== CALENDARIO (dDAE_1.180) =====
+// ===== CALENDARIO (dDAE_1.181) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3292,7 +3292,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.180)
+   Lavanderia (dDAE_1.181)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -3328,6 +3328,36 @@ function setLaundryLabels_(){
   }
 }
 
+function getLaundryRangeEls_(){
+  return {
+    from: document.getElementById('laundryFrom'),
+    to: document.getElementById('laundryTo')
+  };
+}
+
+function setLaundryRangeInputs_(startDate, endDate){
+  const {from, to} = getLaundryRangeEls_();
+  if (from && startDate) from.value = String(startDate).slice(0,10);
+  if (to && endDate) to.value = String(endDate).slice(0,10);
+}
+
+function getLaundryRangeInputs_(){
+  const {from, to} = getLaundryRangeEls_();
+  const startDate = from ? String(from.value || '').trim() : '';
+  const endDate = to ? String(to.value || '').trim() : '';
+  return { startDate, endDate };
+}
+
+function ensureDefaultLaundryRange_(){
+  const {from, to} = getLaundryRangeEls_();
+  if (!from || !to) return;
+  if (from.value && to.value) return;
+  const today = startOfLocalDay(new Date());
+  const monday = startOfWeekMonday(today);
+  from.value = isoDate(monday);
+  to.value = isoDate(today);
+}
+
 function renderLaundry_(item){
   item = item ? sanitizeLaundryItem_(item) : null;
   state.laundry.current = item;
@@ -3336,7 +3366,7 @@ function renderLaundry_(item){
   const printRangeEl = document.getElementById("laundryPrintRange");
 
   if (!item){
-    if (rangeEl) rangeEl.textContent = "Nessun foglio ancora";
+    if (rangeEl) rangeEl.textContent = "Nessun report ancora";
     if (printRangeEl) printRangeEl.textContent = "";
     for (const k of LAUNDRY_COLS){
       const v = document.getElementById("laundryVal"+k);
@@ -3344,6 +3374,7 @@ function renderLaundry_(item){
     }
     const tbody = document.getElementById("laundryPrintBody");
     if (tbody) tbody.innerHTML = "";
+    ensureDefaultLaundryRange_();
     return;
   }
 
@@ -3352,6 +3383,9 @@ function renderLaundry_(item){
   const rangeText = (startLbl && endLbl) ? `${startLbl} → ${endLbl}` : (startLbl || endLbl || "—");
   if (rangeEl) rangeEl.textContent = rangeText;
   if (printRangeEl) printRangeEl.textContent = rangeText;
+
+  // quando selezioni un report, compila anche i due campi data
+  setLaundryRangeInputs_(item.startDate, item.endDate);
 
   for (const k of LAUNDRY_COLS){
     const v = document.getElementById("laundryVal"+k);
@@ -3384,73 +3418,123 @@ function renderLaundryHistory_(list){
 
   list.forEach((raw) => {
     const it = sanitizeLaundryItem_(raw);
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "item";
-    btn.style.width = "100%";
-    btn.style.textAlign = "left";
-    btn.style.cursor = "pointer";
-    btn.style.display = "flex";
-    btn.style.justifyContent = "space-between";
-    btn.style.alignItems = "center";
-    btn.style.gap = "10px";
 
-    const left = document.createElement("div");
-    const startLbl = it.startDate ? formatShortDateIT(it.startDate) : "";
-    const endLbl = it.endDate ? formatShortDateIT(it.endDate) : "";
+    const row = document.createElement('div');
+    row.className = 'item laundry-history-item';
+    row.setAttribute('role','button');
+    row.tabIndex = 0;
+    row.style.width = '100%';
+    row.style.textAlign = 'left';
+    row.style.cursor = 'pointer';
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.alignItems = 'center';
+    row.style.gap = '10px';
+
+    const left = document.createElement('div');
+    left.style.flex = '1 1 auto';
+    const startLbl = it.startDate ? formatShortDateIT(it.startDate) : '';
+    const endLbl = it.endDate ? formatShortDateIT(it.endDate) : '';
     left.innerHTML = `<div style="font-weight:950">${startLbl} → ${endLbl}</div><div style="font-size:12px;opacity:.75">${LAUNDRY_COLS.map(k=>`${k}:${it[k]||0}`).join(" · ")}</div>`;
 
-    const che = document.createElement("div");
-    che.innerHTML = `<svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M9 6l6 6-6 6"></path></svg>`;
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'laundry-del';
+    del.setAttribute('aria-label','Elimina report');
+    del.innerHTML = '×';
 
-    btn.appendChild(left);
-    btn.appendChild(che);
-
-    bindFastTap(btn, () => {
+    const onSelect = () => {
       renderLaundry_(it);
-      // scroll su
-      try{ window.scrollTo({ top: 0, behavior: "smooth" }); }catch(_){
-        window.scrollTo(0,0);
+      try{ window.scrollTo({ top: 0, behavior: "smooth" }); }catch(_){ window.scrollTo(0,0); }
+    };
+
+    // selezione report
+    bindFastTap(row, onSelect);
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelect();
       }
     });
 
-    host.appendChild(btn);
+    // cancellazione report (solo foglio lavanderia)
+    bindFastTap(del, async (ev) => {
+      try{
+        ev && ev.stopPropagation && ev.stopPropagation();
+        ev && ev.preventDefault && ev.preventDefault();
+      }catch(_){ }
+      const ok = confirm(`Eliminare il report ${startLbl} → ${endLbl}?\n\nQuesta azione NON modifica le pulizie.`);
+      if (!ok) return;
+      try{
+        await deleteLavanderiaReport_(it.id);
+        toast('Report eliminato');
+      }catch(e){
+        console.error(e);
+        toast(e && e.message ? e.message : 'Errore eliminazione');
+      }
+    }, true);
+
+    row.appendChild(left);
+    row.appendChild(del);
+    host.appendChild(row);
   });
 }
 
-async function loadLavanderia() {
+async function loadLavanderia(){
   setLaundryLabels_();
-  const hint = document.getElementById("laundryHint");
-  try {
-    const res = await api("lavanderia", { method:"GET", showLoader:false });
+  ensureDefaultLaundryRange_();
+  const hint = document.getElementById('laundryHint');
+  try{
+    const res = await api('lavanderia', { method:'GET', showLoader:false });
     const rows = Array.isArray(res) ? res
       : (res && Array.isArray(res.data) ? res.data
       : (res && res.data && Array.isArray(res.data.data) ? res.data.data
       : (res && Array.isArray(res.rows) ? res.rows
       : [])));
-    const list = (rows || []).map(sanitizeLaundryItem_).sort((a,b) => String(b.endDate||"").localeCompare(String(a.endDate||"")));
+
+    const list = (rows || []).map(sanitizeLaundryItem_)
+      .filter(x => x && x.id)
+      .sort((a,b) => String(b.endDate||'').localeCompare(String(a.endDate||'')));
+
     state.laundry.list = list;
     renderLaundryHistory_(list);
     renderLaundry_(list[0] || null);
-    if (hint) hint.textContent = "Crea un foglio per il ritiro settimanale. Il conteggio riparte automaticamente.";
-  } catch (e) {
-    if (hint) hint.textContent = "Offline o errore: non riesco a caricare lo storico.";
+
+    if (hint) hint.textContent = 'Seleziona un intervallo (Da → A) e premi il tasto arancione per creare il report da dare alla lavanderia.';
+  }catch(e){
+    if (hint) hint.textContent = 'Offline o errore: non riesco a caricare lo storico.';
     throw e;
   }
 }
 
-async function createLavanderiaReport_() {
-  const hint = document.getElementById("laundryHint");
-  if (hint) hint.textContent = "Sto creando il foglio…";
-  const res = await api("lavanderia", { method:"POST", body: {}, showLoader:true });
+async function createLavanderiaReport_(){
+  const hint = document.getElementById('laundryHint');
+  ensureDefaultLaundryRange_();
+  const { startDate, endDate } = getLaundryRangeInputs_();
+
+  if (!startDate || !endDate){
+    toast('Seleziona sia "Da" che "A"');
+    return null;
+  }
+  if (startDate > endDate){
+    toast('Intervallo non valido: "Da" deve essere prima di "A"');
+    return null;
+  }
+
+  if (hint) hint.textContent = 'Sto creando il report…';
+  const res = await api('lavanderia', { method:'POST', body:{ startDate, endDate }, showLoader:true });
   const item = sanitizeLaundryItem_(res && res.data ? res.data : res);
-  // ricarica storico
   await loadLavanderia();
   renderLaundry_(item);
-  if (hint) hint.textContent = "Foglio creato e salvato.";
+  if (hint) hint.textContent = 'Report creato e salvato. Puoi stamparlo.';
   return item;
 }
 
+async function deleteLavanderiaReport_(id){
+  if (!id) throw new Error('ID report mancante');
+  await api('lavanderia', { method:'DELETE', body:{ id }, showLoader:true });
+  await loadLavanderia();
+}
 
 /* Service Worker: forza update su iOS (cache-bust via query) */
 async function registerSW(){
@@ -3585,7 +3669,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.180: renderSpese allineato al backend ---
+// --- FIX dDAE_1.181: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3681,7 +3765,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.180: delete reale ospiti ---
+// --- FIX dDAE_1.181: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3715,7 +3799,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.180: mostra nome ospite ---
+// --- FIX dDAE_1.181: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
