@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.171";
+const BUILD_VERSION = "1.173";
 
 
 
@@ -2764,7 +2764,7 @@ async function init(){
     rows.forEach(r => {
       const room = String(r.stanza || r.room || "").trim();
       if (!room) return;
-      ["MAT","SIN","FED","TDO","TFA","TBI","TAP"].forEach(c => {
+      ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"].forEach(c => {
         const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${room}"][data-col="${c}"]`);
         if (!cell) return;
         const n = parseInt(r[c] ?? 0, 10);
@@ -2782,19 +2782,23 @@ async function init(){
       const data = toISODateLocal(day);
       const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
       // Supporta risposte: array diretto, oppure {data:[...]}
-      const rows = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : (res && Array.isArray(res.rows) ? res.rows : []));
+      const rows = Array.isArray(res) ? res
+        : (res && Array.isArray(res.data) ? res.data
+        : (res && res.data && Array.isArray(res.data.data) ? res.data.data
+        : (res && Array.isArray(res.rows) ? res.rows
+        : [])));
       if (rows.length) applyPulizieRows(rows);
       // altrimenti resta come sta
     }catch(_){
-      // offline/errore: resta vuota (coerente con "vuoto finché non salvato")
-      clearAllSlots();
+      // offline/errore: se stiamo cambiando giorno, resta vuota; se stiamo solo ricaricando dopo salvataggio, non tocchiamo
+      if (clearFirst) clearAllSlots();
     }
   };
 
 const buildPuliziePayload = () => {
     const data = getCleanDate();
     const rooms = ["1","2","3","4","5","6","RES"];
-    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP"];
+    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
     const rows = rooms.map(stanza => {
       const row = { data, stanza };
       cols.forEach(c => {

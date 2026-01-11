@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.171"),
+    url("./assets/bg-daedalium.png?v=1.173"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.171"),
+    url("./assets/bg-daedalium.png?v=1.173"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3130,12 +3130,12 @@ body.perf-lite *::after{
   --cg-corner: clamp(28px, 7vw, 44px);
   --cg-head: clamp(28px, 4.5vh, 34px);
   --cg-row: clamp(38px, 7vh, 54px);
-  --cg-col: calc((100% - var(--cg-corner) - (var(--cg-gap) * 7)) / 7);
+  --cg-col: calc((100% - var(--cg-corner) - (var(--cg-gap) * 8)) / 8);
 
   width: 100%;
   min-width: 0 !important;
   gap: var(--cg-gap);
-  grid-template-columns: var(--cg-corner) repeat(7, minmax(0, var(--cg-col)));
+  grid-template-columns: var(--cg-corner) repeat(8, minmax(0, var(--cg-col)));
   grid-template-rows: var(--cg-head) repeat(7, var(--cg-row));
 }
 
