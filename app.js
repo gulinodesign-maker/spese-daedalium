@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.183";
+const BUILD_VERSION = "1.184";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.183 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.184 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -657,11 +657,13 @@ function formatFullDateIT(d){
   try{
     const dt = (d instanceof Date) ? d : new Date(d);
     if (isNaN(dt)) return "";
+    const weekdays = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
     const months = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+    const wd = weekdays[dt.getDay()];
     const day = dt.getDate();
     const month = months[dt.getMonth()];
     const year = dt.getFullYear();
-    return `${day} ${month} ${year}`;
+    return `${wd} ${day} ${month} ${year}`;
   }catch(_){ return ""; }
 }
 
@@ -1160,7 +1162,7 @@ function showPage(page){
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.183: fallback visualizzazione Pulizie
+  // dDAE_1.184: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2959,7 +2961,7 @@ if (btnLaundryPrint){
 }
 
 
-// ===== CALENDARIO (dDAE_1.183) =====
+// ===== CALENDARIO (dDAE_1.184) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3293,7 +3295,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.183)
+   Lavanderia (dDAE_1.184)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -3625,7 +3627,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.183: renderSpese allineato al backend ---
+// --- FIX dDAE_1.184: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3721,7 +3723,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.183: delete reale ospiti ---
+// --- FIX dDAE_1.184: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3755,7 +3757,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.183: mostra nome ospite ---
+// --- FIX dDAE_1.184: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
