@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.166";
+const BUILD_VERSION = "1.167";
 
 
 
@@ -1402,7 +1402,7 @@ async function onPeriodChanged({ showLoader=false } = {}){
 
   // Aggiorna solo ciò che serve (evita chiamate inutili e loader continui)
   if (state.page === "ospiti") {
-    await loadOspiti(state.period || {});
+    await loadOspiti({ ...(state.period || {}), force:true });
     return;
   }
   if (state.page === "calendario") {
@@ -1497,7 +1497,7 @@ async function load({ showLoader=true } = {}){
   __lsSet("stanze", rows);
 }
 
-async function loadOspiti({ from="", to="" } = {}){
+async function loadOspiti({ from="", to="", force=false } = {}){
   // Prefill rapido da cache locale (poi refresh in background)
   const lsKey = `ospiti|${from}|${to}`;
   const hit = __lsGet(lsKey);
@@ -1509,7 +1509,7 @@ async function loadOspiti({ from="", to="" } = {}){
 
   // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
   const p = load({ showLoader:false });
-  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
+  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000, force });
 
   const [ , data ] = await Promise.all([p, pOspiti]);
   state.guests = Array.isArray(data) ? data : [];
@@ -2315,7 +2315,7 @@ if (!name) return toast("Inserisci il nome");
     try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
   }
 
-  await loadOspiti(state.period || {});
+  await loadOspiti({ ...(state.period || {}), force:true });
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
 
   if (isEdit){
@@ -2379,7 +2379,7 @@ function setupOspite(){
           toast("Ospite eliminato");
           invalidateApiCache("ospiti|");
           invalidateApiCache("stanze|");
-          await loadOspiti(state.period || {});
+          await loadOspiti({ ...(state.period || {}), force:true });
           showPage("ospiti");
         } catch (err) {
           toast(err?.message || "Errore");
@@ -2787,7 +2787,7 @@ async function init(){
       longFired = true;
       writeCell(slot, 0);
     }, 1000);
-};
+  };
 
   const tapSlot = (slot) => {
     writeCell(slot, readCell(slot) + 1);
@@ -3444,7 +3444,7 @@ function attachDeleteOspite(card, ospite){
     toast("Ospite eliminato");
     invalidateApiCache("ospiti|");
     invalidateApiCache("stanze|");
-    await loadOspiti(state.period || {});
+    await loadOspiti({ ...(state.period || {}), force:true });
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
