@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.169";
+const BUILD_VERSION = "1.170";
 
 
 
@@ -2781,7 +2781,9 @@ async function init(){
       const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
       const data = toISODateLocal(day);
       const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
-      if (Array.isArray(res) && res.length) applyPulizieRows(res);
+      // Supporta risposte: array diretto, oppure {data:[...]}
+      const rows = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : (res && Array.isArray(res.rows) ? res.rows : []));
+      if (rows.length) applyPulizieRows(rows);
       if (!(Array.isArray(res) && res.length) && clearFirst) clearAllSlots();
       // altrimenti resta come sta
     }catch(_){
