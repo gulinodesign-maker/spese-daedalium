@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.182";
+const BUILD_VERSION = "1.183";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.182 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.183 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1160,7 +1160,7 @@ function showPage(page){
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.182: fallback visualizzazione Pulizie
+  // dDAE_1.183: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2926,20 +2926,21 @@ const buildPuliziePayload = () => {
 
 
 // --- Lavanderia ---
-  const btnLaundryCreate = document.getElementById("btnLaundryCreate");
-  const btnLaundryPrint = document.getElementById("btnLaundryPrint");
+const btnLaundryCreate = document.getElementById("btnLaundryCreate");
+const btnLaundryPrint = document.getElementById("btnLaundryPrint");
 
-  if (btnLaundryCreate){
-    bindFastTap(btnLaundryCreate, async () => {
-      try{
-        showPage("lavanderia");
-}catch(e){
-        console.error(e);
-        try{ toast(e.message || "Errore"); }catch(_){}
-      }
-    });
-  }
-  if (btnLaundryPrint){
+if (btnLaundryCreate){
+  bindFastTap(btnLaundryCreate, async () => {
+    try{
+      // Crea il report SOLO qui, usando l'intervallo "Da → A"
+      await createLavanderiaReport_();
+    }catch(e){
+      console.error(e);
+      try{ toast(e.message || "Errore"); }catch(_){}
+    }
+  });
+}
+if (btnLaundryPrint){
     bindFastTap(btnLaundryPrint, () => {
       try{ window.print(); }catch(_){}
     });
@@ -2958,7 +2959,7 @@ const buildPuliziePayload = () => {
 }
 
 
-// ===== CALENDARIO (dDAE_1.182) =====
+// ===== CALENDARIO (dDAE_1.183) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3292,7 +3293,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.182)
+   Lavanderia (dDAE_1.183)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -3624,7 +3625,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.182: renderSpese allineato al backend ---
+// --- FIX dDAE_1.183: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3720,7 +3721,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.182: delete reale ospiti ---
+// --- FIX dDAE_1.183: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3754,7 +3755,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.182: mostra nome ospite ---
+// --- FIX dDAE_1.183: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;

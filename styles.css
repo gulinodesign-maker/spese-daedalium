@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.182"),
+    url("./assets/bg-daedalium.png?v=1.183"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.182"),
+    url("./assets/bg-daedalium.png?v=1.183"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1787,7 +1787,7 @@ body::before{
 #page-home #goTassaSoggiorno .home-main-glyph{ color: rgba(201,119,43,0.92); }
 #page-home #goPulizie .home-main-glyph{ color: rgba(15,23,42,0.92); }
 #page-home #goGuadagni .home-main-glyph{ color: rgba(176,92,18,0.92); }
-/* dDAE_1.182 - Ospiti: solo consultazione (azioni nascoste per ora) */
+/* dDAE_1.183 - Ospiti: solo consultazione (azioni nascoste per ora) */
 body[data-page="ospiti"] .guest-card .actions {
   display: flex !important;
 }
@@ -1897,7 +1897,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
+/* dDAE_1.183 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
 .sr-only{
   position:absolute !important;
   width:1px !important;
@@ -1958,7 +1958,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Ospiti: stanze come pallini azzurri */
+/* dDAE_1.183 — Ospiti: stanze come pallini azzurri */
 
 .rooms-dots{
   display:flex;
@@ -1989,7 +1989,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.182 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
+/* dDAE_1.183 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
 
 .rooms-stack{
   display:flex;
@@ -2101,7 +2101,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.182 — Matrimonio: pallino verde 'M' nella riga stanze */
+/* dDAE_1.183 — Matrimonio: pallino verde 'M' nella riga stanze */
 
 #page-ospite .room-dot-marriage{
   margin-left: 14px; /* un po' più a destra dopo la stanza 6 */
@@ -2114,7 +2114,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Acconto: pallini C/E come stanze */
+/* dDAE_1.183 — Acconto: pallini C/E come stanze */
 
 #page-ospite .pay-dots{
   display:grid;
@@ -2142,7 +2142,7 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* dDAE_1.182 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
+/* dDAE_1.183 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
 #page-ospite .pay-dots{
   place-items: center;
 }
@@ -2152,9 +2152,9 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.182 — Pay dots: bianchi quando non selezionati + più distanziati */
+/* dDAE_1.183 — Pay dots: bianchi quando non selezionati + più distanziati */
 
-/* dDAE_1.182 — Pay dots: niente riflesso/ombra e allineamento verticale */
+/* dDAE_1.183 — Pay dots: niente riflesso/ombra e allineamento verticale */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2162,7 +2162,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Colori pallini pagamento (bianchi se off) + niente ombre */
+/* dDAE_1.183 — Colori pallini pagamento (bianchi se off) + niente ombre */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2189,7 +2189,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — iOS: evita accavallamento label/value su date/number */
+/* dDAE_1.183 — iOS: evita accavallamento label/value su date/number */
 
 .field.float input[type="date"],
 .field.float input[type="number"],
@@ -2207,7 +2207,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.182 — Fix definitivo allineamento pallini pagamento */
+/* dDAE_1.183 — Fix definitivo allineamento pallini pagamento */
 
 #page-ospite .field.two-col.payment-row{
   display: grid;
@@ -2229,7 +2229,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Override anti-vincoli: nessun offset fisso su C/E */
+/* dDAE_1.183 — Override anti-vincoli: nessun offset fisso su C/E */
 
 #page-ospite #depositType,
 #page-ospite #saldoType{
@@ -2255,7 +2255,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Eliminazione totale label tipo saldo + paywrap pulito */
+/* dDAE_1.183 — Eliminazione totale label tipo saldo + paywrap pulito */
 
 #page-ospite .subfield.paywrap::before,
 #page-ospite .subfield.paywrap::after{
@@ -2264,7 +2264,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — mini led accanto ai prezzi (Acconto/Saldo) */
+/* dDAE_1.183 — mini led accanto ai prezzi (Acconto/Saldo) */
 .guest-led.mini-led{
   width: 10px;
   height: 10px;
@@ -2564,7 +2564,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background-image: linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40));
   border-color: rgba(255,255,255,.16);
 }
-/* ===== dDAE_1.182 FIX: HOME grid clickable (no flex override) ===== */
+/* ===== dDAE_1.183 FIX: HOME grid clickable (no flex override) ===== */
 #page-home .home-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2580,7 +2580,7 @@ body[data-page="ospiti"] .guest-card .actions {
   pointer-events: auto !important;
 }
 
-/* === dDAE_1.182 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
+/* === dDAE_1.183 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
 #page-home .home-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2598,7 +2598,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.182) ===== */
+/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.183) ===== */
 .guest-filter-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -2618,7 +2618,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
+/* dDAE_1.183 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
 .guest-filter-grid .gf-tile select{
   -webkit-appearance: none;
   appearance: none;
@@ -2662,7 +2662,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Ospiti: pulsante + in testata */
+/* dDAE_1.183 — Ospiti: pulsante + in testata */
 .btn-add-guest{
   width: 40px;
   height: 40px;
@@ -2686,7 +2686,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
+/* dDAE_1.183 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
 #page-ospite .field.two-col.payment-row{
   grid-template-columns: minmax(0,1fr) 170px !important;
 }
@@ -2746,7 +2746,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
+/* dDAE_1.183 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
 #page-ospite .pay-gap{
   opacity: 0;
   pointer-events: none;
@@ -2767,7 +2767,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.182 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.183 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2885,7 +2885,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.182 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.183 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -2901,7 +2901,7 @@ body.perf-lite *::after{
 }
 
 
-/* dDAE_1.182: riga spesa compatta (importo · data · motivazione) */
+/* dDAE_1.183: riga spesa compatta (importo · data · motivazione) */
 .spesa-line{
   display:flex;
   align-items:baseline;
@@ -3255,7 +3255,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   Lavanderia (dDAE_1.182)
+   Lavanderia (dDAE_1.183)
 ========================= */
 #page-lavanderia .bd{ padding-bottom: 18px; }
 .laundry-sub{ margin: 2px 0 14px 0; }
@@ -3360,7 +3360,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* ===== Lavanderia (dDAE_1.182) ===== */
+/* ===== Lavanderia (dDAE_1.183) ===== */
 .laundry-range-row{
   display:flex;
   gap:10px;
