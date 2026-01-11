@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.170";
+const BUILD_VERSION = "1.166";
 
 
 
@@ -421,8 +421,8 @@ const loadingState = {
   showTimer: null,
   shownAt: 0,
   isVisible: false,
-  delayMs: 900,      // opzionale: evita flicker se rapidissimo
-  minVisibleMs: 400, // opzionale: se compare non sparisce subito
+  delayMs: 500,      // opzionale: evita flicker se rapidissimo
+  minVisibleMs: 300, // opzionale: se compare non sparisce subito
 };
 
 function showLoading(){
@@ -1129,7 +1129,7 @@ function showPage(page){
   document.body.dataset.page = page;
 
   try { __rememberPage(page); } catch (_) {}
-  document.querySelectorAll(".page").forEach(s => { s.hidden = true; s.style.display = ""; });
+  document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
   if (el) el.hidden = false;
 
@@ -1155,6 +1155,14 @@ function showPage(page){
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
+
+  // dDAE_1.160: fallback visualizzazione Pulizie
+  try{
+    if (page === "pulizie"){
+      const el = document.getElementById("page-pulizie");
+      if (el) el.style.display = "block";
+    }
+  }catch(_){}
 
 }
 
@@ -1394,7 +1402,7 @@ async function onPeriodChanged({ showLoader=false } = {}){
 
   // Aggiorna solo ciò che serve (evita chiamate inutili e loader continui)
   if (state.page === "ospiti") {
-    await loadOspiti({ ...(state.period||{}), force:true });
+    await loadOspiti(state.period || {});
     return;
   }
   if (state.page === "calendario") {
@@ -1489,7 +1497,7 @@ async function load({ showLoader=true } = {}){
   __lsSet("stanze", rows);
 }
 
-async function loadOspiti({ from="", to="", force=false } = {}){
+async function loadOspiti({ from="", to="" } = {}){
   // Prefill rapido da cache locale (poi refresh in background)
   const lsKey = `ospiti|${from}|${to}`;
   const hit = __lsGet(lsKey);
@@ -1501,7 +1509,7 @@ async function loadOspiti({ from="", to="", force=false } = {}){
 
   // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
   const p = load({ showLoader:false });
-  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader: !(hit && Array.isArray(hit.data) && hit.data.length), ttlMs: 30*1000, force });
+  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
 
   const [ , data ] = await Promise.all([p, pOspiti]);
   state.guests = Array.isArray(data) ? data : [];
@@ -2307,7 +2315,7 @@ if (!name) return toast("Inserisci il nome");
     try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
   }
 
-  await loadOspiti({ ...(state.period||{}), force:true });
+  await loadOspiti(state.period || {});
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
 
   if (isEdit){
@@ -2371,7 +2379,7 @@ function setupOspite(){
           toast("Ospite eliminato");
           invalidateApiCache("ospiti|");
           invalidateApiCache("stanze|");
-          await loadOspiti({ ...(state.period||{}), force:true });
+          await loadOspiti(state.period || {});
           showPage("ospiti");
         } catch (err) {
           toast(err?.message || "Errore");
@@ -2727,8 +2735,6 @@ async function init(){
   const cleanNext = document.getElementById("cleanNext");
   const cleanToday = document.getElementById("cleanToday");
 
-  
-  
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
 
@@ -2740,9 +2746,6 @@ async function init(){
   const writeCell = (el, n) => {
     const val = Math.max(0, parseInt(n || 0, 10) || 0);
     el.textContent = val ? String(val) : "";
-  };
-  const clearCleanGrid = () => {
-    document.querySelectorAll("#page-pulizie .clean-grid .cell.slot").forEach(el => writeCell(el, 0));
   };
 
   const getCleanDate = () => {
@@ -2757,7 +2760,7 @@ async function init(){
     const rows = rooms.map(stanza => {
       const row = { data, stanza };
       cols.forEach(c => {
-        const cell = document.querySelector(`#page-pulizie .clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
+        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
         row[c] = cell ? readCell(cell) : 0;
       });
       return row;
@@ -2765,64 +2768,42 @@ async function init(){
     return { data, rows };
   };
 
-  const applyPulizieRows = (rows) => {
-    clearCleanGrid();
-    if (!Array.isArray(rows) || !rows.length) return;
-    rows.forEach(r => {
-      const stanza = String(r.stanza || "").trim();
-      if (!stanza) return;
-      ["MAT","SIN","FED","TDO","TFA","TBI","TAP"].forEach(c => {
-        const cell = document.querySelector(`#page-pulizie .clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
-        if (!cell) return;
-        const n = parseInt(r[c] ?? 0, 10);
-        writeCell(cell, isNaN(n) ? 0 : n);
-      });
-    });
-  };
-
-  const loadPulizieForDay = async () => {
-    // Regola richiesta: al cambio giorno la griglia DEVE essere subito vuota,
-    // e resta vuota finché non esistono dati salvati per quel giorno.
-    clearCleanGrid();
-    try{
-      const data = getCleanDate();
-      const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
-      if (Array.isArray(res) && res.length) applyPulizieRows(res);
-    }catch(_){
-      clearCleanGrid();
-    }
-  };
-
-  // Tap incrementa, long press (1s) azzera.
+  // Tap incrementa, long press (2s) azzera
   let pressTimer = null;
+  let pressTarget = null;
   let longFired = false;
   let lastTouchAt = 0;
 
   const clearPress = () => {
     if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+    pressTarget = null;
     longFired = false;
   };
 
-  const tapSlot = (slot) => writeCell(slot, readCell(slot) + 1);
-
-  const startLongPress = (slot) => {
+  const startPress = (slot) => {
     clearPress();
+    pressTarget = slot;
     pressTimer = setTimeout(() => {
       longFired = true;
       writeCell(slot, 0);
     }, 1000);
+};
+
+  const tapSlot = (slot) => {
+    writeCell(slot, readCell(slot) + 1);
   };
 
   if (cleanGrid){
-    // Touch iPhone: cattura e blocca la propagazione SOLO dentro la griglia
+    // Touch (iPhone)
     cleanGrid.addEventListener("touchstart", (e) => {
       const slot = e.target.closest && e.target.closest(".cell.slot");
       if (!slot) return;
       lastTouchAt = Date.now();
-      startLongPress(slot);
+      startPress(slot);
+      // blocca altri handler globali
       e.preventDefault();
       e.stopPropagation();
-    }, { capture:true, passive:false });
+    }, { passive: false, capture: true });
 
     cleanGrid.addEventListener("touchend", (e) => {
       const slot = e.target.closest && e.target.closest(".cell.slot");
@@ -2832,16 +2813,14 @@ async function init(){
       clearPress();
       e.preventDefault();
       e.stopPropagation();
-    }, { capture:true, passive:false });
+    }, { passive: false, capture: true });
 
     cleanGrid.addEventListener("touchcancel", (e) => {
-      const slot = e.target.closest && e.target.closest(".cell.slot");
-      if (!slot) return;
       clearPress();
       try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
-    }, { capture:true, passive:false });
+    }, { passive: false, capture: true });
 
-    // Click desktop + anti ghost click
+    // Click (desktop) + anti ghost-click dopo touch
     cleanGrid.addEventListener("click", (e) => {
       const slot = e.target.closest && e.target.closest(".cell.slot");
       if (!slot) return;
@@ -2866,27 +2845,6 @@ async function init(){
     }, true);
   }
 
-  // Carica dati del giorno corrente / selezionato
-  try{ loadPulizieForDay(); }catch(_){}
-};
-  }catch(_){}
-
-  try{
-    if (cleanToday){
-      cleanToday.addEventListener("click", () => {
-        // handler già esistente, qui solo refresh dati
-        setTimeout(() => { try{ loadPulizieForDay(); }catch(_){} }, 0);
-      }, true);
-    }
-  }catch(_){}
-
-  // Primo ingresso: carica subito i dati del giorno selezionato (o vuoto se non esiste)
-  try{ loadPulizieForDay(); }catch(_){}
-    }, true);
-  }
-    }, true);
-  }
-
   const updateCleanLabel = () => {
     const lab = document.getElementById("cleanDateLabel");
     if (!lab) return;
@@ -2900,31 +2858,18 @@ async function init(){
     d.setDate(d.getDate() + deltaDays);
     state.cleanDay = d.toISOString();
     updateCleanLabel();
-    try{ loadPulizieForDay(); }catch(_){ }
-      try{ loadPulizieForDay(); }catch(_){ }
-};
+  };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
-  try{ cleanPrev && cleanPrev.addEventListener("click", () => { try{ loadPulizieForDay(); }catch(_){} }, true); }catch(_){ }
   if (cleanNext) cleanNext.addEventListener("click", () => shiftClean(1));
-  try{ cleanNext && cleanNext.addEventListener("click", () => { try{ loadPulizieForDay(); }catch(_){} }, true); }catch(_){ }
   if (cleanToday) cleanToday.addEventListener("click", () => {
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
   });
-  try{ cleanToday && cleanToday.addEventListener("click", () => { try{ loadPulizieForDay(); }catch(_){} }, true); }catch(_){ }
 
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
-
-  // Restore pagina (evita rimbalzo in Home dopo reload)
-  try{
-    const p = (__restore && __restore.page) ? String(__restore.page) : null;
-    const p2 = p ? (__sanitizePage(p) || null) : null;
-    if (p2 && p2 !== "home") showPage(p2);
-  }catch(_){ }
-
 }
 
 
@@ -3499,7 +3444,7 @@ function attachDeleteOspite(card, ospite){
     toast("Ospite eliminato");
     invalidateApiCache("ospiti|");
     invalidateApiCache("stanze|");
-    await loadOspiti({ ...(state.period||{}), force:true });
+    await loadOspiti(state.period || {});
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
