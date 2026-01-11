@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.166";
+const BUILD_VERSION = "1.167";
 
 
 
@@ -421,8 +421,8 @@ const loadingState = {
   showTimer: null,
   shownAt: 0,
   isVisible: false,
-  delayMs: 500,      // opzionale: evita flicker se rapidissimo
-  minVisibleMs: 300, // opzionale: se compare non sparisce subito
+  delayMs: 900,      // opzionale: evita flicker se rapidissimo
+  minVisibleMs: 400, // opzionale: se compare non sparisce subito
 };
 
 function showLoading(){
@@ -1402,7 +1402,7 @@ async function onPeriodChanged({ showLoader=false } = {}){
 
   // Aggiorna solo ciò che serve (evita chiamate inutili e loader continui)
   if (state.page === "ospiti") {
-    await loadOspiti(state.period || {});
+    await loadOspiti({ ...(state.period||{}), force:true });
     return;
   }
   if (state.page === "calendario") {
@@ -1497,7 +1497,7 @@ async function load({ showLoader=true } = {}){
   __lsSet("stanze", rows);
 }
 
-async function loadOspiti({ from="", to="" } = {}){
+async function loadOspiti({ from="", to="", force=false } = {}){
   // Prefill rapido da cache locale (poi refresh in background)
   const lsKey = `ospiti|${from}|${to}`;
   const hit = __lsGet(lsKey);
@@ -1509,7 +1509,7 @@ async function loadOspiti({ from="", to="" } = {}){
 
   // ✅ Necessario per mostrare i "pallini letti" stanza-per-stanza nelle schede ospiti
   const p = load({ showLoader:false });
-  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader:true, ttlMs: 30*1000 });
+  const pOspiti = cachedGet("ospiti", { from, to }, { showLoader: !(hit && Array.isArray(hit.data) && hit.data.length), ttlMs: 30*1000, force });
 
   const [ , data ] = await Promise.all([p, pOspiti]);
   state.guests = Array.isArray(data) ? data : [];
@@ -2315,7 +2315,7 @@ if (!name) return toast("Inserisci il nome");
     try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
   }
 
-  await loadOspiti(state.period || {});
+  await loadOspiti({ ...(state.period||{}), force:true });
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
 
   if (isEdit){
@@ -2379,7 +2379,7 @@ function setupOspite(){
           toast("Ospite eliminato");
           invalidateApiCache("ospiti|");
           invalidateApiCache("stanze|");
-          await loadOspiti(state.period || {});
+          await loadOspiti({ ...(state.period||{}), force:true });
           showPage("ospiti");
         } catch (err) {
           toast(err?.message || "Errore");
@@ -2735,6 +2735,7 @@ async function init(){
   const cleanNext = document.getElementById("cleanNext");
   const cleanToday = document.getElementById("cleanToday");
 
+  
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
 
@@ -2768,68 +2769,69 @@ async function init(){
     return { data, rows };
   };
 
-  // Tap incrementa, long press (2s) azzera
+  // Intercetta i tap sulle celle Pulizie a livello documento (capture) così NON scattano handler di altre pagine.
   let pressTimer = null;
-  let pressTarget = null;
   let longFired = false;
   let lastTouchAt = 0;
 
   const clearPress = () => {
     if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
-    pressTarget = null;
     longFired = false;
   };
-
-  const startPress = (slot) => {
-    clearPress();
-    pressTarget = slot;
-    pressTimer = setTimeout(() => {
-      longFired = true;
-      writeCell(slot, 0);
-    }, 1000);
-};
 
   const tapSlot = (slot) => {
     writeCell(slot, readCell(slot) + 1);
   };
 
-  if (cleanGrid){
-    // Touch (iPhone)
-    cleanGrid.addEventListener("touchstart", (e) => {
-      const slot = e.target.closest && e.target.closest(".cell.slot");
-      if (!slot) return;
-      lastTouchAt = Date.now();
-      startPress(slot);
-      // blocca altri handler globali
-      e.preventDefault();
-      e.stopPropagation();
-    }, { passive: false, capture: true });
+  const startLongPress = (slot) => {
+    clearPress();
+    pressTimer = setTimeout(() => {
+      longFired = true;
+      writeCell(slot, 0);
+    }, 1000); // 1 secondo
+  };
 
-    cleanGrid.addEventListener("touchend", (e) => {
-      const slot = e.target.closest && e.target.closest(".cell.slot");
-      if (!slot) return;
-      if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
-      if (!longFired) tapSlot(slot);
-      clearPress();
-      e.preventDefault();
-      e.stopPropagation();
-    }, { passive: false, capture: true });
+  const isPulizieSlot = (target) => {
+    const slot = target && target.closest && target.closest("#page-pulizie .clean-grid .cell.slot");
+    return slot || null;
+  };
 
-    cleanGrid.addEventListener("touchcancel", (e) => {
-      clearPress();
-      try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
-    }, { passive: false, capture: true });
+  // Touch iPhone
+  document.addEventListener("touchstart", (e) => {
+    const slot = isPulizieSlot(e.target);
+    if (!slot) return;
+    lastTouchAt = Date.now();
+    startLongPress(slot);
+    e.preventDefault();
+    e.stopPropagation();
+  }, { capture:true, passive:false });
 
-    // Click (desktop) + anti ghost-click dopo touch
-    cleanGrid.addEventListener("click", (e) => {
-      const slot = e.target.closest && e.target.closest(".cell.slot");
-      if (!slot) return;
-      if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
-      tapSlot(slot);
-      e.preventDefault();
-      e.stopPropagation();
-    }, true);
-  }
+  document.addEventListener("touchend", (e) => {
+    const slot = isPulizieSlot(e.target);
+    if (!slot) return;
+    if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+    if (!longFired) tapSlot(slot);
+    clearPress();
+    e.preventDefault();
+    e.stopPropagation();
+  }, { capture:true, passive:false });
+
+  document.addEventListener("touchcancel", (e) => {
+    const slot = isPulizieSlot(e.target);
+    if (!slot) return;
+    clearPress();
+    try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
+  }, { capture:true, passive:false });
+
+  // Click desktop + ghost click protection dopo touch
+  document.addEventListener("click", (e) => {
+    const slot = isPulizieSlot(e.target);
+    if (!slot) return;
+    if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
+    tapSlot(slot);
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
 
   if (cleanSave){
     cleanSave.addEventListener("click", async (e) => {
@@ -2842,6 +2844,8 @@ async function init(){
       }catch(err){
         toast(String(err && err.message || "Errore salvataggio pulizie"));
       }
+    }, true);
+  }
     }, true);
   }
 
@@ -2870,6 +2874,14 @@ async function init(){
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
+
+  // Restore pagina (evita rimbalzo in Home dopo reload)
+  try{
+    const p = (__restore && __restore.page) ? String(__restore.page) : null;
+    const p2 = p ? (__sanitizePage(p) || null) : null;
+    if (p2 && p2 !== "home") showPage(p2);
+  }catch(_){ }
+
 }
 
 
@@ -3444,7 +3456,7 @@ function attachDeleteOspite(card, ospite){
     toast("Ospite eliminato");
     invalidateApiCache("ospiti|");
     invalidateApiCache("stanze|");
-    await loadOspiti(state.period || {});
+    await loadOspiti({ ...(state.period||{}), force:true });
   });
   const actions = card.querySelector(".actions") || card;
   actions.appendChild(btn);
