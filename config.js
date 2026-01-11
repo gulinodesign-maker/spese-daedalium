@@ -1,4 +1,4 @@
-/* dDAE Config - dDAE_1.189 */
+/* dDAE Config - dDAE_1.188 */
 const API_BASE_URL = "https://script.google.com/macros/s/AKfycbxw-OfBbRDWtWl4ETSnXllHg0i17wyNWON8oyjerPzzR_qz6EJ5eDRw0u3pTZnJa_4/exec";
 const API_KEY = "daedalium2026";
 // Tassa di soggiorno: € per persona (>10 anni) per notte
