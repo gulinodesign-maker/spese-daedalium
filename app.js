@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.168";
+const BUILD_VERSION = "1.169";
 
 
 
@@ -2736,39 +2736,6 @@ async function init(){
   const cleanToday = document.getElementById("cleanToday");
 
   
-  const cleanGrid = document.getElementById("cleanGrid");
-  const cleanSave = document.getElementById("cleanSave");
-
-  const readCell = (el) => {
-    const v = String(el.textContent || "").trim();
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  };
-  const writeCell = (el, n) => {
-    const val = Math.max(0, parseInt(n || 0, 10) || 0);
-    el.textContent = val ? String(val) : "";
-  };
-
-  const getCleanDate = () => {
-    const d = state.cleanDay ? new Date(state.cleanDay) : new Date();
-    return toISODateLocal(d);
-  };
-
-  const buildPuliziePayload = () => {
-    const data = getCleanDate();
-    const rooms = ["1","2","3","4","5","6","RES"];
-    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP"];
-    const rows = rooms.map(stanza => {
-      const row = { data, stanza };
-      cols.forEach(c => {
-        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
-        row[c] = cell ? readCell(cell) : 0;
-      });
-      return row;
-    });
-    return { data, rows };
-  };
-
   
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
@@ -2829,23 +2796,12 @@ async function init(){
       const data = getCleanDate();
       const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
       if (Array.isArray(res) && res.length) applyPulizieRows(res);
-      // se res vuoto -> resta vuota
     }catch(_){
-      // se errore rete -> resta vuota (non trascina valori dal giorno prima)
       clearCleanGrid();
     }
   };
 
-  // Intercetta tap/press SOLO quando la pagina corrente è "pulizie"
-  const isPulizieActive = () => {
-    try{
-      const p = String(document.body.dataset.page || "");
-      const sec = document.getElementById("page-pulizie");
-      return (p === "pulizie") && sec && !sec.hidden;
-    }catch(_){ return false; }
-  };
-
-  // Touch iPhone
+  // Tap incrementa, long press (1s) azzera.
   let pressTimer = null;
   let longFired = false;
   let lastTouchAt = 0;
@@ -2855,60 +2811,54 @@ async function init(){
     longFired = false;
   };
 
-  const tapSlot = (slot) => {
-    writeCell(slot, readCell(slot) + 1);
-  };
+  const tapSlot = (slot) => writeCell(slot, readCell(slot) + 1);
 
   const startLongPress = (slot) => {
     clearPress();
     pressTimer = setTimeout(() => {
       longFired = true;
       writeCell(slot, 0);
-    }, 1000); // 1 secondo
+    }, 1000);
   };
 
-  const getSlotFromEvent = (target) => {
-    try{
-      if (!isPulizieActive()) return null;
-      const slot = target && target.closest && target.closest("#page-pulizie .clean-grid .cell.slot");
-      return slot || null;
-    }catch(_){ return null; }
-  };
+  if (cleanGrid){
+    // Touch iPhone: cattura e blocca la propagazione SOLO dentro la griglia
+    cleanGrid.addEventListener("touchstart", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      lastTouchAt = Date.now();
+      startLongPress(slot);
+      e.preventDefault();
+      e.stopPropagation();
+    }, { capture:true, passive:false });
 
-  document.addEventListener("touchstart", (e) => {
-    const slot = getSlotFromEvent(e.target);
-    if (!slot) return;
-    lastTouchAt = Date.now();
-    startLongPress(slot);
-    e.preventDefault();
-    e.stopPropagation();
-  }, { capture:true, passive:false });
+    cleanGrid.addEventListener("touchend", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+      if (!longFired) tapSlot(slot);
+      clearPress();
+      e.preventDefault();
+      e.stopPropagation();
+    }, { capture:true, passive:false });
 
-  document.addEventListener("touchend", (e) => {
-    const slot = getSlotFromEvent(e.target);
-    if (!slot) return;
-    if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
-    if (!longFired) tapSlot(slot);
-    clearPress();
-    e.preventDefault();
-    e.stopPropagation();
-  }, { capture:true, passive:false });
+    cleanGrid.addEventListener("touchcancel", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      clearPress();
+      try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
+    }, { capture:true, passive:false });
 
-  document.addEventListener("touchcancel", (e) => {
-    const slot = getSlotFromEvent(e.target);
-    if (!slot) return;
-    clearPress();
-    try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
-  }, { capture:true, passive:false });
-
-  document.addEventListener("click", (e) => {
-    const slot = getSlotFromEvent(e.target);
-    if (!slot) return;
-    if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
-    tapSlot(slot);
-    e.preventDefault();
-    e.stopPropagation();
-  }, true);
+    // Click desktop + anti ghost click
+    cleanGrid.addEventListener("click", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
+      tapSlot(slot);
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+  }
 
   if (cleanSave){
     cleanSave.addEventListener("click", async (e) => {
@@ -2924,13 +2874,9 @@ async function init(){
     }, true);
   }
 
-  // Aggancia loadPulizieForDay ai controlli giorno (prev/next/oggi)
-  try{
-    const _oldShift = shiftClean;
-    shiftClean = (deltaDays) => {
-      _oldShift(deltaDays);
-      try{ loadPulizieForDay(); }catch(_){}
-    };
+  // Carica dati del giorno corrente / selezionato
+  try{ loadPulizieForDay(); }catch(_){}
+};
   }catch(_){}
 
   try{
@@ -2967,11 +2913,14 @@ async function init(){
 };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
+  try{ cleanPrev && cleanPrev.addEventListener("click", () => { try{ loadPulizieForDay(); }catch(_){} }, true); }catch(_){ }
   if (cleanNext) cleanNext.addEventListener("click", () => shiftClean(1));
+  try{ cleanNext && cleanNext.addEventListener("click", () => { try{ loadPulizieForDay(); }catch(_){} }, true); }catch(_){ }
   if (cleanToday) cleanToday.addEventListener("click", () => {
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
   });
+  try{ cleanToday && cleanToday.addEventListener("click", () => { try{ loadPulizieForDay(); }catch(_){} }, true); }catch(_){ }
 
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
