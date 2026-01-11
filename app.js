@@ -669,6 +669,15 @@ function startOfLocalDay(d){
   return dt;
 }
 
+function toISODateLocal(d){
+  const dt = startOfLocalDay(d);
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth()+1).padStart(2,"0");
+  const da = String(dt.getDate()).padStart(2,"0");
+  return `${y}-${m}-${da}`;
+}
+
+
 
 function spesaCategoryClass(s){
   // "campo X": categoria (fallback: aliquotaIva)
@@ -2727,16 +2736,138 @@ async function init(){
   const cleanToday = document.getElementById("cleanToday");
 
   const cleanGrid = document.getElementById("cleanGrid");
+  const cleanSave = document.getElementById("cleanSave");
+
+  const readSlotValue = (el) => {
+    const v = String(el.textContent || "").trim();
+    const n = parseInt(v, 10);
+    return isNaN(n) ? 0 : n;
+  };
+
+  const setSlotValue = (el, n) => {
+    const val = Math.max(0, parseInt(n || 0, 10) || 0);
+    el.textContent = val ? String(val) : "";
+  };
+
+  const clearAllSlots = () => {
+    document.querySelectorAll(".clean-grid .cell.slot").forEach(el => setSlotValue(el, 0));
+  };
+
+  const collectPulizieRows = () => {
+    const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
+    const data = toISODateLocal(day);
+    const rooms = ["1","2","3","4","5","6","RES"];
+    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP"];
+
+    const rows = rooms.map(room => {
+      const row = { data, stanza: room };
+      cols.forEach(c => {
+        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${room}"][data-col="${c}"]`);
+        row[c] = cell ? readSlotValue(cell) : 0;
+      });
+      return row;
+    });
+
+    return { data, rows };
+  };
+
+  const applyPulizieRows = (rows) => {
+    clearAllSlots();
+    if (!Array.isArray(rows)) return;
+    rows.forEach(r => {
+      const room = String(r.stanza || r.room || "").trim();
+      if (!room) return;
+      ["MAT","SIN","FED","TDO","TFA","TBI","TAP"].forEach(c => {
+        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${room}"][data-col="${c}"]`);
+        if (!cell) return;
+        const n = parseInt(r[c] ?? 0, 10);
+        setSlotValue(cell, isNaN(n) ? 0 : n);
+      });
+    });
+  };
+
+  const loadPulizieForDay = async () => {
+    try{
+      const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
+      const data = toISODateLocal(day);
+      const res = await api("pulizie", { method:"GET", params:{ data }, showLoader:false });
+      if (Array.isArray(res)) applyPulizieRows(res);
+      else clearAllSlots();
+    }catch(_){
+      // se offline/non raggiungibile, lascia i valori correnti
+    }
+  };
+
+  // TAP = incrementa. Long-press 2s = cancella.
+  let pressTimer = null;
+  let pressSlot = null;
+  let longPressFired = false;
+
+  const cancelPress = () => {
+    if (pressTimer){
+      clearTimeout(pressTimer);
+      pressTimer = null;
+    }
+    pressSlot = null;
+    longPressFired = false;
+  };
+
+  const startLongPress = (slot) => {
+    if (pressTimer) clearTimeout(pressTimer);
+    longPressFired = false;
+    pressSlot = slot;
+    pressTimer = setTimeout(() => {
+      longPressFired = true;
+      setSlotValue(slot, 0);
+    }, 2000);
+  };
+
+  const doTapIncrement = (slot) => {
+    const n = readSlotValue(slot) + 1;
+    setSlotValue(slot, n);
+  };
+
   if (cleanGrid){
-    // Per ora cliccare le celle non deve fare nulla
+    // iOS: touch
+    cleanGrid.addEventListener("touchstart", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      startLongPress(slot);
+    }, { passive: true });
+
+    cleanGrid.addEventListener("touchend", (e) => {
+      const slot = e.target.closest && e.target.closest(".cell.slot");
+      if (!slot) return;
+      if (pressTimer){
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+      if (!longPressFired) doTapIncrement(slot);
+      longPressFired = false;
+      pressSlot = null;
+    }, { passive: true });
+
+    cleanGrid.addEventListener("touchcancel", () => cancelPress(), { passive: true });
+
+    // Desktop click
     cleanGrid.addEventListener("click", (e) => {
       const slot = e.target.closest && e.target.closest(".cell.slot");
       if (!slot) return;
-      e.preventDefault();
-      e.stopPropagation();
-    }, true);
+      doTapIncrement(slot);
+    });
   }
 
+  if (cleanSave){
+    cleanSave.addEventListener("click", async () => {
+      try{
+        const payload = collectPulizieRows();
+        await api("pulizie", { method:"POST", body: payload });
+        toast("Pulizie salvate");
+      }catch(err){
+        toast("Errore salvataggio pulizie");
+      }
+    });
+  }
 
   const updateCleanLabel = () => {
     const lab = document.getElementById("cleanDateLabel");
@@ -2751,6 +2882,8 @@ async function init(){
     d.setDate(d.getDate() + deltaDays);
     state.cleanDay = d.toISOString();
     updateCleanLabel();
+  try{ loadPulizieForDay(); }catch(_){ }
+    try{ loadPulizieForDay(); }catch(_){ }
   };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
@@ -2758,6 +2891,7 @@ async function init(){
   if (cleanToday) cleanToday.addEventListener("click", () => {
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
+    try{ loadPulizieForDay(); }catch(_){ }
   });
 
   // inizializza label se apri direttamente la pagina
