@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.177"),
+    url("./assets/bg-daedalium.png?v=1.178"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.177"),
+    url("./assets/bg-daedalium.png?v=1.178"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3246,4 +3246,103 @@ grid-template-rows: 34px repeat(7, 54px);
     --cg-row-h: 40px;
   }
   #page-pulizie .clean-grid .cell.head{ font-size: 10px; }
+}
+
+
+/* ===== Lavanderia (dDAE_1.178) ===== */
+.lav-topbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.lav-period {
+  font-weight: 700;
+  margin: 6px 0 12px;
+  opacity: .9;
+}
+
+.lav-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(8, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.lav-grid .cell {
+  border-radius: 12px;
+  padding: 10px 10px;
+  text-align: center;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.lav-grid .cell.head {
+  font-weight: 800;
+  letter-spacing: .02em;
+  background: rgba(255,255,255,.12);
+}
+
+.lav-grid .cell.rowlbl {
+  font-weight: 800;
+  text-align: left;
+  padding-left: 12px;
+}
+
+.lav-grid .cell.val {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.lav-note {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: .85;
+}
+
+.lav-history .subttl {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-weight: 800;
+}
+
+#lavHistoryList .lav-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  margin-bottom: 8px;
+}
+
+#lavHistoryList .lav-item .meta {
+  font-size: 12px;
+  opacity: .85;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #page-lavanderia, #page-lavanderia * {
+    visibility: visible !important;
+  }
+  #page-lavanderia {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .lav-topbar, #hamburgerBtn, .launcher, .home, .build {
+    display: none !important;
+  }
+  .card {
+    box-shadow: none !important;
+  }
 }
