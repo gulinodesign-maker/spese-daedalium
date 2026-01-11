@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.186";
+const BUILD_VERSION = "1.187";
 
 
 
@@ -635,12 +635,27 @@ function formatLongDateIT(value){
 function formatShortDateIT(input){
   try{
     if (!input) return "";
-    const s = String(input);
-    const iso = s.slice(0, 10); // YYYY-MM-DD
+    const s = String(input).trim();
+
+    // ISO datetime (con T/Z): non usare slice(0,10) perché può "scalare" di 1 giorno
+    if (s.includes("T")) {
+      const dt = new Date(s);
+      if (!isNaN(dt)){
+        const dd = String(dt.getDate()).padStart(2,"0");
+        const mm = String(dt.getMonth()+1).padStart(2,"0");
+        const yy = String(dt.getFullYear()).slice(-2);
+        return `${dd}/${mm}/${yy}`;
+      }
+    }
+
+    // YYYY-MM-DD
+    const iso = s.slice(0, 10);
     if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
       const [y,m,d] = iso.split("-");
       return `${d}/${m}/${y.slice(-2)}`;
     }
+
+    // fallback Date parse
     const dt = new Date(s);
     if (!isNaN(dt)){
       const dd = String(dt.getDate()).padStart(2,"0");
@@ -653,6 +668,7 @@ function formatShortDateIT(input){
     return "";
   }
 }
+
 
 function formatFullDateIT(d){
   try{
