@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.170";
+const BUILD_VERSION = "1.171";
 
 
 
@@ -2784,7 +2784,6 @@ async function init(){
       // Supporta risposte: array diretto, oppure {data:[...]}
       const rows = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : (res && Array.isArray(res.rows) ? res.rows : []));
       if (rows.length) applyPulizieRows(rows);
-      if (!(Array.isArray(res) && res.length) && clearFirst) clearAllSlots();
       // altrimenti resta come sta
     }catch(_){
       // offline/errore: resta vuota (coerente con "vuoto finché non salvato")
