@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.177"),
+    url("./assets/bg-daedalium.png?v=1.186"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.177"),
+    url("./assets/bg-daedalium.png?v=1.186"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3255,7 +3255,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   Lavanderia (dDAE_1.185)
+   Lavanderia (dDAE_1.186)
 ========================= */
 #page-lavanderia .bd{ padding-bottom: 18px; }
 .laundry-sub{ margin: 2px 0 14px 0; }
@@ -3417,23 +3417,60 @@ grid-template-rows: 34px repeat(7, 54px);
   flex: 0 0 auto;
 }
 
+.laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
+
 .laundry-history-wrap{ margin-top: 14px; }
 .laundry-history-wrap .section-title{ margin: 0 0 8px 0; }
 
-.laundry-print{ display:none; }
+.laundry-print{
+  display:none;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(15,23,42,0.14);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.96);
+}
+
+.laundry-print-title{
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-weight: 950;
+  color: #fff;
+  background: linear-gradient(90deg, rgba(201,119,43,0.92), rgba(43,124,180,0.92));
+}
+
+.laundry-print-range{
+  margin: 10px 4px 0;
+  font-weight: 900;
+  color: var(--text);
+}
 
 .laundry-table{
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 10px;
   font-size: 12px;
+  border-radius: 14px;
+  overflow: hidden;
 }
+
 .laundry-table th, .laundry-table td{
   border: 1px solid rgba(15,23,42,0.18);
   padding: 8px 10px;
   text-align:left;
 }
-.laundry-table th{ font-weight: 950; background: rgba(15,23,42,0.04); }
+
+.laundry-table th{
+  font-weight: 950;
+  color: var(--text);
+  background: rgba(216,189,151,0.28);
+}
+
+.laundry-table tr td:last-child{ font-weight: 950; }
+
+
 
 @media print {
   body{ background:#fff !important; }
@@ -3444,4 +3481,8 @@ grid-template-rows: 34px repeat(7, 54px);
   #page-lavanderia .laundry-grid{ display:none !important; }
   #page-lavanderia .laundry-sub{ display:none !important; }
   #page-lavanderia .laundry-print{ display:block !important; }
+  /* stampa con colori */
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  #page-lavanderia .laundry-print{ display:block !important; }
+
 }

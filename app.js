@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.185";
+const BUILD_VERSION = "1.186";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.185 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.186 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1165,7 +1165,7 @@ function showPage(page){
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.185: fallback visualizzazione Pulizie
+  // dDAE_1.186: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2964,7 +2964,7 @@ const buildPuliziePayload = () => {
 }
 
 
-// ===== CALENDARIO (dDAE_1.185) =====
+// ===== CALENDARIO (dDAE_1.186) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3298,7 +3298,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.185)
+   Lavanderia (dDAE_1.186)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -3413,7 +3413,7 @@ function renderLaundryHistory_(list){
     del.type = "button";
     del.className = "laundry-del";
     del.setAttribute("aria-label", "Elimina report");
-    del.innerHTML = "✕";
+    del.innerHTML = `<span class="x">✕</span>`;
 
     bindFastTap(del, async (ev) => {
       try {
@@ -3431,12 +3431,8 @@ function renderLaundryHistory_(list){
       }
     }, true);
 
-    const che = document.createElement("div");
-    che.innerHTML = `<svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M9 6l6 6-6 6"></path></svg>`;
-
     btn.appendChild(left);
     btn.appendChild(del);
-    btn.appendChild(che);
 
     bindFastTap(btn, () => {
       renderLaundry_(it);
@@ -3635,7 +3631,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.185: renderSpese allineato al backend ---
+// --- FIX dDAE_1.186: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3731,7 +3727,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.185: delete reale ospiti ---
+// --- FIX dDAE_1.186: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3765,7 +3761,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.185: mostra nome ospite ---
+// --- FIX dDAE_1.186: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
