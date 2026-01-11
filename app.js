@@ -380,9 +380,6 @@ window.addEventListener("unhandledrejection", (e) => {
 const state = {
   cleanDay: null,
 
-  lavanderiaReports: [],
-  lavanderiaSelectedId: null,
-
   motivazioni: [],
   spese: [],
   report: null,
@@ -1059,6 +1056,7 @@ function bindHomeDelegation(){
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
     const lav = e.target.closest && e.target.closest("#goLavanderia");
     if (lav){ hideLauncher(); showPage("lavanderia"); return; }
+
 const g = e.target.closest && e.target.closest("#goGuadagni");
     if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
 
@@ -1159,8 +1157,8 @@ function showPage(page){
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
+  if (page === "lavanderia") { loadLavanderia().then(()=>renderLavanderia()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
-  if (page === "lavanderia") { ensureLavanderiaData({ showLoader:true }).then(()=>renderLavanderia()).catch(e=>toast(e.message)); }
 
   // dDAE_1.160: fallback visualizzazione Pulizie
   try{
@@ -2663,145 +2661,79 @@ function refreshFloatingLabels(){
 }
 
 
-async 
-// ===== LAVANDERIA (dDAE_1.178) =====
-async function ensureLavanderiaData({ showLoader = true } = {}){
-  const res = await api("lavanderia", { method:"GET", showLoader });
-  const rows = Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []);
-  rows.sort((a,b) => {
-    const ae = String(a.endDate || a.end_date || a.to || a.updatedAt || a.createdAt || "");
-    const be = String(b.endDate || b.end_date || b.to || b.updatedAt || b.createdAt || "");
-    return (be > ae) ? 1 : (be < ae ? -1 : 0);
-  });
-  state.lavanderiaReports = rows;
-  if (!state.lavanderiaSelectedId && rows.length) {
-    state.lavanderiaSelectedId = String(rows[0].id || "");
+
+// --- Lavanderia (report settimanale) ---
+const LAV_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
+
+async function loadLavanderia(){
+  const data = await api("lavanderia", { method:"GET", showLoader:true });
+  state.lavanderiaReports = Array.isArray(data) ? data : [];
+  // report corrente = ultimo per default
+  if (!state.lavanderiaCurrent && state.lavanderiaReports.length){
+    state.lavanderiaCurrent = state.lavanderiaReports[state.lavanderiaReports.length - 1];
   }
-  if (state.lavanderiaSelectedId && !rows.some(r => String(r.id||"") === String(state.lavanderiaSelectedId))) {
-    state.lavanderiaSelectedId = rows.length ? String(rows[0].id||"") : null;
-  }
-  return rows;
+  return state.lavanderiaReports;
 }
 
-function __lavGetSelected(){
-  const id = state.lavanderiaSelectedId;
-  const rows = state.lavanderiaReports || [];
-  if (!rows.length) return null;
-  if (!id) return rows[0];
-  return rows.find(r => String(r.id||"") === String(id)) || rows[0];
-}
-
-function __lavISOtoDate(iso){
-  try{
-    if (!iso) return null;
-    return startOfLocalDay(new Date(String(iso).slice(0,10) + "T00:00:00"));
-  }catch(_){ return null; }
+function normalizeReport_(r){
+  if (!r) return null;
+  const out = { ...r };
+  // compat: alcune varianti possibili
+  out.startDate = out.startDate || out.startdate || out.from || out.start || "";
+  out.endDate   = out.endDate   || out.enddate   || out.to   || out.end   || "";
+  LAV_COLS.forEach(k => { out[k] = parseInt(out[k] ?? 0, 10) || 0; });
+  return out;
 }
 
 function renderLavanderia(){
-  const rep = __lavGetSelected();
-  const lab = document.getElementById("lavPeriodLabel");
-  const list = document.getElementById("lavHistoryList");
+  const grid = document.getElementById("laundryGrid");
+  const period = document.getElementById("laundryPeriod");
+  const hist = document.getElementById("laundryHistory");
+  if (!grid || !period || !hist) return;
 
-  if (!rep){
-    if (lab) lab.textContent = "Nessun resoconto ancora. Premi “Crea foglio”.";
-    ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"].forEach(c=>{
-      const el = document.getElementById("lavVal"+c);
-      if (el) el.textContent = "0";
-    });
-    if (list) list.innerHTML = "";
+  const reps = Array.isArray(state.lavanderiaReports) ? state.lavanderiaReports.map(normalizeReport_) : [];
+  const cur = normalizeReport_(state.lavanderiaCurrent) || (reps.length ? reps[reps.length-1] : null);
+
+  if (!cur){
+    period.textContent = "Nessun foglio creato.";
+    grid.innerHTML = "";
+    hist.innerHTML = '<div class="mini-note">Crea il primo foglio con “Crea foglio”.</div>';
     return;
   }
 
-  const startISO = String(rep.startDate || rep.start_date || rep.from || "");
-  const endISO = String(rep.endDate || rep.end_date || rep.to || "");
-  const sd = __lavISOtoDate(startISO);
-  const ed = __lavISOtoDate(endISO);
-  if (lab){
-    const a = sd ? formatFullDateIT(sd) : startISO;
-    const b = ed ? formatFullDateIT(ed) : endISO;
-    lab.textContent = `${a} → ${b}`;
+  period.textContent = `${cur.startDate || "—"} → ${cur.endDate || "—"}`;
+
+  // Grid (solo totali)
+  let html = '<div class="lg-row lg-head">';
+  LAV_COLS.forEach(c => { html += `<div class="lg-cell">${c}</div>`; });
+  html += '</div><div class="lg-row">';
+  LAV_COLS.forEach(c => { html += `<div class="lg-cell lg-val">${cur[c] || 0}</div>`; });
+  html += '</div>';
+  grid.innerHTML = html;
+
+  // Storico (cliccabile)
+  if (!reps.length){
+    hist.innerHTML = "";
+    return;
   }
-
-  ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"].forEach(c=>{
-    const el = document.getElementById("lavVal"+c);
-    const n = parseInt(rep[c] ?? 0, 10);
-    if (el) el.textContent = (!isNaN(n) && n>0) ? String(n) : "0";
-  });
-
-  if (list){
-    const rows = state.lavanderiaReports || [];
-    list.innerHTML = "";
-    rows.forEach((r, idx) => {
-      const id = String(r.id || "");
-      const sISO = String(r.startDate || r.start_date || r.from || "");
-      const eISO = String(r.endDate || r.end_date || r.to || "");
-      const sD = __lavISOtoDate(sISO);
-      const eD = __lavISOtoDate(eISO);
-      const title = `${sD ? formatFullDateIT(sD) : sISO} → ${eD ? formatFullDateIT(eD) : eISO}`;
-
-      const item = document.createElement("div");
-      item.className = "lav-item";
-      item.dataset.id = id;
-
-      const left = document.createElement("div");
-      const strong = document.createElement("div");
-      strong.style.fontWeight = "800";
-      strong.textContent = title;
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      meta.textContent = `Foglio #${rows.length - idx}`;
-      left.appendChild(strong);
-      left.appendChild(meta);
-
-      const btn = document.createElement("button");
-      btn.className = "btn ghost";
-      btn.type = "button";
-      btn.textContent = (String(state.lavanderiaSelectedId||"") === id) ? "Selezionato" : "Apri";
-
-      btn.addEventListener("click", (e)=>{
-        e.preventDefault(); e.stopPropagation();
-        state.lavanderiaSelectedId = id;
-        renderLavanderia();
-      }, true);
-
-      item.appendChild(left);
-      item.appendChild(btn);
-      list.appendChild(item);
-    });
-  }
+  const items = reps.slice().reverse().map((r, i) => {
+    const label = `${r.startDate || "—"} → ${r.endDate || "—"}`;
+    const isActive = (cur.id && r.id && String(cur.id)===String(r.id));
+    return `<button class="hist-item ${isActive ? "on":""}" type="button" data-id="${String(r.id||"")}">${label}</button>`;
+  }).join("");
+  hist.innerHTML = `<div class="hist-title">Storico</div>${items}`;
 }
 
-async function createLavanderiaReport({ navigate = true } = {}){
-  const rep = await api("lavanderia", { method:"POST", body:{}, showLoader:true });
-  await ensureLavanderiaData({ showLoader:false });
-  if (rep && rep.id) state.lavanderiaSelectedId = String(rep.id);
-  if (navigate) showPage("lavanderia");
-  try{ toast("Foglio lavanderia creato"); }catch(_){}
-  try{ renderLavanderia(); }catch(_){}
-  return rep;
+async function createLavanderia(){
+  const rep = await api("lavanderia", { method:"POST", showLoader:true });
+  state.lavanderiaCurrent = rep;
+  await loadLavanderia();
+  renderLavanderia();
+  showPage("lavanderia");
 }
 
-function setupLavanderia(){
-  const createBtn = document.getElementById("lavCreateBtn");
-  const printBtn = document.getElementById("lavPrintBtn");
 
-  if (createBtn){
-    createBtn.addEventListener("click", async (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      try{ await createLavanderiaReport({ navigate:false }); }
-      catch(err){ toast(err && err.message || "Errore creazione foglio"); }
-    }, true);
-  }
-  if (printBtn){
-    printBtn.addEventListener("click", (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      try{ window.print(); }catch(_){}
-    }, true);
-  }
-}
-
-function init(){
+async function init(){
   // Perf mode: deve girare DOPO che body esiste e DOPO init delle costanti
   applyPerfMode();
   const __restore = __readRestoreState();
@@ -2809,7 +2741,6 @@ function init(){
   setupHeader();
   setupHome();
   setupCalendario();
-  setupLavanderia();
 
     setupOspite();
   initFloatingLabels();
@@ -2882,7 +2813,8 @@ function init(){
 
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
-  const cleanLavBtn = document.getElementById("cleanLavBtn");
+  const cleanLaundry = document.getElementById("cleanLaundry");
+
 
   const readCell = (el) => {
     const v = String(el.textContent || "").trim();
@@ -3033,20 +2965,6 @@ const buildPuliziePayload = () => {
         toast(String(err && err.message || "Errore salvataggio pulizie"));
       }
     }, true);
-
-
-  if (cleanLavBtn){
-    cleanLavBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try{
-        await createLavanderiaReport({ navigate:true });
-      }catch(err){
-        toast(String(err && err.message || "Errore creazione foglio lavanderia"));
-      }
-    }, true);
-  }
-
   }
 
   const updateCleanLabel = () => {
@@ -3077,6 +2995,43 @@ const buildPuliziePayload = () => {
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
   try{ loadPulizieForDay(); }catch(_){ }
+
+  // Lavanderia: crea foglio dal periodo automatico
+  if (cleanLaundry){
+    cleanLaundry.addEventListener("click", async (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      try{ await createLavanderia(); }
+      catch(err){ toast(String(err && err.message || "Errore creazione foglio lavanderia")); }
+    });
+  }
+
+  // Pagina Lavanderia
+  const laundryCreate = document.getElementById("laundryCreate");
+  const laundryPrint  = document.getElementById("laundryPrint");
+  const laundryHistory = document.getElementById("laundryHistory");
+
+  if (laundryCreate){
+    laundryCreate.addEventListener("click", async ()=>{
+      try{ await createLavanderia(); }
+      catch(err){ toast(String(err && err.message || "Errore creazione foglio lavanderia")); }
+    });
+  }
+  if (laundryPrint){
+    laundryPrint.addEventListener("click", ()=>{
+      try{ window.print(); }catch(_){ }
+    });
+  }
+  if (laundryHistory){
+    laundryHistory.addEventListener("click", (e)=>{
+      const b = e.target.closest && e.target.closest("button[data-id]");
+      if (!b) return;
+      const id = b.getAttribute("data-id");
+      const reps = Array.isArray(state.lavanderiaReports) ? state.lavanderiaReports : [];
+      const found = reps.find(r => String(r.id||"") === String(id));
+      if (found){ state.lavanderiaCurrent = found; renderLavanderia(); }
+    });
+  }
 
 }
 

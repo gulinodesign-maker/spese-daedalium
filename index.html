@@ -56,7 +56,7 @@
 </svg></div>
 <div class="home-main-label">Spese</div>
 </button>
-<button aria-label="Calendario" class="home-main" data-go="calendario" id="goCalendario" type="button">
+<button aria-label="Calendario" class="home-main" id="goCalendario" data-go="calendario" type="button">
 <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M7 3v3"></path>
 <path d="M17 3v3"></path>
@@ -91,7 +91,19 @@
 <path d="M8 12l-2 9h12l-2-9"></path>
 </svg></div>
 <div class="home-main-label">Pulizie</div>
-</button><button aria-label="Lavanderia" class="home-main" id="goLavanderia" type="button"><div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M7 10V6a5 5 0 0 1 10 0v4"></path><path d="M5 10h14l-1.2 11.2A2 2 0 0 1 15.8 23H8.2a2 2 0 0 1-2-1.8L5 10Z"></path><path d="M9 14h6"></path><path d="M9.5 18h5"></path></svg></div><div class="home-main-label">Lavanderia</div></button>
+</button>
+<button aria-label="Lavanderia" class="home-main" id="goLavanderia" aria-label="Lavanderia" type="button">
+<div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
+<path d="M9 3h6"></path>
+<path d="M10 3v3"></path>
+<path d="M14 3v3"></path>
+<path d="M8 6h8"></path>
+<path d="M9 6v3a3 3 0 0 0 6 0V6"></path>
+<path d="M7 12h10"></path>
+<path d="M8 12l-2 9h12l-2-9"></path>
+</svg></div>
+<div class="home-main-label">Lavanderia</div>
+</button>
 <button aria-label="Guadagni" class="home-main" id="goGuadagni" type="button">
 <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M7 9V7.5A2.5 2.5 0 0 1 9.5 5h5A2.5 2.5 0 0 1 17 7.5V9"></path>
@@ -148,7 +160,7 @@
 <h2>Spese</h2>
 <div class="hd-actions">
 <button aria-label="Grafico e riepilogo" class="sq-btn sq-btn-blue" id="btnSpeseInsights" type="button">
-<div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
+<div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
 <path d="M4 19V5"></path>
 <path d="M4 19h16"></path>
 <path d="M7 16v-4"></path>
@@ -158,7 +170,7 @@
 </svg></div>
 </button>
 <button aria-label="Aggiungi spesa" class="sq-btn sq-btn-orange" id="btnAddSpesa" type="button">
-<div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></div>
+<div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></div>
 </button>
 </div>
 </div>
@@ -169,18 +181,20 @@
 <!-- options injected by JS -->
 </select>
 </div>
+
 <div class="field period-sort">
-<select aria-label="Ordina spese" id="speseSort">
-<option value="date">Ordina: data</option>
-<option value="insert">Ordina: inserimento</option>
-<option value="motivazione">Ordina: motivazione</option>
-</select>
+  <select aria-label="Ordina spese" id="speseSort">
+    <option value="date">Ordina: data</option>
+    <option value="insert">Ordina: inserimento</option>
+    <option value="motivazione">Ordina: motivazione</option>
+  </select>
 </div>
+
 </div>
 <div id="speseViewList">
 <div class="list" id="speseList"></div>
 </div>
-<div hidden="" id="speseViewInsights">
+<div id="speseViewInsights" hidden>
 <div class="kpi-stack kpi-top" style="margin-top:12px;">
 <div class="kpi-card">
 <div class="kpi-label">Totale spese</div>
@@ -197,7 +211,7 @@
 </div>
 <div style="height:12px;"></div>
 <div class="chart-wrap">
-<canvas aria-label="Grafico a torta per categoria" height="320" id="pieCanvas" width="320"></canvas>
+<canvas aria-label="Grafico a torta per categoria" id="pieCanvas" width="320" height="320"></canvas>
 </div>
 <div class="legend" id="pieLegend"></div>
 </div>
@@ -205,22 +219,27 @@
 </div>
 </section>
 <!-- 3) RIEPILOGO -->
+
+
 <!-- 4) GRAFICO -->
+
+
 <!-- Pagina Ospite (DB) -->
 <section aria-label="Nuovo ospite" class="page" hidden="" id="page-ospite">
 <div class="content">
 <div class="ospite-wrap">
 <div class="card guest-form-card">
 <div class="hd">
-<h2 id="ospiteFormTitle">Nuovo ospite</h2>
-<div class="guest-hd-actions" hidden="" id="ospiteHdActions">
-<button aria-label="Vai al calendario" class="tl-btn tl-indigo" data-guest-cal="" title="Calendario" type="button">
-<span class="sr-only">Calendario</span>
-</button>
-<button aria-label="Torna alla lista ospiti" class="tl-btn tl-green" data-guest-back="" type="button"><span class="sr-only">Indietro</span></button>
-<button aria-label="Modifica ospite" class="tl-btn tl-yellow" data-guest-edit="" type="button"><span class="sr-only">Modifica</span></button>
-<button aria-label="Elimina ospite" class="tl-btn tl-red" data-guest-del="" type="button"><span class="sr-only">Elimina</span></button>
-</div>
+  <h2 id="ospiteFormTitle">Nuovo ospite</h2>
+  <div class="guest-hd-actions" id="ospiteHdActions" hidden>
+    
+    <button class="tl-btn tl-indigo" type="button" data-guest-cal aria-label="Vai al calendario" title="Calendario">
+      <span class="sr-only">Calendario</span>
+    </button>
+<button class="tl-btn tl-green" type="button" data-guest-back aria-label="Torna alla lista ospiti"><span class="sr-only">Indietro</span></button>
+    <button class="tl-btn tl-yellow" type="button" data-guest-edit aria-label="Modifica ospite"><span class="sr-only">Modifica</span></button>
+    <button class="tl-btn tl-red" type="button" data-guest-del aria-label="Elimina ospite"><span class="sr-only">Elimina</span></button>
+  </div>
 </div>
 <div class="bd form-stack">
 <div class="field float">
@@ -256,10 +275,11 @@
 <button aria-pressed="false" class="room-dot" data-room="4" type="button">4</button>
 <button aria-pressed="false" class="room-dot" data-room="5" type="button">5</button>
 <button aria-pressed="false" class="room-dot" data-room="6" type="button">6</button>
-<button aria-pressed="false" class="room-dot room-dot-marriage" id="roomMarriage" title="Matrimonio" type="button">M</button>
+<button aria-pressed="false" class="room-dot room-dot-marriage" id="roomMarriage" type="button" title="Matrimonio">M</button>
 </div>
-<div class="rooms-readonly" hidden="" id="roomsReadOnly"></div>
+<div id="roomsReadOnly" class="rooms-readonly" hidden></div>
 </div>
+
 <div class="field float">
 <input id="guestTotal" inputmode="decimal" placeholder=" " step="0.01" type="number"/>
 <label for="guestTotal">Importo prenotazione (€)</label>
@@ -274,204 +294,222 @@
 <label for="guestDeposit">Acconto (€)</label>
 </div>
 <div class="subfield paywrap">
-<div aria-label="Tipo acconto" class="pay-pill" id="depositType" role="group">
-<button aria-pressed="true" class="pay-dot pay-cash selected" data-type="contante" title="Contanti" type="button"></button>
-<button aria-pressed="false" class="pay-dot pay-elec" data-type="elettronico" title="Elettronico" type="button"></button>
-<button aria-pressed="false" class="pay-dot pay-receipt" data-receipt="1" title="Ricevuta" type="button"></button>
+    <div aria-label="Tipo acconto" class="pay-pill" id="depositType" role="group">
+  <button class="pay-dot pay-cash selected" data-type="contante" aria-pressed="true" type="button" title="Contanti"></button>
+  <button class="pay-dot pay-elec" data-type="elettronico" aria-pressed="false" type="button" title="Elettronico"></button>
+  <button class="pay-dot pay-receipt" data-receipt="1" aria-pressed="false" type="button" title="Ricevuta"></button>
 </div>
 </div>
 </div>
 <div class="field two-col payment-row">
-<div class="subfield field float">
-<input id="guestSaldo" inputmode="decimal" min="0" placeholder="0" step="0.01" type="number"/>
-<label for="guestSaldo">Saldo (€)</label>
+  <div class="subfield field float">
+    <input id="guestSaldo" inputmode="decimal" placeholder="0" type="number" min="0" step="0.01"/>
+    
+  
+    <label for="guestSaldo">Saldo (€)</label>
 </div>
-<div class="subfield paywrap">
-<div aria-label="Saldo" class="pay-pill" id="saldoType" role="group">
-<button aria-pressed="true" class="pay-dot pay-cash selected" data-type="contante" title="Contanti" type="button"></button>
-<button aria-pressed="false" class="pay-dot pay-elec" data-type="elettronico" title="Elettronico" type="button"></button>
-<button aria-pressed="false" class="pay-dot pay-receipt" data-receipt="1" title="Ricevuta" type="button"></button>
+  <div class="subfield paywrap">
+    <div aria-label="Saldo" class="pay-pill" id="saldoType" role="group">
+      <button class="pay-dot pay-cash selected" data-type="contante" aria-pressed="true" type="button" title="Contanti"></button>
+      <button class="pay-dot pay-elec" data-type="elettronico" aria-pressed="false" type="button" title="Elettronico"></button>
+      <button class="pay-dot pay-receipt" data-receipt="1" aria-pressed="false" type="button" title="Ricevuta"></button>
+    </div>
+    
+  </div>
 </div>
-</div>
-</div>
+
 <div class="field two-col payment-row">
-<div class="subfield field float">
-<input id="guestRemaining" inputmode="decimal" min="0" placeholder=" " readonly="" step="0.01" type="number"/>
-<label for="guestRemaining">Rimanenza da pagare (€)</label>
+  <div class="subfield field float">
+    <input id="guestRemaining" inputmode="decimal" placeholder=" " type="number" min="0" step="0.01" readonly/>
+    <label for="guestRemaining">Rimanenza da pagare (€)</label>
+  </div>
+  <div class="subfield paywrap">
+    <div aria-label="Registrazioni" class="pay-pill" id="regTags" role="group">
+      <button class="pay-dot pay-ps" data-flag="ps" aria-pressed="false" type="button" title="Polizia di Stato"></button>
+      <span class="pay-dot pay-gap" aria-hidden="true"></span>
+      <button class="pay-dot pay-istat" data-flag="istat" aria-pressed="false" type="button" title="ISTAT"></button>
+    </div>
+  </div>
 </div>
-<div class="subfield paywrap">
-<div aria-label="Registrazioni" class="pay-pill" id="regTags" role="group">
-<button aria-pressed="false" class="pay-dot pay-ps" data-flag="ps" title="Polizia di Stato" type="button"></button>
-<span aria-hidden="true" class="pay-dot pay-gap"></span>
-<button aria-pressed="false" class="pay-dot pay-istat" data-flag="istat" title="ISTAT" type="button"></button>
-</div>
-</div>
-</div>
+
+
 <button class="btn primary" id="createGuestCard" type="button">Crea scheda cliente</button>
 </div>
 </div>
 </div>
 </div>
-</section><section aria-label="Ospiti" class="page" hidden="" id="page-ospiti"><div class="content"><div class="ospite-wrap"><div class="card guest-cards-card"><div class="hd"><h2>Ospiti</h2><button aria-label="Nuovo ospite" class="btn-add-guest" id="btnNewGuestOspiti" type="button">+</button></div><div class="bd">
-<div aria-label="Filtri ospiti" class="guest-filter-grid">
-<div aria-label="Ordinamento" class="field gf-tile gf-sort">
-<select aria-label="Ordina ospiti per" id="guestSortBy">
-<option value="inserimento">Inserimento</option>
-<option value="arrivo">Arrivo</option>
-<option value="nome">Nome</option>
-</select>
-<button aria-label="Direzione ordinamento" aria-pressed="false" class="gf-dir" id="guestSortDir" type="button">↓</button>
+</section><section aria-label="Ospiti" class="page" hidden="" id="page-ospiti"><div class="content"><div class="ospite-wrap"><div class="card guest-cards-card"><div class="hd"><h2>Ospiti</h2><button id="btnNewGuestOspiti" class="btn-add-guest" type="button" aria-label="Nuovo ospite">+</button></div><div class="bd">
+<div class="guest-filter-grid" aria-label="Filtri ospiti">
+  <div class="field gf-tile gf-sort" aria-label="Ordinamento">
+    <select id="guestSortBy" aria-label="Ordina ospiti per">
+      <option value="inserimento">Inserimento</option>
+      <option value="arrivo">Arrivo</option>
+      <option value="nome">Nome</option>
+    </select>
+    <button class="gf-dir" id="guestSortDir" type="button" aria-label="Direzione ordinamento" aria-pressed="false">↓</button>
+  </div>
+  <div class="field gf-tile" aria-label="Periodo rapido">
+    <select aria-label="Periodo" id="periodPreset4">
+      <!-- options injected by JS -->
+    </select>
+  </div>
+  <div class="field gf-tile" aria-label="Da">
 </div>
-<div aria-label="Periodo rapido" class="field gf-tile">
-<select aria-label="Periodo" id="periodPreset4">
-<!-- options injected by JS -->
-</select>
-</div>
-<div aria-label="Da" class="field gf-tile">
-</div>
-<div aria-label="A" class="field gf-tile">
+  <div class="field gf-tile" aria-label="A">
 </div>
 </div>
 <div class="guest-cards" id="guestCards"></div></div></div></div></div></section>
+
 <!-- CALENDARIO -->
 <section aria-label="Calendario" class="page" hidden="" id="page-calendario">
-<div class="content calendar-page">
-<div class="cal-nav">
-<div aria-label="Navigazione calendario" class="cal-nav-row" role="group">
-<button aria-label="Seleziona data" class="cal-nav-btn" id="calPickBtn" type="button">
-<svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M7 3v3"></path>
-<path d="M17 3v3"></path>
-<path d="M4.5 8h15"></path>
-<path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
-</svg>
-</button>
-<button aria-label="Settimana corrente" class="cal-nav-btn" id="calTodayBtn" type="button">
-<svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<circle cx="12" cy="12" r="8"></circle>
-<circle cx="12" cy="12" r="2"></circle>
-</svg>
-</button>
-<button aria-label="Settimana precedente" class="cal-nav-btn" id="calPrevBtn" type="button">
-<svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M15 18l-6-6 6-6"></path>
-</svg>
-</button>
-<button aria-label="Settimana successiva" class="cal-nav-btn" id="calNextBtn" type="button">
-<svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
-<path d="M9 18l6-6-6-6"></path>
-</svg>
-</button>
-<input aria-label="Data" class="cal-date-input" id="calDateInput" type="date"/>
-</div>
-</div>
-<div class="cal-body">
-<div class="cal-week-title" id="calWeekTitle">GENNAIO</div>
-<div class="cal-grid-wrap">
-<div aria-label="Calendario settimanale" class="cal-grid" id="calGrid"></div>
-</div>
-</div>
-<div aria-label="Legenda letti" class="cal-legend">
-<div class="cal-legend-item"><span aria-hidden="true" class="cal-legend-dot bed-dot bed-dot-m"></span><span>Matrimoniale</span></div>
-<div class="cal-legend-item"><span aria-hidden="true" class="cal-legend-dot bed-dot bed-dot-s"></span><span>Singolo</span></div>
-<div class="cal-legend-item"><span aria-hidden="true" class="cal-legend-dot bed-dot bed-dot-c"></span><span>Culla</span></div>
+  <div class="content calendar-page">
+    <div class="cal-nav">
+      <div class="cal-nav-row" role="group" aria-label="Navigazione calendario">
+        <button class="cal-nav-btn" id="calPickBtn" type="button" aria-label="Seleziona data">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 3v3"></path>
+            <path d="M17 3v3"></path>
+            <path d="M4.5 8h15"></path>
+            <path d="M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"></path>
+          </svg>
+        </button>
+        <button class="cal-nav-btn" id="calTodayBtn" type="button" aria-label="Settimana corrente">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+          </svg>
+        </button>
+        <button class="cal-nav-btn" id="calPrevBtn" type="button" aria-label="Settimana precedente">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+        </button>
+        <button class="cal-nav-btn" id="calNextBtn" type="button" aria-label="Settimana successiva">
+          <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 18l6-6-6-6"></path>
+          </svg>
+        </button>
+
+        <input id="calDateInput" type="date" class="cal-date-input" aria-label="Data" />
+      </div>
+    </div>
+
+    <div class="cal-body">
+      <div class="cal-week-title" id="calWeekTitle">GENNAIO</div>
+      <div class="cal-grid-wrap">
+      <div class="cal-grid" id="calGrid" aria-label="Calendario settimanale"></div>
+    </div>
+    </div>
+
+    <div class="cal-legend" aria-label="Legenda letti">
+      <div class="cal-legend-item"><span class="cal-legend-dot bed-dot bed-dot-m" aria-hidden="true"></span><span>Matrimoniale</span></div>
+      <div class="cal-legend-item"><span class="cal-legend-dot bed-dot bed-dot-s" aria-hidden="true"></span><span>Singolo</span></div>
+      <div class="cal-legend-item"><span class="cal-legend-dot bed-dot bed-dot-c" aria-hidden="true"></span><span>Culla</span></div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="page" id="page-pulizie" style="display:none;">
+  <div class="hd">
+    <div class="title"></div>
+  </div>
+
+  <div class="bd">
+    <div class="clean-topbar">
+      <button class="btn ghost" id="cleanPrev" type="button">←</button>
+      <button class="btn" id="cleanToday" type="button">Oggi</button>
+      <button class="btn ghost" id="cleanNext" type="button">→</button>
+    </div>
+
+    <div class="clean-date" id="cleanDateLabel">1 Gennaio 2026</div>
+
+    <!-- Griglia: riga header (MAT..TAP) + 6 righe stanze (1..6) = 7 righe totali.
+         La prima cella in alto a sinistra è vuota. -->
+        <div class="clean-grid-wrap">
+      <div class="clean-grid" id="cleanGrid">
+        <div class="c cell head corner"></div>
+        <div class="c cell head">MAT</div>
+        <div class="c cell head">SIN</div>
+        <div class="c cell head">FED</div>
+        <div class="c cell head">TDO</div>
+        <div class="c cell head">TFA</div>
+        <div class="c cell head">TBI</div>
+        <div class="c cell head">TAP</div>
+        <div class="c cell head">TPI</div>
+        <div class="c cell room r1">1</div>
+        <div class="c cell slot" data-room="1" data-col="MAT"></div>
+        <div class="c cell slot" data-room="1" data-col="SIN"></div>
+        <div class="c cell slot" data-room="1" data-col="FED"></div>
+        <div class="c cell slot" data-room="1" data-col="TDO"></div>
+        <div class="c cell slot" data-room="1" data-col="TFA"></div>
+        <div class="c cell slot" data-room="1" data-col="TBI"></div>
+        <div class="c cell slot" data-room="1" data-col="TAP"></div>
+        <div class="c cell slot" data-room="1" data-col="TPI"></div>
+        <div class="c cell room r2">2</div>
+        <div class="c cell slot" data-room="2" data-col="MAT"></div>
+        <div class="c cell slot" data-room="2" data-col="SIN"></div>
+        <div class="c cell slot" data-room="2" data-col="FED"></div>
+        <div class="c cell slot" data-room="2" data-col="TDO"></div>
+        <div class="c cell slot" data-room="2" data-col="TFA"></div>
+        <div class="c cell slot" data-room="2" data-col="TBI"></div>
+        <div class="c cell slot" data-room="2" data-col="TAP"></div>
+        <div class="c cell slot" data-room="2" data-col="TPI"></div>
+        <div class="c cell room r3">3</div>
+        <div class="c cell slot" data-room="3" data-col="MAT"></div>
+        <div class="c cell slot" data-room="3" data-col="SIN"></div>
+        <div class="c cell slot" data-room="3" data-col="FED"></div>
+        <div class="c cell slot" data-room="3" data-col="TDO"></div>
+        <div class="c cell slot" data-room="3" data-col="TFA"></div>
+        <div class="c cell slot" data-room="3" data-col="TBI"></div>
+        <div class="c cell slot" data-room="3" data-col="TAP"></div>
+        <div class="c cell slot" data-room="3" data-col="TPI"></div>
+        <div class="c cell room r4">4</div>
+        <div class="c cell slot" data-room="4" data-col="MAT"></div>
+        <div class="c cell slot" data-room="4" data-col="SIN"></div>
+        <div class="c cell slot" data-room="4" data-col="FED"></div>
+        <div class="c cell slot" data-room="4" data-col="TDO"></div>
+        <div class="c cell slot" data-room="4" data-col="TFA"></div>
+        <div class="c cell slot" data-room="4" data-col="TBI"></div>
+        <div class="c cell slot" data-room="4" data-col="TAP"></div>
+        <div class="c cell slot" data-room="4" data-col="TPI"></div>
+        <div class="c cell room r5">5</div>
+        <div class="c cell slot" data-room="5" data-col="MAT"></div>
+        <div class="c cell slot" data-room="5" data-col="SIN"></div>
+        <div class="c cell slot" data-room="5" data-col="FED"></div>
+        <div class="c cell slot" data-room="5" data-col="TDO"></div>
+        <div class="c cell slot" data-room="5" data-col="TFA"></div>
+        <div class="c cell slot" data-room="5" data-col="TBI"></div>
+        <div class="c cell slot" data-room="5" data-col="TAP"></div>
+        <div class="c cell slot" data-room="5" data-col="TPI"></div>
+        <div class="c cell room r6">6</div>
+        <div class="c cell slot" data-room="6" data-col="MAT"></div>
+        <div class="c cell slot" data-room="6" data-col="SIN"></div>
+        <div class="c cell slot" data-room="6" data-col="FED"></div>
+        <div class="c cell slot" data-room="6" data-col="TDO"></div>
+        <div class="c cell slot" data-room="6" data-col="TFA"></div>
+        <div class="c cell slot" data-room="6" data-col="TBI"></div>
+        <div class="c cell slot" data-room="6" data-col="TAP"></div>
+        <div class="c cell slot" data-room="6" data-col="TPI"></div>
+        <div class="c cell room rres">RES</div>
+        <div class="c cell slot" data-room="RES" data-col="MAT"></div>
+        <div class="c cell slot" data-room="RES" data-col="SIN"></div>
+        <div class="c cell slot" data-room="RES" data-col="FED"></div>
+        <div class="c cell slot" data-room="RES" data-col="TDO"></div>
+        <div class="c cell slot" data-room="RES" data-col="TFA"></div>
+        <div class="c cell slot" data-room="RES" data-col="TBI"></div>
+        <div class="c cell slot" data-room="RES" data-col="TAP"></div>
+        <div class="c cell slot" data-room="RES" data-col="TPI"></div>
+      </div>
+    </div>
+
+<div class="clean-actions">
+      <button class="btn" id="cleanSave" type="button">Salva</button>
+      <button class="btn ghost" id="cleanLaundry" type="button">Foglio lavanderia</button>
 </div>
 </div>
 </section>
-<section class="page" id="page-pulizie" style="display:none;">
-<div class="hd">
-<div class="title"></div>
-</div>
-<div class="bd">
-<div class="clean-topbar">
-<button class="btn ghost" id="cleanPrev" type="button">←</button>
-<button class="btn" id="cleanToday" type="button">Oggi</button>
-<button class="btn ghost" id="cleanNext" type="button">→</button>
-</div>
-<div class="clean-date" id="cleanDateLabel">1 Gennaio 2026</div>
-<!-- Griglia: riga header (MAT..TAP) + 6 righe stanze (1..6) = 7 righe totali.
-         La prima cella in alto a sinistra è vuota. -->
-<div class="clean-grid-wrap">
-<div class="clean-grid" id="cleanGrid">
-<div class="c cell head corner"></div>
-<div class="c cell head">MAT</div>
-<div class="c cell head">SIN</div>
-<div class="c cell head">FED</div>
-<div class="c cell head">TDO</div>
-<div class="c cell head">TFA</div>
-<div class="c cell head">TBI</div>
-<div class="c cell head">TAP</div>
-<div class="c cell head">TPI</div>
-<div class="c cell room r1">1</div>
-<div class="c cell slot" data-col="MAT" data-room="1"></div>
-<div class="c cell slot" data-col="SIN" data-room="1"></div>
-<div class="c cell slot" data-col="FED" data-room="1"></div>
-<div class="c cell slot" data-col="TDO" data-room="1"></div>
-<div class="c cell slot" data-col="TFA" data-room="1"></div>
-<div class="c cell slot" data-col="TBI" data-room="1"></div>
-<div class="c cell slot" data-col="TAP" data-room="1"></div>
-<div class="c cell slot" data-col="TPI" data-room="1"></div>
-<div class="c cell room r2">2</div>
-<div class="c cell slot" data-col="MAT" data-room="2"></div>
-<div class="c cell slot" data-col="SIN" data-room="2"></div>
-<div class="c cell slot" data-col="FED" data-room="2"></div>
-<div class="c cell slot" data-col="TDO" data-room="2"></div>
-<div class="c cell slot" data-col="TFA" data-room="2"></div>
-<div class="c cell slot" data-col="TBI" data-room="2"></div>
-<div class="c cell slot" data-col="TAP" data-room="2"></div>
-<div class="c cell slot" data-col="TPI" data-room="2"></div>
-<div class="c cell room r3">3</div>
-<div class="c cell slot" data-col="MAT" data-room="3"></div>
-<div class="c cell slot" data-col="SIN" data-room="3"></div>
-<div class="c cell slot" data-col="FED" data-room="3"></div>
-<div class="c cell slot" data-col="TDO" data-room="3"></div>
-<div class="c cell slot" data-col="TFA" data-room="3"></div>
-<div class="c cell slot" data-col="TBI" data-room="3"></div>
-<div class="c cell slot" data-col="TAP" data-room="3"></div>
-<div class="c cell slot" data-col="TPI" data-room="3"></div>
-<div class="c cell room r4">4</div>
-<div class="c cell slot" data-col="MAT" data-room="4"></div>
-<div class="c cell slot" data-col="SIN" data-room="4"></div>
-<div class="c cell slot" data-col="FED" data-room="4"></div>
-<div class="c cell slot" data-col="TDO" data-room="4"></div>
-<div class="c cell slot" data-col="TFA" data-room="4"></div>
-<div class="c cell slot" data-col="TBI" data-room="4"></div>
-<div class="c cell slot" data-col="TAP" data-room="4"></div>
-<div class="c cell slot" data-col="TPI" data-room="4"></div>
-<div class="c cell room r5">5</div>
-<div class="c cell slot" data-col="MAT" data-room="5"></div>
-<div class="c cell slot" data-col="SIN" data-room="5"></div>
-<div class="c cell slot" data-col="FED" data-room="5"></div>
-<div class="c cell slot" data-col="TDO" data-room="5"></div>
-<div class="c cell slot" data-col="TFA" data-room="5"></div>
-<div class="c cell slot" data-col="TBI" data-room="5"></div>
-<div class="c cell slot" data-col="TAP" data-room="5"></div>
-<div class="c cell slot" data-col="TPI" data-room="5"></div>
-<div class="c cell room r6">6</div>
-<div class="c cell slot" data-col="MAT" data-room="6"></div>
-<div class="c cell slot" data-col="SIN" data-room="6"></div>
-<div class="c cell slot" data-col="FED" data-room="6"></div>
-<div class="c cell slot" data-col="TDO" data-room="6"></div>
-<div class="c cell slot" data-col="TFA" data-room="6"></div>
-<div class="c cell slot" data-col="TBI" data-room="6"></div>
-<div class="c cell slot" data-col="TAP" data-room="6"></div>
-<div class="c cell slot" data-col="TPI" data-room="6"></div>
-<div class="c cell room rres">RES</div>
-<div class="c cell slot" data-col="MAT" data-room="RES"></div>
-<div class="c cell slot" data-col="SIN" data-room="RES"></div>
-<div class="c cell slot" data-col="FED" data-room="RES"></div>
-<div class="c cell slot" data-col="TDO" data-room="RES"></div>
-<div class="c cell slot" data-col="TFA" data-room="RES"></div>
-<div class="c cell slot" data-col="TBI" data-room="RES"></div>
-<div class="c cell slot" data-col="TAP" data-room="RES"></div>
-<div class="c cell slot" data-col="TPI" data-room="RES"></div>
-</div>
-</div>
-<div class="clean-actions">
-<button class="btn" id="cleanSave" type="button">Salva</button><button class="btn ghost" id="cleanLavBtn" type="button">Foglio lavanderia</button>
-</div>
-</div>
-</section><section class="page" hidden="" id="page-lavanderia"><div class="card print-lavanderia"><div class="hd"><h2>Foglio lavanderia</h2></div><div class="bd"><div class="lav-topbar"><button class="btn" id="lavCreateBtn" type="button">Crea foglio</button><button class="btn ghost" id="lavPrintBtn" type="button">Stampa</button></div><div class="lav-period" id="lavPeriodLabel">—</div><div class="lav-grid" id="lavGrid"><div class="lg cell head corner">TOT</div><div class="lg cell head">MAT</div><div class="lg cell head">SIN</div><div class="lg cell head">FED</div><div class="lg cell head">TDO</div><div class="lg cell head">TFA</div><div class="lg cell head">TBI</div><div class="lg cell head">TAP</div><div class="lg cell head">TPI</div><div class="lg cell rowlbl">Totale</div><div class="lg cell val" data-col="MAT" id="lavValMAT">0</div><div class="lg cell val" data-col="SIN" id="lavValSIN">0</div><div class="lg cell val" data-col="FED" id="lavValFED">0</div><div class="lg cell val" data-col="TDO" id="lavValTDO">0</div><div class="lg cell val" data-col="TFA" id="lavValTFA">0</div><div class="lg cell val" data-col="TBI" id="lavValTBI">0</div><div class="lg cell val" data-col="TAP" id="lavValTAP">0</div><div class="lg cell val" data-col="TPI" id="lavValTPI">0</div></div><div class="lav-note" id="lavNote">(Somma totale dal periodo indicato. Nessun dettaglio per stanza.)</div><div class="sep"></div><div class="lav-history"><div class="subttl">Storico resoconti</div><div class="list" id="lavHistoryList"></div></div></div></div></section>
 </main>
 <div class="toast" id="toast"></div>
 <!-- Loader globale -->
@@ -489,15 +527,38 @@
 </div>
 <script defer="" src="./config.js?v=1.178"></script>
 <script defer="" src="./app.js?v=1.178"></script>
+
 <!-- ROOM CONFIG MODAL -->
-<div class="modal" hidden="" id="roomConfigModal">
-<div class="modal-card">
-<h3 id="roomConfigTitle"></h3>
-<div class="row"><span>Matrimoniale</span><div class="dots" id="rc_matrimoniale"></div></div>
-<div class="row"><span>Letti singoli</span><div class="dots" id="rc_singoli"></div></div>
-<div class="row"><span>Culla</span><div class="dots" id="rc_culla"></div></div>
-<div class="row"><button class="btn primary" id="rc_save" type="button">Conferma</button></div>
+<div id="roomConfigModal" hidden class="modal">
+  <div class="modal-card">
+    <h3 id="roomConfigTitle"></h3>
+    <div class="row"><span>Matrimoniale</span><div class="dots" id="rc_matrimoniale"></div></div>
+    <div class="row"><span>Letti singoli</span><div class="dots" id="rc_singoli"></div></div>
+    <div class="row"><span>Culla</span><div class="dots" id="rc_culla"></div></div>
+    <div class="row"><button id="rc_save" class="btn primary" type="button">Conferma</button></div>
+  </div>
 </div>
-</div>
+
+
+<section class="page" hidden="" id="page-lavanderia">
+  <div class="card">
+    <div class="hd">
+      <h2>Lavanderia</h2>
+      <div class="hd-actions laundry-no-print">
+        <button class="sq-btn" id="laundryCreate" type="button">Crea foglio</button>
+        <button class="sq-btn" id="laundryPrint" type="button" aria-label="Stampa">Stampa</button>
+      </div>
+    </div>
+
+    <div class="bd">
+      <div class="laundry-period" id="laundryPeriod">—</div>
+
+      <div class="laundry-grid" id="laundryGrid"></div>
+
+      <div class="laundry-history laundry-no-print" id="laundryHistory"></div>
+    </div>
+  </div>
+</section>
+
 </body>
 </html>
