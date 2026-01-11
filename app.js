@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.168";
+const BUILD_VERSION = "1.169";
 
 
 
@@ -2237,6 +2237,56 @@ function enterGuestViewMode(ospite){
 }
 
 
+
+
+async function findRoomConflict_(rooms, checkInStr, checkOutStr, ignoreGuestId){
+  const ciStr = formatISODateLocal(checkInStr || "");
+  const coStr = formatISODateLocal(checkOutStr || "");
+  if (!ciStr || !coStr) return null;
+
+  const ci = new Date(ciStr + "T00:00:00");
+  const co = new Date(coStr + "T00:00:00");
+  if (!(ci < co)) return null;
+
+  // Carica gli ospiti che possono sovrapporsi al periodo selezionato
+  let guests = [];
+  try{
+    const from = toISO(addDays(ci, -1));
+    const to = toISO(addDays(co, 1));
+    guests = await cachedGet("ospiti", { from, to }, { showLoader:false, ttlMs: 0, force:true });
+    if (!Array.isArray(guests)) guests = [];
+  }catch(_){
+    guests = [];
+  }
+
+  const wantedRooms = (rooms || []).map(r => String(r).trim()).filter(Boolean);
+
+  for (const g of guests){
+    const gid = String(g.id ?? g.ID ?? g.ospite_id ?? g.ospiteId ?? g.guest_id ?? g.guestId ?? "").trim();
+    if (!gid) continue;
+    if (ignoreGuestId && gid === String(ignoreGuestId)) continue;
+
+    const gCiStr = formatISODateLocal(g.check_in || g.checkIn || "");
+    const gCoStr = formatISODateLocal(g.check_out || g.checkOut || "");
+    if (!gCiStr || !gCoStr) continue;
+
+    const gCi = new Date(gCiStr + "T00:00:00");
+    const gCo = new Date(gCoStr + "T00:00:00");
+    if (!(gCi < gCo)) continue;
+
+    // overlap: gCi < co && gCo > ci
+    if (!(gCi < co && gCo > ci)) continue;
+
+    const gRooms = roomsOfGuest(g).map(r => String(r).trim()).filter(Boolean);
+    for (const r of wantedRooms){
+      if (gRooms.includes(r)){
+        return { room: r, guestId: gid };
+      }
+    }
+  }
+  return null;
+}
+
 async function saveGuest(){
   const name = (document.getElementById("guestName")?.value || "").trim();
   const adults = parseInt(document.getElementById("guestAdults")?.value || "0", 10) || 0;
@@ -2249,7 +2299,19 @@ async function saveGuest(){
   const saldoPagato = parseFloat(document.getElementById("guestSaldo")?.value || "0") || 0;
   const saldoTipo = state.guestSaldoType || "contante";
   const rooms = Array.from(state.guestRooms || []).sort((a,b)=>a-b);
-  const depositType = state.guestDepositType || "contante";
+  const depositType
+  // Disponibilità stanze: blocca se la stanza è già occupata nel periodo selezionato
+  try{
+    if ((rooms||[]).length && checkIn && checkOut){
+      const ignoreId = (state.guestMode === "edit") ? (state.guestEditId || null) : null;
+      const conflict = await findRoomConflict_(rooms, checkIn, checkOut, ignoreId);
+      if (conflict && conflict.room){
+        toast(`Stanza ${conflict.room} occupata per la data selezionata`);
+        return;
+      }
+    }
+  }catch(_){ }
+ = state.guestDepositType || "contante";
   const matrimonio = !!(state.guestMarriage);
 if (!name) return toast("Inserisci il nome");
   const payload = {
