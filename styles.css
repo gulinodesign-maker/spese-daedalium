@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.176"),
+    url("./assets/bg-daedalium.png?v=1.177"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.176"),
+    url("./assets/bg-daedalium.png?v=1.177"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2280,12 +2280,13 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* ===== CALENDARIO ===== */
 :root{
-  /* Celle più grandi: riduco l'interspazio e alzo leggermente le altezze */
-  --cal-pill-h: 34px;
-  --cal-cell-h: 62px;
-  --cal-day-w: 58px;
-  --cal-room-w: var(--cal-day-w);
+  /* Responsive: si adatta a iPhone/iPad senza zoom. Rimane scrollabile solo se serve. */
+  --cal-pill-h: clamp(28px, 4.8vw, 38px);
+  --cal-cell-h: clamp(50px, 9.2vw, 82px);
+  --cal-day-w:  clamp(32px, 11vw, 84px);
+  --cal-room-w: clamp(32px, 11vw, 84px);
   --cal-gap: 1px;
+
   --room1: rgba(255, 59, 48, .22);
   --room2: rgba(255, 149, 0, .22);
   --room3: rgba(255, 204, 0, .22);
@@ -2347,7 +2348,7 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity:.92;
 }
 
-.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; }
+.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
 
 
 .cal-grid{
@@ -2359,6 +2360,7 @@ body[data-page="ospiti"] .guest-card .actions {
   grid-auto-rows: var(--cal-cell-h);
   gap: var(--cal-gap);
   width: max-content;
+  max-width: 100%;
 }
 
 
@@ -2495,10 +2497,9 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .cal-legend-dot{ width:8px; height:8px; }
 
-@media (max-width: 420px){
-  :root{ --cal-day-w: 58px; --cal-room-w: 58px; --cal-cell-h: 62px; --cal-pill-h: 34px; --cal-gap: 1px; }
+@media (max-width: 360px){
+  :root{ --cal-day-w: clamp(28px, 10.5vw, 72px); --cal-room-w: clamp(28px, 10.5vw, 72px); --cal-gap: 0px; }
 }
-
 
 .cal-controls-row{ margin-bottom: 20px; }
 
