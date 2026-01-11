@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.178";
+const BUILD_VERSION = "1.179";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.086 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.179 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -404,6 +404,9 @@ guestMarriage: false,
   guestISTATRegistered: false,
   // Scheda ospite (sola lettura): ultimo ospite aperto
   guestViewItem: null,
+
+  // Lavanderia (resoconti settimanali)
+  laundry: { list: [], current: null },
 };
 
 const COLORS = {
@@ -1157,10 +1160,10 @@ function showPage(page){
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
-  if (page === "lavanderia") { loadLavanderia().then(()=>renderLavanderia()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
+  if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.160: fallback visualizzazione Pulizie
+  // dDAE_1.179: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2661,78 +2664,6 @@ function refreshFloatingLabels(){
 }
 
 
-
-// --- Lavanderia (report settimanale) ---
-const LAV_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
-
-async function loadLavanderia(){
-  const data = await api("lavanderia", { method:"GET", showLoader:true });
-  state.lavanderiaReports = Array.isArray(data) ? data : [];
-  // report corrente = ultimo per default
-  if (!state.lavanderiaCurrent && state.lavanderiaReports.length){
-    state.lavanderiaCurrent = state.lavanderiaReports[state.lavanderiaReports.length - 1];
-  }
-  return state.lavanderiaReports;
-}
-
-function normalizeReport_(r){
-  if (!r) return null;
-  const out = { ...r };
-  // compat: alcune varianti possibili
-  out.startDate = out.startDate || out.startdate || out.from || out.start || "";
-  out.endDate   = out.endDate   || out.enddate   || out.to   || out.end   || "";
-  LAV_COLS.forEach(k => { out[k] = parseInt(out[k] ?? 0, 10) || 0; });
-  return out;
-}
-
-function renderLavanderia(){
-  const grid = document.getElementById("laundryGrid");
-  const period = document.getElementById("laundryPeriod");
-  const hist = document.getElementById("laundryHistory");
-  if (!grid || !period || !hist) return;
-
-  const reps = Array.isArray(state.lavanderiaReports) ? state.lavanderiaReports.map(normalizeReport_) : [];
-  const cur = normalizeReport_(state.lavanderiaCurrent) || (reps.length ? reps[reps.length-1] : null);
-
-  if (!cur){
-    period.textContent = "Nessun foglio creato.";
-    grid.innerHTML = "";
-    hist.innerHTML = '<div class="mini-note">Crea il primo foglio con “Crea foglio”.</div>';
-    return;
-  }
-
-  period.textContent = `${cur.startDate || "—"} → ${cur.endDate || "—"}`;
-
-  // Grid (solo totali)
-  let html = '<div class="lg-row lg-head">';
-  LAV_COLS.forEach(c => { html += `<div class="lg-cell">${c}</div>`; });
-  html += '</div><div class="lg-row">';
-  LAV_COLS.forEach(c => { html += `<div class="lg-cell lg-val">${cur[c] || 0}</div>`; });
-  html += '</div>';
-  grid.innerHTML = html;
-
-  // Storico (cliccabile)
-  if (!reps.length){
-    hist.innerHTML = "";
-    return;
-  }
-  const items = reps.slice().reverse().map((r, i) => {
-    const label = `${r.startDate || "—"} → ${r.endDate || "—"}`;
-    const isActive = (cur.id && r.id && String(cur.id)===String(r.id));
-    return `<button class="hist-item ${isActive ? "on":""}" type="button" data-id="${String(r.id||"")}">${label}</button>`;
-  }).join("");
-  hist.innerHTML = `<div class="hist-title">Storico</div>${items}`;
-}
-
-async function createLavanderia(){
-  const rep = await api("lavanderia", { method:"POST", showLoader:true });
-  state.lavanderiaCurrent = rep;
-  await loadLavanderia();
-  renderLavanderia();
-  showPage("lavanderia");
-}
-
-
 async function init(){
   // Perf mode: deve girare DOPO che body esiste e DOPO init delle costanti
   applyPerfMode();
@@ -2813,8 +2744,7 @@ async function init(){
 
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
-  const cleanLaundry = document.getElementById("cleanLaundry");
-
+  const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
 
   const readCell = (el) => {
     const v = String(el.textContent || "").trim();
@@ -2996,47 +2926,44 @@ const buildPuliziePayload = () => {
   updateCleanLabel();
   try{ loadPulizieForDay(); }catch(_){ }
 
-  // Lavanderia: crea foglio dal periodo automatico
-  if (cleanLaundry){
-    cleanLaundry.addEventListener("click", async (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      try{ await createLavanderia(); }
-      catch(err){ toast(String(err && err.message || "Errore creazione foglio lavanderia")); }
-    });
-  }
 
-  // Pagina Lavanderia
-  const laundryCreate = document.getElementById("laundryCreate");
-  const laundryPrint  = document.getElementById("laundryPrint");
-  const laundryHistory = document.getElementById("laundryHistory");
 
-  if (laundryCreate){
-    laundryCreate.addEventListener("click", async ()=>{
-      try{ await createLavanderia(); }
-      catch(err){ toast(String(err && err.message || "Errore creazione foglio lavanderia")); }
+// --- Lavanderia ---
+  const btnLaundryCreate = document.getElementById("btnLaundryCreate");
+  const btnLaundryPrint = document.getElementById("btnLaundryPrint");
+
+  if (btnLaundryCreate){
+    bindFastTap(btnLaundryCreate, async () => {
+      try{
+        showPage("lavanderia");
+        await createLavanderiaReport_();
+      }catch(e){
+        console.error(e);
+        try{ toast(e.message || "Errore"); }catch(_){}
+      }
     });
   }
-  if (laundryPrint){
-    laundryPrint.addEventListener("click", ()=>{
-      try{ window.print(); }catch(_){ }
+  if (btnLaundryPrint){
+    bindFastTap(btnLaundryPrint, () => {
+      try{ window.print(); }catch(_){}
     });
   }
-  if (laundryHistory){
-    laundryHistory.addEventListener("click", (e)=>{
-      const b = e.target.closest && e.target.closest("button[data-id]");
-      if (!b) return;
-      const id = b.getAttribute("data-id");
-      const reps = Array.isArray(state.lavanderiaReports) ? state.lavanderiaReports : [];
-      const found = reps.find(r => String(r.id||"") === String(id));
-      if (found){ state.lavanderiaCurrent = found; renderLavanderia(); }
+  if (typeof btnLaundryFromPulizie !== "undefined" && btnLaundryFromPulizie){
+    bindFastTap(btnLaundryFromPulizie, async () => {
+      try{
+        showPage("lavanderia");
+        await createLavanderiaReport_();
+      }catch(e){
+        console.error(e);
+        try{ toast(e.message || "Errore"); }catch(_){}
+      }
     });
   }
 
 }
 
 
-// ===== CALENDARIO (dDAE_1.094) =====
+// ===== CALENDARIO (dDAE_1.179) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3367,6 +3294,169 @@ function toRoman(n){
 (async ()=>{ try{ await init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
 
 
+
+
+/* =========================
+   Lavanderia (dDAE_1.179)
+========================= */
+const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
+const LAUNDRY_LABELS = {
+  MAT: "Matrimoniale",
+  SIN: "Singolo",
+  FED: "Federe",
+  TDO: "Teli doccia",
+  TFA: "Teli faccia",
+  TBI: "Teli bagno",
+  TAP: "Tappeti",
+  TPI: "Tappeti piccoli",
+};
+
+function sanitizeLaundryItem_(it){
+  it = it || {};
+  const out = {};
+  out.id = String(it.id || "").trim();
+  out.startDate = String(it.startDate || it.start_date || it.from || "").trim();
+  out.endDate = String(it.endDate || it.end_date || it.to || "").trim();
+  out.createdAt = String(it.createdAt || it.created_at || "").trim();
+  out.updatedAt = String(it.updatedAt || it.updated_at || it.updatedAt || "").trim();
+  for (const k of LAUNDRY_COLS){
+    const n = Number(it[k]);
+    out[k] = isNaN(n) ? 0 : Math.max(0, Math.floor(n));
+  }
+  return out;
+}
+
+function setLaundryLabels_(){
+  for (const k of LAUNDRY_COLS){
+    const el = document.getElementById("laundryLbl"+k);
+    if (el) el.textContent = LAUNDRY_LABELS[k] || k;
+  }
+}
+
+function renderLaundry_(item){
+  item = item ? sanitizeLaundryItem_(item) : null;
+  state.laundry.current = item;
+
+  const rangeEl = document.getElementById("laundryPeriodLabel");
+  const printRangeEl = document.getElementById("laundryPrintRange");
+
+  if (!item){
+    if (rangeEl) rangeEl.textContent = "Nessun foglio ancora";
+    if (printRangeEl) printRangeEl.textContent = "";
+    for (const k of LAUNDRY_COLS){
+      const v = document.getElementById("laundryVal"+k);
+      if (v) v.textContent = "0";
+    }
+    const tbody = document.getElementById("laundryPrintBody");
+    if (tbody) tbody.innerHTML = "";
+    return;
+  }
+
+  const startLbl = item.startDate ? formatLongDateIT(item.startDate) : "";
+  const endLbl = item.endDate ? formatLongDateIT(item.endDate) : "";
+  const rangeText = (startLbl && endLbl) ? `${startLbl} → ${endLbl}` : (startLbl || endLbl || "—");
+  if (rangeEl) rangeEl.textContent = rangeText;
+  if (printRangeEl) printRangeEl.textContent = rangeText;
+
+  for (const k of LAUNDRY_COLS){
+    const v = document.getElementById("laundryVal"+k);
+    if (v) v.textContent = String(item[k] || 0);
+  }
+
+  const tbody = document.getElementById("laundryPrintBody");
+  if (tbody){
+    tbody.innerHTML = LAUNDRY_COLS.map(k => {
+      const label = LAUNDRY_LABELS[k] || k;
+      const val = String(item[k] || 0);
+      return `<tr><td><b>${label}</b> <span style="opacity:.7">(${k})</span></td><td style="text-align:right;font-weight:950">${val}</td></tr>`;
+    }).join("");
+  }
+}
+
+function renderLaundryHistory_(list){
+  const host = document.getElementById("laundryHistory");
+  if (!host) return;
+  host.innerHTML = "";
+
+  if (!list || !list.length){
+    const empty = document.createElement("div");
+    empty.className = "item";
+    empty.style.opacity = "0.8";
+    empty.textContent = "Nessun resoconto ancora.";
+    host.appendChild(empty);
+    return;
+  }
+
+  list.forEach((raw) => {
+    const it = sanitizeLaundryItem_(raw);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "item";
+    btn.style.width = "100%";
+    btn.style.textAlign = "left";
+    btn.style.cursor = "pointer";
+    btn.style.display = "flex";
+    btn.style.justifyContent = "space-between";
+    btn.style.alignItems = "center";
+    btn.style.gap = "10px";
+
+    const left = document.createElement("div");
+    const startLbl = it.startDate ? formatShortDateIT(it.startDate) : "";
+    const endLbl = it.endDate ? formatShortDateIT(it.endDate) : "";
+    left.innerHTML = `<div style="font-weight:950">${startLbl} → ${endLbl}</div><div style="font-size:12px;opacity:.75">${LAUNDRY_COLS.map(k=>`${k}:${it[k]||0}`).join(" · ")}</div>`;
+
+    const che = document.createElement("div");
+    che.innerHTML = `<svg aria-hidden="true" class="ui-ico ink" viewBox="0 0 24 24" style="width:18px;height:18px;"><path d="M9 6l6 6-6 6"></path></svg>`;
+
+    btn.appendChild(left);
+    btn.appendChild(che);
+
+    bindFastTap(btn, () => {
+      renderLaundry_(it);
+      // scroll su
+      try{ window.scrollTo({ top: 0, behavior: "smooth" }); }catch(_){
+        window.scrollTo(0,0);
+      }
+    });
+
+    host.appendChild(btn);
+  });
+}
+
+async function loadLavanderia() {
+  setLaundryLabels_();
+  const hint = document.getElementById("laundryHint");
+  try {
+    const res = await api("lavanderia", { method:"GET", showLoader:false });
+    const rows = Array.isArray(res) ? res
+      : (res && Array.isArray(res.data) ? res.data
+      : (res && res.data && Array.isArray(res.data.data) ? res.data.data
+      : (res && Array.isArray(res.rows) ? res.rows
+      : [])));
+    const list = (rows || []).map(sanitizeLaundryItem_).sort((a,b) => String(b.endDate||"").localeCompare(String(a.endDate||"")));
+    state.laundry.list = list;
+    renderLaundryHistory_(list);
+    renderLaundry_(list[0] || null);
+    if (hint) hint.textContent = "Crea un foglio per il ritiro settimanale. Il conteggio riparte automaticamente.";
+  } catch (e) {
+    if (hint) hint.textContent = "Offline o errore: non riesco a caricare lo storico.";
+    throw e;
+  }
+}
+
+async function createLavanderiaReport_() {
+  const hint = document.getElementById("laundryHint");
+  if (hint) hint.textContent = "Sto creando il foglio…";
+  const res = await api("lavanderia", { method:"POST", body: {}, showLoader:true });
+  const item = sanitizeLaundryItem_(res && res.data ? res.data : res);
+  // ricarica storico
+  await loadLavanderia();
+  renderLaundry_(item);
+  if (hint) hint.textContent = "Foglio creato e salvato.";
+  return item;
+}
+
+
 /* Service Worker: forza update su iOS (cache-bust via query) */
 async function registerSW(){
   if (!("serviceWorker" in navigator)) return;
@@ -3500,7 +3590,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.057: renderSpese allineato al backend ---
+// --- FIX dDAE_1.179: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3596,7 +3686,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.057: delete reale ospiti ---
+// --- FIX dDAE_1.179: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3630,7 +3720,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.057: mostra nome ospite ---
+// --- FIX dDAE_1.179: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
