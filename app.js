@@ -202,7 +202,6 @@ function __captureUiState(){
     page: state.page || "home",
     period: state.period || { from:"", to:"" },
     preset: state.periodPreset || "this_month",
-    cleanDay: state.cleanDay || null,
     guest: {
       mode: state.guestMode || "create",
       editId: state.guestEditId || null,
@@ -2730,12 +2729,6 @@ async function init(){
   showPage(targetPage);
   if (__restore) setTimeout(() => { try { __applyUiState(__restore); } catch(_) {} }, 0);
 
-
-
-  // Ripristino data Pulizie dopo update iOS/SW (persistenza giorno selezionato)
-  if (typeof __restore === "object" && __restore && __restore.cleanDay) {
-    state.cleanDay = String(__restore.cleanDay);
-  }
 
   // --- Pulizie (solo grafica) ---
   const cleanPrev = document.getElementById("cleanPrev");
