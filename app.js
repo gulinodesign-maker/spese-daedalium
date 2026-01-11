@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.179";
+const BUILD_VERSION = "1.180";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.179 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.180 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1057,9 +1057,6 @@ function bindHomeDelegation(){
     if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
-    const lav = e.target.closest && e.target.closest("#goLavanderia");
-    if (lav){ hideLauncher(); showPage("lavanderia"); return; }
-
 const g = e.target.closest && e.target.closest("#goGuadagni");
     if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
 
@@ -1163,7 +1160,7 @@ function showPage(page){
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
 
-  // dDAE_1.179: fallback visualizzazione Pulizie
+  // dDAE_1.180: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2949,21 +2946,19 @@ const buildPuliziePayload = () => {
     });
   }
   if (typeof btnLaundryFromPulizie !== "undefined" && btnLaundryFromPulizie){
-    bindFastTap(btnLaundryFromPulizie, async () => {
+    bindFastTap(btnLaundryFromPulizie, () => {
       try{
         showPage("lavanderia");
-        await createLavanderiaReport_();
       }catch(e){
         console.error(e);
-        try{ toast(e.message || "Errore"); }catch(_){}
+        try{ toast(e.message || "Errore"); }catch(_){ }
       }
     });
   }
-
 }
 
 
-// ===== CALENDARIO (dDAE_1.179) =====
+// ===== CALENDARIO (dDAE_1.180) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3297,7 +3292,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.179)
+   Lavanderia (dDAE_1.180)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -3306,9 +3301,9 @@ const LAUNDRY_LABELS = {
   FED: "Federe",
   TDO: "Teli doccia",
   TFA: "Teli faccia",
-  TBI: "Teli bagno",
+  TBI: "Telo bidet",
   TAP: "Tappeti",
-  TPI: "Tappeti piccoli",
+  TPI: "Telo piscina",
 };
 
 function sanitizeLaundryItem_(it){
@@ -3590,7 +3585,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.179: renderSpese allineato al backend ---
+// --- FIX dDAE_1.180: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -3686,7 +3681,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.179: delete reale ospiti ---
+// --- FIX dDAE_1.180: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -3720,7 +3715,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.179: mostra nome ospite ---
+// --- FIX dDAE_1.180: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;

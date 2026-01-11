@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.177"),
+    url("./assets/bg-daedalium.png?v=1.180"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.177"),
+    url("./assets/bg-daedalium.png?v=1.180"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3255,7 +3255,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   Lavanderia (dDAE_1.179)
+   Lavanderia (dDAE_1.180)
 ========================= */
 #page-lavanderia .bd{ padding-bottom: 18px; }
 .laundry-sub{ margin: 2px 0 14px 0; }
@@ -3314,6 +3314,19 @@ grid-template-rows: 34px repeat(7, 54px);
   background: rgba(255,255,255,0.55);
 }
 .laundry-tile-icon svg{ width:18px; height:18px; }
+
+/* === Lavanderia: icone colorate (palette logo) === */
+.laundry-tile[data-key="MAT"] .laundry-tile-icon{ background: var(--orange); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="SIN"] .laundry-tile-icon{ background: var(--blue); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="FED"] .laundry-tile-icon{ background: var(--beige); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="TDO"] .laundry-tile-icon{ background: var(--blue2); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="TFA"] .laundry-tile-icon{ background: var(--orange); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="TBI"] .laundry-tile-icon{ background: var(--blue); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="TAP"] .laundry-tile-icon{ background: var(--beige); border-color: rgba(0,0,0,0.0); }
+.laundry-tile[data-key="TPI"] .laundry-tile-icon{ background: var(--orange); border-color: rgba(0,0,0,0.0); }
+.laundry-tile .laundry-tile-icon{ box-shadow: 0 8px 18px rgba(15,23,42,0.18); }
+.laundry-tile .laundry-tile-icon svg{ stroke: #ffffff; }
+
 .laundry-code{
   font-weight: 950;
   letter-spacing: .14em;
