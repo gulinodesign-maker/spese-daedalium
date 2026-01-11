@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.187"),
+    url("./assets/bg-daedalium.png?v=1.188"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.187"),
+    url("./assets/bg-daedalium.png?v=1.188"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2279,6 +2279,76 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 /* ===== CALENDARIO ===== */
+
+/* dDAE_1.188 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
+#page-calendario .cal-nav-btn{
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(15,23,42,0.14);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#page-calendario .cal-week-title{
+  font-weight: 950;
+  letter-spacing: .04em;
+  opacity: .88;
+}
+#page-calendario .cal-grid{ gap: 7px; padding: 0 10px; }
+#page-calendario .cal-pill{
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(15,23,42,0.12);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: rgba(15,23,42,0.82);
+}
+#page-calendario .cal-pill.day{
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(15,23,42,0.12);
+}
+#page-calendario .cal-day-abbrev{
+  color: rgba(15,23,42,0.70);
+  letter-spacing: .08em;
+}
+#page-calendario .cal-day-num{
+  color: rgba(15,23,42,0.88);
+}
+#page-calendario .cal-pill.corner{
+  background: rgba(255,255,255,0.82);
+  color: rgba(15,23,42,0.70);
+}
+#page-calendario .cal-cell{
+  border-radius: 13px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.66);
+  box-shadow: none;
+}
+#page-calendario .cal-cell::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: var(--room-bg, rgba(255,255,255,.08));
+  opacity: .16;
+  pointer-events:none;
+}
+#page-calendario .cal-cell.has-booking::before{
+  opacity: .28;
+}
+#page-calendario .cal-cell.has-booking{
+  background-image: none;
+  border-color: rgba(15,23,42,0.16);
+}
+#page-calendario .cal-initials{
+  text-shadow: none;
+  color: rgba(15,23,42,0.86);
+}
+#page-calendario .cal-dots{ width: 18px; }
+#page-calendario .cal-dots .bed-dot{
+  width: 7px;
+  height: 7px;
+  border-radius: 4px;
+  opacity: .92;
+}
 :root{
   /* Responsive: si adatta a iPhone/iPad senza zoom. Rimane scrollabile solo se serve. */
   --cal-pill-h: clamp(28px, 4.8vw, 38px);
@@ -3423,6 +3493,23 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 .laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
+
+
+/* dDAE_1.188 — delete: stato busy + spinner (evita doppi tap) */
+.laundry-del.busy{
+  opacity: .70;
+}
+.laundry-del .spinner{
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,.55);
+  border-top-color: rgba(255,255,255,1);
+  animation: ddSpin .8s linear infinite;
+}
+@keyframes ddSpin{
+  to{ transform: rotate(360deg); }
+}
 
 .laundry-history-wrap{ margin-top: 14px; }
 .laundry-history-wrap .section-title{ margin: 0 0 8px 0; }

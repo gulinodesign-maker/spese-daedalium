@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.187";
+const BUILD_VERSION = "1.188";
 
 
 
@@ -2836,7 +2836,7 @@ const buildPuliziePayload = () => {
     return { data, rows };
   };
 
-  // Tap incrementa, long press (2s) azzera
+  // Tap incrementa, long press (0.5s) azzera
   let pressTimer = null;
   let pressTarget = null;
   let longFired = false;
@@ -2854,7 +2854,7 @@ const buildPuliziePayload = () => {
     pressTimer = setTimeout(() => {
       longFired = true;
       writeCell(slot, 0);
-    }, 1000);
+    }, 500);
   };
 
   const tapSlot = (slot) => {
@@ -3436,16 +3436,46 @@ function renderLaundryHistory_(list){
         ev && ev.preventDefault && ev.preventDefault();
         ev && ev.stopPropagation && ev.stopPropagation();
       } catch(_){}
-      if (!confirm("Eliminare questo report lavanderia?")) return;
+
+      // Anti-doppio tap / tocchi multipli
+      if (del.classList.contains("busy")) return;
+
+      const startLblFull = it.startDate ? formatLongDateIT(it.startDate) : String(it.startDate || "");
+      const endLblFull = it.endDate ? formatLongDateIT(it.endDate) : String(it.endDate || "");
+      const msg = (startLblFull && endLblFull)
+        ? `Eliminare il report lavanderia\n${startLblFull} → ${endLblFull}\n\n(Non tocca le Pulizie)`
+        : "Eliminare questo report lavanderia?\n\n(Non tocca le Pulizie)";
+      if (!confirm(msg)) return;
+
+      const prevHTML = del.innerHTML;
+      del.classList.add("busy");
+      del.disabled = true;
+      del.innerHTML = `<span class="spinner" aria-hidden="true"></span>`;
+
       try{
         await api("lavanderia", { method:"DELETE", body:{ id: it.id }, showLoader:true });
-        await loadLavanderia();
         toast("Report eliminato");
+        await loadLavanderia();
       }catch(e){
         console.error(e);
         toast(e && e.message ? e.message : "Errore eliminazione");
+        // ripristina solo se l'elemento esiste ancora
+        try{
+          if (del && del.isConnected){
+            del.innerHTML = prevHTML;
+          }
+        }catch(_){}
+      }finally{
+        try{
+          if (del && del.isConnected){
+            del.classList.remove("busy");
+            del.disabled = false;
+            // se non è stato ripristinato nel catch
+            if (!del.querySelector(".x") && !del.querySelector(".spinner")) del.innerHTML = prevHTML;
+          }
+        }catch(_){}
       }
-    }, true);
+    }, true);;
 
     btn.appendChild(left);
     btn.appendChild(del);
