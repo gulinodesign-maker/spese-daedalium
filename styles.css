@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.188"),
+    url("./assets/bg-daedalium.png?v=1.189"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -54,20 +54,20 @@ body{
 }
 .brand{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 12px;
   padding: 10px 14px;
 }
 .brand-left{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
   min-width: 0;
 }
 .brand-right{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
 }
 .logo{
@@ -110,7 +110,7 @@ body{
   width: 44px;
   height: 44px;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   cursor:pointer;
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
@@ -158,7 +158,7 @@ body{
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 10px;
 }
@@ -170,7 +170,7 @@ body{
 /* Pulsanti quadrati (Spese: + e Grafico+Riepilogo) */
 .hd-actions{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:10px;
 }
 .sq-btn{
@@ -222,7 +222,7 @@ body{
   outline: none;
   font-size: 16px; /* evita zoom iOS */
 }
-.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:stretch; }
 
 .btn{
   border: 1px solid var(--border);
@@ -328,7 +328,7 @@ input[type="date"]{
   cursor:pointer;
   font-weight: 900;
   display:inline-flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
 }
 
@@ -373,7 +373,7 @@ input[type="date"]{
   display:flex;
   justify-content:space-between;
   gap: 10px;
-  align-items:center;
+  align-items:stretch;
 }
 .catname{ font-weight: 900; }
 .catgrid{
@@ -391,7 +391,7 @@ input[type="date"]{
   margin-top: 12px;
   display:flex;
   justify-content:center;
-  align-items:center;
+  align-items:stretch;
 }
 #pieCanvas{
   width: min(320px, 78vw);
@@ -405,7 +405,7 @@ input[type="date"]{
 }
 .legrow{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 10px;
   padding: 10px 10px;
@@ -416,7 +416,7 @@ input[type="date"]{
 }
 .legleft{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
   min-width: 0;
 }
@@ -443,7 +443,7 @@ input[type="date"]{
   min-height: calc(100vh - 68px - var(--safe-top)); /* 68px ~ header area */
   display:flex;
   flex-direction:column;
-  align-items:center;
+  align-items:stretch;
   padding: 0 2px;
 }
 .home-spacer{ flex: 1; }
@@ -474,7 +474,7 @@ input[type="date"]{
   box-shadow: 0 14px 38px rgba(15,23,42,0.12);
   display:flex;
   flex-direction:column;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   gap: 10px;
   cursor:pointer;
@@ -492,7 +492,7 @@ input[type="date"]{
   border: 1px solid rgba(15,23,42,0.10);
   box-shadow: 0 16px 42px rgba(15,23,42,0.14);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-size: 28px;
   font-weight: 950;
@@ -557,13 +557,13 @@ input[type="date"]{
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
   padding: 12px;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 10px;
 }
 .catitem-left{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
   min-width: 0;
 }
@@ -613,7 +613,7 @@ input[type="date"]{
   padding: 18px 16px;
   display:flex;
   flex-direction: column;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   gap: 10px;
 }
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.188"),
+    url("./assets/bg-daedalium.png?v=1.189"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1015,7 +1015,7 @@ body::before{
   position: relative;
   height: 100%;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   padding: 18px 16px;
 }
@@ -1067,7 +1067,7 @@ body::before{
   cursor:pointer;
   display:flex;
   flex-direction:column;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   gap: 10px;
   padding: 8px 6px 6px;
@@ -1078,7 +1078,7 @@ body::before{
   height: 96px;
   border-radius: 30px;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-size: 40px;
   font-weight: 950;
@@ -1139,7 +1139,7 @@ body::before{
   font-size: 16px;
   color: rgba(15,23,42,0.86);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   padding: 0;
   cursor: pointer;
@@ -1220,7 +1220,7 @@ body::before{
 }
 .badge{
   display:inline-flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   padding: 6px 10px;
   border-radius: 999px;
@@ -1563,7 +1563,7 @@ body::before{
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
   font-weight: 950;
   letter-spacing: .2px;
@@ -1624,7 +1624,7 @@ body::before{
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 8px;
   font-weight: 950;
   letter-spacing: .2px;
@@ -1802,7 +1802,7 @@ body[data-page="ospiti"] .guest-card .actions {
 /* Popup stanza: testo a sinistra, pallini a destra */
 .modal-card .row{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap:12px;
 }
@@ -1833,14 +1833,14 @@ body[data-page="ospiti"] .guest-card .actions {
 #page-ospiti .guest-top{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  align-items:stretch;
 }
 
 
 /* OSPITI: LED status a sinistra del nome */
 #page-ospiti .guest-left{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:10px;
   min-width: 0;
 }
@@ -1912,7 +1912,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 #page-ospiti .guest-actions{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
 }
 
@@ -1964,7 +1964,7 @@ body[data-page="ospiti"] .guest-card .actions {
   display:flex;
   gap:8px;
   flex-wrap:wrap;
-  align-items:center;
+  align-items:stretch;
   margin-left: 2px;
 }
 .room-dot-badge{
@@ -1974,7 +1974,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background: rgba(43,124,180,0.92);
   color: rgba(255,255,255,0.98);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-weight: 950;
   font-size: 14px;
@@ -1999,7 +1999,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .rooms-readonly-wrap{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap:12px;
 }
@@ -2014,7 +2014,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background: var(--brand-orange);
   color: rgba(255,255,255,0.98);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:8px;
   font-weight: 950;
   font-size: 12px;
@@ -2026,7 +2026,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .stay-right{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:10px;
   flex: 0 0 auto;
 }
@@ -2038,7 +2038,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background: #34c759;
   color: rgba(255,255,255,0.98);
   display:inline-flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-weight: 950;
   font-size: 12px;
@@ -2058,7 +2058,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background: var(--brand-orange);
   color: rgba(255,255,255,0.98);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-weight: 950;
   font-size: 13px;
@@ -2069,12 +2069,12 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .room-row{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:10px;
 }
 .bed-dots{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:6px;
   flex-wrap:wrap;
   min-height: 18px;
@@ -2122,7 +2122,7 @@ body[data-page="ospiti"] .guest-card .actions {
   column-gap: 22px;
   width: 114px;
   margin: 0 auto;
-  align-items:center;
+  align-items:stretch;
 }
 #page-ospite .pay-dot{
   width: 46px;
@@ -2132,7 +2132,7 @@ body[data-page="ospiti"] .guest-card .actions {
   font-size: 16px;
   letter-spacing: 0.2px;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   padding: 0;
   border: 1px solid rgba(15,23,42,0.14);
@@ -2220,7 +2220,7 @@ body[data-page="ospiti"] .guest-card .actions {
   padding: 0 !important;
   margin: 0 !important;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
 }
 #page-ospite .field.two-col.payment-row .subfield.paywrap .pay-dots{
@@ -2280,7 +2280,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* ===== CALENDARIO ===== */
 
-/* dDAE_1.188 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
+/* dDAE_1.189 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
 #page-calendario .cal-nav-btn{
   background: rgba(255,255,255,0.92);
   border: 1px solid rgba(15,23,42,0.14);
@@ -2350,31 +2350,44 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity: .92;
 }
 :root{
-  /* Responsive: si adatta a iPhone/iPad senza zoom. Rimane scrollabile solo se serve. */
+  /* Calendario: responsive iPhone/iPad (riduce al minimo lo scroll orizzontale) */
   --cal-pill-h: clamp(28px, 4.8vw, 38px);
-  --cal-cell-h: clamp(50px, 9.2vw, 82px);
-  --cal-day-w:  clamp(32px, 11vw, 84px);
-  --cal-room-w: clamp(32px, 11vw, 84px);
+  --cal-cell-h: clamp(46px, 8.8vw, 82px);
+
+  /* prova a far entrare 7 giorni + colonna stanze nello schermo */
+  --cal-room-w: clamp(34px, 10vw, 84px);
+  --cal-day-w:  clamp(30px, calc((100vw - var(--cal-room-w) - 28px)/7), 84px);
   --cal-gap: 1px;
 
-  --room1: rgba(255, 59, 48, .22);
-  --room2: rgba(255, 149, 0, .22);
-  --room3: rgba(255, 204, 0, .22);
-  --room4: rgba(52, 199, 89, .22);
-  --room5: rgba(90, 200, 250, .22);
-  --room6: rgba(88, 86, 214, .22);
+  /* Colori stanze:
+     - celle: più saturazione (ma sempre meno delle intestazioni stanza)
+     - intestazioni stanza: più opache + leggero boost saturazione */
+  --room1: rgba(255, 59, 48, .32);
+  --room2: rgba(255, 149, 0, .32);
+  --room3: rgba(255, 204, 0, .30);
+  --room4: rgba(52, 199, 89, .32);
+  --room5: rgba(90, 200, 250, .32);
+  --room6: rgba(88, 86, 214, .32);
+
+  --room1-pill: rgba(255, 59, 48, .60);
+  --room2-pill: rgba(255, 149, 0, .60);
+  --room3-pill: rgba(255, 204, 0, .58);
+  --room4-pill: rgba(52, 199, 89, .60);
+  --room5-pill: rgba(90, 200, 250, .60);
+  --room6-pill: rgba(88, 86, 214, .60);
 }
+
 
 .calendar-page .cal-nav{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   margin-top: 6px;
 }
 
 .cal-nav-row{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   gap:10px;
   width:100%;
@@ -2385,7 +2398,7 @@ body[data-page="ospiti"] .guest-card .actions {
   margin-top: 20px; /* distanza tra icone e gruppo mese+calendario */
   display:flex;
   flex-direction:column;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
 }
 
@@ -2405,7 +2418,7 @@ body[data-page="ospiti"] .guest-card .actions {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   box-shadow: 0 8px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.22);
 }
@@ -2418,7 +2431,7 @@ body[data-page="ospiti"] .guest-card .actions {
   opacity:.92;
 }
 
-.cal-grid-wrap{ width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+.cal-grid-wrap{ width:100%; max-width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling: touch; padding: 0 calc(10px + env(safe-area-inset-right)) 2px calc(10px + env(safe-area-inset-left)); box-sizing: border-box; }
 
 
 .cal-grid{
@@ -2438,7 +2451,7 @@ body[data-page="ospiti"] .guest-card .actions {
   height: var(--cal-pill-h);
   border-radius: 16px;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-weight:800;
   font-size:12px;
@@ -2449,7 +2462,7 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
 }
-.cal-pill.day{ flex-direction:column; justify-content:center; align-items:center; padding:0; background: rgba(140,140,140,.30); border:1px solid rgba(255,255,255,.20); }
+.cal-pill.day{ flex-direction:column; justify-content:center; align-items:stretch; padding:0; background: rgba(140,140,140,.30); border:1px solid rgba(255,255,255,.20); }
 .cal-pill.room{ justify-content:center; padding:0; }
 
 .cal-day-abbrev{
@@ -2481,9 +2494,9 @@ body[data-page="ospiti"] .guest-card .actions {
   overflow:hidden;
   position:relative;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
-  background-color: var(--room-bg, rgba(255,255,255,.08));
+  background-color: var(--room-pill, var(--room-bg, rgba(255,255,255,.08)));
   background-image: none;
 }
 
@@ -2492,7 +2505,7 @@ body[data-page="ospiti"] .guest-card .actions {
   height:100%;
   display:flex;
   flex-direction:column;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   gap:4px;
   padding:6px 4px;
@@ -2533,20 +2546,20 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .cal-cell.last-day::after{ content:none !important; display:none !important; }
 
-/* Colori colonne stanze (variabile base) */
-.room-1{ --room-bg: var(--room1); }
-.room-2{ --room-bg: var(--room2); }
-.room-3{ --room-bg: var(--room3); }
-.room-4{ --room-bg: var(--room4); }
-.room-5{ --room-bg: var(--room5); }
-.room-6{ --room-bg: var(--room6); }
+/* Colori colonne stanze (celle vs intestazioni) */
+.room-1{ --room-bg: var(--room1); --room-pill: var(--room1-pill); }
+.room-2{ --room-bg: var(--room2); --room-pill: var(--room2-pill); }
+.room-3{ --room-bg: var(--room3); --room-pill: var(--room3-pill); }
+.room-4{ --room-bg: var(--room4); --room-pill: var(--room4-pill); }
+.room-5{ --room-bg: var(--room5); --room-pill: var(--room5-pill); }
+.room-6{ --room-bg: var(--room6); --room-pill: var(--room6-pill); }
 
 /* Legenda */
 .cal-legend{
   display:flex;
   gap:14px;
   justify-content:center;
-  align-items:center;
+  align-items:stretch;
   margin-top:10px;
   padding:8px 10px;
   border-radius:16px;
@@ -2558,7 +2571,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .cal-legend-item{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap:6px;
   font-size:12px;
   font-weight:700;
@@ -2568,8 +2581,9 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-legend-dot{ width:8px; height:8px; }
 
 @media (max-width: 360px){
-  :root{ --cal-day-w: clamp(28px, 10.5vw, 72px); --cal-room-w: clamp(28px, 10.5vw, 72px); --cal-gap: 0px; }
+  :root{ --cal-room-w: clamp(30px, 10.5vw, 72px); --cal-day-w: clamp(28px, calc((100vw - var(--cal-room-w) - 22px)/7), 72px); --cal-gap: 0px; }
 }
+
 
 .cal-controls-row{ margin-bottom: 20px; }
 
@@ -2587,7 +2601,7 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-pill.room{
   height: var(--cal-cell-h);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   border-radius: 14px;
   border: 1px solid rgba(255,255,255,.10);
@@ -2605,9 +2619,9 @@ body[data-page="ospiti"] .guest-card .actions {
   content:"";
   position:absolute;
   inset:0;
-  background-color: var(--room-bg, rgba(255,255,255,.08));
+  background-color: var(--room-pill, var(--room-bg, rgba(255,255,255,.08)));
   /* +30% saturazione rispetto alle celle standard */
-  filter: saturate(1.3);
+  filter: saturate(1.18);
   transform: translateZ(0);
 }
 
@@ -2630,8 +2644,8 @@ body[data-page="ospiti"] .guest-card .actions {
    - 40% più chiara (overlay bianco al 40%)
 */
 .cal-cell.has-booking{
-  background-color: var(--room-bg, rgba(255,255,255,.08));
-  background-image: linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40));
+  background-color: var(--room-pill, var(--room-bg, rgba(255,255,255,.08)));
+  background-image: linear-gradient(rgba(255,255,255,.30), rgba(255,255,255,.30));
   border-color: rgba(255,255,255,.16);
 }
 /* ===== dDAE_1.099 FIX: HOME grid clickable (no flex override) ===== */
@@ -2712,14 +2726,14 @@ body[data-page="ospiti"] .guest-card .actions {
   font-size: 18px;
   font-weight: 900;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
 }
 .gf-dir:active{ transform: translateY(-50%) scale(0.98); }
 
 .guest-insno{
   display:inline-flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   margin-right: 8px;
   padding: 2px 8px;
@@ -2770,7 +2784,7 @@ body[data-page="ospiti"] .guest-card .actions {
   padding: 0 12px;
   border-radius: 999px;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 12px;
 
@@ -2846,7 +2860,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 #page-ospiti .guest-row{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 12px;
 }
@@ -2867,7 +2881,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 #page-ospiti .guest-meta-right{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
   flex: 0 0 auto;
 }
@@ -2880,7 +2894,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 #page-ospite .guest-hd-actions{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
 }
 
@@ -3070,12 +3084,12 @@ body.perf-lite *::after{
 .clean-topbar{
   display:flex;
   gap: 10px;
-  align-items:center;
+  align-items:stretch;
   justify-content: space-between;
   margin: 4px 0 10px 0;
 }
-.clean-nav{ display:flex; gap:10px; align-items:center; justify-content:center; flex:1; }
-.clean-actions{ display:flex; gap:10px; align-items:center; }
+.clean-nav{ display:flex; gap:10px; align-items:stretch; justify-content:center; flex:1; }
+.clean-actions{ display:flex; gap:10px; align-items:stretch; }
 .clean-date{
   text-align:center;
   font-weight: 900;
@@ -3103,7 +3117,7 @@ grid-template-rows: 34px repeat(7, 54px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   font-weight: 900;
   font-size: 12px;
@@ -3282,7 +3296,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 #page-pulizie .clean-grid .cell{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:center;
   text-align:center;
   overflow:hidden;
@@ -3331,7 +3345,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-sub{ margin: 2px 0 14px 0; }
 .laundry-period{
   display:inline-flex;
-  align-items:center;
+  align-items:stretch;
   gap: 10px;
   font-weight: 950;
   border: 1px solid var(--border);
@@ -3362,13 +3376,13 @@ grid-template-rows: 34px repeat(7, 54px);
   min-height: 0;
   display:flex;
   flex-direction:row;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 14px;
 }
 .laundry-tile-top{
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:space-between;
   gap: 10px;
 }
@@ -3436,7 +3450,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-value{
   flex: 0 0 auto;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   justify-content:flex-end;
   font-size: 34px;
   font-weight: 950;
@@ -3455,7 +3469,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-range-field{
   flex:1;
   display:flex;
-  align-items:center;
+  align-items:stretch;
   gap: 8px;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -3495,7 +3509,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
 
 
-/* dDAE_1.188 — delete: stato busy + spinner (evita doppi tap) */
+/* dDAE_1.189 — delete: stato busy + spinner (evita doppi tap) */
 .laundry-del.busy{
   opacity: .70;
 }

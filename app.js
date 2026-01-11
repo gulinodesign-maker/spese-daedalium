@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.188";
+const BUILD_VERSION = "1.189";
 
 
 
@@ -2995,7 +2995,53 @@ function setupCalendario(){
   const openPicker = () => {
     if (!input) return;
     try { input.value = formatISODateLocal(state.calendar.anchor) || todayISO(); } catch(_) {}
-    input.click();
+
+    // iOS/Safari (anche PWA da Home): click su input "nascosto" a volte non apre il date picker.
+    try{
+      if (typeof input.showPicker === "function") {
+        input.showPicker();
+        return;
+      }
+    }catch(_){}
+
+    // Fallback: rendilo "quasi" visibile per un attimo e forza focus + click (gesture utente).
+    const prev = {
+      position: input.style.position,
+      left: input.style.left,
+      top: input.style.top,
+      opacity: input.style.opacity,
+      width: input.style.width,
+      height: input.style.height,
+      zIndex: input.style.zIndex,
+      pointerEvents: input.style.pointerEvents
+    };
+
+    try{
+      input.style.position = "fixed";
+      input.style.left = "12px";
+      input.style.top = "12px";
+      input.style.opacity = "0.01";
+      input.style.width = "1px";
+      input.style.height = "1px";
+      input.style.zIndex = "2147483647";
+      input.style.pointerEvents = "auto";
+      input.focus({ preventScroll: true });
+    }catch(_){}
+
+    try{ input.click(); }catch(_){}
+
+    setTimeout(() => {
+      try{
+        input.style.position = prev.position;
+        input.style.left = prev.left;
+        input.style.top = prev.top;
+        input.style.opacity = prev.opacity;
+        input.style.width = prev.width;
+        input.style.height = prev.height;
+        input.style.zIndex = prev.zIndex;
+        input.style.pointerEvents = prev.pointerEvents;
+      }catch(_){}
+    }, 500);
   };
 
   if (pickBtn) pickBtn.addEventListener("click", openPicker);
