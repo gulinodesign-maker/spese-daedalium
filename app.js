@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.194";
+const BUILD_VERSION = "1.195";
 
 
 
@@ -3272,19 +3272,26 @@ async function init(){
     const rows = [];
     let touched = false;
 
+    // Se l'utente inserisce SOLO le ore, prova a prendere i nomi da "impostazioni" (operatore_1/2/3)
+    const defaultNames = (state.settings && state.settings.loaded) ? getOperatorNamesFromSettings() : [];
+
     opEls.forEach((r, idx) => {
-      const name = String((r.name.value || "")).trim();
-      const hoursRaw = r.hours.value;
+      const nameRaw = String((r.name.value || "")).trim();
+      const hoursRaw = String(r.hours.value ?? "");
       const hours = parseHours_(hoursRaw);
 
-      if (name || String(hoursRaw || "").trim()) touched = true;
+      // Considera "touched" se l'utente ha scritto qualcosa (nome o ore)
+      if (nameRaw || String(hoursRaw || "").trim()) touched = true;
 
-      // Se la riga è vuota, ignora
-      if (!name && (hours === null)) return;
+      // Se la riga è davvero vuota, ignora
+      if (!nameRaw && !String(hoursRaw || "").trim() && hours === null) return;
+
+      // Nome: se vuoto, prova con default (da impostazioni)
+      const name = nameRaw || String(defaultNames[idx] || "").trim();
 
       // Validazione: o entrambi, o niente
       if (!name || hours === null) {
-        throw new Error("Compila nome e ore per Operatore " + (idx + 1));
+        throw new Error("Compila le ore (formato es: 2 o 2.5) e assicurati che esista il nome per Operatore " + (idx + 1));
       }
 
       // Se ore=0, non salvare (considerata assenza)
