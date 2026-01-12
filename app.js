@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.190";
+const BUILD_VERSION = "1.192";
 
 
 
@@ -2779,6 +2779,60 @@ async function init(){
     return toISODateLocal(d);
   };
 
+  // --- Ore operatori (foglio "operatori") ---
+  const OP_BENZINA_EUR = 2.00;   // € per presenza (non dipende dalle ore)
+  const OP_RATE_EUR_H = 8.00;    // € per ora (solo informativo per ora)
+
+  const opEls = [
+    { name: document.getElementById("op1Name"), hours: document.getElementById("op1Hours") },
+    { name: document.getElementById("op2Name"), hours: document.getElementById("op2Hours") },
+    { name: document.getElementById("op3Name"), hours: document.getElementById("op3Hours") },
+  ].filter(x => x.name && x.hours);
+
+  const parseHours_ = (v) => {
+    if (v === undefined || v === null) return null;
+    const s = String(v).trim().replace(",", ".");
+    if (!s) return null;
+    const n = Number(s);
+    if (!isFinite(n) || n < 0) return null;
+    return Math.round(n * 100) / 100;
+  };
+
+  const buildOperatoriPayload = () => {
+    const date = getCleanDate();
+    const rows = [];
+    let touched = false;
+
+    opEls.forEach((r, idx) => {
+      const name = String((r.name.value || "")).trim();
+      const hoursRaw = r.hours.value;
+      const hours = parseHours_(hoursRaw);
+
+      if (name || String(hoursRaw || "").trim()) touched = true;
+
+      // Se la riga è vuota, ignora
+      if (!name && (hours === null)) return;
+
+      // Validazione: o entrambi, o niente
+      if (!name || hours === null) {
+        throw new Error("Compila nome e ore per Operatore " + (idx + 1));
+      }
+
+      // Se ore=0, non salvare (considerata assenza)
+      if (hours <= 0) return;
+
+      rows.push({
+        data: date,
+        operatore: name,
+        ore: hours,
+        benzina_euro: OP_BENZINA_EUR
+      });
+    });
+
+    return { touched, payload: { data: date, operatori: rows } };
+  };
+
+
   
   const clearAllSlots = () => {
     document.querySelectorAll(".clean-grid .cell.slot").forEach(el => { el.textContent = ""; });
@@ -2905,10 +2959,27 @@ const buildPuliziePayload = () => {
       e.stopPropagation();
       try{
         const payload = buildPuliziePayload();
-        await api("pulizie", { method:"POST", body: payload });
-        // ricarica dal DB senza svuotare (così resta visibile subito)
-        try{ await loadPulizieForDay({ clearFirst:false }); }catch(_){ }
-        toast("Pulizie salvate");
+
+// 1) salva pulizie
+await api("pulizie", { method:"POST", body: payload });
+
+// 2) salva operatori (se compilati)
+let opSaved = 0;
+try{
+  const { touched, payload: opPayload } = buildOperatoriPayload();
+  if (touched && opPayload && Array.isArray(opPayload.operatori) && opPayload.operatori.length){
+    const res = await api("operatori", { method:"POST", body: opPayload, showLoader:false });
+    opSaved = (res && res.data && res.data.saved) ? res.data.saved : opPayload.operatori.length;
+  }
+}catch(opErr){
+  // Se l'utente ha iniziato a compilare e c'è errore, blocca: meglio correggere subito
+  throw opErr;
+}
+
+// ricarica dal DB senza svuotare (così resta visibile subito)
+try{ await loadPulizieForDay({ clearFirst:false }); }catch(_){ }
+
+toast(opSaved ? ("Pulizie salvate • Ore operatori salvate ("+opSaved+")") : "Pulizie salvate");
       }catch(err){
         toast(String(err && err.message || "Errore salvataggio pulizie"));
       }

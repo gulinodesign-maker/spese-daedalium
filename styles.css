@@ -3616,3 +3616,50 @@ grid-template-rows: 34px repeat(7, 54px);
 .tax-result-paying{ background: #d9efff; }
 .tax-result-reduced{ background: #ffe8c8; }
 .tax-result-kids{ background: #eeeeee; }
+
+
+/* --- Pulizie: ore operatori (max 3) --- */
+.clean-ops{
+  width: 100%;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.clean-op-row{
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+}
+
+.clean-op-row input[type="text"],
+.clean-op-row input[type="number"]{
+  display:block;
+  box-sizing: border-box;
+  padding: 20px 16px;
+  height: 72px;            /* circa doppia altezza */
+  border-radius: 999px;    /* pillola */
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.78);
+  outline: none;
+  font-size: 16px;         /* evita zoom iOS */
+}
+
+.clean-op-row input[type="text"]{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.clean-op-row input[type="number"]{
+  flex: 0 0 120px;
+  text-align: center;
+}
+.clean-op-hint{
+  font-size: 12px;
+  opacity: .85;
+  margin-top: 2px;
+  text-align: center;
+}
