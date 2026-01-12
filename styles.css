@@ -3635,20 +3635,6 @@ grid-template-rows: 34px repeat(7, 54px);
   align-items: center;
   min-width: 0;
 }
-
-.clean-op-row input[type="text"],
-.clean-op-row input[type="number"]{
-  display:block;
-  box-sizing: border-box;
-  padding: 20px 16px;
-  height: 72px;            /* circa doppia altezza */
-  border-radius: 999px;    /* pillola */
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.78);
-  outline: none;
-  font-size: 16px;         /* evita zoom iOS */
-}
-
 .clean-op-row input[type="text"]{
   flex: 1 1 auto;
   min-width: 0;
