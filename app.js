@@ -2880,7 +2880,20 @@ function __normOp(v){
   return String(v ?? "").trim().toUpperCase();
 }
 function __normISO(v){
-  return String(v ?? "").trim();
+  const s = String(v ?? "").trim();
+  if (!s) return "";
+  // Accetta sia "YYYY-MM-DD" che ISO con orario (es. "YYYY-MM-DDTHH:mm:ssZ")
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (m) return m[1];
+  // Accetta anche formati italiani "DD/MM/YYYY"
+  const m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m2){
+    const dd = String(m2[1]).padStart(2,"0");
+    const mm = String(m2[2]).padStart(2,"0");
+    const yy = m2[3];
+    return `${yy}-${mm}-${dd}`;
+  }
+  return s;
 }
 
 const oreState = {
