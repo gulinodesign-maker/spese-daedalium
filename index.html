@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.192" rel="stylesheet"/>
-<link href="./manifest.json?v=1.192" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.192" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.192" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.192" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.192" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.193" rel="stylesheet"/>
+<link href="./manifest.json?v=1.193" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.193" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.193" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.193" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.193" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.192"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.193"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -102,7 +102,7 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.192</div>
+<div class="build" id="buildText">1.193</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -462,6 +462,13 @@
     <button class="btn ghost" id="cleanNext" type="button">→</button>
   </div>
   <div class="clean-actions">
+
+    <button aria-label="Report ore operatori" class="sq-btn sq-btn-orange" id="btnOpsReportFromPulizie" type="button">
+      <div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 7v5l3 2"></path>
+</svg></div>
+    </button>
     <button aria-label="Foglio lavanderia" class="sq-btn sq-btn-blue" id="btnLaundryFromPulizie" type="button">
       <div aria-hidden="true" class="sq-ico"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
 <path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path>
@@ -570,9 +577,6 @@
     <input id="op3Name" type="text" autocomplete="off" placeholder="Operatore 3" />
     <input id="op3Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
   </div>
-  <div class="clean-op-hint">
-    Lavoro: €8,00/ora
-  </div>
 </div>
 
 
@@ -581,6 +585,39 @@
 </div>
 </div>
 </section>
+<!-- REPORT ORE OPERATORI -->
+<section class="page" hidden id="page-ore-report">
+  <div class="card">
+    <div class="hd">
+      <button class="btn ghost" id="opsRepBack" type="button" aria-label="Indietro">←</button>
+      <h2>Report ore</h2>
+      <div class="hd-actions"></div>
+    </div>
+    <div class="bd">
+      <div class="opsr-filters" aria-label="Filtri report ore">
+        <label class="opsr-tab">
+          <span>Mese</span>
+          <select id="opsrMonth"></select>
+        </label>
+        <label class="opsr-tab">
+          <span>Operatore</span>
+          <select id="opsrOperator"></select>
+        </label>
+      </div>
+
+      <div class="opsr-cal" aria-label="Calendario ore del mese">
+        <div class="opsr-cal-head" id="opsrCalHead"></div>
+        <div class="opsr-cal-grid" id="opsrCalGrid"></div>
+      </div>
+
+      <div class="opsr-summary" aria-label="Riepilogo report ore">
+        <div class="opsr-pill" id="opsrPillTotal">Ore: — <span class="opsr-sep">•</span> Totale: —</div>
+        <div class="opsr-pill" id="opsrPillFuel">Benzina: —</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 <div class="toast" id="toast"></div>
 
@@ -726,8 +763,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.192"></script>
-<script defer="" src="./app.js?v=1.192"></script>
+<script defer="" src="./config.js?v=1.193"></script>
+<script defer="" src="./app.js?v=1.193"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
