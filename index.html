@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.189" rel="stylesheet"/>
-<link href="./manifest.json?v=1.189" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.189" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.189" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.189" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.189" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.190" rel="stylesheet"/>
+<link href="./manifest.json?v=1.190" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.190" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.190" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.190" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.190" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.189"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.190"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -78,7 +78,7 @@
 <path d="M12 13v5"></path>
 <path d="M10.2 14.8 12 13l1.8 1.8"></path>
 </svg></div>
-<div class="home-main-label">Tassa di soggiorno</div>
+<div class="home-main-label small">Tassa di soggiorno</div>
 </button>
 <button aria-label="Pulizie" class="home-main" id="goPulizie" type="button">
 <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
@@ -102,10 +102,60 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 </div>
-<div class="build" id="buildText">1.188</div>
+<div class="build" id="buildText">1.190</div>
 <div class="home-spacer"></div>
 </div>
 </section>
+
+<section class="page" hidden="" id="page-tassa">
+  <div class="card">
+    <div class="hd tax-hd">
+      <button class="btn ghost tax-back" id="taxBackBtn" type="button" aria-label="Indietro">←</button>
+      <h2>Tassa di soggiorno</h2>
+    </div>
+    <div class="bd">
+      <div class="tax-period">
+        <div class="field float">
+          <input id="taxFrom" type="date" placeholder=" " />
+          <label for="taxFrom">Da</label>
+        </div>
+        <div class="field float">
+          <input id="taxTo" type="date" placeholder=" " />
+          <label for="taxTo">A</label>
+        </div>
+      </div>
+
+      <button class="btn tax-calc" id="taxCalcBtn" type="button">Calcola</button>
+
+      <div class="tax-results" id="taxResults" hidden>
+        <div class="tax-result-card tax-result-paying" id="taxPayingCard">
+          <div class="tax-result-top">
+            <div class="tax-result-title">Ospiti paganti</div>
+            <div class="tax-result-value" id="taxPayingCount">—</div>
+          </div>
+          <div class="tax-result-sub" id="taxPayingAmount">—</div>
+        </div>
+
+        <div class="tax-result-card tax-result-kids" id="taxKidsCard">
+          <div class="tax-result-top">
+            <div class="tax-result-title">Bambini (&lt;10)</div>
+            <div class="tax-result-value" id="taxKidsCount">—</div>
+          </div>
+          <div class="tax-result-sub" id="taxKidsAmount">—</div>
+        </div>
+
+        <div class="tax-result-card tax-result-reduced" id="taxReducedCard">
+          <div class="tax-result-top">
+            <div class="tax-result-title">Altri (ridotti)</div>
+            <div class="tax-result-value" id="taxReducedCount">—</div>
+          </div>
+          <div class="tax-result-sub" id="taxReducedAmount">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 1) INSERISCI -->
 <section class="page" hidden="" id="page-inserisci">
 <div class="card">
@@ -128,7 +178,7 @@
 <select id="spesaCategoria" required="">
 <option value="">Seleziona…</option>
 <option value="CONTANTI">Contanti</option>
-<option value="TASSA_SOGGIORNO">Tassa soggiorno</option>
+<option value="TASSA_SOGGIORNO">Tassa di soggiorno</option>
 <option value="IVA_22">IVA 22%</option>
 <option value="IVA_10">IVA 10%</option>
 <option value="IVA_4">IVA 4%</option>
@@ -399,52 +449,6 @@
 
 
 
-
-<section class="page" hidden="" id="page-tassa">
-  <div class="card">
-    <div class="hd">
-      <h2>Tassa di soggiorno</h2>
-    </div>
-
-    <div class="bd">
-      <div class="tassa-period-row">
-        <div class="field">
-          <label for="tassaFrom">Da</label>
-          <input id="tassaFrom" type="date" inputmode="numeric"/>
-        </div>
-        <div class="field">
-          <label for="tassaTo">A</label>
-          <input id="tassaTo" type="date" inputmode="numeric"/>
-        </div>
-      </div>
-
-      <button class="btn btn-flat tassa-calc-btn" id="btnCalcolaTassa" type="button">Calcola</button>
-
-      <div class="tassa-hint" id="tassaHint">Seleziona un periodo e premi <b>Calcola</b>.</div>
-
-      <div class="tassa-results" hidden="" id="tassaResults">
-        <div class="tassa-kpi tassa-pay">
-          <div class="tassa-kpi-label">Ospiti paganti</div>
-          <div class="tassa-kpi-value" id="tassaPagantiN">—</div>
-          <div class="tassa-kpi-sub" id="tassaPagantiE">—</div>
-        </div>
-
-        <div class="tassa-kpi tassa-free">
-          <div class="tassa-kpi-label">Bambini (&lt; 10 anni)</div>
-          <div class="tassa-kpi-value" id="tassaBambiniN">—</div>
-          <div class="tassa-kpi-sub" id="tassaBambiniE">—</div>
-        </div>
-
-        <div class="tassa-kpi tassa-reduced">
-          <div class="tassa-kpi-label">Altri (ridotti)</div>
-          <div class="tassa-kpi-value" id="tassaRidottiN">—</div>
-          <div class="tassa-kpi-sub" id="tassaRidottiE">—</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="page" id="page-pulizie" style="display:none;">
   <div class="hd">
     <div class="title"></div>
@@ -701,8 +705,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.189"></script>
-<script defer="" src="./app.js?v=1.189"></script>
+<script defer="" src="./config.js?v=1.190"></script>
+<script defer="" src="./app.js?v=1.190"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">

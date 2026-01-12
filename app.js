@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.189";
+const BUILD_VERSION = "1.190";
 
 
 
@@ -1072,7 +1072,7 @@ function bindHomeDelegation(){
     const cal = e.target.closest && e.target.closest("#goCalendario");
     if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
-    if (tassa){ hideLauncher(); showPage("tassa"); return; }
+    if (tassa){ hideLauncher(); showPage("tassa"); try{ initTassaPage(); }catch(_){} return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
     const lav = e.target.closest && e.target.closest("#goLavanderia");
@@ -1156,8 +1156,6 @@ function showPage(page){
   document.querySelectorAll(".page").forEach(s => s.hidden = true);
   const el = $(`#page-${page}`);
   if (el) el.hidden = false;
-
-  if (page === "tassa") { try{ initTassaPage(); }catch(_){ } }
 
   // Sotto-viste della pagina Spese (lista ↔ grafico+riepilogo)
   if (page === "spese") {
@@ -3832,168 +3830,152 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-/* ===========================
-   Tassa di soggiorno (range)
-   - risultati SOLO dopo click "Calcola"
-   - reset automatico al cambio periodo
-   =========================== */
 
-let tassaBound = false;
+// ===== Tassa di soggiorno =====
+let __tassaBound = false;
 
-function _parseDateToUtcDay(v){
-  if (!v) return null;
-
-  if (typeof v === "string") {
-    const s = v.trim();
-    // YYYY-MM-DD
-    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-      const [y,m,d] = s.split("-").map(n=>parseInt(n,10));
-      return Math.floor(Date.UTC(y, m-1, d) / 86400000);
-    }
-    // ISO con orario
-    if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
-      const dt = new Date(s);
-      if (!isNaN(dt.getTime())) {
-        return Math.floor(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()) / 86400000);
-      }
-    }
-    // dd/mm/yyyy
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-      const [dd,mm,yy] = s.split("/").map(n=>parseInt(n,10));
-      return Math.floor(Date.UTC(yy, mm-1, dd) / 86400000);
-    }
-    // fallback
-    const dt = new Date(s);
-    if (!isNaN(dt.getTime())) {
-      return Math.floor(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()) / 86400000);
-    }
-    return null;
+function __parseDateFlexibleToISO(unknown){
+  // Ritorna ISO YYYY-MM-DD oppure "" se non parsabile
+  const s = String(unknown || "").trim();
+  if (!s) return "";
+  // ISO date (YYYY-MM-DD) or ISO datetime
+  const mIso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (mIso) return `${mIso[1]}-${mIso[2]}-${mIso[3]}`;
+  // dd/mm/yyyy
+  const mIt = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mIt){
+    const dd = String(mIt[1]).padStart(2,"0");
+    const mm = String(mIt[2]).padStart(2,"0");
+    const yy = mIt[3];
+    return `${yy}-${mm}-${dd}`;
   }
-
-  if (typeof v === "number" && isFinite(v)) {
-    const dt = new Date(v);
-    if (!isNaN(dt.getTime())) {
-      return Math.floor(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()) / 86400000);
-    }
-  }
-
-  return null;
+  return "";
 }
 
-function _overlapNights(stayInDay, stayOutDay, rangeFromDay, rangeToInclusiveDay){
-  if (stayInDay === null || stayOutDay === null || rangeFromDay === null || rangeToInclusiveDay === null) return 0;
-  const rangeToExcl = rangeToInclusiveDay + 1; // "A" inclusivo
-  const a = Math.max(stayInDay, rangeFromDay);
-  const b = Math.min(stayOutDay, rangeToExcl);
-  return Math.max(0, b - a);
+function __utcDay(y,m,d){ return Date.UTC(y, m-1, d); }
+
+function __daysBetweenUTC(isoA, isoB){
+  // isoA, isoB: YYYY-MM-DD ; ritorna giorni interi (B - A)
+  const [ya,ma,da] = isoA.split("-").map(n=>parseInt(n,10));
+  const [yb,mb,db] = isoB.split("-").map(n=>parseInt(n,10));
+  const ta = __utcDay(ya,ma,da);
+  const tb = __utcDay(yb,mb,db);
+  return Math.round((tb - ta) / 86400000);
 }
 
-function calcTassaRangeFromOspiti(ospiti, fromISO, toISO){
-  const fromDay = _parseDateToUtcDay(fromISO);
-  const toDay   = _parseDateToUtcDay(toISO);
-  if (fromDay === null || toDay === null) throw new Error("Periodo non valido");
-  if (toDay < fromDay) throw new Error("Periodo non valido");
+function __addDaysISO(iso, delta){
+  const [y,m,d] = iso.split("-").map(n=>parseInt(n,10));
+  const dt = new Date(Date.UTC(y, m-1, d));
+  dt.setUTCDate(dt.getUTCDate() + delta);
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth()+1).padStart(2,"0");
+  const dd = String(dt.getUTCDate()).padStart(2,"0");
+  return `${yy}-${mm}-${dd}`;
+}
 
-  let pagantiPresenze = 0;
-  let pagantiTot = 0;
+function __overlapNights(checkInISO, checkOutISO, fromISO, toISO_inclusive){
+  // Intersezione tra [checkIn, checkOut) e [from, to+1)
+  const toExcl = __addDaysISO(toISO_inclusive, 1);
+  const start = (checkInISO > fromISO) ? checkInISO : fromISO;
+  const end   = (checkOutISO < toExcl) ? checkOutISO : toExcl;
+  const n = __daysBetweenUTC(start, end);
+  return (isFinite(n) && n > 0) ? n : 0;
+}
 
-  let bambiniPresenze = 0;
+function resetTassaUI(){
+  const res = $("#taxResults");
+  if (res) res.hidden = true;
+  const ids = ["taxPayingCount","taxPayingAmount","taxKidsCount","taxKidsAmount","taxReducedCount","taxReducedAmount"];
+  ids.forEach(id => { const el = $("#"+id); if (el) el.textContent = "—"; });
+}
 
-  let ridottiPresenze = 0;
-  let ridottiTot = 0;
-
-  for (const o of (ospiti || [])) {
-    const inDay  = _parseDateToUtcDay(o.check_in);
-    const outDay = _parseDateToUtcDay(o.check_out);
-
-    const overlap = _overlapNights(inDay, outDay, fromDay, toDay);
-    if (!overlap) continue;
-
-    const kids = Math.max(0, parseInt(o.bambini_u10 ?? o.kids_u10 ?? 0, 10) || 0);
-
-    // Importo tassa: usa la logica già esistente (cap notti) tramite calcTouristTax
-    const tax = calcTouristTax(o, overlap);
-    pagantiTot += tax.total;
-    pagantiPresenze += tax.adults * tax.taxableDays;
-
-    // Bambini: non pagano, ma contiamo le presenze nel periodo (persona×notte)
-    bambiniPresenze += kids * overlap;
-
-    // Ridotti: placeholder (implementeremo quando aggiungerai il campo)
+async function calcTassa(){
+  const fromEl = $("#taxFrom");
+  const toEl = $("#taxTo");
+  const from = fromEl ? fromEl.value : "";
+  const to   = toEl ? toEl.value : "";
+  if (!from || !to){
+    toast("Seleziona un periodo (Da/A)");
+    resetTassaUI();
+    return;
+  }
+  if (to < from){
+    toast("Il periodo non è valido");
+    resetTassaUI();
+    return;
   }
 
-  return {
-    pagantiPresenze,
-    pagantiTot,
-    bambiniPresenze,
-    ridottiPresenze,
-    ridottiTot,
-  };
-}
+  // Prende i dati SOLO dalle prenotazioni (foglio ospiti)
+  const ospiti = await api("ospiti", { method:"GET" }) || [];
 
-function renderTassaResults(res){
-  const n1 = $("#tassaPagantiN");
-  const e1 = $("#tassaPagantiE");
-  const n2 = $("#tassaBambiniN");
-  const e2 = $("#tassaBambiniE");
-  const n3 = $("#tassaRidottiN");
-  const e3 = $("#tassaRidottiE");
+  let payingPres = 0;
+  let kidsPres = 0;
+  let reducedPres = 0;
 
-  if (n1) n1.textContent = String(res.pagantiPresenze || 0);
-  if (e1) e1.textContent = formatEUR(res.pagantiTot || 0);
+  for (const o of ospiti){
+    const inISO  = __parseDateFlexibleToISO(o.check_in || o.checkIn);
+    const outISO = __parseDateFlexibleToISO(o.check_out || o.checkOut);
+    if (!inISO || !outISO) continue;
 
-  if (n2) n2.textContent = String(res.bambiniPresenze || 0);
-  if (e2) e2.textContent = formatEUR(0);
+    const nights = __overlapNights(inISO, outISO, from, to);
+    if (!nights) continue;
 
-  if (n3) n3.textContent = String(res.ridottiPresenze || 0);
-  if (e3) e3.textContent = formatEUR(res.ridottiTot || 0);
+    const adults = Number(o.adulti || 0) || 0;
+    const kids   = Number(o.bambini_u10 || 0) || 0;
+
+    // Ridotti: campo futuro (se presente). Esempi supportati: ridotti, anziani, ridotti_n
+    const red = Number(o.ridotti ?? o.anziani ?? o.ridotti_n ?? 0) || 0;
+
+    const redClamped = Math.max(0, Math.min(adults, red));
+    const fullAdults = Math.max(0, adults - redClamped);
+
+    payingPres  += fullAdults * nights;
+    reducedPres += redClamped * nights;
+    kidsPres    += kids * nights;
+  }
+
+  const rate = Number(typeof TOURIST_TAX_EUR_PPN !== "undefined" ? TOURIST_TAX_EUR_PPN : 0) || 0;
+  const redFactor = Number(typeof TOURIST_TAX_REDUCED_FACTOR !== "undefined" ? TOURIST_TAX_REDUCED_FACTOR : 1) || 1;
+
+  const payingAmt  = payingPres * rate;
+  const reducedAmt = reducedPres * rate * redFactor;
+
+  // UI: mostra solo dopo click Calcola
+  const res = $("#taxResults");
+  if (res) res.hidden = false;
+
+  const pc = $("#taxPayingCount"); if (pc) pc.textContent = String(payingPres);
+  const pa = $("#taxPayingAmount"); if (pa) pa.textContent = formatEUR(payingAmt);
+
+  const kc = $("#taxKidsCount"); if (kc) kc.textContent = String(kidsPres);
+  const ka = $("#taxKidsAmount"); if (ka) ka.textContent = "—"; // non pagano
+
+  const rc = $("#taxReducedCount"); if (rc) rc.textContent = String(reducedPres);
+  const ra = $("#taxReducedAmount"); if (ra) ra.textContent = formatEUR(reducedAmt);
 }
 
 function initTassaPage(){
-  if (tassaBound) return;
-  tassaBound = true;
+  if (__tassaBound) return;
+  __tassaBound = true;
 
-  const from = $("#tassaFrom");
-  const to   = $("#tassaTo");
-  const btn  = $("#btnCalcolaTassa");
-  const results = $("#tassaResults");
-  const hint = $("#tassaHint");
+  const back = $("#taxBackBtn");
+  if (back){
+    bindFastTap(back, () => { showPage("home"); showLauncher(); });
+  }
 
-  if (!from || !to || !btn) return;
+  const from = $("#taxFrom");
+  const to = $("#taxTo");
+  if (from) from.addEventListener("change", resetTassaUI);
+  if (to) to.addEventListener("change", resetTassaUI);
 
-  // default: periodo globale attuale
-  try {
-    from.value = state.period?.from || from.value;
-    to.value   = state.period?.to   || to.value;
-  } catch(_){}
+  const btn = $("#taxCalcBtn");
+  if (btn){
+    bindFastTap(btn, async () => {
+      try { await calcTassa(); }
+      catch (err) { toast(String(err && err.message || err || "Errore")); resetTassaUI(); }
+    });
+  }
 
-  const reset = () => {
-    if (results) results.hidden = true;
-    if (hint) hint.hidden = false;
-  };
-
-  from.addEventListener("change", reset);
-  to.addEventListener("change", reset);
-
-  bindFastTap(btn, async () => {
-    try {
-      const f = from.value;
-      const t = to.value;
-      if (!f || !t) { toast("Seleziona Da e A"); return; }
-      if (t < f) { toast("Periodo non valido"); return; }
-
-      // Dati dalle prenotazioni (foglio ospiti)
-      const ospiti = await api("ospiti", { showLoader: true });
-      const res = calcTassaRangeFromOspiti(ospiti, f, t);
-
-      renderTassaResults(res);
-      if (results) results.hidden = false;
-      if (hint) hint.hidden = true;
-    } catch(e) {
-      toast(e.message || "Errore calcolo tassa");
-    }
-  });
+  // Stato iniziale: risultati nascosti finché non premi "Calcola"
+  resetTassaUI();
 }
-
-
-

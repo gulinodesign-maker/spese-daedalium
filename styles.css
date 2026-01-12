@@ -2280,7 +2280,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* ===== CALENDARIO ===== */
 
-/* dDAE_1.189 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
+/* dDAE_1.188 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
 #page-calendario .cal-nav-btn{
   background: rgba(255,255,255,0.92);
   border: 1px solid rgba(15,23,42,0.14);
@@ -3495,7 +3495,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
 
 
-/* dDAE_1.189 — delete: stato busy + spinner (evita doppi tap) */
+/* dDAE_1.188 — delete: stato busy + spinner (evita doppi tap) */
 .laundry-del.busy{
   opacity: .70;
 }
@@ -3580,83 +3580,39 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* ===== Tassa di soggiorno (UI) ===== */
-.tassa-period-row{
-  display:flex;
-  gap:12px;
-  justify-content:space-between;
-  align-items:stretch;
-}
-.tassa-period-row .field{ flex:1 1 0; }
+/* ===== Tassa di soggiorno (dDAE_1.190) ===== */
+.home-main-label.small{ font-size: 14px; line-height: 1.05; text-align:center; }
 
-.tassa-calc-btn{
-  width:100%;
-  margin-top: 12px;
-  border-radius: 18px;
-  padding: 14px 16px;
-  font-weight: 950;
-  letter-spacing: 0.2px;
-  /* NO sfumature */
-  background: #2b7cb4;
+.tax-hd{ display:flex; align-items:center; gap:12px; }
+.tax-back{ padding: 10px 14px; min-height: 44px; border-radius: 16px; }
+.tax-period{ display:flex; gap:12px; justify-content: space-between; align-items: stretch; }
+.tax-period .field{ flex:1; margin-top: 0; }
+.tax-period input[type="date"]{ min-height: 54px; }
+
+.tax-calc{ width:100%; margin-top: 14px; }
+/* tasto calcola: flat (no gradient) e ben visibile su iPhone */
+.btn.tax-calc{ 
+  background: rgba(43,124,180,1);
   color: #ffffff;
-  border: 0;
-  box-shadow: none;
+  border-color: rgba(43,124,180,0.85);
   backdrop-filter: none;
 }
+.btn.tax-calc:active{ transform: translateY(1px); }
 
-.btn-flat{
-  background: #2b7cb4 !important;
-  color: #ffffff !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
+/* Risultati: solo dopo Calcola, stack verticale */
+.tax-results{ margin-top: 14px; display:flex; flex-direction:column; gap:12px; }
 
-.tassa-hint{
-  margin-top: 10px;
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-.tassa-results{
-  margin-top: 14px;
-  display:flex;
-  flex-direction:column;
-  gap: 12px;
-}
-
-.tassa-kpi{
-  border-radius: 18px;
+.tax-result-card{ 
+  border-radius: 22px;
   padding: 14px 14px;
   border: 1px solid rgba(15,23,42,0.10);
-  box-shadow: none;
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
 }
+.tax-result-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.tax-result-title{ font-weight: 950; font-size: 16px; color: rgba(15,23,42,0.92); }
+.tax-result-value{ font-weight: 980; font-size: 22px; color: rgba(15,23,42,0.92); }
+.tax-result-sub{ margin-top: 6px; font-weight: 900; color: rgba(15,23,42,0.74); }
 
-.tassa-kpi-label{
-  font-size: 13px;
-  font-weight: 900;
-  margin-bottom: 6px;
-}
-
-.tassa-kpi-value{
-  font-size: 28px;
-  font-weight: 1000;
-  line-height: 1.05;
-}
-
-.tassa-kpi-sub{
-  margin-top: 4px;
-  font-size: 14px;
-  font-weight: 900;
-  opacity: 0.9;
-}
-
-/* colori chiari, NO sfumature */
-.tassa-pay{ background: #d7efff; }
-.tassa-free{ background: #ececec; }
-.tassa-reduced{ background: #ffe2c7; }
-
-@media (max-width: 420px){
-  .tassa-period-row{ gap:10px; }
-  .tassa-kpi-value{ font-size: 26px; }
-}
+.tax-result-paying{ background: #d9efff; }
+.tax-result-reduced{ background: #ffe8c8; }
+.tax-result-kids{ background: #eeeeee; }
