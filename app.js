@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.195";
+const BUILD_VERSION = "1.192";
 
 
 
@@ -1242,9 +1242,7 @@ function bindHomeDelegation(){
     }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
-        const ore = e.target.closest && e.target.closest("#goOrePulizia");
-    if (ore){ hideLauncher(); showPage("ore-pulizia"); return; }
-const lav = e.target.closest && e.target.closest("#goLavanderia");
+    const lav = e.target.closest && e.target.closest("#goLavanderia");
     if (lav){ hideLauncher(); showPage("lavanderia"); return; }
 
     const imp = e.target.closest && e.target.closest("#goImpostazioni");
@@ -1322,8 +1320,6 @@ function showPage(page){
   if (page === "spese" && !state.speseView) state.speseView = "list";
 
   state.page = page;
-  try{ document.dispatchEvent(new CustomEvent("dDAE:page", { detail:{ page } })); }catch(_){ }
-
   document.body.dataset.page = page;
 
   try { __rememberPage(page); } catch (_) {}
@@ -2852,289 +2848,6 @@ function initFloatingLabels(){
 }
 
 
-// =========================
-// ORE PULIZIA (report mensile da foglio "operatori")
-// =========================
-const ORE_DEFAULT_OPERATORS = ["COSTANZA","GIOVANNA","GIUSY"];
-
-function __itMonthLabel(yyyyMM){
-  const [y,m] = String(yyyyMM||"").split("-");
-  const monthNames = ["GENNAIO","FEBBRAIO","MARZO","APRILE","MAGGIO","GIUGNO","LUGLIO","AGOSTO","SETTEMBRE","OTTOBRE","NOVEMBRE","DICEMBRE"];
-  const mi = Math.max(1, Math.min(12, parseInt(m,10)||1)) - 1;
-  return `${monthNames[mi]} ${y||""}`.trim();
-}
-function __daysInMonth(year, month1){ // month1: 1..12
-  return new Date(year, month1, 0).getDate();
-}
-function __dowMon0(dateObj){
-  // JS: 0=Sun..6=Sat -> convert to 0=Mon..6=Sun
-  const d = dateObj.getDay();
-  return (d + 6) % 7;
-}
-function __num(v){
-  const s = String(v ?? "").trim().replace(",", ".");
-  const n = Number(s);
-  return isFinite(n) ? n : 0;
-}
-function __normOp(v){
-  return String(v ?? "").trim().toUpperCase();
-}
-function __normISO(v){
-  return String(v ?? "").trim();
-}
-
-const oreState = {
-  loaded: false,
-  rows: [],
-  byMonthOp: new Map(), // key `${yyyyMM}__${OP}` -> Map(day->hours)
-};
-
-async function ensureOperatoriLoaded_({ force=false, showLoader=true } = {}){
-  if (!force && oreState.loaded && Array.isArray(oreState.rows) && oreState.rows.length) return;
-  const res = await api("operatori", { method:"GET", params:{}, showLoader });
-  const rows = (res && Array.isArray(res.rows)) ? res.rows : [];
-  oreState.rows = rows;
-  oreState.loaded = true;
-  oreState.byMonthOp = new Map();
-}
-
-function buildMonthOpIndex_(){
-  oreState.byMonthOp = new Map();
-  const rows = Array.isArray(oreState.rows) ? oreState.rows : [];
-  rows.forEach(r => {
-    const iso = __normISO(r.data || r.date || r.Data || r.Date);
-    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
-    const yyyyMM = iso.slice(0,7);
-    const day = parseInt(iso.slice(8,10),10);
-    const op = __normOp(r.operatore || r.Operatore || r.name || r.nome);
-    if (!op) return;
-    const h = __num(r.ore || r.Ore || r.hours);
-    const key = `${yyyyMM}__${op}`;
-    if (!oreState.byMonthOp.has(key)) oreState.byMonthOp.set(key, new Map());
-    const m = oreState.byMonthOp.get(key);
-    m.set(day, (m.get(day) || 0) + h);
-  });
-}
-
-function getAvailableMonths_(){
-  const set = new Set();
-  const rows = Array.isArray(oreState.rows) ? oreState.rows : [];
-  rows.forEach(r => {
-    const iso = __normISO(r.data || r.date || r.Data || r.Date);
-    if (iso && /^\d{4}-\d{2}-\d{2}$/.test(iso)) set.add(iso.slice(0,7));
-  });
-  const months = Array.from(set);
-  months.sort(); // asc
-  return months;
-}
-
-function getOperators_(){
-  // come richiesto: COSTANZA, GIOVANNA, GIUSY (sempre presenti).
-  // Se nelle impostazioni troviamo nomi validi, li aggiungiamo senza togliere i default.
-  const ops = new Set(ORE_DEFAULT_OPERATORS);
-  try{
-    const fromSettings = getOperatorNamesFromSettings();
-    (Array.isArray(fromSettings) ? fromSettings : []).forEach(o => {
-      const n = __normOp(o);
-      if (n) ops.add(n);
-    });
-  }catch(_){}
-  return Array.from(ops);
-}
-
-function renderOreCalendar_({ yyyyMM, op }){
-  const grid = document.getElementById("oreCalGrid");
-  const title = document.getElementById("oreCalTitle");
-  if (!grid || !title) return;
-
-  title.textContent = __itMonthLabel(yyyyMM);
-
-  const [yS,mS] = String(yyyyMM).split("-");
-  const y = parseInt(yS,10);
-  const m1 = parseInt(mS,10);
-  const days = __daysInMonth(y, m1);
-  const first = new Date(y, m1-1, 1);
-  const offset = __dowMon0(first); // 0..6
-  const totalCells = Math.ceil((offset + days) / 7) * 7;
-
-  const key = `${yyyyMM}__${__normOp(op)}`;
-  const map = oreState.byMonthOp.get(key) || new Map();
-
-  grid.innerHTML = "";
-  for (let i=0; i<totalCells; i++){
-    const cell = document.createElement("div");
-    cell.className = "ore-day";
-    const dayNum = i - offset + 1;
-
-    if (dayNum < 1 || dayNum > days){
-      cell.classList.add("is-empty");
-      cell.innerHTML = `<div class="ore-day-num"></div><div class="ore-day-hours"></div>`;
-    } else {
-      const h = map.get(dayNum) || 0;
-      cell.innerHTML = `<div class="ore-day-num">${dayNum}</div><div class="ore-day-hours">${(h % 1 === 0) ? String(h) : String(Math.round(h*10)/10)}</div>`;
-    }
-    grid.appendChild(cell);
-  }
-}
-
-function renderOreReport_({ yyyyMM, op }){
-  const rep = document.getElementById("oreReport");
-  const meta = document.getElementById("oreReportMeta");
-  const totals = document.getElementById("oreReportTotals");
-  const cal = document.getElementById("oreReportCalendar");
-  const table = document.getElementById("oreReportTable");
-  const printBtn = document.getElementById("orePrintBtn");
-  if (!rep || !meta || !totals || !cal || !table) return;
-
-  const key = `${yyyyMM}__${__normOp(op)}`;
-  const map = oreState.byMonthOp.get(key) || new Map();
-
-  // Totali
-  let tot = 0;
-  let daysWorked = 0;
-  const pairs = [];
-  map.forEach((h, day)=> {
-    if (h && h>0){ daysWorked++; }
-    tot += (h || 0);
-    pairs.push([day, h||0]);
-  });
-  pairs.sort((a,b)=>a[0]-b[0]);
-
-  meta.textContent = `${__itMonthLabel(yyyyMM)} • ${__normOp(op)}`;
-  const totFixed = (tot % 1 === 0) ? String(tot) : String(Math.round(tot*10)/10);
-  totals.innerHTML = `
-    <div class="ore-kpi">
-      <div class="ore-kpi-label">Totale ore</div>
-      <div class="ore-kpi-value">${totFixed}</div>
-    </div>
-    <div class="ore-kpi">
-      <div class="ore-kpi-label">Giorni con ore</div>
-      <div class="ore-kpi-value">${daysWorked}</div>
-    </div>
-  `;
-
-  // Calendario stampabile (clona il calendario attuale)
-  const grid = document.getElementById("oreCalGrid");
-  const dow = document.querySelector(".ore-cal-dow");
-  cal.innerHTML = "";
-  const calBox = document.createElement("div");
-  calBox.className = "ore-print-cal";
-  const calTitle = document.createElement("div");
-  calTitle.className = "ore-print-cal-title";
-  calTitle.textContent = __itMonthLabel(yyyyMM);
-  calBox.appendChild(calTitle);
-  if (dow){
-    const dowClone = dow.cloneNode(true);
-    dowClone.classList.add("print");
-    calBox.appendChild(dowClone);
-  }
-  if (grid){
-    const gridClone = grid.cloneNode(true);
-    gridClone.id = "";
-    gridClone.classList.add("print");
-    calBox.appendChild(gridClone);
-  }
-  cal.appendChild(calBox);
-
-  // Tabella dettagli
-  const [yS,mS] = String(yyyyMM).split("-");
-  const y = parseInt(yS,10);
-  const m1 = parseInt(mS,10);
-  const days = __daysInMonth(y, m1);
-
-  let rowsHtml = "";
-  for (let d=1; d<=days; d++){
-    const h = map.get(d) || 0;
-    const hs = (h % 1 === 0) ? String(h) : String(Math.round(h*10)/10);
-    rowsHtml += `<tr><td>${String(d).padStart(2,"0")}/${String(m1).padStart(2,"0")}/${y}</td><td class="num">${hs}</td></tr>`;
-  }
-  table.innerHTML = `
-    <div class="ore-table-wrap">
-      <table class="ore-table" aria-label="Dettaglio ore per giorno">
-        <thead><tr><th>Giorno</th><th class="num">Ore</th></tr></thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
-    </div>
-  `;
-
-  rep.hidden = false;
-  if (printBtn) printBtn.hidden = false;
-}
-
-function setupOrePuliziaPage(){
-  const back = document.getElementById("orePuliziaBackBtn");
-  if (back) back.addEventListener("click", ()=> showPage("home"));
-
-  const monthSel = document.getElementById("oreMonthSelect");
-  const opSel = document.getElementById("oreOperatorSelect");
-  const genBtn = document.getElementById("oreGenerateBtn");
-  const printBtn = document.getElementById("orePrintBtn");
-
-  if (!monthSel || !opSel || !genBtn) return;
-
-  const fillOperators = () => {
-    const ops = getOperators_();
-    opSel.innerHTML = ops.map(o => `<option value="${o}">${o}</option>`).join("");
-    // default: primo (COSTANZA se presente)
-    if (ops.includes("COSTANZA")) opSel.value = "COSTANZA";
-  };
-
-  const fillMonths = () => {
-    const months = getAvailableMonths_();
-    // default: mese corrente se presente, altrimenti ultimo disponibile, altrimenti mese corrente
-    const now = new Date();
-    const curr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-    const def = months.includes(curr) ? curr : (months.length ? months[months.length-1] : curr);
-
-    monthSel.innerHTML = (months.length ? months : [def]).map(mm => `<option value="${mm}">${__itMonthLabel(mm)}</option>`).join("");
-    monthSel.value = def;
-  };
-
-  const render = () => {
-    const yyyyMM = monthSel.value;
-    const op = opSel.value;
-    renderOreCalendar_({ yyyyMM, op });
-  };
-
-  const generate = () => {
-    const yyyyMM = monthSel.value;
-    const op = opSel.value;
-    renderOreReport_({ yyyyMM, op });
-    // porta a report
-    try{ document.getElementById("oreReport")?.scrollIntoView({ behavior:"smooth", block:"start" }); }catch(_){}
-  };
-
-  const doPrint = () => {
-    try{ window.print(); }catch(_){}
-  };
-
-  // bind
-  monthSel.addEventListener("change", render);
-  opSel.addEventListener("change", render);
-  genBtn.addEventListener("click", generate);
-  if (printBtn) printBtn.addEventListener("click", doPrint);
-
-  // load data + first render when page is visited
-  const onEnter = async () => {
-    try{
-      await ensureSettingsLoaded({ force:false, showLoader:false });
-      await ensureOperatoriLoaded_({ force:false, showLoader:true });
-      buildMonthOpIndex_();
-      fillOperators();
-      fillMonths();
-      render();
-    }catch(e){
-      toast(e.message || "Errore caricamento operatori");
-    }
-  };
-
-  // Hook: quando si apre la pagina
-  document.addEventListener("dDAE:page", (ev)=>{
-    const page = ev && ev.detail && ev.detail.page;
-    if (page === "ore-pulizia") onEnter();
-  });
-}
-
 function refreshFloatingLabels(){
   try{
     document.querySelectorAll(".field.float").forEach(f => {
@@ -3156,7 +2869,6 @@ async function init(){
   setupCalendario();
   setupImpostazioni();
 
-  try{ setupOrePuliziaPage(); }catch(_){ }
     setupOspite();
   initFloatingLabels();
 // periodo iniziale
@@ -3272,26 +2984,19 @@ async function init(){
     const rows = [];
     let touched = false;
 
-    // Se l'utente inserisce SOLO le ore, prova a prendere i nomi da "impostazioni" (operatore_1/2/3)
-    const defaultNames = (state.settings && state.settings.loaded) ? getOperatorNamesFromSettings() : [];
-
     opEls.forEach((r, idx) => {
-      const nameRaw = String((r.name.value || "")).trim();
-      const hoursRaw = String(r.hours.value ?? "");
+      const name = String((r.name.value || "")).trim();
+      const hoursRaw = r.hours.value;
       const hours = parseHours_(hoursRaw);
 
-      // Considera "touched" se l'utente ha scritto qualcosa (nome o ore)
-      if (nameRaw || String(hoursRaw || "").trim()) touched = true;
+      if (name || String(hoursRaw || "").trim()) touched = true;
 
-      // Se la riga è davvero vuota, ignora
-      if (!nameRaw && !String(hoursRaw || "").trim() && hours === null) return;
-
-      // Nome: se vuoto, prova con default (da impostazioni)
-      const name = nameRaw || String(defaultNames[idx] || "").trim();
+      // Se la riga è vuota, ignora
+      if (!name && (hours === null)) return;
 
       // Validazione: o entrambi, o niente
       if (!name || hours === null) {
-        throw new Error("Compila le ore (formato es: 2 o 2.5) e assicurati che esista il nome per Operatore " + (idx + 1));
+        throw new Error("Compila nome e ore per Operatore " + (idx + 1));
       }
 
       // Se ore=0, non salvare (considerata assenza)

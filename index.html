@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.195" rel="stylesheet"/>
-<link href="./manifest.json?v=1.195" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.195" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.195" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.195" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.195" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.192" rel="stylesheet"/>
+<link href="./manifest.json?v=1.192" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.192" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.192" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.192" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.192" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.195"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.192"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -92,16 +92,6 @@
 </svg></div>
 <div class="home-main-label">Pulizie</div>
 </button>
-<button aria-label="Ore pulizia" class="home-main" id="goOrePulizia" type="button">
-  <div aria-hidden="true" class="home-main-glyph alt">
-    <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="8"></circle>
-      <path d="M12 8v4l3 2"></path>
-    </svg>
-  </div>
-  <div class="home-main-label">Ore pulizia</div>
-</button>
-
 <button aria-label="Guadagni" class="home-main" id="goGuadagni" type="button">
 <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M7 9V7.5A2.5 2.5 0 0 1 9.5 5h5A2.5 2.5 0 0 1 17 7.5V9"></path>
@@ -121,58 +111,13 @@
 </button>
 
 </div>
-<div class="build" id="buildText">1.195</div>
+<div class="build" id="buildText"1.192</div>
 <div class="home-spacer"></div>
 </div>
 </section>
 
 
-<section class="page" hidden id="page-ore-pulizia" aria-label="Ore pulizia">
-  <div class="hd">
-    <button class="btn ghost" id="orePuliziaBackBtn" type="button" aria-label="Indietro">←</button>
-    <h2>Ore pulizia</h2>
-  </div>
-
-  <div class="bd ore-page">
-    <div class="ore-filters" aria-label="Filtri report ore pulizia">
-      <div class="field gf-tile">
-        <label class="mini-label" for="oreMonthSelect">Mese</label>
-        <select id="oreMonthSelect" aria-label="Seleziona mese"></select>
-      </div>
-      <div class="field gf-tile">
-        <label class="mini-label" for="oreOperatorSelect">Operatore</label>
-        <select id="oreOperatorSelect" aria-label="Seleziona operatore"></select>
-      </div>
-    </div>
-
-    <div class="ore-cal-wrap">
-      <div class="ore-cal-title" id="oreCalTitle"></div>
-      <div class="ore-cal-dow" aria-hidden="true">
-        <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
-      </div>
-      <div class="ore-cal-grid" id="oreCalGrid" role="grid" aria-label="Calendario mensile ore pulizia"></div>
-    </div>
-
-    <div class="ore-actions">
-      <button class="btn" id="oreGenerateBtn" type="button">Genera report</button>
-      <button class="btn ghost" id="orePrintBtn" type="button" hidden>Stampa</button>
-    </div>
-
-    <div class="ore-report" id="oreReport" hidden>
-      <div class="card ore-report-card">
-        <div class="ore-report-head">
-          <div class="ore-report-title">Report ore pulizia</div>
-          <div class="ore-report-meta" id="oreReportMeta"></div>
-        </div>
-        <div class="ore-report-totals" id="oreReportTotals"></div>
-        <div class="ore-report-calendar" id="oreReportCalendar"></div>
-        <div class="ore-report-table" id="oreReportTable"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="page" hidden id="page-impostazioni">
+<section class="page" hidden="" id="page-impostazioni">
   <div class="card">
     <div class="hd">
       <button class="btn ghost" id="settingsBackBtn" type="button" aria-label="Indietro">←</button>
@@ -673,15 +618,15 @@
 <div class="clean-ops" id="cleanOps">
   <div class="clean-op-row">
     <input id="op1Name" type="text" autocomplete="off" placeholder="Operatore 1" />
-    <input id="op1Hours" type="text" inputmode="decimal" pattern="[0-9]+([\.,][0-9]+)?" placeholder="Ore" />
+    <input id="op1Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
   </div>
   <div class="clean-op-row">
     <input id="op2Name" type="text" autocomplete="off" placeholder="Operatore 2" />
-    <input id="op2Hours" type="text" inputmode="decimal" pattern="[0-9]+([\.,][0-9]+)?" placeholder="Ore" />
+    <input id="op2Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
   </div>
   <div class="clean-op-row">
     <input id="op3Name" type="text" autocomplete="off" placeholder="Operatore 3" />
-    <input id="op3Hours" type="text" inputmode="decimal" pattern="[0-9]+([\.,][0-9]+)?" placeholder="Ore" />
+    <input id="op3Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
   </div>
   <div class="clean-op-hint">
     Benzina: €2,00 per presenza (non dipende dalle ore) • Lavoro: €8,00/ora
@@ -839,8 +784,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.195"></script>
-<script defer="" src="./app.js?v=1.195"></script>
+<script defer="" src="./config.js?v=1.192"></script>
+<script defer="" src="./app.js?v=1.192"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
