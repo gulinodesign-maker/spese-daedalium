@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.191";
+const BUILD_VERSION = "1.192";
 
 
 
@@ -407,6 +407,8 @@ guestMarriage: false,
 
   // Lavanderia (resoconti settimanali)
   laundry: { list: [], current: null },
+  // Impostazioni (foglio "impostazioni")
+  settings: { loaded: false, byKey: {}, rows: [], loadedAt: 0 },
 };
 
 const COLORS = {
@@ -770,7 +772,7 @@ function calcTouristTax(ospite, nights){
   const nNights = Math.max(0, parseInt(nights, 10) || 0);
   const taxableDays = Math.min(nNights, 3);
 
-  const rate = (typeof TOURIST_TAX_EUR_PPN !== "undefined") ? Number(TOURIST_TAX_EUR_PPN) : 0;
+  const rate = (state.settings && state.settings.loaded) ? getSettingNumber("tassa_soggiorno", (typeof TOURIST_TAX_EUR_PPN !== "undefined" ? TOURIST_TAX_EUR_PPN : 0)) : ((typeof TOURIST_TAX_EUR_PPN !== "undefined") ? Number(TOURIST_TAX_EUR_PPN) : 0);
   const r = isFinite(rate) ? Math.max(0, rate) : 0;
 
   const total = adults * taxableDays * r;
@@ -978,6 +980,167 @@ return json.data;
 }
 
 
+// =========================
+// IMPOSTAZIONI (foglio Google "impostazioni")
+// Chiavi usate:
+// - operatori  -> colonne operatore_1/2/3
+// - tariffa_oraria -> value (number)
+// - costo_benzina  -> value (number)
+// - tassa_soggiorno -> value (number)
+// =========================
+
+function __normKey(k) {
+  return String(k || "").trim().toLowerCase();
+}
+
+function __parseSettingsRows(rows) {
+  const byKey = {};
+  (Array.isArray(rows) ? rows : []).forEach(r => {
+    const key = __normKey(r?.key ?? r?.Key ?? r?.KEY);
+    if (!key) return;
+    byKey[key] = r;
+  });
+  return byKey;
+}
+
+function getSettingRow(key) {
+  const k = __normKey(key);
+  return (state.settings && state.settings.byKey && state.settings.byKey[k]) ? state.settings.byKey[k] : null;
+}
+
+function getSettingText(key, fallback = "") {
+  const row = getSettingRow(key);
+  const v = row ? (row.value ?? row.Value ?? row.val ?? "") : "";
+  const s = String(v ?? "").trim();
+  return s ? s : String(fallback ?? "");
+}
+
+function getSettingNumber(key, fallback = 0) {
+  const row = getSettingRow(key);
+  let v = row ? (row.value ?? row.Value ?? row.val ?? "") : "";
+  if (v === null || v === undefined) v = "";
+  const s = String(v).trim().replace(",", ".");
+  if (!s) return Number(fallback) || 0;
+  const n = Number(s);
+  return isFinite(n) ? n : (Number(fallback) || 0);
+}
+
+function getOperatorNamesFromSettings() {
+  const row = getSettingRow("operatori");
+  const op1 = String(row?.operatore_1 ?? row?.Operatore_1 ?? row?.operatore1 ?? "").trim();
+  const op2 = String(row?.operatore_2 ?? row?.Operatore_2 ?? row?.operatore2 ?? "").trim();
+  const op3 = String(row?.operatore_3 ?? row?.Operatore_3 ?? row?.operatore3 ?? "").trim();
+  return [op1, op2, op3].filter(x => x);
+}
+
+async function ensureSettingsLoaded({ force = false, showLoader = false } = {}) {
+  try {
+    if (!force && state.settings?.loaded) return state.settings;
+    const data = await api("impostazioni", { method: "GET", showLoader });
+    const rows = data?.rows || data?.items || [];
+    state.settings.rows = Array.isArray(rows) ? rows : [];
+    state.settings.byKey = __parseSettingsRows(state.settings.rows);
+    state.settings.loaded = true;
+    state.settings.loadedAt = Date.now();
+
+    // Se esistono campi operatori (pulizie) e sono vuoti, auto-compila con i nomi salvati
+    try {
+      const names = getOperatorNamesFromSettings();
+      if (names.length) {
+        const ids = ["op1Name","op2Name","op3Name"];
+        ids.forEach((id, idx) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (!String(el.value || "").trim() && names[idx]) el.value = names[idx];
+        });
+        refreshFloatingLabels();
+      }
+    } catch(_) {}
+
+    return state.settings;
+  } catch (e) {
+    // Non bloccare l'app se il foglio non è ancora pronto
+    console.warn("Impostazioni: load failed", e);
+    return state.settings;
+  }
+}
+
+async function loadImpostazioniPage({ force = false } = {}) {
+  await ensureSettingsLoaded({ force, showLoader: true });
+  try {
+    const rOps = getSettingRow("operatori") || {};
+    const op1 = String(rOps.operatore_1 ?? "").trim();
+    const op2 = String(rOps.operatore_2 ?? "").trim();
+    const op3 = String(rOps.operatore_3 ?? "").trim();
+
+    const el1 = document.getElementById("setOp1");
+    const el2 = document.getElementById("setOp2");
+    const el3 = document.getElementById("setOp3");
+    if (el1) el1.value = op1;
+    if (el2) el2.value = op2;
+    if (el3) el3.value = op3;
+
+    const t = document.getElementById("setTariffa");
+    const b = document.getElementById("setBenzina");
+    const ts = document.getElementById("setTassa");
+
+    if (t) t.value = String(getSettingNumber("tariffa_oraria", 0) || "");
+    if (b) b.value = String(getSettingNumber("costo_benzina", 0) || "");
+    if (ts) ts.value = String(getSettingNumber("tassa_soggiorno", (typeof TOURIST_TAX_EUR_PPN !== "undefined" ? TOURIST_TAX_EUR_PPN : 0)) || "");
+
+    refreshFloatingLabels();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
+function __readNumInput(id) {
+  const el = document.getElementById(id);
+  const raw = el ? String(el.value || "").trim() : "";
+  if (!raw) return "";
+  const n = Number(raw.replace(",", "."));
+  if (!isFinite(n) || n < 0) return "";
+  return Math.round(n * 100) / 100;
+}
+
+async function saveImpostazioniPage() {
+  const op1 = String(document.getElementById("setOp1")?.value || "").trim();
+  const op2 = String(document.getElementById("setOp2")?.value || "").trim();
+  const op3 = String(document.getElementById("setOp3")?.value || "").trim();
+
+  const tariffa = __readNumInput("setTariffa");
+  const benzina = __readNumInput("setBenzina");
+  const tassa = __readNumInput("setTassa");
+
+  const payload = {
+    operatori: [op1, op2, op3],
+    tariffa_oraria: tariffa,
+    costo_benzina: benzina,
+    tassa_soggiorno: tassa,
+  };
+
+  await api("impostazioni", { method: "POST", body: payload, showLoader: true });
+  await ensureSettingsLoaded({ force: true, showLoader: false });
+
+  toast("Impostazioni salvate");
+}
+
+function setupImpostazioni() {
+  const back = document.getElementById("settingsBackBtn");
+  if (back) back.addEventListener("click", () => showPage("home"));
+
+  const save = document.getElementById("settingsSaveBtn");
+  if (save) save.addEventListener("click", async () => {
+    try { await saveImpostazioniPage(); } catch (e) { toast(e.message); }
+  });
+
+  const reload = document.getElementById("settingsReloadBtn");
+  if (reload) reload.addEventListener("click", async () => {
+    try { await loadImpostazioniPage({ force: true }); toast("Impostazioni ricaricate"); } catch (e) { toast(e.message); }
+  });
+}
+
+
 
 // ===== API Cache (speed + dedupe richieste) =====
 const __apiCache = new Map();      // key -> { t:number, data:any }
@@ -1072,11 +1235,18 @@ function bindHomeDelegation(){
     const cal = e.target.closest && e.target.closest("#goCalendario");
     if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
-    if (tassa){ hideLauncher(); showPage("tassa"); try{ initTassaPage(); }catch(_){} return; }
+    if (tassa){
+      hideLauncher();
+      (async ()=>{ try{ await ensureSettingsLoaded({ force:false, showLoader:false }); }catch(_){} showPage("tassa"); try{ initTassaPage(); }catch(_){} })();
+      return;
+    }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
     const lav = e.target.closest && e.target.closest("#goLavanderia");
     if (lav){ hideLauncher(); showPage("lavanderia"); return; }
+
+    const imp = e.target.closest && e.target.closest("#goImpostazioni");
+    if (imp){ hideLauncher(); showPage("impostazioni"); return; }
 
 const g = e.target.closest && e.target.closest("#goGuadagni");
     if (g){ hideLauncher(); toast("Guadagni: in arrivo"); return; }
@@ -1247,6 +1417,13 @@ const btnNewGuestOspiti = $("#btnNewGuestOspiti");
 if (btnNewGuestOspiti){
   btnNewGuestOspiti.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
 }
+
+
+  // HOME: icona Impostazioni
+  const goImp = $("#goImpostazioni");
+  if (goImp){
+    bindFastTap(goImp, () => showPage("impostazioni"));
+  }
 
   // HOME: icona Calendario (attiva e “tap-safe” su iOS PWA)
   const goCal = $("#goCalendario");
@@ -2690,6 +2867,7 @@ async function init(){
   setupHeader();
   setupHome();
   setupCalendario();
+  setupImpostazioni();
 
     setupOspite();
   initFloatingLabels();
@@ -2749,6 +2927,9 @@ async function init(){
   // prefetch leggero (evita lentezza all'avvio)
   try { await loadMotivazioni(); } catch(e){ toast(e.message); }
 
+  // Impostazioni: carica in background (serve per tassa soggiorno / operatori)
+  try { await ensureSettingsLoaded({ force:false, showLoader:false }); } catch(_) {}
+
   // avvio: ripristina sezione se il SW ha forzato un reload su iOS
   const targetPage = (__restore && __restore.page) ? __restore.page : "home";
   showPage(targetPage);
@@ -2780,8 +2961,8 @@ async function init(){
   };
 
   // --- Ore operatori (foglio "operatori") ---
-  const OP_BENZINA_EUR = 2.00;   // € per presenza (non dipende dalle ore)
-  const OP_RATE_EUR_H = 8.00;    // € per ora (solo informativo per ora)
+  const OP_BENZINA_EUR = (state.settings && state.settings.loaded) ? getSettingNumber("costo_benzina", 2.00) : 2.00;   // € per presenza
+  const OP_RATE_EUR_H = (state.settings && state.settings.loaded) ? getSettingNumber("tariffa_oraria", 8.00) : 8.00;    // € per ora
 
   const opEls = [
     { name: document.getElementById("op1Name"), hours: document.getElementById("op1Hours") },
@@ -4005,7 +4186,7 @@ async function calcTassa(){
     kidsPres    += kids * nights;
   }
 
-  const rate = Number(typeof TOURIST_TAX_EUR_PPN !== "undefined" ? TOURIST_TAX_EUR_PPN : 0) || 0;
+  const rate = (state.settings && state.settings.loaded) ? (getSettingNumber("tassa_soggiorno", (typeof TOURIST_TAX_EUR_PPN !== "undefined" ? TOURIST_TAX_EUR_PPN : 0)) || 0) : (Number(typeof TOURIST_TAX_EUR_PPN !== "undefined" ? TOURIST_TAX_EUR_PPN : 0) || 0);
   const redFactor = Number(typeof TOURIST_TAX_REDUCED_FACTOR !== "undefined" ? TOURIST_TAX_REDUCED_FACTOR : 1) || 1;
 
   const payingAmt  = payingPres * rate;

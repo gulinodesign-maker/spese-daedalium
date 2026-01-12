@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.191" rel="stylesheet"/>
-<link href="./manifest.json?v=1.191" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.191" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.191" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.191" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.191" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.192" rel="stylesheet"/>
+<link href="./manifest.json?v=1.192" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.192" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.192" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.192" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.192" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.191"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.192"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -101,11 +101,69 @@
 </svg></div>
 <div class="home-main-label">Guadagni</div>
 </button>
+
+<button aria-label="Impostazioni" class="home-main" id="goImpostazioni" type="button">
+  <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+    <path d="M19.4 15a7.97 7.97 0 0 0 .1-1 7.97 7.97 0 0 0-.1-1l2.1-1.6a.5.5 0 0 0 .1-.6l-2-3.5a.5.5 0 0 0-.6-.2l-2.5 1a8.28 8.28 0 0 0-1.7-1l-.4-2.6A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.4l-.4 2.6a8.28 8.28 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.5a.5.5 0 0 0 .1.6L4.6 13a7.97 7.97 0 0 0-.1 1 7.97 7.97 0 0 0 .1 1L2.5 16.6a.5.5 0 0 0-.1.6l2 3.5a.5.5 0 0 0 .6.2l2.5-1a8.28 8.28 0 0 0 1.7 1l.4 2.6a.5.5 0 0 0 .5.4h4a.5.5 0 0 0 .5-.4l.4-2.6a8.28 8.28 0 0 0 1.7-1l2.5 1a.5.5 0 0 0 .6-.2l2-3.5a.5.5 0 0 0-.1-.6Z"></path>
+  </svg></div>
+  <div class="home-main-label">Impostazioni</div>
+</button>
+
 </div>
-<div class="build" id="buildText">1.191</div>
+<div class="build" id="buildText"1.192</div>
 <div class="home-spacer"></div>
 </div>
 </section>
+
+
+<section class="page" hidden="" id="page-impostazioni">
+  <div class="card">
+    <div class="hd">
+      <button class="btn ghost" id="settingsBackBtn" type="button" aria-label="Indietro">←</button>
+      <h2>Impostazioni</h2>
+    </div>
+    <div class="bd">
+      <div class="field float">
+        <input id="setOp1" autocomplete="off" placeholder=" " />
+        <label for="setOp1">Operatore 1 (nome)</label>
+      </div>
+      <div class="field float" style="margin-top:10px;">
+        <input id="setOp2" autocomplete="off" placeholder=" " />
+        <label for="setOp2">Operatore 2 (nome)</label>
+      </div>
+      <div class="field float" style="margin-top:10px;">
+        <input id="setOp3" autocomplete="off" placeholder=" " />
+        <label for="setOp3">Operatore 3 (nome)</label>
+      </div>
+
+      <div class="field float" style="margin-top:16px;">
+        <input id="setTariffa" inputmode="decimal" min="0" step="0.01" type="number" placeholder=" " />
+        <label for="setTariffa">Tariffa oraria operatore (€ / ora)</label>
+      </div>
+
+      <div class="field float" style="margin-top:10px;">
+        <input id="setBenzina" inputmode="decimal" min="0" step="0.01" type="number" placeholder=" " />
+        <label for="setBenzina">Costo benzina (€)</label>
+      </div>
+
+      <div class="field float" style="margin-top:10px;">
+        <input id="setTassa" inputmode="decimal" min="0" step="0.01" type="number" placeholder=" " />
+        <label for="setTassa">Tassa di soggiorno (€ / persona / notte)</label>
+      </div>
+
+      <div class="row" style="margin-top:16px; gap:10px;">
+        <button class="btn primary" id="settingsSaveBtn" type="button" style="flex:1;">Salva</button>
+        <button class="btn ghost" id="settingsReloadBtn" type="button">Ricarica</button>
+      </div>
+
+      <div class="muted small" id="settingsHint" style="margin-top:12px;">
+        I valori vengono salvati nel foglio Google <b>impostazioni</b>.
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <section class="page" hidden="" id="page-tassa">
   <div class="card">
@@ -726,8 +784,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.191"></script>
-<script defer="" src="./app.js?v=1.191"></script>
+<script defer="" src="./config.js?v=1.192"></script>
+<script defer="" src="./app.js?v=1.192"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
