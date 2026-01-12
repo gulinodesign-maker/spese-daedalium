@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.188";
+const BUILD_VERSION = "1.189";
 
 
 
@@ -778,6 +778,145 @@ function calcTouristTax(ospite, nights){
 }
 
 
+/* =========================
+   Tassa di soggiorno (dDAE1.189)
+   - numeri solo dopo click "Calcola"
+   - calcolo da prenotazioni (foglio ospiti)
+========================= */
+
+function _isoToUTCms(iso){
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const [y,m,d] = iso.split("-").map(n => parseInt(n,10));
+  if (![y,m,d].every(n=>isFinite(n))) return null;
+  return Date.UTC(y, m-1, d);
+}
+
+function _addDaysISO(iso, days){
+  const t = _isoToUTCms(iso);
+  if (t == null) return "";
+  const dt = new Date(t + (days*86400000));
+  return toISO(dt);
+}
+
+function _overlapNights(guestInISO, guestOutISO, fromISO, toISO){
+  const a0 = _isoToUTCms(guestInISO);
+  const a1 = _isoToUTCms(guestOutISO);
+  const b0 = _isoToUTCms(fromISO);
+  const b1 = _isoToUTCms(_addDaysISO(toISO, 1)); // range inclusivo
+  if ([a0,a1,b0,b1].some(x=>x==null)) return 0;
+  const start = Math.max(a0, b0);
+  const end = Math.min(a1, b1);
+  const diff = Math.floor((end - start) / 86400000);
+  return (isFinite(diff) && diff > 0) ? diff : 0;
+}
+
+function resetTassaUI(){
+  const res = document.getElementById("taxResults");
+  const hint = document.getElementById("taxHint");
+  if (res) res.hidden = true;
+  if (hint) hint.hidden = false;
+
+  ["taxPayCount","taxPayAmount","taxRedCount","taxRedAmount","taxFreeCount"].forEach((id)=>{
+    const el = document.getElementById(id);
+    if (el) el.textContent = "—";
+  });
+}
+
+async function computeTassaSoggiornoForRange(fromISO, toISO){
+  const guests = await cachedGet("ospiti", { from: fromISO, to: toISO }, { showLoader:true, ttlMs: 5*1000, force:true });
+  const list = Array.isArray(guests) ? guests : [];
+
+  const rate = (typeof TOURIST_TAX_EUR_PPN !== "undefined") ? Number(TOURIST_TAX_EUR_PPN) : 0;
+  const r = isFinite(rate) ? Math.max(0, rate) : 0;
+
+  const reducedFactor = (typeof TOURIST_TAX_REDUCED_FACTOR !== "undefined") ? Number(TOURIST_TAX_REDUCED_FACTOR) : 0.5;
+  const rf = isFinite(reducedFactor) ? Math.max(0, reducedFactor) : 0.5;
+
+  let payingPres = 0, payingAmt = 0;
+  let freePres = 0;
+  let redPres = 0, redAmt = 0;
+
+  for (const g of list){
+    const inISO = formatISODateLocal(g?.check_in ?? g?.checkIn ?? "");
+    const outISO = formatISODateLocal(g?.check_out ?? g?.checkOut ?? "");
+    if (!inISO || !outISO) continue;
+
+    const overlap = _overlapNights(inISO, outISO, fromISO, toISO);
+    if (overlap <= 0) continue;
+
+    const days = Math.min(overlap, 3);
+
+    const adults = Math.max(0, parseInt(g?.adulti ?? g?.adults ?? 0, 10) || 0);
+    const kids = Math.max(0, parseInt(g?.bambini_u10 ?? g?.kids_u10 ?? 0, 10) || 0);
+
+    // Ridotti (placeholder): quando implementi la colonna, useremo questo valore
+    const red = Math.max(0, parseInt(g?.ridotti ?? g?.ridotto ?? g?.anziani ?? 0, 10) || 0);
+
+    payingPres += adults * days;
+    payingAmt += adults * days * r;
+
+    freePres += kids * days;
+
+    redPres += red * days;
+    redAmt += red * days * r * rf;
+  }
+
+  return { payingPres, payingAmt, freePres, redPres, redAmt, rate: r };
+}
+
+function setupTassaSoggiorno(){
+  const from = document.getElementById("taxFrom");
+  const to = document.getElementById("taxTo");
+  const btn = document.getElementById("btnTaxCalc");
+  if (!from || !to || !btn) return;
+
+  try{
+    if (state?.period?.from) from.value = state.period.from;
+    if (state?.period?.to) to.value = state.period.to;
+  }catch(_){}
+
+  const onChange = () => {
+    // ogni modifica periodo -> reset, numeri solo dopo "Calcola"
+    resetTassaUI();
+  };
+  from.addEventListener("change", onChange);
+  to.addEventListener("change", onChange);
+
+  bindFastTap(btn, async () => {
+    const f = String(from.value || "").trim();
+    const t = String(to.value || "").trim();
+    if (!f || !t) { toast("Seleziona il periodo"); return; }
+    if (f > t) { toast("Il campo 'Da' deve essere <= 'A'"); return; }
+
+    try{
+      const out = await computeTassaSoggiornoForRange(f, t);
+
+      const res = document.getElementById("taxResults");
+      const hint = document.getElementById("taxHint");
+      if (hint) hint.hidden = true;
+      if (res) res.hidden = false;
+
+      const pc = document.getElementById("taxPayCount");
+      const pa = document.getElementById("taxPayAmount");
+      const rc = document.getElementById("taxRedCount");
+      const ra = document.getElementById("taxRedAmount");
+      const fc = document.getElementById("taxFreeCount");
+
+      if (pc) pc.textContent = String(out.payingPres || 0);
+      if (pa) pa.textContent = formatEUR(out.payingAmt || 0);
+      if (rc) rc.textContent = String(out.redPres || 0);
+      if (ra) ra.textContent = formatEUR(out.redAmt || 0);
+      if (fc) fc.textContent = String(out.freePres || 0);
+    }catch(e){
+      console.error(e);
+      toast(e.message || "Errore nel calcolo");
+    }
+  });
+
+  resetTassaUI();
+}
+
+
 function monthRangeISO(date = new Date()){
   const y = date.getFullYear();
   const m = date.getMonth();
@@ -1072,7 +1211,7 @@ function bindHomeDelegation(){
     const cal = e.target.closest && e.target.closest("#goCalendario");
     if (cal){ hideLauncher(); showPage("calendario"); return; }
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
-    if (tassa){ hideLauncher(); toast("Tassa soggiorno: in arrivo"); return; }
+    if (tassa){ hideLauncher(); showPage("tassa-soggiorno"); resetTassaUI(); return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
     const lav = e.target.closest && e.target.closest("#goLavanderia");
@@ -1180,6 +1319,7 @@ function showPage(page){
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
+  if (page === "tassa-soggiorno") { resetTassaUI(); }
 
   // dDAE_1.186: fallback visualizzazione Pulizie
   try{
@@ -2977,6 +3117,10 @@ const buildPuliziePayload = () => {
     });
   }
 
+
+
+  // --- Tassa di soggiorno ---
+  try{ setupTassaSoggiorno(); }catch(_){ }
 }
 
 

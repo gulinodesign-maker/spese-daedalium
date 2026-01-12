@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.188"),
+    url("./assets/bg-daedalium.png?v=1.189"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.188"),
+    url("./assets/bg-daedalium.png?v=1.189"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3577,4 +3577,81 @@ grid-template-rows: 34px repeat(7, 54px);
   *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   #page-lavanderia .laundry-print{ display:block !important; }
 
+}
+
+
+
+/* =========================
+   Tassa di soggiorno (dDAE1.189)
+========================= */
+.tax-period-row{
+  display:flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: stretch;
+  margin-top: 10px;
+}
+.tax-field{ flex:1; min-width:0; }
+
+.tax-calc-btn{
+  width:100%;
+  margin-top: 14px;
+  background: var(--blue2);
+  color: #fff;
+  border-color: rgba(255,255,255,0.30);
+  box-shadow: 0 12px 30px rgba(15,23,42,0.14);
+}
+.tax-calc-btn:active{ transform: scale(0.99); }
+
+.tax-hint{
+  margin-top: 10px;
+  font-weight: 800;
+  opacity: 0.85;
+  font-size: 14px;
+}
+
+.tax-results{ margin-top: 12px; }
+
+.tax-kpi-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+@media (min-width: 420px){
+  .tax-kpi-grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.tax-kpi{
+  border-radius: 18px;
+  padding: 14px 14px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.10);
+}
+.tax-kpi__label{
+  font-weight: 900;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.tax-kpi__value{
+  margin-top: 6px;
+  font-weight: 950;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+.tax-kpi__sub{
+  margin-top: 2px;
+  font-weight: 900;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.tax-kpi--paying{ background: #a9ddff; }  /* azzurro chiaro, flat */
+.tax-kpi--reduced{ background: #ffd2a1; } /* arancio chiaro, flat */
+.tax-kpi--free{ background: #e2e2e2; }    /* grigio chiaro, flat */
+
+.tax-note{
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.75;
 }
