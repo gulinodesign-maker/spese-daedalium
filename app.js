@@ -379,6 +379,7 @@ window.addEventListener("unhandledrejection", (e) => {
 
 const state = {
   cleanDay: null,
+  settings: null,
 
   motivazioni: [],
   spese: [],
@@ -408,9 +409,6 @@ guestMarriage: false,
   // Lavanderia (resoconti settimanali)
   laundry: { list: [], current: null },
 };
-// Impostazioni globali (da foglio "impostazioni")
-state.settings = null;
-
 
 const COLORS = {
   CONTANTI: "#2b7cb4",          // azzurro
@@ -1042,6 +1040,38 @@ async function cachedGet(action, params = {}, { ttlMs = 30000, showLoader = true
   }
 }
 
+// --- Impostazioni (foglio 'impostazioni') ---
+async function loadImpostazioni({ force = false, showLoader = false } = {}){
+  if (state.settings && !force) return state.settings;
+  const rows = await api("impostazioni", { method:"GET", params:{}, showLoader });
+  const arr = Array.isArray(rows) ? rows : (rows && rows.rows ? rows.rows : []);
+  const map = {};
+  arr.forEach(r => {
+    const k = String(r.key || r.KEY || "").trim();
+    if (!k) return;
+    map[k] = {
+      value: r.value ?? r.VALUE ?? "",
+      type: r.type ?? r.TYPE ?? "",
+      unit: r.unit ?? r.UNIT ?? "",
+      descrizione: r.descrizione ?? r.DESCRIZIONE ?? "",
+    };
+  });
+  state.settings = map;
+  return map;
+}
+
+function getSettingNum(key, fallback){
+  const v = state.settings && state.settings[key] ? state.settings[key].value : undefined;
+  const n = parseFloat(String(v ?? "").replace(",", "."));
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function setSettingLocal(key, value){
+  if (!state.settings) state.settings = {};
+  if (!state.settings[key]) state.settings[key] = { value:"", type:"number", unit:"", descrizione:"" };
+  state.settings[key].value = value;
+}
+
 /* Launcher modal (popup) */
 
 
@@ -1075,7 +1105,8 @@ function bindHomeDelegation(){
     const cal = e.target.closest && e.target.closest("#goCalendario");
     if (cal){ hideLauncher(); showPage("calendario"); return; }
     const imp = e.target.closest && e.target.closest("#goImpostazioni");
-    if (imp){ hideLauncher(); showPage("impostazioni"); try{ window.initImpostazioniPage && window.initImpostazioniPage(); }catch(_){} return; }
+    if (imp){ hideLauncher(); showPage("impostazioni"); try{ initImpostazioniPage(); }catch(_){} return; }
+
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); showPage("tassa"); try{ initTassaPage(); }catch(_){} return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -2768,6 +2799,7 @@ async function init(){
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
   const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
+  const btnOpsReportFromPulizie = document.getElementById("btnOpsReportFromPulizie");
 
   const readCell = (el) => {
     const v = String(el.textContent || "").trim();
@@ -2911,7 +2943,6 @@ const buildPuliziePayload = () => {
       try{
         const payload = buildPuliziePayload();
         await api("pulizie", { method:"POST", body: payload });
-        try{ await (window.saveOperatoriForPulizie && window.saveOperatoriForPulizie()); }catch(_){ }
         // ricarica dal DB senza svuotare (così resta visibile subito)
         try{ await loadPulizieForDay({ clearFirst:false }); }catch(_){ }
         toast("Pulizie salvate");
@@ -2935,6 +2966,7 @@ const buildPuliziePayload = () => {
     state.cleanDay = d.toISOString();
     updateCleanLabel();
     try{ loadPulizieForDay(); }catch(_){ }
+    try{ if (typeof loadOperatoriForDay === "function") loadOperatoriForDay(); }catch(_){ }
   };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
@@ -2943,12 +2975,143 @@ const buildPuliziePayload = () => {
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
     try{ loadPulizieForDay(); }catch(_){ }
+    try{ if (typeof loadOperatoriForDay === "function") loadOperatoriForDay(); }catch(_){ }
   });
+// --- Operatori (pulizie) ---
+  const opNameEls = [$("#opName1"), $("#opName2"), $("#opName3")];
+  const opHoursEls = [$("#opHours1"), $("#opHours2"), $("#opHours3")];
+  const opPresenzeEl = $("#opPresenze");
+  const opBenzinaEl = $("#opBenzina");
+
+  function getOpsInput(){
+    const out = [];
+    let presenze = 0;
+    for (let i=0;i<3;i++){
+      const name = String(opNameEls[i]?.value || "").trim();
+      const ore = parseFloat(String(opHoursEls[i]?.value || "0").replace(",", "."));
+      const oreN = Number.isFinite(ore) ? ore : 0;
+      out.push({ slot:i+1, operatore:name, ore:oreN });
+      if (name && oreN > 0) presenze++;
+    }
+    const benzinaPerPres = getSettingNum("benzina_per_presenza", 2);
+    const benzina = presenze * benzinaPerPres;
+    return { rows: out, presenze, benzina, benzinaPerPres };
+  }
+
+  function renderOpsSummary(){
+    try{
+      const { presenze, benzina } = getOpsInput();
+      if (opPresenzeEl) opPresenzeEl.textContent = String(presenze);
+      if (opBenzinaEl) opBenzinaEl.textContent = "€ " + (benzina||0).toFixed(2);
+    }catch(_){}
+  }
+
+  async function loadOperatoriForDay(){
+    try{
+      await loadImpostazioni({ showLoader:false });
+      const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
+      const data = toISODateLocal(day);
+
+      const res = await api("operatori", { method:"GET", params:{ data }, showLoader:false });
+      const rows = Array.isArray(res) ? res : (res && res.rows ? res.rows : []);
+      // reset
+      opNameEls.forEach(el => { if (el) el.value=""; });
+      opHoursEls.forEach(el => { if (el) el.value=""; });
+
+      // fill by id suffix _1.._3 when possible
+      rows.forEach(r => {
+        const id = String(r.id || "");
+        const op = String(r.operatore || r.OPERATORE || "").trim();
+        const ore = parseFloat(String(r.ore ?? r.ORE ?? "0").replace(",", "."));
+        if (!op || op === "BENZINA") return;
+        const m = id.match(/_(\d+)$/);
+        const slot = m ? parseInt(m[1],10) : null;
+        const i = (slot && slot>=1 && slot<=3) ? (slot-1) : null;
+        if (i!==null){
+          if (opNameEls[i]) opNameEls[i].value = op;
+          if (opHoursEls[i]) opHoursEls[i].value = Number.isFinite(ore)? String(ore) : "";
+        }
+      });
+
+      renderOpsSummary();
+    }catch(e){
+      console.error(e);
+      // non bloccare pulizie se operatori non disponibili
+      renderOpsSummary();
+    }
+  }
+
+  // bind input changes
+  [...opNameEls, ...opHoursEls].forEach(el => {
+    if (!el) return;
+    el.addEventListener("input", renderOpsSummary);
+    el.addEventListener("change", renderOpsSummary);
+  });
+
+  async function savePulizieAndOperatori(){
+    const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
+    const data = toISODateLocal(day);
+
+    // 1) serializza griglia pulizie
+    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
+    const rooms = ["1","2","3","4","5","6","RES"];
+    const rowsPulizie = rooms.map(stanza => {
+      const obj = { data, stanza };
+      cols.forEach(c => {
+        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
+        const v = cell ? String(cell.textContent||"").trim() : "";
+        const n = parseInt(v, 10);
+        obj[c] = (!isNaN(n) && n>0) ? n : 0;
+      });
+      return obj;
+    });
+
+    // 2) operatori + benzina
+    await loadImpostazioni({ showLoader:false });
+    const { rows, presenze, benzina } = getOpsInput();
+    const opsRows = [];
+
+    rows.forEach(r => {
+      const name = String(r.operatore||"").trim();
+      const ore = Number(r.ore||0);
+      // salva solo se nome compilato (anche ore=0 per conservare) -> ma presenze calcola con ore>0
+      if (!name) return;
+      const id = `o_${data}_${r.slot}`;
+      opsRows.push({ id, data, operatore: name, ore: ore, benzina_euro: 0 });
+    });
+
+    // benzina come riga unica
+    const idFuel = `o_${data}_BENZINA`;
+    opsRows.push({ id: idFuel, data, operatore: "BENZINA", ore: 0, benzina_euro: benzina });
+
+    // 3) invia API (ordine: pulizie poi operatori)
+    await api("pulizie", { method:"POST", body:{ data, rows: rowsPulizie }, showLoader:true });
+    await api("operatori", { method:"POST", body:{ data, rows: opsRows }, showLoader:true });
+
+    toast("Salvato");
+  }
+
+  if (cleanSave){
+    bindFastTap(cleanSave, async () => {
+      try{
+        await savePulizieAndOperatori();
+      }catch(e){
+        console.error(e);
+        toast(e.message || "Errore salvataggio");
+      }
+    });
+  }
+
+  // pre-carica impostazioni e operatori del giorno
+  try{ loadImpostazioni({ showLoader:false }); }catch(_){}
+  try{ loadOperatoriForDay(); }catch(_){}
+
 
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
   try{ loadPulizieForDay(); }catch(_){ }
+    try{ if (typeof loadOperatoriForDay === "function") loadOperatoriForDay(); }catch(_){ }
 
 
 
@@ -2982,6 +3145,24 @@ const buildPuliziePayload = () => {
       }
     });
   }
+
+  if (typeof btnOpsReportFromPulizie !== "undefined" && btnOpsReportFromPulizie){
+    bindFastTap(btnOpsReportFromPulizie, async () => {
+      try{
+        showPage("operatori");
+        try{ initOperatoriReportPage(); }catch(_){}
+        const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
+        const d = toISODateLocal(day);
+        if ($("#opsFrom")) $("#opsFrom").value = d;
+        if ($("#opsTo")) $("#opsTo").value = d;
+        try{ await refreshOperatoriReport(); }catch(_){}
+      }catch(e){
+        console.error(e);
+        try{ toast(e.message || "Errore"); }catch(_){}
+      }
+    });
+  }
+
 
 }
 
@@ -3896,6 +4077,8 @@ function resetTassaUI(){
 }
 
 async function calcTassa(){
+  try{ await loadImpostazioni({ showLoader:false }); }catch(_){ }
+
   const fromEl = $("#taxFrom");
   const toEl = $("#taxTo");
   const from = fromEl ? fromEl.value : "";
@@ -3960,6 +4143,87 @@ async function calcTassa(){
   const ra = $("#taxReducedAmount"); if (ra) ra.textContent = formatEUR(reducedAmt);
 }
 
+let __operatoriReportBound = false;
+function initOperatoriReportPage(){
+  if (__operatoriReportBound) return;
+  __operatoriReportBound = true;
+
+  const back = $("#opsBackBtn");
+  if (back){
+    bindFastTap(back, () => { showPage("pulizie"); });
+  }
+
+  const btn = $("#opsCalcBtn");
+  if (btn){
+    bindFastTap(btn, async () => {
+      try{ await refreshOperatoriReport(); }
+      catch(e){ console.error(e); toast(e.message || "Errore report"); }
+    });
+  }
+
+  // default date = oggi
+  const today = toISODateLocal(new Date());
+  if ($("#opsFrom") && !$("#opsFrom").value) $("#opsFrom").value = today;
+  if ($("#opsTo") && !$("#opsTo").value) $("#opsTo").value = today;
+}
+
+async function refreshOperatoriReport(){
+  await loadImpostazioni({ showLoader:false });
+  const from = String($("#opsFrom")?.value || "").trim();
+  const to = String($("#opsTo")?.value || "").trim();
+  if (!from || !to) throw new Error("Seleziona un intervallo date");
+
+  const rows = await api("operatori", { method:"GET", params:{ from, to }, showLoader:true });
+  const arr = Array.isArray(rows) ? rows : (rows && rows.rows ? rows.rows : []);
+  let totOre = 0;
+  let totBenz = 0;
+  const byOp = new Map();
+
+  arr.forEach(r => {
+    const op = String(r.operatore || "").trim();
+    const ore = parseFloat(String(r.ore ?? "0").replace(",", "."));
+    const benz = parseFloat(String(r.benzina_euro ?? "0").replace(",", "."));
+    if (op === "BENZINA"){
+      if (Number.isFinite(benz)) totBenz += benz;
+      return;
+    }
+    if (op){
+      const o = Number.isFinite(ore) ? ore : 0;
+      totOre += o;
+      byOp.set(op, (byOp.get(op) || 0) + o);
+    }
+  });
+
+  const costoOrario = getSettingNum("costo_orario", 8);
+  const costoLavoro = totOre * costoOrario;
+  const totale = costoLavoro + totBenz;
+
+  $("#opsTotOre").textContent = (totOre||0).toFixed(2);
+  $("#opsCostoOrarioLbl").textContent = "Costo orario: € " + (costoOrario||0).toFixed(2);
+  $("#opsCostoLavoro").textContent = "€ " + (costoLavoro||0).toFixed(2);
+  $("#opsBenzina").textContent = "€ " + (totBenz||0).toFixed(2);
+  $("#opsTotale").textContent = "€ " + (totale||0).toFixed(2);
+
+  const resBox = $("#opsResults");
+  if (resBox) resBox.hidden = false;
+
+  // breakdown
+  const bd = $("#opsBreakdown");
+  const card = $("#opsBreakdownCard");
+  if (bd && card){
+    bd.innerHTML = "";
+    const entries = Array.from(byOp.entries()).sort((a,b)=>b[1]-a[1]);
+    if (!entries.length){ card.hidden = true; return; }
+    entries.forEach(([name, ore]) => {
+      const div = document.createElement("div");
+      div.className = "row";
+      div.textContent = `${name}: ${ore.toFixed(2)} h`;
+      bd.appendChild(div);
+    });
+    card.hidden = false;
+  }
+}
+
 function initTassaPage(){
   if (__tassaBound) return;
   __tassaBound = true;
@@ -3985,293 +4249,3 @@ function initTassaPage(){
   // Stato iniziale: risultati nascosti finché non premi "Calcola"
   resetTassaUI();
 }
-
-
-/* ============================================================
- * dDAE_1.191 - Operatori (Pulizie) + Impostazioni globali
- * - fino a 3 operatori (nome + ore)
- * - benzina = presenze * benzina_per_presenza, presenza = nome compilato + ore>0
- * - tasto Salva Pulizie salva anche foglio "operatori"
- * - pagina Impostazioni salva foglio "impostazioni"
- * - Report Operatori accessibile da Pulizie (tasto arancione)
- * ============================================================ */
-
-(function(){
-  const DEFAULTS = {
-    costo_orario: 8,
-    benzina_per_presenza: 2,
-    tassa_soggiorno_adulto: (typeof TOURIST_TAX_EUR_PPN === "number" ? TOURIST_TAX_EUR_PPN : 1.5),
-    tassa_soggiorno_bambino_u10: 0,
-    tassa_soggiorno_max_notti: 0,
-  };
-
-  const num = (v, fb=0) => {
-    const n = Number(String(v ?? "").replace(",", "."));
-    return Number.isFinite(n) ? n : fb;
-  };
-
-  async function ensureSettings(force=false){
-    if (!force && state.settings) return state.settings;
-    try{
-      const res = await api("impostazioni", { method:"GET", showLoader:false });
-      const rows = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.data) ? res.data.data : []);
-      const out = { ...DEFAULTS };
-      (rows||[]).forEach(r => {
-        const k = String(r.key||r.Key||"").trim();
-        if (!k) return;
-        const t = String(r.type||r.Type||"number").toLowerCase();
-        let v = r.value ?? r.Value;
-        if (t === "number") v = num(v, out[k] ?? 0);
-        if (t === "boolean") v = String(v).toLowerCase()==="true";
-        out[k] = v;
-      });
-      state.settings = out;
-      return out;
-    }catch(_){
-      state.settings = { ...DEFAULTS };
-      return state.settings;
-    }
-  }
-
-  function getCleanISO(){
-    const base = state.cleanDay ? new Date(state.cleanDay) : new Date();
-    return toISODateLocal(base);
-  }
-
-  function readOpsInputs(){
-    const rows = [];
-    for (let i=1;i<=3;i++) {
-      const name = (document.getElementById(`op${i}Name`)?.value || "").trim();
-      const ore = num(document.getElementById(`op${i}Hours`)?.value, 0);
-      if (name && ore > 0) rows.push({ operatore: name, ore });
-    }
-    return rows;
-  }
-
-  function computeFuel(rows, settings){
-    const presenze = rows.length; // già filtrate su nome+ore>0
-    const per = num(settings?.benzina_per_presenza, DEFAULTS.benzina_per_presenza);
-    return {
-      presenze,
-      fuel: presenze * per,
-      per
-    };
-  }
-
-  function renderOpsSummary(){
-    const presEl = document.getElementById("opsPresence");
-    const fuelEl = document.getElementById("opsFuel");
-    if (!presEl || !fuelEl) return;
-    const rows = readOpsInputs();
-    const s = state.settings || DEFAULTS;
-    const { presenze, fuel } = computeFuel(rows, s);
-    presEl.textContent = String(presenze);
-    fuelEl.textContent = `€${fuel.toFixed(2).replace(".", ",")}`;
-  }
-
-  async function loadOperatoriForDay(){
-    const date = getCleanISO();
-    const inputs = ["op1Name","op1Hours","op2Name","op2Hours","op3Name","op3Hours"];
-    inputs.forEach(id => { const el=document.getElementById(id); if (el) el.value=""; });
-    try{
-      await ensureSettings(false);
-      const res = await api("operatori", { method:"GET", params: { data: date }, showLoader:false });
-      const rows = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.data) ? res.data.data : []);
-      const ops = (rows||[]).filter(r => String(r.operatore||r.Operatore||"").trim().toUpperCase() !== "BENZINA");
-      // riempi prime 3 righe
-      for (let i=0;i<3;i++) {
-        const r = ops[i];
-        if (!r) break;
-        const name = String(r.operatore||r.Operatore||"").trim();
-        const ore = num(r.ore||r.Ore, 0);
-        const nEl = document.getElementById(`op${i+1}Name`);
-        const hEl = document.getElementById(`op${i+1}Hours`);
-        if (nEl) nEl.value = name;
-        if (hEl) hEl.value = ore ? String(ore) : "";
-      }
-    }catch(_){
-      // offline: lascia vuoto
-    }
-    renderOpsSummary();
-  }
-
-  async function saveOperatoriForPulizie(){
-    const settings = await ensureSettings(false);
-    const date = getCleanISO();
-    const ops = readOpsInputs();
-    const { presenze, fuel } = computeFuel(ops, settings);
-
-    const nowIso = new Date().toISOString();
-    const rows = ops.map(o => ({
-      id: `o_${date}_${String(o.operatore).replace(/\s+/g,"_")}`,
-      data: date,
-      operatore: o.operatore,
-      ore: o.ore,
-      benzina_euro: 0,
-      note: "",
-      createdAt: nowIso,
-      updatedAt: nowIso
-    }));
-
-    // benzina: una riga al giorno
-    if (presenze > 0) {
-      rows.push({
-        id: `o_${date}_BENZINA`,
-        data: date,
-        operatore: "BENZINA",
-        ore: 0,
-        benzina_euro: fuel,
-        note: "",
-        createdAt: nowIso,
-        updatedAt: nowIso
-      });
-    }
-
-    // replace=true: rimuove vecchie righe di quel giorno e inserisce queste
-    await api("operatori", { method:"POST", body: { data: date, replace: true, rows } });
-  }
-
-  async function initImpostazioniPage(){
-    const s = await ensureSettings(true);
-    const set = (id, val) => { const el=document.getElementById(id); if (el) el.value = (val ?? "") !== null ? String(val) : ""; };
-    set("setCostoOrario", num(s.costo_orario, DEFAULTS.costo_orario));
-    set("setBenzinaPresenza", num(s.benzina_per_presenza, DEFAULTS.benzina_per_presenza));
-    set("setTaxAdulto", num(s.tassa_soggiorno_adulto, DEFAULTS.tassa_soggiorno_adulto));
-    set("setTaxBimbo", num(s.tassa_soggiorno_bambino_u10, DEFAULTS.tassa_soggiorno_bambino_u10));
-    set("setTaxMaxNotti", num(s.tassa_soggiorno_max_notti, DEFAULTS.tassa_soggiorno_max_notti));
-  }
-
-  async function saveImpostazioni(){
-    const nowIso = new Date().toISOString();
-    const rows = [
-      { key:"costo_orario", value: num(document.getElementById("setCostoOrario")?.value, DEFAULTS.costo_orario), type:"number", unit:"EUR/h", descrizione:"Costo orario operatori", updatedAt: nowIso, createdAt: nowIso },
-      { key:"benzina_per_presenza", value: num(document.getElementById("setBenzinaPresenza")?.value, DEFAULTS.benzina_per_presenza), type:"number", unit:"EUR", descrizione:"Benzina per presenza", updatedAt: nowIso, createdAt: nowIso },
-      { key:"tassa_soggiorno_adulto", value: num(document.getElementById("setTaxAdulto")?.value, DEFAULTS.tassa_soggiorno_adulto), type:"number", unit:"EUR/person/night", descrizione:"Tassa soggiorno adulto", updatedAt: nowIso, createdAt: nowIso },
-      { key:"tassa_soggiorno_bambino_u10", value: num(document.getElementById("setTaxBimbo")?.value, DEFAULTS.tassa_soggiorno_bambino_u10), type:"number", unit:"EUR/person/night", descrizione:"Tassa soggiorno bimbo <10", updatedAt: nowIso, createdAt: nowIso },
-      { key:"tassa_soggiorno_max_notti", value: num(document.getElementById("setTaxMaxNotti")?.value, DEFAULTS.tassa_soggiorno_max_notti), type:"number", unit:"nights", descrizione:"Max notti tassabili (0=nessun limite)", updatedAt: nowIso, createdAt: nowIso },
-    ];
-    await api("impostazioni", { method:"POST", body: { rows } });
-    state.settings = null;
-    await ensureSettings(true);
-    toast("Impostazioni salvate");
-  }
-
-  async function loadOperatorReport(){
-    const s = await ensureSettings(false);
-    const costoOrario = num(s.costo_orario, DEFAULTS.costo_orario);
-    const from = document.getElementById("opFrom")?.value;
-    const to = document.getElementById("opTo")?.value;
-    if (!from || !to) throw new Error("Seleziona Da e A");
-    const res = await api("operatori", { method:"GET", params: { from, to }, showLoader:true });
-    const rows = Array.isArray(res?.data) ? res.data : (Array.isArray(res?.data?.data) ? res.data.data : []);
-    const ops = (rows||[]).filter(r => String(r.operatore||"").trim().toUpperCase() !== "BENZINA");
-    const benz = (rows||[]).filter(r => String(r.operatore||"").trim().toUpperCase() === "BENZINA");
-    const byOp = new Map();
-    ops.forEach(r => {
-      const name = String(r.operatore||r.Operatore||"").trim();
-      const ore = num(r.ore||r.Ore, 0);
-      byOp.set(name, (byOp.get(name)||0) + ore);
-    });
-    const totOre = Array.from(byOp.values()).reduce((a,b)=>a+b,0);
-    const totLavoro = totOre * costoOrario;
-    const totBenz = benz.reduce((a,r)=> a + num(r.benzina_euro||r.Benzina_euro||r.benzina||0,0), 0);
-    const tot = totLavoro + totBenz;
-
-    const totalsEl = document.getElementById("opTotals");
-    if (totalsEl) {
-      totalsEl.innerHTML = `
-        <div class="kpi-stack">
-          <div class="kpi-card"><div class="kpi-label">Ore</div><div class="kpi-value">${totOre.toFixed(2).replace(".",",")}</div></div>
-          <div class="kpi-card"><div class="kpi-label">Lavoro</div><div class="kpi-value">€${totLavoro.toFixed(2).replace(".",",")}</div></div>
-          <div class="kpi-card"><div class="kpi-label">Benzina</div><div class="kpi-value">€${totBenz.toFixed(2).replace(".",",")}</div></div>
-          <div class="kpi-card accent"><div class="kpi-label">Totale</div><div class="kpi-value">€${tot.toFixed(2).replace(".",",")}</div></div>
-        </div>
-      `;
-    }
-
-    const tbody = document.querySelector("#opTable tbody");
-    if (tbody) {
-      tbody.innerHTML = "";
-      Array.from(byOp.entries()).sort((a,b)=> b[1]-a[1]).forEach(([name, ore]) => {
-        const cost = ore * costoOrario;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${escapeHtml(name)}</td><td style="text-align:right">${ore.toFixed(2).replace(".",",")}</td><td style="text-align:right">€${cost.toFixed(2).replace(".",",")}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
-  }
-
-  // Expose for patched handler
-  window.saveOperatoriForPulizie = saveOperatoriForPulizie;
-  window.loadOperatoriForDay = loadOperatoriForDay;
-  window.initImpostazioniPage = initImpostazioniPage;
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    // Load settings in background (best-effort)
-    ensureSettings(false).catch(()=>{});
-
-    // Pulizie: ricalcolo benzina live
-    ["op1Name","op1Hours","op2Name","op2Hours","op3Name","op3Hours"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener("input", renderOpsSummary);
-      if (el) el.addEventListener("change", renderOpsSummary);
-    });
-
-    // Pulizie: quando si cambia giorno (prev/next) ricarica anche operatori
-    document.addEventListener("click", (e) => {
-      const p = e.target.closest && (e.target.closest("#cleanPrev") || e.target.closest("#cleanNext"));
-      if (!p) return;
-      setTimeout(() => {
-        if (document.body.dataset.page === "pulizie") loadOperatoriForDay().catch(()=>{});
-      }, 0);
-    });
-
-    // Pulizie: bottone report operatori
-    document.addEventListener("click", (e) => {
-      const b = e.target.closest && e.target.closest("#btnOperatoriReportFromPulizie");
-      if (!b) return;
-      showPage("operatori");
-      const today = getCleanISO();
-      const fromEl = document.getElementById("opFrom");
-      const toEl = document.getElementById("opTo");
-      if (fromEl && !fromEl.value) fromEl.value = today;
-      if (toEl && !toEl.value) toEl.value = today;
-      loadOperatorReport().catch(err => toast(err.message || String(err)));
-    });
-
-    // Report: load
-    const opLoad = document.getElementById("opLoadBtn");
-    if (opLoad) opLoad.addEventListener("click", () => loadOperatorReport().catch(err => toast(err.message || String(err))));
-
-    // Back buttons
-    const opBack = document.getElementById("opReportBackBtn");
-    if (opBack) opBack.addEventListener("click", () => showPage("pulizie"));
-    const setBack = document.getElementById("settingsBackBtn");
-    if (setBack) setBack.addEventListener("click", () => showPage("home"));
-
-    // Settings save
-    const setSave = document.getElementById("settingsSaveBtn");
-    if (setSave) setSave.addEventListener("click", () => saveImpostazioni().catch(err => toast(err.message || String(err))));
-
-    // Home: pill click (fallback, se non preso dalla delegation)
-    const pill = document.getElementById("goImpostazioni");
-    if (pill) pill.addEventListener("click", () => { showPage("impostazioni"); initImpostazioniPage().catch(()=>{}); });
-
-    // Quando apro pagina pulizie, carico operatori del giorno
-    const origShowPage = window.showPage;
-    if (typeof origShowPage === "function" && !origShowPage.__opsWrapped) {
-      const wrapped = function(page) {
-        const r = origShowPage(page);
-        if (page === "pulizie") setTimeout(()=> loadOperatoriForDay().catch(()=>{}), 0);
-        if (page === "impostazioni") setTimeout(()=> initImpostazioniPage().catch(()=>{}), 0);
-        return r;
-      };
-      wrapped.__opsWrapped = true;
-      window.showPage = wrapped;
-    }
-  });
-})();

@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.191"),
+    url("./assets/bg-daedalium.png?v=1.189"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.191"),
+    url("./assets/bg-daedalium.png?v=1.189"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3580,7 +3580,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* ===== Tassa di soggiorno (dDAE_1.190) ===== */
+/* ===== Tassa di soggiorno (dDAE_1.191) ===== */
 .home-main-label.small{ font-size: 14px; line-height: 1.05; text-align:center; }
 
 .tax-hd{ display:flex; align-items:center; gap:12px; }
@@ -3617,90 +3617,70 @@ grid-template-rows: 34px repeat(7, 54px);
 .tax-result-reduced{ background: #ffe8c8; }
 .tax-result-kids{ background: #eeeeee; }
 
-/* dDAE_1.191 - Home pill + Operatori (Pulizie) */
-.home-pill-btn{
-  width: 100%;
-  margin: 12px 0 4px;
-  border: 1px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 999px;
-  padding: 10px 14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  color: rgba(15,23,42,0.95);
-  box-shadow: 0 10px 24px rgba(15,23,42,0.08);
-  cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.home-pill-btn:active{ transform: scale(0.99); }
-.home-pill-btn .pill-ico .ui-ico{
-  width:18px;
-  height:18px;
-  stroke: rgba(15,23,42,0.85);
-  fill: none;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.home-pill-btn .pill-txt{ font-weight: 700; font-size: 13px; }
 
-.ops-panel{
-  margin-top: 12px;
-  margin-bottom: 10px;
+/* --- Impostazioni (Home pill) --- */
+.home-pill-row{
+  display:flex;
+  justify-content:center;
+  padding: 10px 0 4px;
+}
+.pill-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+.pill-btn:active{ transform: translateY(1px); }
+.pill-ico .ui-ico{ width:18px; height:18px; }
+
+/* --- Pulizie: operatori --- */
+.clean-ops{
+  margin-top: 14px;
   padding: 12px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
 }
-.ops-title{
-  font-weight: 800;
-  font-size: 12px;
+.clean-ops-title{
+  font-weight: 700;
   margin-bottom: 10px;
-  color: rgba(15,23,42,0.9);
 }
-.ops-row{
+.clean-op-row{
   display:flex;
   gap:10px;
   margin-bottom: 8px;
 }
-.ops-name{
+.clean-op-name{
   flex: 1 1 auto;
   padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.4);
-  background: rgba(255,255,255,0.7);
-  outline: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.18);
+  color: #fff;
 }
-.ops-hours{
-  width: 110px;
+.clean-op-hours{
+  width: 92px;
   padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.4);
-  background: rgba(255,255,255,0.7);
-  outline: none;
-  text-align: right;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.18);
+  color: #fff;
+  text-align:right;
 }
-.ops-summary{
+.clean-ops-summary{
   display:flex;
   justify-content: space-between;
+  opacity: 0.95;
   margin-top: 6px;
-  font-size: 12px;
-  color: rgba(15,23,42,0.9);
+  font-weight: 600;
 }
-
-/* dDAE_1.191 - Report Operatori */
-.report-box{ margin-top: 12px; display:grid; gap: 12px; }
-.report-table-wrap{
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.62);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+.sq-btn-orange{
+  background: rgba(255,149,0,0.18);
+  border: 1px solid rgba(255,149,0,0.35);
 }
+.sq-btn-orange .ui-ico{ color:#fff; }
