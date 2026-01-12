@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.191";
+const BUILD_VERSION = "1.190";
 
 
 
@@ -379,7 +379,6 @@ window.addEventListener("unhandledrejection", (e) => {
 
 const state = {
   cleanDay: null,
-  settings: null,
 
   motivazioni: [],
   spese: [],
@@ -1040,38 +1039,6 @@ async function cachedGet(action, params = {}, { ttlMs = 30000, showLoader = true
   }
 }
 
-// --- Impostazioni (foglio 'impostazioni') ---
-async function loadImpostazioni({ force = false, showLoader = false } = {}){
-  if (state.settings && !force) return state.settings;
-  const rows = await api("impostazioni", { method:"GET", params:{}, showLoader });
-  const arr = Array.isArray(rows) ? rows : (rows && rows.rows ? rows.rows : []);
-  const map = {};
-  arr.forEach(r => {
-    const k = String(r.key || r.KEY || "").trim();
-    if (!k) return;
-    map[k] = {
-      value: r.value ?? r.VALUE ?? "",
-      type: r.type ?? r.TYPE ?? "",
-      unit: r.unit ?? r.UNIT ?? "",
-      descrizione: r.descrizione ?? r.DESCRIZIONE ?? "",
-    };
-  });
-  state.settings = map;
-  return map;
-}
-
-function getSettingNum(key, fallback){
-  const v = state.settings && state.settings[key] ? state.settings[key].value : undefined;
-  const n = parseFloat(String(v ?? "").replace(",", "."));
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function setSettingLocal(key, value){
-  if (!state.settings) state.settings = {};
-  if (!state.settings[key]) state.settings[key] = { value:"", type:"number", unit:"", descrizione:"" };
-  state.settings[key].value = value;
-}
-
 /* Launcher modal (popup) */
 
 
@@ -1104,9 +1071,6 @@ function bindHomeDelegation(){
     if (o){ hideLauncher(); showPage("ospiti"); return; }
     const cal = e.target.closest && e.target.closest("#goCalendario");
     if (cal){ hideLauncher(); showPage("calendario"); return; }
-    const imp = e.target.closest && e.target.closest("#goImpostazioni");
-    if (imp){ hideLauncher(); showPage("impostazioni"); try{ initImpostazioniPage(); }catch(_){} return; }
-
     const tassa = e.target.closest && e.target.closest("#goTassaSoggiorno");
     if (tassa){ hideLauncher(); showPage("tassa"); try{ initTassaPage(); }catch(_){} return; }
     const pul = e.target.closest && e.target.closest("#goPulizie");
@@ -2799,7 +2763,6 @@ async function init(){
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSave = document.getElementById("cleanSave");
   const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
-  const btnOpsReportFromPulizie = document.getElementById("btnOpsReportFromPulizie");
 
   const readCell = (el) => {
     const v = String(el.textContent || "").trim();
@@ -2966,7 +2929,6 @@ const buildPuliziePayload = () => {
     state.cleanDay = d.toISOString();
     updateCleanLabel();
     try{ loadPulizieForDay(); }catch(_){ }
-    try{ if (typeof loadOperatoriForDay === "function") loadOperatoriForDay(); }catch(_){ }
   };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
@@ -2975,143 +2937,12 @@ const buildPuliziePayload = () => {
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
     try{ loadPulizieForDay(); }catch(_){ }
-    try{ if (typeof loadOperatoriForDay === "function") loadOperatoriForDay(); }catch(_){ }
   });
-// --- Operatori (pulizie) ---
-  const opNameEls = [$("#opName1"), $("#opName2"), $("#opName3")];
-  const opHoursEls = [$("#opHours1"), $("#opHours2"), $("#opHours3")];
-  const opPresenzeEl = $("#opPresenze");
-  const opBenzinaEl = $("#opBenzina");
-
-  function getOpsInput(){
-    const out = [];
-    let presenze = 0;
-    for (let i=0;i<3;i++){
-      const name = String(opNameEls[i]?.value || "").trim();
-      const ore = parseFloat(String(opHoursEls[i]?.value || "0").replace(",", "."));
-      const oreN = Number.isFinite(ore) ? ore : 0;
-      out.push({ slot:i+1, operatore:name, ore:oreN });
-      if (name && oreN > 0) presenze++;
-    }
-    const benzinaPerPres = getSettingNum("benzina_per_presenza", 2);
-    const benzina = presenze * benzinaPerPres;
-    return { rows: out, presenze, benzina, benzinaPerPres };
-  }
-
-  function renderOpsSummary(){
-    try{
-      const { presenze, benzina } = getOpsInput();
-      if (opPresenzeEl) opPresenzeEl.textContent = String(presenze);
-      if (opBenzinaEl) opBenzinaEl.textContent = "€ " + (benzina||0).toFixed(2);
-    }catch(_){}
-  }
-
-  async function loadOperatoriForDay(){
-    try{
-      await loadImpostazioni({ showLoader:false });
-      const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
-      const data = toISODateLocal(day);
-
-      const res = await api("operatori", { method:"GET", params:{ data }, showLoader:false });
-      const rows = Array.isArray(res) ? res : (res && res.rows ? res.rows : []);
-      // reset
-      opNameEls.forEach(el => { if (el) el.value=""; });
-      opHoursEls.forEach(el => { if (el) el.value=""; });
-
-      // fill by id suffix _1.._3 when possible
-      rows.forEach(r => {
-        const id = String(r.id || "");
-        const op = String(r.operatore || r.OPERATORE || "").trim();
-        const ore = parseFloat(String(r.ore ?? r.ORE ?? "0").replace(",", "."));
-        if (!op || op === "BENZINA") return;
-        const m = id.match(/_(\d+)$/);
-        const slot = m ? parseInt(m[1],10) : null;
-        const i = (slot && slot>=1 && slot<=3) ? (slot-1) : null;
-        if (i!==null){
-          if (opNameEls[i]) opNameEls[i].value = op;
-          if (opHoursEls[i]) opHoursEls[i].value = Number.isFinite(ore)? String(ore) : "";
-        }
-      });
-
-      renderOpsSummary();
-    }catch(e){
-      console.error(e);
-      // non bloccare pulizie se operatori non disponibili
-      renderOpsSummary();
-    }
-  }
-
-  // bind input changes
-  [...opNameEls, ...opHoursEls].forEach(el => {
-    if (!el) return;
-    el.addEventListener("input", renderOpsSummary);
-    el.addEventListener("change", renderOpsSummary);
-  });
-
-  async function savePulizieAndOperatori(){
-    const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
-    const data = toISODateLocal(day);
-
-    // 1) serializza griglia pulizie
-    const cols = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
-    const rooms = ["1","2","3","4","5","6","RES"];
-    const rowsPulizie = rooms.map(stanza => {
-      const obj = { data, stanza };
-      cols.forEach(c => {
-        const cell = document.querySelector(`.clean-grid .cell.slot[data-room="${stanza}"][data-col="${c}"]`);
-        const v = cell ? String(cell.textContent||"").trim() : "";
-        const n = parseInt(v, 10);
-        obj[c] = (!isNaN(n) && n>0) ? n : 0;
-      });
-      return obj;
-    });
-
-    // 2) operatori + benzina
-    await loadImpostazioni({ showLoader:false });
-    const { rows, presenze, benzina } = getOpsInput();
-    const opsRows = [];
-
-    rows.forEach(r => {
-      const name = String(r.operatore||"").trim();
-      const ore = Number(r.ore||0);
-      // salva solo se nome compilato (anche ore=0 per conservare) -> ma presenze calcola con ore>0
-      if (!name) return;
-      const id = `o_${data}_${r.slot}`;
-      opsRows.push({ id, data, operatore: name, ore: ore, benzina_euro: 0 });
-    });
-
-    // benzina come riga unica
-    const idFuel = `o_${data}_BENZINA`;
-    opsRows.push({ id: idFuel, data, operatore: "BENZINA", ore: 0, benzina_euro: benzina });
-
-    // 3) invia API (ordine: pulizie poi operatori)
-    await api("pulizie", { method:"POST", body:{ data, rows: rowsPulizie }, showLoader:true });
-    await api("operatori", { method:"POST", body:{ data, rows: opsRows }, showLoader:true });
-
-    toast("Salvato");
-  }
-
-  if (cleanSave){
-    bindFastTap(cleanSave, async () => {
-      try{
-        await savePulizieAndOperatori();
-      }catch(e){
-        console.error(e);
-        toast(e.message || "Errore salvataggio");
-      }
-    });
-  }
-
-  // pre-carica impostazioni e operatori del giorno
-  try{ loadImpostazioni({ showLoader:false }); }catch(_){}
-  try{ loadOperatoriForDay(); }catch(_){}
-
 
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
   try{ loadPulizieForDay(); }catch(_){ }
-    try{ if (typeof loadOperatoriForDay === "function") loadOperatoriForDay(); }catch(_){ }
 
 
 
@@ -3145,24 +2976,6 @@ const buildPuliziePayload = () => {
       }
     });
   }
-
-  if (typeof btnOpsReportFromPulizie !== "undefined" && btnOpsReportFromPulizie){
-    bindFastTap(btnOpsReportFromPulizie, async () => {
-      try{
-        showPage("operatori");
-        try{ initOperatoriReportPage(); }catch(_){}
-        const day = state.cleanDay ? new Date(state.cleanDay) : new Date();
-        const d = toISODateLocal(day);
-        if ($("#opsFrom")) $("#opsFrom").value = d;
-        if ($("#opsTo")) $("#opsTo").value = d;
-        try{ await refreshOperatoriReport(); }catch(_){}
-      }catch(e){
-        console.error(e);
-        try{ toast(e.message || "Errore"); }catch(_){}
-      }
-    });
-  }
-
 
 }
 
@@ -4077,8 +3890,6 @@ function resetTassaUI(){
 }
 
 async function calcTassa(){
-  try{ await loadImpostazioni({ showLoader:false }); }catch(_){ }
-
   const fromEl = $("#taxFrom");
   const toEl = $("#taxTo");
   const from = fromEl ? fromEl.value : "";
@@ -4141,87 +3952,6 @@ async function calcTassa(){
 
   const rc = $("#taxReducedCount"); if (rc) rc.textContent = String(reducedPres);
   const ra = $("#taxReducedAmount"); if (ra) ra.textContent = formatEUR(reducedAmt);
-}
-
-let __operatoriReportBound = false;
-function initOperatoriReportPage(){
-  if (__operatoriReportBound) return;
-  __operatoriReportBound = true;
-
-  const back = $("#opsBackBtn");
-  if (back){
-    bindFastTap(back, () => { showPage("pulizie"); });
-  }
-
-  const btn = $("#opsCalcBtn");
-  if (btn){
-    bindFastTap(btn, async () => {
-      try{ await refreshOperatoriReport(); }
-      catch(e){ console.error(e); toast(e.message || "Errore report"); }
-    });
-  }
-
-  // default date = oggi
-  const today = toISODateLocal(new Date());
-  if ($("#opsFrom") && !$("#opsFrom").value) $("#opsFrom").value = today;
-  if ($("#opsTo") && !$("#opsTo").value) $("#opsTo").value = today;
-}
-
-async function refreshOperatoriReport(){
-  await loadImpostazioni({ showLoader:false });
-  const from = String($("#opsFrom")?.value || "").trim();
-  const to = String($("#opsTo")?.value || "").trim();
-  if (!from || !to) throw new Error("Seleziona un intervallo date");
-
-  const rows = await api("operatori", { method:"GET", params:{ from, to }, showLoader:true });
-  const arr = Array.isArray(rows) ? rows : (rows && rows.rows ? rows.rows : []);
-  let totOre = 0;
-  let totBenz = 0;
-  const byOp = new Map();
-
-  arr.forEach(r => {
-    const op = String(r.operatore || "").trim();
-    const ore = parseFloat(String(r.ore ?? "0").replace(",", "."));
-    const benz = parseFloat(String(r.benzina_euro ?? "0").replace(",", "."));
-    if (op === "BENZINA"){
-      if (Number.isFinite(benz)) totBenz += benz;
-      return;
-    }
-    if (op){
-      const o = Number.isFinite(ore) ? ore : 0;
-      totOre += o;
-      byOp.set(op, (byOp.get(op) || 0) + o);
-    }
-  });
-
-  const costoOrario = getSettingNum("costo_orario", 8);
-  const costoLavoro = totOre * costoOrario;
-  const totale = costoLavoro + totBenz;
-
-  $("#opsTotOre").textContent = (totOre||0).toFixed(2);
-  $("#opsCostoOrarioLbl").textContent = "Costo orario: € " + (costoOrario||0).toFixed(2);
-  $("#opsCostoLavoro").textContent = "€ " + (costoLavoro||0).toFixed(2);
-  $("#opsBenzina").textContent = "€ " + (totBenz||0).toFixed(2);
-  $("#opsTotale").textContent = "€ " + (totale||0).toFixed(2);
-
-  const resBox = $("#opsResults");
-  if (resBox) resBox.hidden = false;
-
-  // breakdown
-  const bd = $("#opsBreakdown");
-  const card = $("#opsBreakdownCard");
-  if (bd && card){
-    bd.innerHTML = "";
-    const entries = Array.from(byOp.entries()).sort((a,b)=>b[1]-a[1]);
-    if (!entries.length){ card.hidden = true; return; }
-    entries.forEach(([name, ore]) => {
-      const div = document.createElement("div");
-      div.className = "row";
-      div.textContent = `${name}: ${ore.toFixed(2)} h`;
-      bd.appendChild(div);
-    });
-    card.hidden = false;
-  }
 }
 
 function initTassaPage(){
