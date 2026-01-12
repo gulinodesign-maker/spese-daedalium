@@ -1,4 +1,4 @@
-/* dDAE Config - dDAE_1.189 */
+/* dDAE Config - dDAE_1.191 */
 const API_BASE_URL = "https://script.google.com/macros/s/AKfycbxw-OfBbRDWtWl4ETSnXllHg0i17wyNWON8oyjerPzzR_qz6EJ5eDRw0u3pTZnJa_4/exec";
 const API_KEY = "daedalium2026";
 // Tassa di soggiorno: € per persona (>10 anni) per notte
@@ -7,3 +7,8 @@ const TOURIST_TAX_EUR_PPN = 1.5;
 
 // Ridotti (es. anziani): moltiplicatore sull'importo (0.5 = -50%). Per ora non usato se non c'è il campo.
 const TOURIST_TAX_REDUCED_FACTOR = 0.5;
+
+
+// dDAE_1.191: valori di default (usati solo se foglio 'impostazioni' è vuoto/non disponibile)
+const DEFAULT_COSTO_ORARIO = 8;            // €/h
+const DEFAULT_BENZINA_PER_PRESENZA = 2;    // €/presenza (nome compilato + ore>0)
