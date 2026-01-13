@@ -332,6 +332,35 @@ input[type="date"]{
   justify-content:center;
 }
 
+/* Spese: tasto elimina = pallino rosso con X bianca */
+.delbtn.delbtn-x{
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.95);
+  border: 1px solid rgba(185, 28, 28, 0.85);
+  box-shadow: 0 10px 26px rgba(15,23,42,0.14);
+  position: relative;
+  color: transparent;
+  font-size: 0;
+}
+.delbtn.delbtn-x::before,
+.delbtn.delbtn-x::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width: 18px;
+  height: 2.6px;
+  background: rgba(255,255,255,0.98);
+  border-radius: 999px;
+  transform-origin: center;
+}
+.delbtn.delbtn-x::before{ transform: translate(-50%,-50%) rotate(45deg); }
+.delbtn.delbtn-x::after{  transform: translate(-50%,-50%) rotate(-45deg); }
+.delbtn.delbtn-x:active{ transform: scale(0.97); }
+
 /* Riepilogo KPIs */
 .kpi-stack{
   display:grid;
@@ -3683,6 +3712,25 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .btn.tax-calc:active{ transform: translateY(1px); }
 
+/* Tassa: tasto report in stile Liquid Glass arancione */
+.btn.tax-report{
+  width: 100%;
+  margin-top: 10px;
+  color: rgba(255,255,255,0.98);
+  border-color: rgba(201,119,43,0.65);
+  background:
+    radial-gradient(120% 120% at 18% 0%, rgba(255,255,255,0.55), rgba(255,255,255,0) 58%),
+    radial-gradient(140% 120% at 90% 0%, rgba(255,216,168,0.55), rgba(255,255,255,0) 62%),
+    linear-gradient(180deg, rgba(201,119,43,0.92), rgba(201,119,43,0.72));
+  box-shadow: 0 12px 28px rgba(15,23,42,0.16);
+  backdrop-filter: blur(16px);
+}
+.btn.tax-report:active{ transform: translateY(1px); }
+.btn.tax-report:disabled{
+  opacity: 0.55;
+  filter: grayscale(0.15);
+}
+
 /* Risultati: solo dopo Calcola, stack verticale */
 .tax-results{ margin-top: 14px; display:flex; flex-direction:column; gap:12px; }
 
@@ -4001,4 +4049,26 @@ grid-template-rows: 34px repeat(7, 54px);
   .opcal-grid{ gap: 10px; }
   .opcal-cell{ min-height: 72px; border-radius: 16px; }
   .opcal-hours{ font-size: 20px; }
+}
+
+/* Modal report tassa */
+.tax-report-card{
+  background:
+    radial-gradient(120% 120% at 12% 0%, rgba(43,124,180,0.10), transparent 58%),
+    radial-gradient(120% 120% at 92% 0%, rgba(201,119,43,0.12), transparent 58%),
+    linear-gradient(to bottom, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  border: 1px solid rgba(15,23,42,0.10);
+  box-shadow: 0 14px 34px rgba(15,23,42,0.16);
+}
+.tax-report-text{
+  margin: 0;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.70);
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  max-height: 44vh;
+  overflow: auto;
 }

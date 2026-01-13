@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.215";
+const BUILD_VERSION = "1.216";
 
 
 
@@ -1890,7 +1890,7 @@ function renderSpese(){
           <span class="spesa-sep">·</span>
           <span class="spesa-motivo">${motivo}</span>
         </div>
-        <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
+        <button class="delbtn delbtn-x" type="button" aria-label="Elimina record" data-del="${s.id}">Elimina</button>
       </div>
     `;
 
@@ -4280,7 +4280,7 @@ function renderSpese(){
           <span class="spesa-sep">·</span>
           <span class="spesa-motivo">${motivo}</span>
         </div>
-        <button class="delbtn" type="button" data-del="${s.id}">Elimina</button>
+        <button class="delbtn delbtn-x" type="button" aria-label="Elimina record" data-del="${s.id}">Elimina</button>
       </div>
     `;
 
@@ -4413,6 +4413,9 @@ function __overlapNights(checkInISO, checkOutISO, fromISO, toISO_inclusive){
 function resetTassaUI(){
   const res = $("#taxResults");
   if (res) res.hidden = true;
+  const rb = $("#taxReportBtn");
+  if (rb) rb.disabled = true;
+
   const ids = ["taxPayingCount","taxPayingAmount","taxKidsCount","taxKidsAmount","taxReducedCount","taxReducedAmount"];
   ids.forEach(id => { const el = $("#"+id); if (el) el.textContent = "—"; });
 }
@@ -4468,9 +4471,14 @@ async function calcTassa(){
   const payingAmt  = payingPres * rate;
   const reducedAmt = reducedPres * rate * redFactor;
 
+  // salva per report
+  state._taxLast = { from, to, payingPres, kidsPres, reducedPres, rate, redFactor, payingAmt, reducedAmt, totalAmt: (payingAmt + reducedAmt) };
+
   // UI: mostra solo dopo click Calcola
   const res = $("#taxResults");
   if (res) res.hidden = false;
+  const rb = $("#taxReportBtn");
+  if (rb) rb.disabled = false;
 
   const pc = $("#taxPayingCount"); if (pc) pc.textContent = String(payingPres);
   const pa = $("#taxPayingAmount"); if (pa) pa.textContent = formatEUR(payingAmt);
@@ -4481,6 +4489,80 @@ async function calcTassa(){
   const rc = $("#taxReducedCount"); if (rc) rc.textContent = String(reducedPres);
   const ra = $("#taxReducedAmount"); if (ra) ra.textContent = formatEUR(reducedAmt);
 }
+
+
+function buildTaxReportText(){
+  const t = state._taxLast;
+  if (!t) return "Premi prima Calcola.";
+  const lines = [];
+  lines.push("Report tassa di soggiorno");
+  lines.push(`Periodo: ${t.from} → ${t.to}`);
+  lines.push("");
+  lines.push(`Presenze paganti: ${t.payingPres}`);
+  lines.push(`Importo paganti: ${formatEUR(t.payingAmt)}`);
+  lines.push("");
+  lines.push(`Presenze ridotte: ${t.reducedPres}`);
+  lines.push(`Importo ridotti: ${formatEUR(t.reducedAmt)}`);
+  lines.push("");
+  lines.push(`Bambini (<10): ${t.kidsPres} (esenti)`);
+  lines.push("");
+  lines.push(`Tariffa: ${formatEUR(t.rate)} / persona / notte`);
+  if (t.redFactor !== 1) lines.push(`Fattore ridotti: ${String(t.redFactor)}`);
+  lines.push("");
+  lines.push(`TOTALE: ${formatEUR(t.totalAmt)}`);
+  return lines.join("\n");
+}
+
+function openTaxReportModal(text){
+  const modal = document.getElementById("taxReportModal");
+  const pre = document.getElementById("taxReportText");
+  const closeBtn = document.getElementById("taxReportCloseBtn");
+  const copyBtn = document.getElementById("taxReportCopyBtn");
+
+  if (!modal || !pre) return;
+  pre.textContent = text || "";
+
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden","false");
+
+  const close = () => {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden","true");
+  };
+
+  // click su overlay chiude
+  const onOverlay = (e)=>{
+    if (e.target === modal) close();
+  };
+  modal.addEventListener("click", onOverlay, { once:true });
+
+  if (closeBtn){
+    closeBtn.onclick = close;
+  }
+
+  if (copyBtn){
+    copyBtn.onclick = async () => {
+      try{
+        const txt = pre.textContent || "";
+        if (navigator.clipboard && navigator.clipboard.writeText){
+          await navigator.clipboard.writeText(txt);
+        } else {
+          // fallback
+          const ta = document.createElement("textarea");
+          ta.value = txt;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+        toast("Copiato");
+      }catch(_){
+        toast("Impossibile copiare");
+      }
+    };
+  }
+}
+
 
 function initTassaPage(){
   if (__tassaBound) return;
@@ -4501,6 +4583,21 @@ function initTassaPage(){
     bindFastTap(btn, async () => {
       try { await calcTassa(); }
       catch (err) { toast(String(err && err.message || err || "Errore")); resetTassaUI(); }
+    });
+  }
+
+
+  const reportBtn = $("#taxReportBtn");
+  if (reportBtn){
+    bindFastTap(reportBtn, async () => {
+      try{
+        // se non hai ancora calcolato, prova a calcolare
+        if (!state._taxLast) await calcTassa();
+        const txt = buildTaxReportText();
+        openTaxReportModal(txt);
+      }catch(err){
+        toast(String(err && err.message || err || "Errore"));
+      }
     });
   }
 
