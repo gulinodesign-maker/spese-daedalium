@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.189"),
+    url("./assets/bg-daedalium.png?v=1.193"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.189"),
+    url("./assets/bg-daedalium.png?v=1.193"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3652,206 +3652,57 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   ORE PULIZIA (calendario mensile + report stampabile)
-   ========================= */
-
-.ore-page{ padding: 14px 12px 18px; }
-
-.ore-filters{
-  display:flex;
-  gap:10px;
-  align-items:stretch;
-  flex-wrap:wrap;
-  margin: 6px 0 12px;
+   Ore pulizia - calendario ore operatori
+========================= */
+.op-hours-filters{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
-.ore-filters .field{
-  flex: 1 1 160px;
-  min-width: 150px;
+.opcal-dow-row{
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin: 4px 2px 8px;
 }
-.ore-filters select{
-  width:100%;
-}
-
-.ore-cal-wrap{
-  border: 1px solid var(--border);
-  background: var(--glass);
-  border-radius: 18px;
-  padding: 12px;
-  box-shadow: var(--shadow-soft);
-}
-
-.ore-cal-title{
+.opcal-dow{
+  text-align: center;
+  font-size: 12px;
+  color: rgba(43,124,180,0.85);
   font-weight: 800;
-  letter-spacing: 0.06em;
-  font-size: 13px;
-  color: var(--text);
-  opacity: 0.85;
-  text-transform: uppercase;
-  margin: 2px 2px 10px;
 }
-
-.ore-cal-dow{
-  display:grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.ore-cal-dow > div{
-  text-align:center;
-  font-size: 11px;
-  font-weight: 700;
-  opacity: 0.65;
-  letter-spacing: 0.04em;
-}
-
-.ore-cal-grid{
-  display:grid;
+.opcal-grid{
+  display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 8px;
 }
-
-.ore-day{
-  position:relative;
-  background: #eef2f7; /* grigio chiaro */
-  border: 1px solid rgba(15,23,42,0.08);
+.opcal-cell{
+  position: relative;
+  background: rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.10);
   border-radius: 14px;
-  min-height: 62px;
-  padding: 10px 10px 12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  overflow:hidden;
+  min-height: 74px;
+  padding: 8px;
+  overflow: hidden;
 }
-.ore-day.is-empty{
-  background: rgba(15,23,42,0.03);
-  border-style: dashed;
-  opacity: 0.6;
+.opcal-cell.opcal-empty{
+  background: transparent;
+  border-color: transparent;
 }
-.ore-day-num{
-  position:absolute;
-  top: 8px;
-  left: 10px;
+.opcal-day{
+  position: absolute;
+  top: 6px;
+  left: 8px;
   font-size: 12px;
-  font-weight: 800;
-  color: var(--blue);
+  color: rgba(43,124,180,0.85);
+  font-weight: 600;
 }
-.ore-day-hours{
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--orange);
-  letter-spacing: 0.01em;
-}
-
-.ore-actions{
-  display:flex;
-  gap: 10px;
-  align-items:center;
-  justify-content:flex-start;
-  margin-top: 12px;
-}
-.ore-actions .btn{
-  flex: 0 0 auto;
-}
-
-.ore-report{
-  margin-top: 14px;
-}
-.ore-report-card{
-  padding: 14px;
-}
-.ore-report-head{
-  display:flex;
-  gap: 10px;
-  align-items:flex-end;
-  justify-content:space-between;
-  margin-bottom: 10px;
-}
-.ore-report-title{
-  font-weight: 900;
-  font-size: 16px;
-}
-.ore-report-meta{
-  opacity: 0.75;
-  font-weight: 700;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-align:right;
-}
-
-.ore-report-totals{
-  display:flex;
-  gap: 10px;
-  flex-wrap:wrap;
-  margin: 10px 0 12px;
-}
-.ore-kpi{
-  flex: 1 1 160px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.55);
-}
-.ore-kpi-label{
-  font-size: 12px;
-  opacity: 0.7;
-  font-weight: 800;
-}
-.ore-kpi-value{
-  font-size: 22px;
-  font-weight: 900;
-  color: var(--orange);
-}
-
-.ore-print-cal{
-  margin: 6px 0 14px;
-}
-.ore-print-cal-title{
-  font-weight: 900;
-  font-size: 13px;
-  opacity: 0.85;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin: 0 0 8px 2px;
-}
-
-.ore-table-wrap{
-  overflow:auto;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: rgba(255,255,255,0.55);
-}
-.ore-table{
-  width:100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-.ore-table th, .ore-table td{
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(15,23,42,0.08);
-}
-.ore-table th{
-  text-align:left;
-  font-weight: 900;
-  opacity: 0.85;
-}
-.ore-table td.num, .ore-table th.num{
-  text-align:right;
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
-}
-
-@media print{
-  /* stampa: pulita e coerente */
-  body{ background:#fff !important; }
-  .topbar, .home-grid, .home-main, .home-spacer { display:none !important; }
-  .ore-filters, .ore-actions, .btn, button, .icon-btn { display:none !important; }
-  section.page{ display:none !important; }
-  #page-ore-pulizia{ display:block !important; }
-  #page-ore-pulizia .hd{ display:none !important; }
-  #page-ore-pulizia .bd{ padding: 0 !important; }
-  .ore-cal-wrap{ box-shadow:none !important; background:#fff !important; }
-  .card, .ore-kpi, .ore-table-wrap{ background:#fff !important; box-shadow:none !important; }
-  .ore-day{ background:#f3f4f6 !important; }
+.opcal-hours{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  font-weight: 950;
+  color: rgba(201,119,43,0.95);
 }
