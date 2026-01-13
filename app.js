@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.200";
+const BUILD_VERSION = "1.201";
 
 
 
@@ -1046,15 +1046,16 @@ async function ensureSettingsLoaded({ force = false, showLoader = false } = {}) 
     // Se esistono campi operatori (pulizie) e sono vuoti, auto-compila con i nomi salvati
     try {
       const names = getOperatorNamesFromSettings();
-      if (names.length) {
-        const ids = ["op1Name","op2Name","op3Name"];
-        ids.forEach((id, idx) => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          if (!String(el.value || "").trim() && names[idx]) el.value = names[idx];
-        });
-        refreshFloatingLabels();
-      }
+if (names.length) {
+  const ids = ["op1Name","op2Name","op3Name"];
+  ids.forEach((id, idx) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Nomi operatori: provengono da Impostazioni (non editabili in Pulizie)
+    el.value = names[idx] ? names[idx] : "";
+  });
+  refreshFloatingLabels();
+}
     } catch(_) {}
 
     return state.settings;
@@ -3002,7 +3003,7 @@ async function init(){
 
       // Validazione: o entrambi, o niente
       if (!name || hours === null) {
-        throw new Error("Compila nome e ore per Operatore " + (idx + 1));
+        throw new Error("Imposta il nome Operatore " + (idx + 1) + " in Impostazioni");
       }
 
       // Se ore=0, non salvare (considerata assenza)
@@ -4257,7 +4258,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.200
+   Build: dDAE_1.201
 ========================= */
 
 state.orepulizia = state.orepulizia || {
