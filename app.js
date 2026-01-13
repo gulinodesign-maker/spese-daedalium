@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.209";
+const BUILD_VERSION = "1.210";
 
 
 
@@ -4436,7 +4436,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.209
+   Build: dDAE_1.210
 ========================= */
 
 state.orepulizia = state.orepulizia || {
