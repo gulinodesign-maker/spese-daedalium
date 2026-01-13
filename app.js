@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.196";
+const BUILD_VERSION = "1.197";
 
 
 
@@ -2947,7 +2947,8 @@ async function init(){
   const cleanToday = document.getElementById("cleanToday");
 
   const cleanGrid = document.getElementById("cleanGrid");
-  const cleanSave = document.getElementById("cleanSave");
+  const cleanSaveLaundry = document.getElementById("cleanSaveLaundry");
+  const cleanSaveHours = document.getElementById("cleanSaveHours");
   const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
 
   const readCell = (el) => {
@@ -3139,38 +3140,54 @@ const buildPuliziePayload = () => {
     }, true);
   }
 
-  if (cleanSave){
-    cleanSave.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try{
-        const payload = buildPuliziePayload();
+  // Salva biancheria (foglio "pulizie")
+if (cleanSaveLaundry){
+  cleanSaveLaundry.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try{
+      const payload = buildPuliziePayload();
+      await api("pulizie", { method:"POST", body: payload });
 
-// 1) salva pulizie
-await api("pulizie", { method:"POST", body: payload });
+      // ricarica dal DB senza svuotare (così resta visibile subito)
+      try{ await loadPulizieForDay({ clearFirst:false }); }catch(_){ }
 
-// 2) salva operatori (se compilati)
-let opSaved = 0;
-try{
-  const { touched, payload: opPayload } = buildOperatoriPayload();
-  if (touched && opPayload && Array.isArray(opPayload.operatori) && opPayload.operatori.length){
-    const res = await api("operatori", { method:"POST", body: opPayload, showLoader:false });
-    opSaved = (res && res.data && res.data.saved) ? res.data.saved : opPayload.operatori.length;
-  }
-}catch(opErr){
-  // Se l'utente ha iniziato a compilare e c'è errore, blocca: meglio correggere subito
-  throw opErr;
+      toast("Biancheria salvata");
+    }catch(err){
+      toast(String(err && err.message || "Errore salvataggio biancheria"));
+    }
+  }, true);
 }
 
-// ricarica dal DB senza svuotare (così resta visibile subito)
-try{ await loadPulizieForDay({ clearFirst:false }); }catch(_){ }
+// Salva ore lavoro (foglio "operatori")
+if (cleanSaveHours){
+  cleanSaveHours.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try{
+      const { touched, payload: opPayload } = buildOperatoriPayload();
 
-toast(opSaved ? ("Pulizie salvate • Ore operatori salvate ("+opSaved+")") : "Pulizie salvate");
-      }catch(err){
-        toast(String(err && err.message || "Errore salvataggio pulizie"));
+      // Se non è stato toccato nulla, non fare nulla
+      if (!touched){
+        toast("Nessuna ora da salvare");
+        return;
       }
-    }, true);
-  }
+
+      // Se ha toccato ma non ci sono righe >0, informalo
+      if (!opPayload || !Array.isArray(opPayload.operatori) || !opPayload.operatori.length){
+        toast("Nessuna ora (>0) da salvare");
+        return;
+      }
+
+      const res = await api("operatori", { method:"POST", body: opPayload });
+      const saved = (res && typeof res.saved === "number") ? res.saved : opPayload.operatori.length;
+
+      toast("Ore lavoro salvate (" + saved + ")");
+    }catch(err){
+      toast(String(err && err.message || "Errore salvataggio ore lavoro"));
+    }
+  }, true);
+}
 
   const updateCleanLabel = () => {
     const lab = document.getElementById("cleanDateLabel");
@@ -4240,7 +4257,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.196
+   Build: dDAE_1.197
 ========================= */
 
 state.orepulizia = state.orepulizia || {
