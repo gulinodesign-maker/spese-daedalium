@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.197";
+const BUILD_VERSION = "1.198";
 
 
 
@@ -4257,7 +4257,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.197
+   Build: dDAE_1.198
 ========================= */
 
 state.orepulizia = state.orepulizia || {
@@ -4297,7 +4297,8 @@ function __fmtHours_(h){
 function __getUniqueMonthsFromRows_(rows){
   const set = new Set();
   (rows||[]).forEach(r=>{
-    const iso = String(r.data || r.date || r.Data || "").trim();
+    const iso = formatISODateLocal(r.data || r.date || r.Data || "");
+    if (!iso) return;
     if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) set.add(iso.slice(0,7));
   });
   return Array.from(set).sort();
@@ -4373,7 +4374,8 @@ function __renderOrePuliziaCalendar_(){
   const rows = state.orepulizia.rows || [];
   const hoursByDay = new Map();
   rows.forEach(r=>{
-    const iso = String(r.data || r.date || r.Data || "").trim();
+    const iso = formatISODateLocal(r.data || r.date || r.Data || "");
+    if (!iso) return;
     if (!iso.startsWith(monthKey + "-")) return;
 
     const oper = String(r.operatore || r.nome || "").trim();
