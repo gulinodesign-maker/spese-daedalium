@@ -3663,7 +3663,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* =========================
    Ore pulizia (calendario ore operatori)
-   Build: dDAE_1.198
+   Build: dDAE_1.200
 ========================= */
 
 .opcal-wrap{
@@ -3699,11 +3699,7 @@ grid-template-rows: 34px repeat(7, 54px);
   flex-direction: column;
   gap: 8px;
 }
-.opcal-filterLabel{
-  font-size: 14px;
-  color: rgba(0,0,0,0.55);
-  font-weight: 700;
-}
+.opcal-filterLabel{ display:none !important; }
 .opcal-filter select{
   width: 100%;
   height: 56px;
@@ -3722,11 +3718,11 @@ grid-template-rows: 34px repeat(7, 54px);
 
 .opcal-titleMain{
   text-align: center;
-  margin: 18px 0 16px;
-  font-weight: 900;
-  font-size: 46px;
-  color: rgba(122,192,219,1);
-  letter-spacing: -0.02em;
+  margin: 10px 0 12px;
+  font-weight: 750;
+  font-size: 28px;
+  color: rgba(122,192,219,0.95);
+  letter-spacing: -0.01em;
 }
 
 .opcal-stats{
@@ -3824,9 +3820,27 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* Responsive */
 @media (max-width: 720px){
-  .opcal-filterRow{ grid-template-columns: 1fr; }
-  .opcal-titleMain{ font-size: 20px; margin: 10px 0 10px; font-weight: 700; }
-  .opcal-stats{ grid-template-columns: 1fr; margin-bottom: 38px; }
+  /* Su smartphone: filtri e "tab" affiancati (massima densità verticale) */
+  .opcal-filterRow{ grid-template-columns: 1fr 1fr; gap: 10px; }
+  .opcal-titleMain{
+  text-align: center;
+  margin: 10px 0 12px;
+  font-weight: 750;
+  font-size: 28px;
+  color: rgba(122,192,219,0.95);
+  letter-spacing: -0.01em;
+}
+
+  .opcal-stats{ grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .opcal-statLabel{ font-size: 13px; }
+  .opcal-statValue{
+    font-size: 18px;
+    line-height: 1.12;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .opcal-weekdays{ gap: 10px; }
   .opcal-grid{ gap: 10px; }
   .opcal-cell{ min-height: 72px; border-radius: 16px; }
