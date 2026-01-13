@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.193";
+const BUILD_VERSION = "1.196";
 
 
 
@@ -1242,19 +1242,10 @@ function bindHomeDelegation(){
     }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
+        const opcal = e.target.closest && e.target.closest("#goOrePulizia");
+    if (opcal){ hideLauncher(); showPage("orepulizia"); return; }
 
-    const oreP = e.target.closest && e.target.closest("#goOrePulizia");
-    if (oreP){
-      hideLauncher();
-      (async ()=>{ 
-        try{ await ensureSettingsLoaded({ force:false, showLoader:false }); }catch(_){}
-        showPage("orepulizia");
-        try{ initOrePuliziaPage(); }catch(_){}
-      })();
-      return;
-    }
-
-    const lav = e.target.closest && e.target.closest("#goLavanderia");
+const lav = e.target.closest && e.target.closest("#goLavanderia");
     if (lav){ hideLauncher(); showPage("lavanderia"); return; }
 
     const imp = e.target.closest && e.target.closest("#goImpostazioni");
@@ -1362,6 +1353,8 @@ function showPage(page){
   if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
   if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
+  if (page === "orepulizia") { initOrePuliziaPage().catch(e=>toast(e.message)); }
+
 
   // dDAE_1.186: fallback visualizzazione Pulizie
   try{
@@ -2880,7 +2873,6 @@ async function init(){
   setupHome();
   setupCalendario();
   setupImpostazioni();
-  setupOrePulizia();
 
     setupOspite();
   initFloatingLabels();
@@ -3573,223 +3565,6 @@ function toRoman(n){
 }
 
 
-
-/* =========================
-   Ore pulizia (Calendario ore operatori)
-   - filtro per mese + operatore
-   - griglia responsive
-========================= */
-function setupOrePulizia(){
-  const back = document.getElementById("opHoursBackBtn");
-  if (back){
-    back.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); showPage("home"); }, true);
-  }
-
-  const tabMonth = document.getElementById("opHoursTabMonth");
-  const tabOp = document.getElementById("opHoursTabOperator");
-  const paneMonth = document.getElementById("opHoursMonthPane");
-  const paneOp = document.getElementById("opHoursOperatorPane");
-  const selMonth = document.getElementById("opHoursMonthSelect");
-  const selOp = document.getElementById("opHoursOperatorSelect");
-
-  if (!state.opHours) state.opHours = { tab: "month", month: "", operatore: "", allRows: null, loadedAt: 0 };
-
-  const setTab = (t) => {
-    state.opHours.tab = t;
-    if (tabMonth) tabMonth.classList.toggle("active", t === "month");
-    if (tabOp) tabOp.classList.toggle("active", t === "op");
-    if (paneMonth) paneMonth.hidden = (t !== "month");
-    if (paneOp) paneOp.hidden = (t !== "op");
-  };
-
-  if (tabMonth) tabMonth.addEventListener("click", ()=> setTab("month"), true);
-  if (tabOp) tabOp.addEventListener("click", ()=> setTab("op"), true);
-
-  if (selMonth){
-    selMonth.addEventListener("change", async ()=> {
-      state.opHours.month = selMonth.value || "";
-      await refreshOrePulizia();
-    }, true);
-  }
-  if (selOp){
-    selOp.addEventListener("change", async ()=> {
-      state.opHours.operatore = selOp.value || "";
-      await refreshOrePulizia();
-    }, true);
-  }
-
-  // stato iniziale tab
-  setTab(state.opHours.tab || "month");
-}
-
-function initOrePuliziaPage(){
-  if (!state.opHours) state.opHours = { tab: "month", month: "", operatore: "", allRows: null, loadedAt: 0 };
-  const selMonth = document.getElementById("opHoursMonthSelect");
-  const selOp = document.getElementById("opHoursOperatorSelect");
-
-  // Popola mesi (una volta)
-  if (selMonth && selMonth.options.length === 0){
-    const now = new Date();
-    const startY = now.getFullYear() - 1;
-    const endY = now.getFullYear() + 2;
-    const monthsIT = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-    for (let y = startY; y <= endY; y++){
-      for (let m = 1; m <= 12; m++){
-        const v = `${y}-${String(m).padStart(2,"0")}`;
-        const opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = `${monthsIT[m-1]} ${y}`;
-        selMonth.appendChild(opt);
-      }
-    }
-  }
-
-  // Default mese: corrente
-  if (selMonth){
-    const now = new Date();
-    const defM = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
-    if (!state.opHours.month) state.opHours.month = defM;
-    selMonth.value = state.opHours.month;
-  }
-
-  // Popola operatori (da impostazioni)
-  if (selOp){
-    selOp.innerHTML = "";
-    const rOps = getSettingRow("operatori") || {};
-    const list = [rOps.operatore_1, rOps.operatore_2, rOps.operatore_3]
-      .map(x=>String(x||"").trim())
-      .filter(Boolean);
-const list = (ops || []).map(x=>String(x||"").trim()).filter(Boolean);
-
-    // placeholder se vuoto
-    if (!list.length){
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "Imposta gli operatori in Impostazioni";
-      selOp.appendChild(opt);
-    } else {
-      list.forEach(name=>{
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        selOp.appendChild(opt);
-      });
-    }
-
-    if (!state.opHours.operatore) state.opHours.operatore = list[0] || "";
-    selOp.value = state.opHours.operatore || "";
-  }
-
-  refreshOrePulizia();
-}
-
-async function loadOperatoriAll_(){
-  if (!state.opHours) state.opHours = { tab:"month", month:"", operatore:"", allRows:null, loadedAt:0 };
-  const now = Date.now();
-  if (state.opHours.allRows && (now - (state.opHours.loadedAt||0)) < 30_000) return state.opHours.allRows;
-  const data = await api("operatori", { method:"GET", showLoader:true });
-  const rows = data && (data.rows || data.items || data.data || data) ? (data.rows || []) : [];
-  state.opHours.allRows = Array.isArray(rows) ? rows : [];
-  state.opHours.loadedAt = now;
-  return state.opHours.allRows;
-}
-
-function fmtHours_(n){
-  if (!isFinite(n)) return "";
-  const isInt = Math.abs(n - Math.round(n)) < 1e-9;
-  let s = isInt ? String(Math.round(n)) : String(n);
-  // normalizza: max 2 decimali, senza zeri finali
-  if (!isInt){
-    s = (Math.round(n*100)/100).toFixed(2);
-    s = s.replace(/\.?0+$/,"");
-  }
-  return s.replace(".", ",");
-}
-
-function buildHoursMap_(rows, monthYYYYMM, operatore){
-  const out = new Map();
-  const opNeed = String(operatore||"").trim().toLowerCase();
-  if (!monthYYYYMM || !/^\d{4}-\d{2}$/.test(monthYYYYMM)) return out;
-
-  rows.forEach(r=>{
-    const op = String(r.operatore || r.operator || r.name || "").trim();
-    if (!op) return;
-    if (opNeed && op.toLowerCase() !== opNeed) return;
-
-    const d = String(r.data || r.date || "").trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return;
-    if (!d.startsWith(monthYYYYMM + "-")) return;
-
-    const h = Number(String(r.ore ?? r.hours ?? "").replace(",", "."));
-    if (!isFinite(h) || h <= 0) return;
-
-    out.set(d, (out.get(d) || 0) + h);
-  });
-  return out;
-}
-
-function renderOreCalendar_(monthYYYYMM, hoursMap){
-  const cal = document.getElementById("opHoursCalendar");
-  const note = document.getElementById("opHoursNote");
-  if (!cal) return;
-
-  if (!monthYYYYMM || !/^\d{4}-\d{2}$/.test(monthYYYYMM)){
-    cal.innerHTML = "";
-    if (note) note.textContent = "";
-    return;
-  }
-
-  const [Y, M] = monthYYYYMM.split("-").map(x=>parseInt(x,10));
-  const first = new Date(Y, M-1, 1);
-  const daysInMonth = new Date(Y, M, 0).getDate();
-  // Monday-first index
-  const startIdx = (first.getDay() + 6) % 7;
-  const total = startIdx + daysInMonth;
-  const weeks = Math.ceil(total / 7);
-  const cells = weeks * 7;
-
-  let html = "";
-  for (let i=0;i<cells;i++){
-    const dayNum = i - startIdx + 1;
-    if (dayNum < 1 || dayNum > daysInMonth){
-      html += `<div class="opcal-cell opcal-empty"></div>`;
-      continue;
-    }
-    const d = `${Y}-${String(M).padStart(2,"0")}-${String(dayNum).padStart(2,"0")}`;
-    const h = hoursMap && hoursMap.get ? (hoursMap.get(d) || 0) : 0;
-    const hoursHTML = (h > 0) ? `<div class="opcal-hours">${fmtHours_(h)}</div>` : "";
-    html += `<div class="opcal-cell" data-date="${d}">
-      <div class="opcal-day">${dayNum}</div>
-      ${hoursHTML}
-    </div>`;
-  }
-  cal.innerHTML = html;
-
-  // Nota
-  const op = String(state.opHours?.operatore || "").trim();
-  if (note){
-    if (!op) note.textContent = "Seleziona un operatore (Impostazioni → Operatori).";
-    else note.textContent = "";
-  }
-}
-
-async function refreshOrePulizia(){
-  if (state.page !== "orepulizia") {
-    // Non renderizzare se non siamo nella pagina (evita flicker)
-    return;
-  }
-  try{
-    const month = state.opHours?.month || "";
-    const op = state.opHours?.operatore || "";
-    const rows = await loadOperatoriAll_();
-    const map = buildHoursMap_(rows, month, op);
-    renderOreCalendar_(month, map);
-  }catch(err){
-    try{ toast(String(err && err.message || "Errore caricamento ore")); }catch(_){}
-  }
-}
-
-
 (async ()=>{ try{ await init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
 
 
@@ -4461,3 +4236,241 @@ function initTassaPage(){
   // Stato iniziale: risultati nascosti finché non premi "Calcola"
   resetTassaUI();
 }
+
+
+/* =========================
+   Ore pulizia (Calendario ore operatori)
+   Build: dDAE_1.196
+========================= */
+
+state.orepulizia = state.orepulizia || {
+  inited: false,
+  monthKey: "",          // "YYYY-MM"
+  operatore: "",         // nome operatore oppure "__ALL__"
+  rows: [],              // righe da foglio operatori
+  months: []             // [{key,label}]
+};
+
+function __capitalizeFirst_(s){
+  s = String(s||"");
+  return s ? (s[0].toUpperCase() + s.slice(1)) : "";
+}
+
+function formatMonthYearIT_(monthKey){
+  // monthKey = "YYYY-MM"
+  if (!monthKey || !/^\d{4}-\d{2}$/.test(monthKey)) return "";
+  const parts = monthKey.split("-").map(n=>parseInt(n,10));
+  const y = parts[0], m = parts[1];
+  const dt = new Date(y, (m-1), 1);
+  const s = dt.toLocaleDateString("it-IT", { month:"long", year:"numeric" });
+  return __capitalizeFirst_(s);
+}
+
+function __fmtHours_(h){
+  const n = Number(h||0);
+  if (!isFinite(n) || n <= 0) return "";
+  // 2 dec max, no trailing zeros
+  let s = (Math.round(n * 100) / 100).toFixed(2);
+  s = s.replace(/\.00$/, "").replace(/0$/, "");
+  // italiano: virgola
+  s = s.replace(".", ",");
+  return s;
+}
+
+function __getUniqueMonthsFromRows_(rows){
+  const set = new Set();
+  (rows||[]).forEach(r=>{
+    const iso = String(r.data || r.date || r.Data || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) set.add(iso.slice(0,7));
+  });
+  return Array.from(set).sort();
+}
+
+async function __loadOperatoriRows_(){
+  try{
+    const res = await api("operatori", { method:"GET", showLoader:true });
+    const rows = res && (res.rows || res.items) ? (res.rows || res.items) : [];
+    return Array.isArray(rows) ? rows : [];
+  }catch(e){
+    console.warn("Operatori load failed", e);
+    return [];
+  }
+}
+
+function __fillSelect_(sel, items, value){
+  if (!sel) return;
+  sel.innerHTML = "";
+  (items||[]).forEach(it=>{
+    const opt = document.createElement("option");
+    opt.value = it.value;
+    opt.textContent = it.label;
+    sel.appendChild(opt);
+  });
+  if (value) sel.value = value;
+}
+
+function __fmtHoursOrDash_(h){
+  const s = __fmtHours_(h);
+  return s ? s : "—";
+}
+
+function __opLabel_(op){
+  const v = String(op||"").trim();
+  if (!v || v === "__ALL__") return "Tutti";
+  const low = v.toLowerCase();
+  // Title-case semplice (spazi, trattini, apostrofi)
+  return low.replace(/(^|[\s\-'])\S/g, (m) => m.toUpperCase());
+}
+
+function __renderOrePuliziaCalendar_(){
+  const grid = document.getElementById("opcalGrid");
+  if (!grid) return;
+
+  const monthKey = state.orepulizia.monthKey;
+  if (!monthKey || !/^\d{4}-\d{2}$/.test(monthKey)) {
+    grid.innerHTML = "";
+    return;
+  }
+
+  const titleEl = document.getElementById("opcalTitleMain");
+  const totalEl = document.getElementById("opcalTotalHours");
+  const daysEl = document.getElementById("opcalDaysWithHours");
+
+  const monthLabel = formatMonthYearIT_(monthKey) || monthKey;
+  const op = String(state.orepulizia.operatore || "").trim();
+  const opDisp = __opLabel_(op);
+
+  if (titleEl) titleEl.textContent = `${opDisp} - ${monthLabel}`;
+
+  const parts = monthKey.split("-").map(n=>parseInt(n,10));
+  const Y = parts[0], M = parts[1]; // 1..12
+  const first = new Date(Y, M-1, 1);
+  const daysInMonth = new Date(Y, M, 0).getDate();
+
+  // Lun=0..Dom=6
+  const jsDow = first.getDay(); // Dom=0..Sab=6
+  const dowMon0 = (jsDow + 6) % 7; // convert to Mon=0
+  const totalCells = 42; // 6 settimane
+
+  // ore per giorno
+  const rows = state.orepulizia.rows || [];
+  const hoursByDay = new Map();
+  rows.forEach(r=>{
+    const iso = String(r.data || r.date || r.Data || "").trim();
+    if (!iso.startsWith(monthKey + "-")) return;
+
+    const oper = String(r.operatore || r.nome || "").trim();
+    if (op && op !== "__ALL__" && oper !== op) return;
+
+    const oreRaw = (r.ore !== undefined && r.ore !== null) ? r.ore : (r.Ore !== undefined ? r.Ore : "");
+    const ore = Number(String(oreRaw).trim().replace(",", "."));
+    if (!isFinite(ore) || ore <= 0) return;
+
+    const d = parseInt(iso.slice(8,10), 10);
+    if (!d) return;
+    hoursByDay.set(d, (hoursByDay.get(d) || 0) + ore);
+  });
+
+  // stats
+  let totalHours = 0;
+  let daysWithHours = 0;
+  for (const h of hoursByDay.values()){
+    if (h > 0){
+      totalHours += h;
+      daysWithHours += 1;
+    }
+  }
+  if (totalEl) totalEl.textContent = __fmtHoursOrDash_(totalHours);
+  if (daysEl) daysEl.textContent = daysWithHours > 0 ? String(daysWithHours) : "—";
+
+  // build cells
+  grid.innerHTML = "";
+  for (let i=0; i<totalCells; i++) {
+    const cell = document.createElement("div");
+    cell.className = "opcal-cell";
+
+    const dayNum = i - dowMon0 + 1;
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      cell.classList.add("is-empty");
+      grid.appendChild(cell);
+      continue;
+    }
+
+    const dayEl = document.createElement("div");
+    dayEl.className = "opcal-day";
+    dayEl.textContent = String(dayNum);
+    cell.appendChild(dayEl);
+
+    const h = hoursByDay.get(dayNum) || 0;
+    if (h > 0) {
+      const hEl = document.createElement("div");
+      hEl.className = "opcal-hours";
+      hEl.textContent = __fmtHours_(h); // no zeri
+      cell.appendChild(hEl);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+async function initOrePuliziaPage(){
+  const s = state.orepulizia;
+  const back = document.getElementById("opcalBack");
+  const selMonth = document.getElementById("opcalMonthSelect");
+  const selOp = document.getElementById("opcalOperatorSelect");
+
+  if (!s.inited){
+    s.inited = true;
+
+    if (back) back.addEventListener("click", ()=>showPage("home"));
+
+    if (selMonth) selMonth.addEventListener("change", ()=>{
+      s.monthKey = selMonth.value;
+      __renderOrePuliziaCalendar_();
+    });
+
+    if (selOp) selOp.addEventListener("change", ()=>{
+      s.operatore = selOp.value;
+      __renderOrePuliziaCalendar_();
+    });
+  }
+
+  // dati
+  await ensureSettingsLoaded({ force:false, showLoader:false });
+  s.rows = await __loadOperatoriRows_();
+
+  // mesi
+  const months = __getUniqueMonthsFromRows_(s.rows);
+  const now = new Date();
+  const nowKey = String(now.getFullYear()) + "-" + String(now.getMonth()+1).padStart(2,"0");
+  if (!months.includes(nowKey)) months.push(nowKey);
+  months.sort();
+
+  s.months = months.map(k=>({ key:k, label: formatMonthYearIT_(k) }));
+  const monthItems = s.months.map(m=>({ value:m.key, label:m.label }));
+
+  // default month: ultimo (più recente)
+  if (!s.monthKey) s.monthKey = monthItems.length ? monthItems[monthItems.length-1].value : nowKey;
+
+  __fillSelect_(selMonth, monthItems, s.monthKey);
+
+  // operatori list: da impostazioni + da righe
+  let fromSet = [];
+  try{ fromSet = getOperatorNamesFromSettings(); }catch(_){ fromSet = []; }
+  const fromRows = Array.from(new Set((s.rows||[]).map(r=>String(r.operatore||r.nome||"").trim()).filter(Boolean))).sort();
+  const ops = Array.from(new Set([...(fromSet||[]), ...(fromRows||[])]))
+    .filter(Boolean)
+    .sort();
+
+  // opzioni: TUTTI + operatori
+  const opItems = [{ value:"__ALL__", label:"TUTTI" }, ...ops.map(x=>({ value:x, label:x }))];
+
+  // default operatore
+  if (!s.operatore) s.operatore = ops.length ? ops[0] : "__ALL__";
+  if (!opItems.some(o=>o.value === s.operatore)) s.operatore = ops.length ? ops[0] : "__ALL__";
+
+  __fillSelect_(selOp, opItems, s.operatore);
+
+  __renderOrePuliziaCalendar_();
+}
+

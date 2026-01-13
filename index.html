@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.193" rel="stylesheet"/>
-<link href="./manifest.json?v=1.193" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.193" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.193" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.193" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.193" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.196" rel="stylesheet"/>
+<link href="./manifest.json?v=1.196" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.196" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.196" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.196" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.196" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.193"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.196"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -92,15 +92,6 @@
 </svg></div>
 <div class="home-main-label">Pulizie</div>
 </button>
-
-<button aria-label="Ore pulizia" class="home-main" id="goOrePulizia" type="button">
-  <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-    <path d="M12 8v5l3 2"></path>
-    <path d="M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z"></path>
-  </svg></div>
-  <div class="home-main-label">Ore pulizia</div>
-</button>
-
 <button aria-label="Guadagni" class="home-main" id="goGuadagni" type="button">
 <div aria-hidden="true" class="home-main-glyph"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24">
 <path d="M7 9V7.5A2.5 2.5 0 0 1 9.5 5h5A2.5 2.5 0 0 1 17 7.5V9"></path>
@@ -111,6 +102,14 @@
 <div class="home-main-label">Guadagni</div>
 </button>
 
+<button aria-label="Ore pulizia" class="home-main" id="goOrePulizia" type="button">
+  <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+    <path d="M12 8v5l3 2"></path>
+    <path d="M12 22a10 10 0 1 0-10-10 10 10 0 0 0 10 10Z"></path>
+  </svg></div>
+  <div class="home-main-label">Ore pulizia</div>
+</button>
+
 <button aria-label="Impostazioni" class="home-main" id="goImpostazioni" type="button">
   <div aria-hidden="true" class="home-main-glyph alt"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
     <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
@@ -119,8 +118,7 @@
   <div class="home-main-label">Impostazioni</div>
 </button>
 
-</div>
-<div class="build" id="buildText">1.193</div>
+<div class="build" id="buildText">1.196</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -652,41 +650,45 @@
 <div class="toast" id="toast"></div>
 
 
-<section class="page" id="page-orepulizia" hidden>
-  <div class="card">
-    <div class="hd">
-      <button class="btn ghost" id="opHoursBackBtn" type="button" aria-label="Indietro">←</button>
-      <h2>Ore pulizia</h2>
+<section class="page" hidden id="page-orepulizia">
+  <div class="opcal-wrap">
+    <button class="btn ghost opcal-back" id="opcalBack" type="button" aria-label="Indietro">←</button>
+
+    <div class="opcal-filterRow" aria-label="Filtri ore pulizia">
+      <label class="opcal-filter">
+        <span class="opcal-filterLabel">Mese</span>
+        <select id="opcalMonthSelect" aria-label="Mese"></select>
+      </label>
+      <label class="opcal-filter">
+        <span class="opcal-filterLabel">Operatore</span>
+        <select id="opcalOperatorSelect" aria-label="Operatore"></select>
+      </label>
     </div>
-    <div class="bd">
 
-      <div class="segmented" style="margin-bottom:12px;">
-        <button class="seg-btn active" id="opHoursTabMonth" type="button">Mese</button>
-        <button class="seg-btn" id="opHoursTabOperator" type="button">Operatore</button>
+    <div class="opcal-titleMain" id="opcalTitleMain">—</div>
+
+    <div class="opcal-stats" aria-label="Report ore pulizia">
+      <div class="opcal-stat opcal-stat--blue">
+        <div class="opcal-statLabel">Totale ore</div>
+        <div class="opcal-statValue" id="opcalTotalHours">—</div>
       </div>
-
-      <div class="op-hours-filters">
-        <div class="field float" id="opHoursMonthPane">
-          <select id="opHoursMonthSelect" placeholder=" "></select>
-          <label for="opHoursMonthSelect">Mese</label>
-        </div>
-
-        <div class="field float" id="opHoursOperatorPane" hidden>
-          <select id="opHoursOperatorSelect" placeholder=" "></select>
-          <label for="opHoursOperatorSelect">Operatore</label>
-        </div>
+      <div class="opcal-stat opcal-stat--beige">
+        <div class="opcal-statLabel">Giorni con ore</div>
+        <div class="opcal-statValue" id="opcalDaysWithHours">—</div>
       </div>
-
-      <div class="op-hours-note" id="opHoursNote" style="margin:10px 0 0 2px;"></div>
-
-      <div class="opcal-wrap" style="margin-top:14px;">
-        <div class="opcal-dow-row" aria-hidden="true">
-          <div class="opcal-dow">L</div><div class="opcal-dow">M</div><div class="opcal-dow">M</div><div class="opcal-dow">G</div><div class="opcal-dow">V</div><div class="opcal-dow">S</div><div class="opcal-dow">D</div>
-        </div>
-        <div class="opcal-grid" id="opHoursCalendar" aria-label="Calendario ore pulizia"></div>
-      </div>
-
     </div>
+
+    <div class="opcal-weekdays" aria-hidden="true">
+      <div class="opcal-weekday">L</div>
+      <div class="opcal-weekday">M</div>
+      <div class="opcal-weekday">M</div>
+      <div class="opcal-weekday">G</div>
+      <div class="opcal-weekday">V</div>
+      <div class="opcal-weekday">S</div>
+      <div class="opcal-weekday">D</div>
+    </div>
+
+    <div class="opcal-grid" id="opcalGrid" aria-label="Calendario ore pulizia"></div>
   </div>
 </section>
 
@@ -832,8 +834,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.193"></script>
-<script defer="" src="./app.js?v=1.193"></script>
+<script defer="" src="./config.js?v=1.196"></script>
+<script defer="" src="./app.js?v=1.196"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">

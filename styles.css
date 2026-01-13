@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.193"),
+    url("./assets/bg-daedalium.png?v=1.196"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.193"),
+    url("./assets/bg-daedalium.png?v=1.196"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3652,57 +3652,173 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   Ore pulizia - calendario ore operatori
+   Ore pulizia (calendario ore operatori)
+   Build: dDAE_1.196
 ========================= */
-.op-hours-filters{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
+
+.opcal-wrap{
+  padding: 14px 14px 26px;
+  max-width: 1120px;
+  margin: 0 auto;
+  position: relative;
 }
-.opcal-dow-row{
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+
+/* Back discreto (non altera il layout) */
+.opcal-back{
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.opcal-filterRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items:end;
+  margin: 8px 0 8px;
+}
+
+.opcal-filter{
+  display:flex;
+  flex-direction: column;
   gap: 8px;
-  margin: 4px 2px 8px;
 }
-.opcal-dow{
-  text-align: center;
-  font-size: 12px;
-  color: rgba(43,124,180,0.85);
+.opcal-filterLabel{
+  font-size: 14px;
+  color: rgba(0,0,0,0.55);
+  font-weight: 700;
+}
+.opcal-filter select{
+  width: 100%;
+  height: 56px;
+  border-radius: 18px;
+  padding: 0 16px;
+  font-size: 20px;
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.75);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
-.opcal-grid{
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+
+.opcal-titleMain{
+  text-align: center;
+  margin: 18px 0 16px;
+  font-weight: 900;
+  font-size: 46px;
+  color: rgba(122,192,219,1);
+  letter-spacing: -0.02em;
+}
+
+.opcal-stats{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 0 0 56px;
+}
+
+.opcal-stat{
+  border-radius: 18px;
+  padding: 16px 18px;
+  min-height: 82px;
+  border: 1px solid rgba(15,23,42,0.10);
+  box-shadow: 0 14px 34px rgba(15,23,42,0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
   gap: 8px;
+}
+.opcal-stat--blue{
+  background: linear-gradient(90deg, rgba(200,232,255,0.55), rgba(255,255,255,0.55));
+}
+.opcal-stat--beige{
+  background: linear-gradient(90deg, rgba(255,236,221,0.55), rgba(255,255,255,0.55));
+}
+
+.opcal-statLabel{
+  font-size: 16px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.60);
+}
+.opcal-statValue{
+  font-size: 30px;
+  font-weight: 900;
+  color: rgba(201,119,43,1);
+  line-height: 1.0;
+}
+
+.opcal-weekdays{
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0,1fr));
+  gap: 18px;
+  margin: 0 0 16px;
+}
+.opcal-weekday{
+  text-align:center;
+  font-size: 16px;
+  color: rgba(43,124,180,0.95);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.opcal-grid{
+  display:grid;
+  grid-template-columns: repeat(7, minmax(0,1fr));
+  gap: 18px;
 }
 .opcal-cell{
   position: relative;
-  background: rgba(15,23,42,0.06);
-  border: 1px solid rgba(15,23,42,0.10);
-  border-radius: 14px;
-  min-height: 74px;
-  padding: 8px;
-  overflow: hidden;
-}
-.opcal-cell.opcal-empty{
-  background: transparent;
-  border-color: transparent;
+  min-height: 84px;
+  border-radius: 18px;
+  background: rgba(235,235,235,0.74);
+  box-shadow: 0 10px 22px rgba(15,23,42,0.08), inset 0 0 0 1px rgba(15,23,42,0.06);
+  overflow:hidden;
 }
 .opcal-day{
-  position: absolute;
-  top: 6px;
-  left: 8px;
-  font-size: 12px;
-  color: rgba(43,124,180,0.85);
-  font-weight: 600;
+  position:absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 14px;
+  color: rgba(43,124,180,0.95);
+  font-weight: 700;
 }
 .opcal-hours{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 18px;
-  font-weight: 950;
-  color: rgba(201,119,43,0.95);
+  position:absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  transform: translateY(-40%);
+  text-align:center;
+  font-weight: 900;
+  color: rgba(201,119,43,1);
+  font-size: 22px;
+}
+
+/* Celle fuori mese: invisibili (come nello screenshot) */
+.opcal-cell.is-empty{
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* Responsive */
+@media (max-width: 720px){
+  .opcal-filterRow{ grid-template-columns: 1fr; }
+  .opcal-titleMain{ font-size: 34px; margin: 14px 0 12px; }
+  .opcal-stats{ grid-template-columns: 1fr; margin-bottom: 38px; }
+  .opcal-weekdays{ gap: 10px; }
+  .opcal-grid{ gap: 10px; }
+  .opcal-cell{ min-height: 72px; border-radius: 16px; }
+  .opcal-hours{ font-size: 20px; }
 }
