@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.216";
+const BUILD_VERSION = "1.217";
 
 
 
@@ -3514,6 +3514,7 @@ function setupCalendario(){
   const todayBtn = document.getElementById("calTodayBtn");
   const prevBtn = document.getElementById("calPrevBtn");
   const nextBtn = document.getElementById("calNextBtn");
+  const syncBtn = document.getElementById("calSyncBtn");
   const input = document.getElementById("calDateInput");
 
   if (!state.calendar) {
@@ -3547,7 +3548,7 @@ function setupCalendario(){
 }
 
 
-async function ensureCalendarData() {
+async function ensureCalendarData({ force = false } = {}) {
   if (!state.calendar) state.calendar = { anchor: new Date(), ready: false, guests: [], rangeKey: "" };
 
   const anchor = (state.calendar && state.calendar.anchor) ? state.calendar.anchor : new Date();
@@ -3559,10 +3560,10 @@ async function ensureCalendarData() {
   const rangeKey = `${winFrom}|${winTo}`;
 
   // Se ho già i dati per questa finestra, non ricarico
-  if (state.calendar.ready && state.calendar.rangeKey === rangeKey) return;
+  if (!force && state.calendar.ready && state.calendar.rangeKey === rangeKey) return;
 
   await load({ showLoader: true }); // necessario per i pallini letti
-  const data = await cachedGet("ospiti", { from: winFrom, to: winTo }, { showLoader: true, ttlMs: 30*1000 });
+    const data = await cachedGet("ospiti", { from: winFrom, to: winTo }, { showLoader: true, ttlMs: 30*1000, force });
   state.calendar.guests = Array.isArray(data) ? data : [];
   state.calendar.ready = true;
   state.calendar.rangeKey = rangeKey;
