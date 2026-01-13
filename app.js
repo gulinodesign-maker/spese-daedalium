@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.206";
+const BUILD_VERSION = "1.209";
 
 
 
@@ -496,12 +496,19 @@ function euro(n){
   return x.toLocaleString("it-IT", { style:"currency", currency:"EUR" });
 }
 
-function toast(msg){
+let __toastTimer = null;
+function toast(msg, kind){
   const t = $("#toast");
   if (!t) return;
   t.textContent = msg;
+  // kind: "blue" | "orange" | "" (default)
+  t.dataset.kind = kind ? String(kind) : "";
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 1700);
+  try{ if (__toastTimer) clearTimeout(__toastTimer); }catch(_ ){}
+  __toastTimer = setTimeout(() => {
+    t.classList.remove("show");
+    t.dataset.kind = "";
+  }, 1700);
 }
 
 function todayISO(){
@@ -1046,27 +1053,37 @@ async function ensureSettingsLoaded({ force = false, showLoader = false } = {}) 
     // Se esistono campi operatori (pulizie), mostra i nomi salvati (non editabili)
     try {
       const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
-      const placeholders = ["Operatore 1","Operatore 2","Operatore 3"];
-      const ids = ["op1Name","op2Name","op3Name"];
-      ids.forEach((id, idx) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const name = String(names[idx] || "").trim();
+const ids = ["op1Name","op2Name","op3Name"];
+ids.forEach((id, idx) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const name = String(names[idx] || "").trim();
 
-        // Se è un input (compat), rendilo readOnly e compila
-        if (String(el.tagName || "").toUpperCase() === "INPUT") {
-          el.readOnly = true;
-          el.setAttribute("readonly", "");
-          el.value = name || "";
-          return;
-        }
+  // Nascondi completamente l'operatore se non è impostato
+  const row = el.closest ? el.closest(".clean-op-row") : null;
+  if (!name) {
+    if (row) row.style.display = "none";
+    el.textContent = "";
+    el.classList.remove("is-placeholder");
+    return;
+  } else {
+    if (row) row.style.display = "";
+  }
 
-        // Altrimenti è un testo (div/span)
-        el.textContent = name || placeholders[idx];
-        el.classList.toggle("is-placeholder", !name);
-      });
+  // Se è un input (compat), rendilo readOnly e compila
+  if (String(el.tagName || "").toUpperCase() === "INPUT") {
+    el.readOnly = true;
+    el.setAttribute("readonly", "");
+    el.value = name;
+    return;
+  }
 
-      refreshFloatingLabels();
+  // Altrimenti è un testo (div/span)
+  el.textContent = name;
+  el.classList.remove("is-placeholder");
+});
+
+refreshFloatingLabels();
     } catch(_) {}
 
     return state.settings;
@@ -3048,26 +3065,49 @@ async function init(){
   };
 
   const syncCleanOperators = () => {
-    const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
-    const placeholders = ["Operatore 1","Operatore 2","Operatore 3"];
+  const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
 
-    opEls.forEach((r, idx) => {
-      const n = String(names[idx] || "").trim();
+  opEls.forEach((r, idx) => {
+    const n = String(names[idx] || "").trim();
+    const rowEl = (r.hours && r.hours.closest) ? r.hours.closest(".clean-op-row") : null;
 
-      // Nome: solo lettura
+    // Se non è impostato: NON mostrare né scritta né pallino
+    if (!n) {
+      if (rowEl) rowEl.style.display = "none";
       if (String(r.name.tagName || "").toUpperCase() === "INPUT") {
-        r.name.readOnly = true;
-        r.name.setAttribute("readonly", "");
-        r.name.value = n || "";
+        r.name.value = "";
       } else {
-        r.name.textContent = n || placeholders[idx];
-        r.name.classList.toggle("is-placeholder", !n);
+        r.name.textContent = "";
+        r.name.classList.remove("is-placeholder");
       }
+      // sicurezza: azzera il dot
+      writeHourDot(r.hours, 0);
+      return;
+    }
 
-      // Dot: init a 0
-      if (!r.hours.dataset.value) writeHourDot(r.hours, 0);
-    });
-  };
+    // Se impostato: mostra riga e applica nome
+    if (rowEl) rowEl.style.display = "";
+
+    // Nome: solo lettura
+    if (String(r.name.tagName || "").toUpperCase() === "INPUT") {
+      r.name.readOnly = true;
+      r.name.setAttribute("readonly", "");
+      r.name.value = n;
+    } else {
+      r.name.textContent = n;
+      r.name.classList.remove("is-placeholder");
+    }
+
+    // Dot: init a 0 (se mancante)
+    if (!r.hours.dataset.value) writeHourDot(r.hours, 0);
+
+    // Accessibilità: usa il nome reale
+    try {
+      r.name.setAttribute("aria-label", n);
+      r.hours.setAttribute("aria-label", "Ore " + n);
+    } catch (_) {}
+  });
+};
 
   try{ syncCleanOperators(); }catch(_){}
   opEls.forEach(r => { try{ bindHourDot(r.hours); }catch(_){ } });
@@ -3075,19 +3115,21 @@ async function init(){
   const buildOperatoriPayload = () => {
     const date = getCleanDate();
     const rows = [];
-    let touched = false;
     const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
 
+    const hasAnyName = names.some(n => String(n || "").trim());
+    if (!hasAnyName){
+      throw new Error("Imposta i nomi operatori in Impostazioni");
+    }
+
+    // IMPORTANTE: inviamo ANCHE le ore a 0.
+    // Il backend farà "replace" del giorno: cancella i record esistenti per quella data
+    // e reinserisce solo quelli con ore > 0. Così un secondo salvataggio SOVRASCRIVE.
     opEls.forEach((r, idx) => {
-      const hours = readHourDot(r.hours);
-      if (hours > 0) touched = true;
-      if (hours <= 0) return;
-
       const name = String(names[idx] || "").trim();
-      if (!name) {
-        throw new Error("Imposta i nomi operatori in Impostazioni");
-      }
+      if (!name) return; // operatore non configurato
 
+      const hours = readHourDot(r.hours); // può essere 0
       rows.push({
         data: date,
         operatore: name,
@@ -3096,8 +3138,9 @@ async function init(){
       });
     });
 
-    return { touched, payload: { data: date, operatori: rows } };
+    return { touched: true, payload: { data: date, operatori: rows, replaceDay: true } };
   };
+
 
 
   
@@ -3119,6 +3162,52 @@ async function init(){
       });
     });
   };
+
+  // --- Ore operatori: carica dal DB per il giorno selezionato (così un nuovo salvataggio SOVRASCRIVE davvero) ---
+  const _normOpName = (s) => String(s || "").trim().toLowerCase();
+
+  const applyOperatoriRows = (rows) => {
+    if (!Array.isArray(rows)) rows = [];
+    const map = new Map();
+    rows.forEach(r => {
+      const op = _normOpName(r?.operatore || r?.nome || "");
+      const ore = parseInt(String(r?.ore ?? 0), 10);
+      if (op) map.set(op, isNaN(ore) ? 0 : Math.max(0, ore));
+    });
+
+    const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
+    opEls.forEach((r, idx) => {
+      const name = String(names[idx] || "").trim();
+      if (!name) return; // non configurato (riga nascosta)
+      const v = map.get(_normOpName(name)) || 0;
+      writeHourDot(r.hours, v);
+    });
+  };
+
+  const loadOperatoriForDay = async ({ clearFirst = true } = {}) => {
+    if (clearFirst){
+      // azzera dots visivamente (se poi arrivano dati li ripopola)
+      const names = getOperatorNamesFromSettings();
+      opEls.forEach((r, idx) => {
+        const name = String(names[idx] || "").trim();
+        if (!name) return;
+        writeHourDot(r.hours, 0);
+      });
+    }
+    try{
+      const data = getCleanDate();
+      const res = await api("operatori", { method:"GET", params:{ data }, showLoader:false });
+
+      const rows = Array.isArray(res) ? res
+        : (res && Array.isArray(res.rows) ? res.rows
+        : (res && Array.isArray(res.data) ? res.data
+        : []));
+      applyOperatoriRows(rows);
+    }catch(_){
+      // offline/errore: se clearFirst era true, restano a 0
+    }
+  };
+
 
   const loadPulizieForDay = async ({ clearFirst = true } = {}) => {
     // Regola: quando cambi giorno, la griglia deve essere SUBITO vuota.
@@ -3232,14 +3321,14 @@ if (cleanSaveLaundry){
       // ricarica dal DB senza svuotare (così resta visibile subito)
       try{ await loadPulizieForDay({ clearFirst:false }); }catch(_){ }
 
-      toast("Biancheria salvata");
+      toast("Biancheria salvata", "blue");
     }catch(err){
       toast(String(err && err.message || "Errore salvataggio biancheria"));
     }
   }, true);
 }
 
-// Salva ore lavoro (foglio "operatori")
+// Salva ore lavoro (foglio "operatori") — REPLACE per data (sovrascrive report del giorno)
 if (cleanSaveHours){
   cleanSaveHours.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -3247,27 +3336,28 @@ if (cleanSaveHours){
     try{
       const { touched, payload: opPayload } = buildOperatoriPayload();
 
-      // Se non è stato toccato nulla, non fare nulla
       if (!touched){
-        toast("Nessuna ora da salvare");
-        return;
-      }
-
-      // Se ha toccato ma non ci sono righe >0, informalo
-      if (!opPayload || !Array.isArray(opPayload.operatori) || !opPayload.operatori.length){
-        toast("Nessuna ora (>0) da salvare");
+        toast("Nessun operatore configurato");
         return;
       }
 
       const res = await api("operatori", { method:"POST", body: opPayload });
-      const saved = (res && typeof res.saved === "number") ? res.saved : opPayload.operatori.length;
+      const saved = (res && typeof res.saved === "number") ? res.saved : 0;
+      const deleted = (res && typeof res.deleted === "number") ? res.deleted : null;
 
-      toast("Ore lavoro salvate (" + saved + ")");
+      // Ricarica dal DB per confermare UI allineata
+      try{ await loadOperatoriForDay({ clearFirst:false }); }catch(_){}
+
+      const msg = (deleted != null)
+        ? `Ore lavoro salvate (${saved}) — sostituiti ${deleted} record`
+        : `Ore lavoro salvate (${saved})`;
+      toast(msg, "orange");
     }catch(err){
       toast(String(err && err.message || "Errore salvataggio ore lavoro"));
     }
   }, true);
 }
+
 
   const updateCleanLabel = () => {
     const lab = document.getElementById("cleanDateLabel");
@@ -3283,6 +3373,7 @@ if (cleanSaveHours){
     state.cleanDay = d.toISOString();
     updateCleanLabel();
     try{ loadPulizieForDay(); }catch(_){ }
+    try{ loadOperatoriForDay(); }catch(_){ }
   };
 
   if (cleanPrev) cleanPrev.addEventListener("click", () => shiftClean(-1));
@@ -3291,12 +3382,14 @@ if (cleanSaveHours){
     state.cleanDay = startOfLocalDay(new Date()).toISOString();
     updateCleanLabel();
     try{ loadPulizieForDay(); }catch(_){ }
+    try{ loadOperatoriForDay(); }catch(_){ }
   });
 
   // inizializza label se apri direttamente la pagina
   if (!state.cleanDay) state.cleanDay = startOfLocalDay(new Date()).toISOString();
   updateCleanLabel();
   try{ loadPulizieForDay(); }catch(_){ }
+    try{ loadOperatoriForDay(); }catch(_){ }
 
 
 
@@ -4343,7 +4436,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.206
+   Build: dDAE_1.209
 ========================= */
 
 state.orepulizia = state.orepulizia || {
