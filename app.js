@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.201";
+const BUILD_VERSION = "1.206";
 
 
 
@@ -2962,6 +2962,7 @@ async function init(){
   const cleanSaveLaundry = document.getElementById("cleanSaveLaundry");
   const cleanSaveHours = document.getElementById("cleanSaveHours");
   const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
+  const btnOrePuliziaFromPulizie = document.getElementById("btnOrePuliziaFromPulizie");
 
   const readCell = (el) => {
     const v = String(el.textContent || "").trim();
@@ -3319,6 +3320,12 @@ if (cleanSaveHours){
       try{ window.print(); }catch(_){}
     });
   }
+  if (typeof btnOrePuliziaFromPulizie !== "undefined" && btnOrePuliziaFromPulizie){
+    bindFastTap(btnOrePuliziaFromPulizie, () => {
+      try{ showPage("orepulizia"); }catch(_){}
+    });
+  }
+
   if (typeof btnLaundryFromPulizie !== "undefined" && btnLaundryFromPulizie){
     bindFastTap(btnLaundryFromPulizie, async () => {
       try{
@@ -4336,7 +4343,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.201
+   Build: dDAE_1.206
 ========================= */
 
 state.orepulizia = state.orepulizia || {
@@ -4505,7 +4512,7 @@ function __renderOrePuliziaCalendar_(){
     totalEl.textContent = hoursStr ? `${hoursStr} ore - ${totalImportoStr}` : "—";
   }
   if (daysEl) {
-    daysEl.textContent = presenze > 0 ? `${presenze} P - ${presenzeImportoStr}` : "—";
+    daysEl.textContent = presenze > 0 ? `${presenze} transfert - ${presenzeImportoStr}` : "—";
   }
 
   // build cells

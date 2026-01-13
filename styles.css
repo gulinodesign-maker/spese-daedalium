@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.201"),
+    url("./assets/bg-daedalium.png?v=1.206"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -233,7 +233,7 @@ body{
   min-height: 48px;
   font-size: 16px;
   cursor:pointer;
-  font-weight: 900;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -294,7 +294,7 @@ input[type="date"]{
   gap: 10px;
 }
 .item-title{
-  font-weight: 900;
+  font-weight: 500;
   font-size: 13px;
 }
 .item-sub{
@@ -315,7 +315,7 @@ input[type="date"]{
 }
 .mini{
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 500;
 }
 .delbtn{
   border: 1px solid rgba(201,119,43,0.40);
@@ -326,7 +326,7 @@ input[type="date"]{
   min-width: 44px;
   font-size: 15px;
   cursor:pointer;
-  font-weight: 900;
+  font-weight: 500;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -354,7 +354,7 @@ input[type="date"]{
 .kpi-value{ font-size: 26px; font-weight: 950; letter-spacing: 0.2px; }
 .subhead{
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 500;
   opacity: 0.85;
   margin-bottom: 8px;
 }
@@ -375,7 +375,7 @@ input[type="date"]{
   gap: 10px;
   align-items:center;
 }
-.catname{ font-weight: 900; }
+.catname{ font-weight: 500; }
 .catgrid{
   margin-top: 8px;
   display:grid;
@@ -384,7 +384,7 @@ input[type="date"]{
   font-size: 12px;
   opacity: 0.90;
 }
-.catgrid b{ font-weight: 900; }
+.catgrid b{ font-weight: 500; }
 
 /* Chart */
 .chart-wrap{
@@ -426,7 +426,7 @@ input[type="date"]{
   border-radius: 999px;
 }
 .legname{
-  font-weight: 900;
+  font-weight: 500;
   font-size: 12px;
   white-space: nowrap;
   overflow:hidden;
@@ -434,7 +434,7 @@ input[type="date"]{
 }
 .legright{
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 500;
   color: rgba(15,23,42,0.85);
 }
 
@@ -624,7 +624,7 @@ input[type="date"]{
 }
 .loading-text{
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: 0.2px;
   color: rgba(15,23,42,0.85);
 }
@@ -642,7 +642,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.201"),
+    url("./assets/bg-daedalium.png?v=1.206"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1226,7 +1226,7 @@ body::before{
   border-radius: 999px;
   border: 1px solid rgba(15,23,42,0.10);
   background: rgba(255,255,255,0.74);
-  font-weight: 900;
+  font-weight: 500;
   font-size: 12px;
 }
 .badge.orange{ border-color: rgba(201,119,43,0.25); }
@@ -1361,7 +1361,7 @@ body::before{
 }
 #page-ospite .field label{
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 500;
   color: rgba(15,23,42,0.72);
   margin-bottom: 6px;
 }
@@ -1451,7 +1451,7 @@ body::before{
   top: 14px;
   margin: 0;
   padding: 0;
-  font-weight: 900;
+  font-weight: 500;
   font-size: 13px;
   color: rgba(15,23,42,0.62);
   pointer-events: none;
@@ -2049,7 +2049,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 .stay-pill__sep{ opacity: 0.85; font-weight: 800; }
 .stay-pill__n{ font-weight: 950; }
-.stay-pill__t{ font-weight: 900; }
+.stay-pill__t{ font-weight: 500; }
 
 .nights-badge{
   width: 34px;
@@ -2597,7 +2597,7 @@ body[data-page="ospiti"] .guest-card .actions {
   /* La base colore stanza viene da .room-X (var(--room-bg)) */
   background: transparent;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-  font-weight: 900;
+  font-weight: 500;
   color: rgba(255,255,255,.96);
 }
 
@@ -2710,7 +2710,7 @@ body[data-page="ospiti"] .guest-card .actions {
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.78);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 500;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -2727,7 +2727,7 @@ body[data-page="ospiti"] .guest-card .actions {
   border: 1px solid rgba(15,23,42,0.10);
   background: rgba(255,255,255,0.55);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 500;
   opacity: 0.85;
 }
 
@@ -2740,7 +2740,7 @@ body[data-page="ospiti"] .guest-card .actions {
   border: 1px solid rgba(255,255,255,0.35);
   background: var(--orange);
   color: #fff;
-  font-weight: 900;
+  font-weight: 500;
   font-size: 26px;
   line-height: 1;
   display: inline-flex;
@@ -2863,7 +2863,7 @@ body[data-page="ospiti"] .guest-card .actions {
   overflow:hidden;
   text-overflow:ellipsis;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 500;
 }
 #page-ospiti .guest-meta-right{
   display:flex;
@@ -3068,19 +3068,34 @@ body.perf-lite *::after{
 
 /* Pulizie: calendario giornaliero (solo grafica) */
 .clean-topbar{
-  display:flex;
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
   gap: 10px;
   align-items:center;
-  justify-content: space-between;
   margin: 4px 0 10px 0;
 }
-.clean-nav{ display:flex; gap:10px; align-items:center; justify-content:center; flex:1; }
-.clean-actions{ display:flex; gap:10px; align-items:center; }
+
+
+/* dDAE_1.204 — Pulizie: raggruppa contenuto sotto topbar e spostalo giù di 30px */
+#page-pulizie .clean-mainGroup{
+  margin-top: 30px;
+}
+.clean-top-left{ justify-self:start; }
+.clean-nav{ justify-self:center; display:flex; gap:10px; align-items:center; }
+.clean-top-actions{ justify-self:end; display:flex; gap:10px; align-items:center; }
+/* Pulizie: pulsanti top (allineati alle frecce) */
+#page-pulizie .clean-top-actions .sq-btn,
+#page-pulizie .clean-top-left .sq-btn{
+  width: 44px;
+  height: 44px;
+  border-radius: 18px;
+}
 .clean-date{
   text-align:center;
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: .2px;
   margin: 2px 0 12px 0;
+  font-size: clamp(22px, 6vw, 30px);
 }
 
 .clean-grid-wrap{
@@ -3105,7 +3120,7 @@ grid-template-rows: 34px repeat(7, 54px);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight: 900;
+  font-weight: 500;
   font-size: 12px;
   user-select:none;
 }
@@ -3306,7 +3321,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 #page-pulizie .clean-grid .cell.room{
   font-size: 14px;
-  font-weight: 900;
+  font-weight: 500;
 }
 
 @media (max-width: 520px){
@@ -3405,7 +3420,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .laundry-label{
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 500;
   opacity: .78;
 }
 
@@ -3474,7 +3489,7 @@ grid-template-rows: 34px repeat(7, 54px);
   backdrop-filter: blur(12px);
 }
 .laundry-range-field span{
-  font-weight: 900;
+  font-weight: 500;
   opacity: .8;
   min-width: 22px;
 }
@@ -3483,7 +3498,7 @@ grid-template-rows: 34px repeat(7, 54px);
   border: 0;
   background: transparent;
   font: inherit;
-  font-weight: 900;
+  font-weight: 500;
   color: inherit;
   outline: none;
 }
@@ -3544,7 +3559,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 .laundry-print-range{
   margin: 10px 4px 0;
-  font-weight: 900;
+  font-weight: 500;
   color: var(--text);
 }
 
@@ -3621,7 +3636,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .tax-result-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
 .tax-result-title{ font-weight: 950; font-size: 16px; color: rgba(15,23,42,0.92); }
 .tax-result-value{ font-weight: 980; font-size: 22px; color: rgba(15,23,42,0.92); }
-.tax-result-sub{ margin-top: 6px; font-weight: 900; color: rgba(15,23,42,0.74); }
+.tax-result-sub{ margin-top: 6px; font-weight: 500; color: rgba(15,23,42,0.74); }
 
 .tax-result-paying{ background: #d9efff; }
 .tax-result-reduced{ background: #ffe8c8; }
@@ -3651,7 +3666,8 @@ grid-template-rows: 34px repeat(7, 54px);
   min-width: 0;
   padding: 10px 6px;
   font-weight: 950;
-  font-size: 16px;
+  font-size: 35.2px;
+  line-height: 1.05;
   color: rgba(15,23,42,0.92);
   white-space: nowrap;
   overflow: hidden;
@@ -3659,7 +3675,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .clean-op-name.is-placeholder{
   opacity: .65;
-  font-weight: 900;
+  font-weight: 500;
 }
 .clean-hour-dot{
   flex: 0 0 54px;
@@ -3696,18 +3712,42 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* =========================
    Ore pulizia (calendario ore operatori)
-   Build: dDAE_1.201
+   Build: dDAE_1.203
 ========================= */
  (calendario ore operatori)
-   Build: dDAE_1.201
+   Build: dDAE_1.203
 ========================= */
 
 .opcal-wrap{
-  padding: 14px 14px 26px;
+  padding: 12px 19px 26px;
   max-width: 1120px;
   margin: 0 auto;
   position: relative;
 }
+
+.opcal-group{
+  margin-top: 8px;
+
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.opcal-group-hd{
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid rgba(15,23,42,0.10);
+
+  background: transparent;
+}
+
+.opcal-group-bd{
+  padding: 12px;
+
+  background: transparent;
+}
+
 
 /* Back discreto (non altera il layout) */
 .opcal-back{
@@ -3727,7 +3767,7 @@ grid-template-rows: 34px repeat(7, 54px);
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   align-items:end;
-  margin: 8px 0 8px;
+  margin: 0 0 10px;
 }
 
 .opcal-filter{
@@ -3765,7 +3805,7 @@ grid-template-rows: 34px repeat(7, 54px);
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
-  margin: 0 0 56px;
+  margin: 0;
 }
 
 .opcal-stat{
@@ -3782,10 +3822,10 @@ grid-template-rows: 34px repeat(7, 54px);
   gap: 8px;
 }
 .opcal-stat--blue{
-  background: linear-gradient(90deg, rgba(200,232,255,0.55), rgba(255,255,255,0.55));
+  background: rgba(43,124,180,0.18);
 }
 .opcal-stat--beige{
-  background: linear-gradient(90deg, rgba(255,236,221,0.55), rgba(255,255,255,0.55));
+  background: rgba(201,119,43,0.18);
 }
 
 .opcal-statLabel{
@@ -3795,10 +3835,13 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .opcal-statValue{
   font-size: 30px;
-  font-weight: 900;
+  font-weight: 500;
   color: rgba(201,119,43,1);
   line-height: 1.0;
 }
+
+.opcal-stat--blue .opcal-statValue{ color: rgba(43,124,180,0.95); }
+.opcal-stat--beige .opcal-statValue{ color: rgba(201,119,43,0.95); }
 
 .opcal-weekdays{
   display:grid;
@@ -3810,7 +3853,7 @@ grid-template-rows: 34px repeat(7, 54px);
   text-align:center;
   font-size: 16px;
   color: rgba(43,124,180,0.95);
-  font-weight: 900;
+  font-weight: 500;
   letter-spacing: 0.14em;
 }
 
@@ -3833,7 +3876,7 @@ grid-template-rows: 34px repeat(7, 54px);
   left: 12px;
   font-size: 14px;
   color: rgba(43,124,180,0.95);
-  font-weight: 700;
+  font-weight: 500;
 }
 .opcal-hours{
   position:absolute;
@@ -3842,7 +3885,7 @@ grid-template-rows: 34px repeat(7, 54px);
   top: 52%;
   transform: translateY(-40%);
   text-align:center;
-  font-weight: 900;
+  font-weight: 500;
   color: rgba(201,119,43,1);
   font-size: 22px;
 }
@@ -3867,7 +3910,7 @@ grid-template-rows: 34px repeat(7, 54px);
   letter-spacing: -0.01em;
 }
 
-  .opcal-stats{ grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .opcal-stats{ grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0; }
   .opcal-statLabel{ font-size: 13px; }
   .opcal-statValue{
     font-size: 18px;
