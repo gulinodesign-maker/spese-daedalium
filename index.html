@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.211" rel="stylesheet"/>
-<link href="./manifest.json?v=1.211" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.211" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.211" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.211" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.211" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.214" rel="stylesheet"/>
+<link href="./manifest.json?v=1.214" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.214" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.214" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.214" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.214" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.211"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.214"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -118,7 +118,7 @@
   <div class="home-main-label">Impostazioni</div>
 </button>
 
-<div class="build" id="buildText">1.211</div>
+<div class="build" id="buildText">1.214</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -856,8 +856,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.211"></script>
-<script defer="" src="./app.js?v=1.211"></script>
+<script defer="" src="./config.js?v=1.214"></script>
+<script defer="" src="./app.js?v=1.214"></script>
 
 <!-- ROOM CONFIG MODAL -->
 <div id="roomConfigModal" hidden class="modal">
@@ -867,6 +867,14 @@
     <div class="row"><span>Letti singoli</span><div class="dots" id="rc_singoli"></div></div>
     <div class="row"><span>Culla</span><div class="dots" id="rc_culla"></div></div>
     <div class="row"><button id="rc_save" class="btn primary" type="button">Conferma</button></div>
+  </div>
+</div>
+
+<!-- PULIZIE: HEADER INFO MODAL -->
+<div id="cleanHeaderModal" hidden class="modal modal-center" role="dialog" aria-modal="true" aria-label="Descrizione biancheria">
+  <div class="modal-card clean-info-card">
+    <button id="cleanHeaderClose" class="btn ghost clean-info-close" type="button" aria-label="Chiudi">✕</button>
+    <div class="clean-info-text" id="cleanHeaderText">—</div>
   </div>
 </div>
 

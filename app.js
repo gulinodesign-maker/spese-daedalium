@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.211";
+const BUILD_VERSION = "1.214";
 
 
 
@@ -2981,6 +2981,53 @@ async function init(){
   const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
   const btnOrePuliziaFromPulizie = document.getElementById("btnOrePuliziaFromPulizie");
 
+  // --- Pulizie: popup descrizioni intestazioni (MAT/SIN/...) ---
+  const cleanHeaderModal = document.getElementById("cleanHeaderModal");
+  const cleanHeaderText = document.getElementById("cleanHeaderText");
+  const cleanHeaderClose = document.getElementById("cleanHeaderClose");
+
+  const CLEAN_HEADER_DESC = {
+    MAT: "Lenzuolo Matrimoniale",
+    SIN: "Lenzuolo Singolo",
+    FED: "Federe",
+    TDO: "Telo Doccia",
+    TFA: "Telo Faccia",
+    TBI: "Telo Bidet",
+    TAP: "Tappeto",
+    TPI: "Telo Piscina",
+  };
+
+  const openCleanHeaderModal = (code) => {
+    if (!cleanHeaderModal || !cleanHeaderText) return;
+    const c = String(code || "").trim().toUpperCase();
+    const text = CLEAN_HEADER_DESC[c] || "";
+    if (!text) return;
+    cleanHeaderText.textContent = text;
+    cleanHeaderModal.hidden = false;
+  };
+
+  const closeCleanHeaderModal = () => {
+    if (!cleanHeaderModal) return;
+    cleanHeaderModal.hidden = true;
+  };
+
+  if (cleanHeaderClose){
+    cleanHeaderClose.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCleanHeaderModal();
+    }, true);
+  }
+
+  if (cleanHeaderModal){
+    cleanHeaderModal.addEventListener("click", (e) => {
+      // click fuori dalla card chiude
+      if (e.target === cleanHeaderModal) closeCleanHeaderModal();
+    }, true);
+  }
+
+
+
   const readCell = (el) => {
     const v = String(el.textContent || "").trim();
     const n = parseInt(v, 10);
@@ -3272,6 +3319,34 @@ const buildPuliziePayload = () => {
   };
 
   if (cleanGrid){
+    // Header click (MAT/SIN/FED...): mostra descrizione in popup
+    let __lastHeadTouchAt = 0;
+    const __pickHeadCode = (ev) => {
+      const head = ev.target && ev.target.closest ? ev.target.closest(".cell.head") : null;
+      if (!head || head.classList.contains("corner")) return null;
+      const code = String(head.textContent || "").trim().toUpperCase();
+      return CLEAN_HEADER_DESC[code] ? code : null;
+    };
+
+    cleanGrid.addEventListener("touchend", (e) => {
+      const code = __pickHeadCode(e);
+      if (!code) return;
+      __lastHeadTouchAt = Date.now();
+      openCleanHeaderModal(code);
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false, capture: true });
+
+    cleanGrid.addEventListener("click", (e) => {
+      const code = __pickHeadCode(e);
+      if (!code) return;
+      if (Date.now() - __lastHeadTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
+      openCleanHeaderModal(code);
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+
+
     // Touch (iPhone)
     cleanGrid.addEventListener("touchstart", (e) => {
       const slot = e.target.closest && e.target.closest(".cell.slot");
@@ -3776,11 +3851,11 @@ const LAUNDRY_LABELS = {
   FED: "Federe",
   // Teli (arancio)
   TDO: "Telo doccia",
-  TFA: "Telo viso",
+  TFA: "Telo Faccia",
   TBI: "Telo bidet",
   // Eccezioni
   TAP: "Tappeto",
-  TPI: "Telo piscina",
+  TPI: "Telo Piscina",
 };
 
 function sanitizeLaundryItem_(it){
@@ -4436,7 +4511,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.211
+   Build: dDAE_1.214
 ========================= */
 
 state.orepulizia = state.orepulizia || {

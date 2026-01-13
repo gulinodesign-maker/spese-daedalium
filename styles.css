@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.211"),
+    url("./assets/bg-daedalium.png?v=1.214"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -648,7 +648,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.211"),
+    url("./assets/bg-daedalium.png?v=1.214"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1800,6 +1800,41 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999}
 .modal-card{background:#fff;margin:12vh auto;padding:16px;border-radius:16px;width:min(420px,92vw)}
+/* Centered modal (used for Pulizie header info) */
+.modal.modal-center{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 18px 14px;
+}
+.modal.modal-center .modal-card{ margin: 0; }
+
+/* Pulizie: header info popup */
+.clean-info-card{
+  position: relative;
+  text-align: center;
+  background:
+    radial-gradient(120% 120% at 12% 0%, rgba(43,124,180,0.14), transparent 58%),
+    radial-gradient(120% 120% at 92% 0%, rgba(201,119,43,0.14), transparent 58%),
+    linear-gradient(to bottom, var(--glass), var(--glass2));
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.clean-info-close{
+  position:absolute;
+  top: 10px;
+  right: 10px;
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+.clean-info-text{
+  padding: 14px 10px 10px;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
 .dots{display:flex;gap:8px}
 .dot{width:22px;height:22px;border-radius:50%;border:2px solid #333}
 .dot.on{background:#333}
@@ -2297,7 +2332,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 /* ===== CALENDARIO ===== */
-/* dDAE_1.211 — Calendario: margini orizzontali 5px (compensa padding .wrap) */
+/* dDAE_1.214 — Calendario: margini orizzontali 5px (compensa padding .wrap) */
 #page-calendario .content.calendar-page{
   margin-left: -9px; /* 14px (wrap) - 9px = 5px */
   margin-right: -9px;
@@ -3239,7 +3274,7 @@ grid-template-rows: 34px repeat(7, 54px);
   /* variabili responsive */
   --cg-gap: clamp(4px, 1.2vw, 8px);
   --cg-corner: clamp(28px, 7vw, 44px);
-  --cg-head: clamp(28px, 4.5vh, 34px);
+  --cg-head: var(--cg-row);
   --cg-row: clamp(38px, 7vh, 54px);
   --cg-col: calc((100% - var(--cg-corner) - (var(--cg-gap) * 8)) / 8);
 
@@ -3316,7 +3351,7 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-pulizie .clean-grid{
   --cg-gap: 6px;
   --cg-corner: 40px;
-  --cg-head-h: 32px;
+  --cg-head-h: 50px;
   --cg-row-h: 50px;
 
   width: 100%;
@@ -3352,7 +3387,7 @@ grid-template-rows: 34px repeat(7, 54px);
   #page-pulizie .clean-grid{
     --cg-gap: 4px;
     --cg-corner: 34px;
-    --cg-head-h: 28px;
+    --cg-head-h: 44px;
     --cg-row-h: 44px;
   }
   #page-pulizie .clean-grid .cell.head{ font-size: 11px; }
@@ -3363,7 +3398,7 @@ grid-template-rows: 34px repeat(7, 54px);
   #page-pulizie .clean-grid{
     --cg-gap: 3px;
     --cg-corner: 30px;
-    --cg-head-h: 26px;
+    --cg-head-h: 40px;
     --cg-row-h: 40px;
   }
   #page-pulizie .clean-grid .cell.head{ font-size: 10px; }
