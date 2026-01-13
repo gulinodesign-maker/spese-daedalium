@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.198";
+const BUILD_VERSION = "1.199";
 
 
 
@@ -4257,7 +4257,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.198
+   Build: dDAE_1.199
 ========================= */
 
 state.orepulizia = state.orepulizia || {
@@ -4293,6 +4293,15 @@ function __fmtHours_(h){
   s = s.replace(".", ",");
   return s;
 }
+
+function __fmtMoneyNoSpace_(amount){
+  const n = Number(amount || 0);
+  if (!isFinite(n)) return "—";
+  // Formato italiano senza spazio prima di €
+  const s = n.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return s + "€";
+}
+
 
 function __getUniqueMonthsFromRows_(rows){
   const set = new Set();
@@ -4392,15 +4401,33 @@ function __renderOrePuliziaCalendar_(){
 
   // stats
   let totalHours = 0;
-  let daysWithHours = 0;
+  let presenze = 0;
   for (const h of hoursByDay.values()){
     if (h > 0){
       totalHours += h;
-      daysWithHours += 1;
+      presenze += 1;
     }
   }
-  if (totalEl) totalEl.textContent = __fmtHoursOrDash_(totalHours);
-  if (daysEl) daysEl.textContent = daysWithHours > 0 ? String(daysWithHours) : "—";
+
+  // Tariffe da impostazioni
+  // - tariffa_oraria: €/ora
+  // - costo_benzina: €/presenza (giorno con ore)
+  const tariffaOraria = (state.settings && state.settings.loaded) ? getSettingNumber("tariffa_oraria", 0) : 0;
+  const costoBenzinaPerPresenza = (state.settings && state.settings.loaded) ? getSettingNumber("costo_benzina", 0) : 0;
+
+  const hoursStr = __fmtHours_(totalHours);
+  const totalImporto = (isFinite(totalHours) && isFinite(tariffaOraria)) ? (totalHours * tariffaOraria) : 0;
+  const totalImportoStr = (tariffaOraria > 0) ? __fmtMoneyNoSpace_(totalImporto) : "—";
+
+  const presenzeImporto = (isFinite(presenze) && isFinite(costoBenzinaPerPresenza)) ? (presenze * costoBenzinaPerPresenza) : 0;
+  const presenzeImportoStr = (costoBenzinaPerPresenza > 0) ? __fmtMoneyNoSpace_(presenzeImporto) : "—";
+
+  if (totalEl) {
+    totalEl.textContent = hoursStr ? `${hoursStr} ore - ${totalImportoStr}` : "—";
+  }
+  if (daysEl) {
+    daysEl.textContent = presenze > 0 ? `${presenze} P - ${presenzeImportoStr}` : "—";
+  }
 
   // build cells
   grid.innerHTML = "";
@@ -4437,6 +4464,9 @@ async function initOrePuliziaPage(){
   const back = document.getElementById("opcalBack");
   const selMonth = document.getElementById("opcalMonthSelect");
   const selOp = document.getElementById("opcalOperatorSelect");
+
+  // Serve per mostrare importi in "Totali ore" e "Spese Benzina"
+  try{ await ensureSettingsLoaded({ force:false, showLoader:false }); }catch(_){}
 
   if (!s.inited){
     s.inited = true;
