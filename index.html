@@ -521,7 +521,6 @@
 
   <div class="bd">
     <div class="clean-topbar">
-  <div class="clean-left" aria-hidden="true"></div>
   <div class="clean-nav">
     <button class="btn ghost" id="cleanPrev" type="button">←</button>
     <button class="btn" id="cleanToday" type="button">Oggi</button>
@@ -624,22 +623,23 @@
 
 <!-- Ore operatori (max 3) -->
 <div class="clean-ops" id="cleanOps">
-  <div class="clean-op-row">
-    <input id="op1Name" class="clean-op-name-input" type="text" autocomplete="off" placeholder="Operatore 1" readonly aria-readonly="true" tabindex="-1" />
-    <input id="op1Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
+  <div class="clean-op-row" data-op="1">
+    <div class="clean-op-name" id="op1Name" aria-label="Operatore 1">Operatore 1</div>
+    <button class="clean-hour-dot is-zero" id="op1Hours" type="button" data-value="0" aria-label="Ore Operatore 1"></button>
   </div>
-  <div class="clean-op-row">
-    <input id="op2Name" class="clean-op-name-input" type="text" autocomplete="off" placeholder="Operatore 2" readonly aria-readonly="true" tabindex="-1" />
-    <input id="op2Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
+  <div class="clean-op-row" data-op="2">
+    <div class="clean-op-name" id="op2Name" aria-label="Operatore 2">Operatore 2</div>
+    <button class="clean-hour-dot is-zero" id="op2Hours" type="button" data-value="0" aria-label="Ore Operatore 2"></button>
   </div>
-  <div class="clean-op-row">
-    <input id="op3Name" class="clean-op-name-input" type="text" autocomplete="off" placeholder="Operatore 3" readonly aria-readonly="true" tabindex="-1" />
-    <input id="op3Hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="Ore" />
+  <div class="clean-op-row" data-op="3">
+    <div class="clean-op-name" id="op3Name" aria-label="Operatore 3">Operatore 3</div>
+    <button class="clean-hour-dot is-zero" id="op3Hours" type="button" data-value="0" aria-label="Ore Operatore 3"></button>
   </div>
   <div class="clean-op-hint">
     Benzina: €2,00 per presenza (non dipende dalle ore) • Lavoro: €8,00/ora
   </div>
 </div>
+
 
 
 <div class="clean-actions">

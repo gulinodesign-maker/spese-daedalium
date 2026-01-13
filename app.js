@@ -1030,7 +1030,7 @@ function getOperatorNamesFromSettings() {
   const op1 = String(row?.operatore_1 ?? row?.Operatore_1 ?? row?.operatore1 ?? "").trim();
   const op2 = String(row?.operatore_2 ?? row?.Operatore_2 ?? row?.operatore2 ?? "").trim();
   const op3 = String(row?.operatore_3 ?? row?.Operatore_3 ?? row?.operatore3 ?? "").trim();
-  return [op1, op2, op3].filter(x => x);
+  return [op1, op2, op3];
 }
 
 async function ensureSettingsLoaded({ force = false, showLoader = false } = {}) {
@@ -1043,19 +1043,30 @@ async function ensureSettingsLoaded({ force = false, showLoader = false } = {}) 
     state.settings.loaded = true;
     state.settings.loadedAt = Date.now();
 
-    // Se esistono campi operatori (pulizie) e sono vuoti, auto-compila con i nomi salvati
+    // Se esistono campi operatori (pulizie), mostra i nomi salvati (non editabili)
     try {
-      const names = getOperatorNamesFromSettings();
-if (names.length) {
-  const ids = ["op1Name","op2Name","op3Name"];
-  ids.forEach((id, idx) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    // Nomi operatori: provengono da Impostazioni (non editabili in Pulizie)
-    el.value = names[idx] ? names[idx] : "";
-  });
-  refreshFloatingLabels();
-}
+      const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
+      const placeholders = ["Operatore 1","Operatore 2","Operatore 3"];
+      const ids = ["op1Name","op2Name","op3Name"];
+      ids.forEach((id, idx) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const name = String(names[idx] || "").trim();
+
+        // Se è un input (compat), rendilo readOnly e compila
+        if (String(el.tagName || "").toUpperCase() === "INPUT") {
+          el.readOnly = true;
+          el.setAttribute("readonly", "");
+          el.value = name || "";
+          return;
+        }
+
+        // Altrimenti è un testo (div/span)
+        el.textContent = name || placeholders[idx];
+        el.classList.toggle("is-placeholder", !name);
+      });
+
+      refreshFloatingLabels();
     } catch(_) {}
 
     return state.settings;
@@ -2971,43 +2982,110 @@ async function init(){
   const OP_BENZINA_EUR = (state.settings && state.settings.loaded) ? getSettingNumber("costo_benzina", 2.00) : 2.00;   // € per presenza
   const OP_RATE_EUR_H = (state.settings && state.settings.loaded) ? getSettingNumber("tariffa_oraria", 8.00) : 8.00;    // € per ora
 
-  const opEls = [
+    const opEls = [
     { name: document.getElementById("op1Name"), hours: document.getElementById("op1Hours") },
     { name: document.getElementById("op2Name"), hours: document.getElementById("op2Hours") },
     { name: document.getElementById("op3Name"), hours: document.getElementById("op3Hours") },
   ].filter(x => x.name && x.hours);
 
-  const parseHours_ = (v) => {
-    if (v === undefined || v === null) return null;
-    const s = String(v).trim().replace(",", ".");
-    if (!s) return null;
-    const n = Number(s);
-    if (!isFinite(n) || n < 0) return null;
-    return Math.round(n * 100) / 100;
+  const readHourDot = (el) => {
+    const n = parseInt(String(el.dataset.value || "0"), 10);
+    return isNaN(n) ? 0 : Math.max(0, n);
   };
+  const writeHourDot = (el, n) => {
+    const val = Math.max(0, parseInt(n || 0, 10) || 0);
+    el.dataset.value = String(val);
+    el.textContent = val ? String(val) : "";
+    el.classList.toggle("is-zero", !val);
+  };
+
+  const bindHourDot = (el) => {
+    // Tap incrementa, long press (0.5s) azzera — come la biancheria
+    let pressTimer = null;
+    let longFired = false;
+    let lastTouchAt = 0;
+
+    const clear = () => {
+      if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+      longFired = false;
+    };
+
+    const onLong = () => writeHourDot(el, 0);
+    const onTap = () => writeHourDot(el, readHourDot(el) + 1);
+
+    el.addEventListener("touchstart", (e) => {
+      lastTouchAt = Date.now();
+      clear();
+      pressTimer = setTimeout(() => {
+        longFired = true;
+        onLong();
+      }, 500);
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false, capture: true });
+
+    el.addEventListener("touchend", (e) => {
+      if (pressTimer){ clearTimeout(pressTimer); pressTimer = null; }
+      if (!longFired) onTap();
+      clear();
+      e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false, capture: true });
+
+    el.addEventListener("touchcancel", (e) => {
+      clear();
+      try{ e.preventDefault(); e.stopPropagation(); }catch(_){}
+    }, { passive: false, capture: true });
+
+    // Click (desktop) + anti ghost-click dopo touch
+    el.addEventListener("click", (e) => {
+      if (Date.now() - lastTouchAt < 450) { e.preventDefault(); e.stopPropagation(); return; }
+      onTap();
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+  };
+
+  const syncCleanOperators = () => {
+    const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
+    const placeholders = ["Operatore 1","Operatore 2","Operatore 3"];
+
+    opEls.forEach((r, idx) => {
+      const n = String(names[idx] || "").trim();
+
+      // Nome: solo lettura
+      if (String(r.name.tagName || "").toUpperCase() === "INPUT") {
+        r.name.readOnly = true;
+        r.name.setAttribute("readonly", "");
+        r.name.value = n || "";
+      } else {
+        r.name.textContent = n || placeholders[idx];
+        r.name.classList.toggle("is-placeholder", !n);
+      }
+
+      // Dot: init a 0
+      if (!r.hours.dataset.value) writeHourDot(r.hours, 0);
+    });
+  };
+
+  try{ syncCleanOperators(); }catch(_){}
+  opEls.forEach(r => { try{ bindHourDot(r.hours); }catch(_){ } });
 
   const buildOperatoriPayload = () => {
     const date = getCleanDate();
     const rows = [];
     let touched = false;
+    const names = getOperatorNamesFromSettings(); // [op1, op2, op3]
 
     opEls.forEach((r, idx) => {
-      const name = String((r.name.value || "")).trim();
-      const hoursRaw = r.hours.value;
-      const hours = parseHours_(hoursRaw);
-
-      if (name || String(hoursRaw || "").trim()) touched = true;
-
-      // Se la riga è vuota, ignora
-      if (!name && (hours === null)) return;
-
-      // Validazione: o entrambi, o niente
-      if (!name || hours === null) {
-        throw new Error("Imposta il nome Operatore " + (idx + 1) + " in Impostazioni");
-      }
-
-      // Se ore=0, non salvare (considerata assenza)
+      const hours = readHourDot(r.hours);
+      if (hours > 0) touched = true;
       if (hours <= 0) return;
+
+      const name = String(names[idx] || "").trim();
+      if (!name) {
+        throw new Error("Imposta i nomi operatori in Impostazioni");
+      }
 
       rows.push({
         data: date,
