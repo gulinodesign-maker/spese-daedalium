@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.222";
+const BUILD_VERSION = "1.223";
 
 
 
@@ -1375,6 +1375,13 @@ function showPage(page){
     }
   }
 
+
+  // Top back button (solo Ore pulizia → torna a Pulizie)
+  const backBtnTop = $("#backBtnTop");
+  if (backBtnTop){
+    backBtnTop.hidden = (page !== "orepulizia");
+  }
+
   // render on demand
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
@@ -1398,6 +1405,12 @@ function showPage(page){
 function setupHeader(){
   const hb = $("#hamburgerBtn");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
+
+  // Back (solo ore pulizia)
+  const bb = $("#backBtnTop");
+  if (bb) bb.addEventListener("click", () => {
+    if (state.page === "orepulizia") { showPage("pulizie"); }
+  });
 }
 function setupHome(){
   bindLauncherDelegation();

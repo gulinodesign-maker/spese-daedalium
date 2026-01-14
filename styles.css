@@ -115,6 +115,14 @@ body{
   cursor:pointer;
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
 }
+
+.icon-btn.icon-btn-orange{
+  background: var(--orange);
+  border-color: rgba(255,255,255,0.28);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(15,23,42,0.14);
+}
+.icon-btn.icon-btn-orange:active{ transform: scale(0.98); }
 .hamburger{
   width: 18px;
   height: 14px;
