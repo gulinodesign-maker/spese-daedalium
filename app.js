@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.229";
+const BUILD_VERSION = "1.230";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.229 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.230 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1392,7 +1392,7 @@ function showPage(page){
   if (page === "orepulizia") { initOrePuliziaPage().catch(e=>toast(e.message)); }
 
 
-  // dDAE_1.229: fallback visualizzazione Pulizie
+  // dDAE_1.230: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -3635,7 +3635,7 @@ if (cleanSaveHours){
 }
 
 
-// ===== CALENDARIO (dDAE_1.229) =====
+// ===== CALENDARIO (dDAE_1.230) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3991,7 +3991,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.229)
+   Lavanderia (dDAE_1.230)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -4354,7 +4354,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.229: renderSpese allineato al backend ---
+// --- FIX dDAE_1.230: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -4450,7 +4450,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.229: delete reale ospiti ---
+// --- FIX dDAE_1.230: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -4484,7 +4484,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.229: mostra nome ospite ---
+// --- FIX dDAE_1.230: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
@@ -4757,7 +4757,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.229
+   Build: dDAE_1.230
 ========================= */
 
 state.orepulizia = state.orepulizia || {
