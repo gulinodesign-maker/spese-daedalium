@@ -2757,14 +2757,13 @@ function setupOspite(){
       return;
     }
 
-    // Se occupata => popup (usa lo stato, non solo la classe CSS)
-    const n = parseInt(b.getAttribute("data-room"), 10);
-    const occSet = (state.occupiedRooms instanceof Set) ? state.occupiedRooms : new Set();
-    if (occSet.has(n)){
+    // Se occupata (rossa) => popup
+    if (b.classList.contains("occupied")){
       try{ toast("Stanza occupata"); }catch(_){}
       return;
     }
 
+    const n = parseInt(b.getAttribute("data-room"), 10);
     if (state.guestRooms.has(n)) {
       state.guestRooms.delete(n);
       if (state.lettiPerStanza) delete state.lettiPerStanza[String(n)];
@@ -4340,8 +4339,26 @@ function openRoomConfig(room){
 document.addEventListener('click', (e)=>{
   const b = e.target.closest && e.target.closest('[data-room]');
   if(!b) return;
+
   // Le celle del calendario settimanale usano data-room: qui NON deve aprirsi la config stanza
   if (b.closest && b.closest('#calGrid')) return;
+
+  // Picker stanze nel form "Nuovo ospite": non aprire configurazione letti se:
+  // - manca intervallo date
+  // - la stanza è occupata
+  const inRoomsPicker = !!(b.closest && b.closest('#roomsPicker'));
+  if (inRoomsPicker){
+    const range = _getGuestDateRange();
+    if (!range){
+      try{ toast("Seleziona prima check-in e check-out"); }catch(_){}
+      return;
+    }
+    if (b.classList && b.classList.contains('occupied')){
+      try{ toast("Stanza occupata"); }catch(_){}
+      return;
+    }
+  }
+
   openRoomConfig(b.getAttribute('data-room'));
 });
 

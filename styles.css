@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.228"),
+    url("./assets/bg-daedalium.png?v=1.226"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -719,7 +719,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.228"),
+    url("./assets/bg-daedalium.png?v=1.226"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1230,13 +1230,13 @@ body::before{
 }
 
 .room-dot.occupied{
-  border-color: rgba(220,38,38,0.55);
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(220,38,38,0.22), transparent 60%),
-    rgba(255,255,255,0.80);
-  color: rgba(127,29,29,0.92);
+  background: #E11D48 !important;
+  color: #fff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  filter: none !important;
 }
-
 .room-dot:disabled{
   cursor: not-allowed;
   opacity: 0.75;
@@ -4293,3 +4293,5 @@ button,
 .room-dot:active{
   transform: translateY(1px);
 }
+
+.room-dot.occupied.selected{ outline: none !important; }
