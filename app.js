@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.231";
+const BUILD_VERSION = "1.232";
 
 
 
@@ -1376,6 +1376,13 @@ function showPage(page){
   }
 
 
+  // Top actions (solo Pulizie): Lavanderia + Ore lavoro
+  const btnTopLaundry = document.getElementById("btnLaundryFromPulizie");
+  const btnTopOre = document.getElementById("btnOrePuliziaFromPulizie");
+  const showPulTop = (page === "pulizie");
+  if (btnTopLaundry) btnTopLaundry.hidden = !showPulTop;
+  if (btnTopOre) btnTopOre.hidden = !showPulTop;
+
   // Top back button (solo Ore pulizia → torna a Pulizie)
   const backBtnTop = $("#backBtnTop");
   if (backBtnTop){
@@ -1405,6 +1412,13 @@ function showPage(page){
 function setupHeader(){
   const hb = $("#hamburgerBtn");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
+
+  // Pulizie shortcuts (top bar)
+  const topOre = document.getElementById("btnOrePuliziaFromPulizie");
+  if (topOre) topOre.addEventListener("click", () => { try{ hideLauncher(); showPage("orepulizia"); }catch(_{}){} });
+
+  const topLav = document.getElementById("btnLaundryFromPulizie");
+  if (topLav) topLav.addEventListener("click", () => { try{ hideLauncher(); showPage("lavanderia"); }catch(_{}){} });
 
   // Back (solo ore pulizia)
   const bb = $("#backBtnTop");
