@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.221";
+const BUILD_VERSION = "1.222";
 
 
 
@@ -4845,7 +4845,7 @@ async function initOrePuliziaPage(){
   if (!s.inited){
     s.inited = true;
 
-    if (back) back.addEventListener("click", ()=>showPage("home"));
+    if (back) back.addEventListener("click", ()=>showPage("pulizie"));
 
     if (goPulizie) bindFastTap(goPulizie, () => {
       try{ showPage("pulizie"); }catch(_){ }
