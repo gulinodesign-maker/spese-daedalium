@@ -3753,6 +3753,25 @@ grid-template-rows: 34px repeat(7, 54px);
   filter: grayscale(0.15);
 }
 
+
+/* dDAE_1.219 - iOS fix: su PWA Safari alcuni button perdono il colore testo */
+.btn.tax-calc,
+.btn.tax-report,
+.btn.ghost.tax-back{
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-text-fill-color: currentColor; /* forza visibilità testo */
+}
+.is-ios .btn.tax-calc,
+.is-ios .btn.tax-report{
+  -webkit-text-fill-color: rgba(255,255,255,0.98);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.18);
+  font-weight: 800;
+}
+.is-ios .btn.ghost.tax-back{
+  -webkit-text-fill-color: rgba(15,23,42,0.92);
+}
+
 /* Risultati: solo dopo Calcola, stack verticale */
 .tax-results{ margin-top: 14px; display:flex; flex-direction:column; gap:12px; }
 
