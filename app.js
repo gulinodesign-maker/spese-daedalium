@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.217";
+const BUILD_VERSION = "1.218";
 
 
 
@@ -3519,6 +3519,27 @@ function setupCalendario(){
 
   if (!state.calendar) {
     state.calendar = { anchor: new Date(), ready: false, guests: [] };
+  }
+
+  // Sync: forza lettura database (tap-safe iOS PWA)
+  if (syncBtn){
+    syncBtn.setAttribute("aria-label", "Forza lettura database");
+    bindFastTap(syncBtn, async () => {
+      try{
+        syncBtn.disabled = true;
+        syncBtn.classList.add("is-loading");
+        if (state.calendar) state.calendar.ready = false;
+        await ensureCalendarData({ force:true });
+        renderCalendario();
+        try{ toast("Aggiornato"); }catch(_){ }
+      }catch(e){
+        console.error(e);
+        try{ toast(e.message || "Errore"); }catch(_){ }
+      }finally{
+        syncBtn.classList.remove("is-loading");
+        syncBtn.disabled = false;
+      }
+    });
   }
 
   const openPicker = () => {
