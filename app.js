@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.224";
+const BUILD_VERSION = "1.219";
 
 
 
@@ -1375,13 +1375,6 @@ function showPage(page){
     }
   }
 
-
-  // Top back button (solo Ore pulizia → torna a Pulizie)
-  const backBtnTop = $("#backBtnTop");
-  if (backBtnTop){
-    backBtnTop.hidden = (page !== "orepulizia");
-  }
-
   // render on demand
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
@@ -1405,12 +1398,6 @@ function showPage(page){
 function setupHeader(){
   const hb = $("#hamburgerBtn");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
-
-  // Back (solo ore pulizia)
-  const bb = $("#backBtnTop");
-  if (bb) bb.addEventListener("click", () => {
-    if (state.page === "orepulizia") { showPage("pulizie"); }
-  });
 }
 function setupHome(){
   bindLauncherDelegation();
@@ -4857,14 +4844,7 @@ async function initOrePuliziaPage(){
   if (!s.inited){
     s.inited = true;
 
-    if (back) back.addEventListener("click", ()=>showPage("pulizie"));
-
-    // Topbar: tasto arancione "torna a Pulizie"
-    const topBack = document.getElementById("backBtnTop");
-    if (topBack && !s._topBackBound){
-      s._topBackBound = true;
-      bindFastTap(topBack, () => { try{ showPage("pulizie"); }catch(_){ } });
-    }
+    if (back) back.addEventListener("click", ()=>showPage("home"));
 
     if (selMonth) selMonth.addEventListener("change", ()=>{
       s.monthKey = selMonth.value;

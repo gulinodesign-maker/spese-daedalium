@@ -115,29 +115,6 @@ body{
   cursor:pointer;
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
 }
-
-.icon-btn.icon-btn-orange{
-  background: var(--orange);
-  border-color: rgba(255,255,255,0.28);
-  color: #fff;
-  box-shadow: 0 10px 26px rgba(15,23,42,0.14);
-}
-.icon-btn.icon-btn-orange:active{ transform: scale(0.98); }
-
-/* Icone SVG nei pulsanti in topbar */
-.icon-btn .ui-ico{
-  width: 22px;
-  height: 22px;
-  stroke: rgba(15,23,42,0.92);
-  fill: none;
-  stroke-width: 2.3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.icon-btn.icon-btn-orange .ui-ico{
-  stroke: #ffffff;
-}
-
 .hamburger{
   width: 18px;
   height: 14px;
@@ -219,7 +196,7 @@ body{
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.sq-btn-orange{ background: var(--orange); color: #fff; }
+.sq-btn-orange{ background: var(--orange); }
 .sq-btn-blue{ background: var(--blue2); }
 .sq-btn.is-active{
   outline: 2px solid rgba(255,255,255,0.65);
@@ -248,11 +225,6 @@ body{
 .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 
 .btn{
-  -webkit-appearance: none;
-  appearance: none;
-  -webkit-tap-highlight-color: transparent;
-  color: rgba(15,23,42,0.92);
-  -webkit-text-fill-color: currentColor;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.78);
   backdrop-filter: blur(12px);
@@ -3759,8 +3731,6 @@ grid-template-rows: 34px repeat(7, 54px);
   color: #ffffff;
   border-color: rgba(43,124,180,0.85);
   backdrop-filter: none;
-
-  -webkit-text-fill-color: currentColor;
 }
 .btn.tax-calc:active{ transform: translateY(1px); }
 
@@ -3776,8 +3746,6 @@ grid-template-rows: 34px repeat(7, 54px);
     linear-gradient(180deg, rgba(201,119,43,0.92), rgba(201,119,43,0.72));
   box-shadow: 0 12px 28px rgba(15,23,42,0.16);
   backdrop-filter: blur(16px);
-
-  -webkit-text-fill-color: currentColor;
 }
 .btn.tax-report:active{ transform: translateY(1px); }
 .btn.tax-report:disabled{
@@ -3924,7 +3892,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 .opcal-group{
-  margin-top: 16px;
+  margin-top: 8px;
 
   background: transparent;
   border: 0;
@@ -3950,9 +3918,9 @@ grid-template-rows: 34px repeat(7, 54px);
 /* Back discreto (non altera il layout) */
 .opcal-back{
   position: absolute;
-  top: calc(8px + var(--safe-top) - 30px);
+  top: 8px;
   left: 8px;
-  z-index: 40;
+  z-index: 2;
   width: 44px;
   height: 44px;
   border-radius: 14px;
@@ -3965,8 +3933,7 @@ grid-template-rows: 34px repeat(7, 54px);
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   align-items:end;
-  margin: 0 0 16px;
-  padding: 0 5px;
+  margin: 0 0 10px;
 }
 
 .opcal-filter{
@@ -4003,7 +3970,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .opcal-stats{
   display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 18px;
   margin: 0;
 }
 
@@ -4045,7 +4012,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .opcal-weekdays{
   display:grid;
   grid-template-columns: repeat(7, minmax(0,1fr));
-  gap: 14px;
+  gap: 18px;
   margin: 0 0 16px;
 }
 .opcal-weekday{
@@ -4059,11 +4026,11 @@ grid-template-rows: 34px repeat(7, 54px);
 .opcal-grid{
   display:grid;
   grid-template-columns: repeat(7, minmax(0,1fr));
-  gap: 14px;
+  gap: 18px;
 }
 .opcal-cell{
   position: relative;
-  min-height: 74px;
+  min-height: 84px;
   border-radius: 18px;
   background: rgba(235,235,235,0.74);
   box-shadow: 0 10px 22px rgba(15,23,42,0.08), inset 0 0 0 1px rgba(15,23,42,0.06);
@@ -4095,23 +4062,6 @@ grid-template-rows: 34px repeat(7, 54px);
   box-shadow: none;
   border: none;
 }
-
-
-
-.opcal-go-clean{
-  width: 100%;
-  margin: 14px 5px 0;
-  border-radius: 18px;
-  border: 1px solid rgba(201,119,43,0.55);
-  background: rgba(201,119,43,0.78);
-  color: rgba(255,255,255,0.98);
-  -webkit-text-fill-color: rgba(255,255,255,0.98);
-  box-shadow: 0 14px 34px rgba(15,23,42,0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.opcal-go-clean .ui-ico{ width: 20px; height: 20px; }
-.opcal-go-clean:active{ transform: translateY(1px); }
 
 /* Responsive */
 @media (max-width: 720px){
@@ -4175,9 +4125,3 @@ grid-template-rows: 34px repeat(7, 54px);
   text-align: center;
 }
 #page-calendario .calendar-page .cal-body{ margin-top: 28px; }
-
-
-/* dDAE_1.222: Ore Pulizia - shift up 30px */
-#page-orepulizia .opcal-wrap{
-  padding: calc(12px + var(--safe-top) - 30px) 19px 26px;
-}
