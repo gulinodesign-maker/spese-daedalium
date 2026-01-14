@@ -123,6 +123,21 @@ body{
   box-shadow: 0 10px 26px rgba(15,23,42,0.14);
 }
 .icon-btn.icon-btn-orange:active{ transform: scale(0.98); }
+
+/* Icone SVG nei pulsanti in topbar */
+.icon-btn .ui-ico{
+  width: 22px;
+  height: 22px;
+  stroke: rgba(15,23,42,0.92);
+  fill: none;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.icon-btn.icon-btn-orange .ui-ico{
+  stroke: #ffffff;
+}
+
 .hamburger{
   width: 18px;
   height: 14px;
@@ -3988,7 +4003,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .opcal-stats{
   display:grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 14px;
   margin: 0;
 }
 
@@ -4030,7 +4045,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .opcal-weekdays{
   display:grid;
   grid-template-columns: repeat(7, minmax(0,1fr));
-  gap: 18px;
+  gap: 14px;
   margin: 0 0 16px;
 }
 .opcal-weekday{
@@ -4044,11 +4059,11 @@ grid-template-rows: 34px repeat(7, 54px);
 .opcal-grid{
   display:grid;
   grid-template-columns: repeat(7, minmax(0,1fr));
-  gap: 18px;
+  gap: 14px;
 }
 .opcal-cell{
   position: relative;
-  min-height: 84px;
+  min-height: 74px;
   border-radius: 18px;
   background: rgba(235,235,235,0.74);
   box-shadow: 0 10px 22px rgba(15,23,42,0.08), inset 0 0 0 1px rgba(15,23,42,0.06);
