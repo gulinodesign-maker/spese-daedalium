@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.228";
+const BUILD_VERSION = "1.227";
 
 
 
@@ -4339,26 +4339,8 @@ function openRoomConfig(room){
 document.addEventListener('click', (e)=>{
   const b = e.target.closest && e.target.closest('[data-room]');
   if(!b) return;
-
   // Le celle del calendario settimanale usano data-room: qui NON deve aprirsi la config stanza
   if (b.closest && b.closest('#calGrid')) return;
-
-  // Picker stanze nel form "Nuovo ospite": non aprire configurazione letti se:
-  // - manca intervallo date
-  // - la stanza è occupata
-  const inRoomsPicker = !!(b.closest && b.closest('#roomsPicker'));
-  if (inRoomsPicker){
-    const range = _getGuestDateRange();
-    if (!range){
-      try{ toast("Seleziona prima check-in e check-out"); }catch(_){}
-      return;
-    }
-    if (b.classList && b.classList.contains('occupied')){
-      try{ toast("Stanza occupata"); }catch(_){}
-      return;
-    }
-  }
-
   openRoomConfig(b.getAttribute('data-room'));
 });
 

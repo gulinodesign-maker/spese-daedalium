@@ -1230,13 +1230,13 @@ body::before{
 }
 
 .room-dot.occupied{
-  background: #E11D48 !important;
-  color: #fff !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  background-image: none !important;
-  filter: none !important;
+  border-color: rgba(220,38,38,0.55);
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(220,38,38,0.22), transparent 60%),
+    rgba(255,255,255,0.80);
+  color: rgba(127,29,29,0.92);
 }
+
 .room-dot:disabled{
   cursor: not-allowed;
   opacity: 0.75;
@@ -4293,5 +4293,3 @@ button,
 .room-dot:active{
   transform: translateY(1px);
 }
-
-.room-dot.occupied.selected{ outline: none !important; }
