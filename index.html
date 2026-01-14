@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.220" rel="stylesheet"/>
-<link href="./manifest.json?v=1.220" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.220" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.220" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.220" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.220" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.221" rel="stylesheet"/>
+<link href="./manifest.json?v=1.221" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.221" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.221" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.221" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.221" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.220"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.221"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -121,7 +121,7 @@
 </button>
 
 
-<div class="build" id="buildText">1.220</div>
+<div class="build" id="buildText">1.221</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -677,9 +677,42 @@
 </main>
 <div class="toast" id="toast"></div>
 
+<div class="modal" id="opcalReportModal" hidden aria-hidden="true">
+  <div class="modal-card opcal-report-card" role="dialog" aria-modal="true" aria-label="Report ore lavoro">
+    <div class="modal-hd">
+      <div class="modal-title">Report</div>
+      <button class="btn ghost modal-close" id="opcalReportClose" type="button" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-bd opcal-report-bd">
+      <img id="opcalReportImg" alt="Report ore lavoro" />
+      <div class="opcal-report-actions">
+        <a class="btn primary opcal-report-download" id="opcalReportDownload" href="#" download="report-ore-lavoro.png">Scarica</a>
+        <button class="btn tax-calc opcal-report-print" id="opcalReportPrint" type="button">Stampa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <section class="page" hidden id="page-orepulizia">
   <div class="opcal-wrap">
+    <div class="opcal-topbar" aria-label="Azioni ore lavoro">
+      <button class="opcal-topbtn opcal-topbtn--orange" id="opcalGoPulizie" type="button" aria-label="Torna a Pulizie">
+        <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+      </button>
+
+      <button class="opcal-topbtn opcal-topbtn--blue" id="opcalReportBtn" type="button" aria-label="Genera report immagine">
+        <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+          <path d="M6 9V4h12v5"></path>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <path d="M6 14h12v8H6z"></path>
+        </svg>
+      </button>
+    </div>
+
     <div class="opcal-filterRow" aria-label="Filtri ore pulizia">
       <label class="opcal-filter">
         <select id="opcalMonthSelect" aria-label="Mese"></select>
@@ -689,7 +722,7 @@
       </label>
     </div>
 
-    <div class="opcal-group" aria-label="Riepilogo ore pulizia">
+    <div class="opcal-group" id="opcalCapture" aria-label="Riepilogo ore pulizia">
       <div class="opcal-group-hd">
         <div class="opcal-titleMain" id="opcalTitleMain">—</div>
 
@@ -717,16 +750,7 @@
         </div>
 
         <div class="opcal-grid" id="opcalGrid" aria-label="Calendario ore pulizia"></div>
-
-        <button id="opcalGoPulizie" class="btn opcal-go-clean" type="button" aria-label="Vai alla pagina Pulizie">
-          <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-            <path d="M4 11h4l9 9a2 2 0 0 0 2.8 0l1.2-1.2a2 2 0 0 0 0-2.8l-9-9V4"></path>
-            <path d="M7 7l10 10"></path>
-          </svg>
-          <span>Pulizie</span>
-        </button>
-
-      </div>
+</div>
     </div>
   </div>
 </section>
@@ -873,8 +897,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.220"></script>
-<script defer="" src="./app.js?v=1.220"></script>
+<script defer="" src="./config.js?v=1.221"></script>
+<script defer="" src="./app.js?v=1.221"></script>
 
 <!-- TAX REPORT MODAL -->
 <div id="taxReportModal" hidden class="modal" aria-hidden="true">
