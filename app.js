@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.219";
+const BUILD_VERSION = "1.220";
 
 
 
@@ -4837,6 +4837,7 @@ async function initOrePuliziaPage(){
   const back = document.getElementById("opcalBack");
   const selMonth = document.getElementById("opcalMonthSelect");
   const selOp = document.getElementById("opcalOperatorSelect");
+  const goPulizie = document.getElementById("opcalGoPulizie");
 
   // Serve per mostrare importi in "Totali ore" e "Spese Benzina"
   try{ await ensureSettingsLoaded({ force:false, showLoader:false }); }catch(_){}
@@ -4845,6 +4846,10 @@ async function initOrePuliziaPage(){
     s.inited = true;
 
     if (back) back.addEventListener("click", ()=>showPage("home"));
+
+    if (goPulizie) bindFastTap(goPulizie, () => {
+      try{ showPage("pulizie"); }catch(_){ }
+    });
 
     if (selMonth) selMonth.addEventListener("change", ()=>{
       s.monthKey = selMonth.value;
