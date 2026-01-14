@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.225";
+const BUILD_VERSION = "1.226";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.225 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.226 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1392,7 +1392,7 @@ function showPage(page){
   if (page === "orepulizia") { initOrePuliziaPage().catch(e=>toast(e.message)); }
 
 
-  // dDAE_1.225: fallback visualizzazione Pulizie
+  // dDAE_1.226: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -2641,23 +2641,127 @@ function setupOspite(){
   const roomsWrap = document.getElementById("roomsPicker");
   const roomsOut = null; // removed UI string output
 
+  function _getGuestDateRange(){
+    try{
+      const ci = (document.getElementById("guestCheckIn")?.value || "").trim();
+      const co = (document.getElementById("guestCheckOut")?.value || "").trim();
+      if (!ci || !co) return null;
+      // Date ISO YYYY-MM-DD: confronto lessicografico ok
+      if (co <= ci) return null;
+      return { ci, co };
+    }catch(_){ return null; }
+  }
+
+  async function refreshRoomsAvailability(){
+    // Regola: nessuna stanza selezionabile senza intervallo date valido
+    const range = _getGuestDateRange();
+
+    // reset/lock
+    if (!range){
+      state.occupiedRooms = new Set();
+      state._roomsAvailKey = "";
+      // se l'utente non ha ancora inserito date, non deve poter selezionare stanze
+      if (state.guestRooms && state.guestRooms.size){
+        state.guestRooms.clear();
+        if (state.lettiPerStanza) state.lettiPerStanza = {};
+      }
+      renderRooms();
+      return;
+    }
+
+    const key = `${range.ci}|${range.co}`;
+    if (state._roomsAvailKey === key && state.occupiedRooms instanceof Set) {
+      renderRooms();
+      return;
+    }
+    state._roomsAvailKey = key;
+
+    let rows = [];
+    try{
+      const data = await cachedGet("ospiti", {}, { showLoader:false, ttlMs: 15000 });
+      rows = Array.isArray(data) ? data : [];
+    }catch(_){ rows = []; }
+
+    const occ = new Set();
+
+    for (const g of rows){
+      const gi = String(g.check_in ?? g.checkIn ?? g.checkin ?? "").slice(0,10);
+      const go = String(g.check_out ?? g.checkOut ?? g.checkout ?? "").slice(0,10);
+      if (!gi || !go) continue;
+
+      // overlap: [gi,go) interseca [ci,co)
+      if (!(gi < range.co && go > range.ci)) continue;
+
+      const roomsArr = _parseRoomsArr(g.stanze ?? g.rooms ?? g.stanza ?? "");
+      roomsArr.forEach(r => occ.add(r));
+    }
+
+    state.occupiedRooms = occ;
+
+    // Se l'utente aveva selezionato stanze che ora risultano occupate, le togliamo
+    let removed = false;
+    try{
+      for (const r of Array.from(state.guestRooms || [])){
+        if (occ.has(r)){
+          state.guestRooms.delete(r);
+          if (state.lettiPerStanza) delete state.lettiPerStanza[String(r)];
+          removed = true;
+        }
+      }
+    }catch(_){}
+
+    if (removed){
+      try{ toast("Alcune stanze non sono disponibili"); }catch(_){}
+    }
+
+    renderRooms();
+  }
+
   function renderRooms(){
-    const arr = Array.from(state.guestRooms).sort((a,b)=>a-b);
+    const range = _getGuestDateRange();
+    const locked = !range;
+    const occSet = (state.occupiedRooms instanceof Set) ? state.occupiedRooms : new Set();
+
     roomsWrap?.querySelectorAll(".room-dot").forEach(btn => {
+      // Il pallino "M" non è una stanza numerata
+      if (btn.id === "roomMarriage") return;
+
       const n = parseInt(btn.getAttribute("data-room"), 10);
       const on = state.guestRooms.has(n);
+      const occ = !locked && occSet.has(n);
+
       btn.classList.toggle("selected", on);
+      btn.classList.toggle("occupied", occ);
+
+      const dis = locked || occ;
+      btn.disabled = !!dis;
+      btn.setAttribute("aria-disabled", dis ? "true" : "false");
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
-  // matrimonio dot
-  setMarriage(state.guestMarriage);
 
+    // matrimonio dot (rimane gestibile come flag)
+    setMarriage(state.guestMarriage);
   }
 
   roomsWrap?.addEventListener("click", (e) => {
     const b = e.target.closest(".room-dot");
     if (!b) return;
+
+    // Matrimonio: flag separato
     if (b.id === "roomMarriage") { setMarriage(!state.guestMarriage); return; }
+
+    const range = _getGuestDateRange();
+    if (!range){
+      try{ toast("Seleziona prima check-in e check-out"); }catch(_){}
+      return;
+    }
+
+    // Se occupata (rossa) => popup
+    if (b.classList.contains("occupied") || b.disabled){
+      try{ toast("Stanza occupata"); }catch(_){}
+      return;
+    }
+
     const n = parseInt(b.getAttribute("data-room"), 10);
     if (state.guestRooms.has(n)) {
       state.guestRooms.delete(n);
@@ -2722,6 +2826,16 @@ function setupOspite(){
     el.addEventListener("change", () => { try { updateGuestRemaining(); } catch (_) {} });
   });
   try { updateGuestRemaining(); } catch (_) {}
+
+
+  // ✅ Stanze: blocca selezione finché non c'è un intervallo date valido + segna stanze occupate (rosso)
+  ["guestCheckIn","guestCheckOut"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", () => { try { refreshRoomsAvailability(); } catch (_) {} });
+    el.addEventListener("change", () => { try { refreshRoomsAvailability(); } catch (_) {} });
+  });
+  try { refreshRoomsAvailability(); } catch (_) {}
 
 
   const btnCreate = document.getElementById("createGuestCard");
@@ -3521,7 +3635,7 @@ if (cleanSaveHours){
 }
 
 
-// ===== CALENDARIO (dDAE_1.225) =====
+// ===== CALENDARIO (dDAE_1.226) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3877,7 +3991,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.225)
+   Lavanderia (dDAE_1.226)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -4240,7 +4354,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.225: renderSpese allineato al backend ---
+// --- FIX dDAE_1.226: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -4336,7 +4450,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.225: delete reale ospiti ---
+// --- FIX dDAE_1.226: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -4370,7 +4484,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.225: mostra nome ospite ---
+// --- FIX dDAE_1.226: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
@@ -4643,7 +4757,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.225
+   Build: dDAE_1.226
 ========================= */
 
 state.orepulizia = state.orepulizia || {
