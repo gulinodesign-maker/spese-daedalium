@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.221";
+const BUILD_VERSION = "1.217";
 
 
 
@@ -3521,27 +3521,6 @@ function setupCalendario(){
     state.calendar = { anchor: new Date(), ready: false, guests: [] };
   }
 
-  // Sync: forza lettura database (tap-safe iOS PWA)
-  if (syncBtn){
-    syncBtn.setAttribute("aria-label", "Forza lettura database");
-    bindFastTap(syncBtn, async () => {
-      try{
-        syncBtn.disabled = true;
-        syncBtn.classList.add("is-loading");
-        if (state.calendar) state.calendar.ready = false;
-        await ensureCalendarData({ force:true });
-        renderCalendario();
-        try{ toast("Aggiornato"); }catch(_){ }
-      }catch(e){
-        console.error(e);
-        try{ toast(e.message || "Errore"); }catch(_){ }
-      }finally{
-        syncBtn.classList.remove("is-loading");
-        syncBtn.disabled = false;
-      }
-    });
-  }
-
   const openPicker = () => {
     if (!input) return;
     try { input.value = formatISODateLocal(state.calendar.anchor) || todayISO(); } catch(_) {}
@@ -3857,108 +3836,154 @@ function toRoman(n){
   return out || "I";
 }
 
-/* dDAE_1.221 — Ore lavoro: Report immagine stampabile */
+
+/* dDAE_1.221 — Ore pulizia: Report immagine stampabile (iOS safe) */
+function __collectCssText_(){
+  let css = "";
+  for (const sheet of Array.from(document.styleSheets || [])){
+    try{
+      const rules = sheet.cssRules;
+      if (!rules) continue;
+      for (const r of Array.from(rules)){
+        css += r.cssText + "\n";
+      }
+    }catch(_){
+      // fogli cross-origin: ignora
+    }
+  }
+  return css;
+}
+
+async function __domToPngDataUrl(node, scale){
+  scale = scale || 2;
+
+  const rect = node.getBoundingClientRect();
+  const w = Math.max(10, Math.round(rect.width));
+  const h = Math.max(10, Math.round(rect.height));
+
+  // Clona node per evitare side effects
+  const clone = node.cloneNode(true);
+
+  // Forza background trasparente gestibile
+  clone.style.margin = "0";
+  clone.style.boxSizing = "border-box";
+
+  const cssText = __collectCssText_();
+  const xhtml = new XMLSerializer().serializeToString(clone);
+
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${w*scale}" height="${h*scale}">
+  <foreignObject x="0" y="0" width="100%" height="100%">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="transform:scale(${scale}); transform-origin: 0 0; width:${w}px; height:${h}px;">
+      <style>${cssText}</style>
+      ${xhtml}
+    </div>
+  </foreignObject>
+</svg>`.trim();
+
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  try{
+    const img = new Image();
+    img.decoding = "async";
+    img.crossOrigin = "anonymous";
+
+    const loaded = await new Promise((resolve, reject)=>{
+      img.onload = ()=>resolve(true);
+      img.onerror = (e)=>reject(e);
+      img.src = url;
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w*scale;
+    canvas.height = h*scale;
+
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img, 0, 0);
+
+    const dataUrl = canvas.toDataURL("image/png");
+    return dataUrl;
+  }finally{
+    URL.revokeObjectURL(url);
+  }
+}
+
 async function generateOpcalReportImage(){
   const node = document.getElementById("opcalCapture");
-  const reportModal = document.getElementById("opcalReportModal");
-  const reportImg = document.getElementById("opcalReportImg");
-  const reportDl = document.getElementById("opcalReportDownload");
-  const reportPrint = document.getElementById("opcalReportPrint");
-
   if (!node){ toast("Report non disponibile"); return; }
 
   // Apri subito un popup (se possibile) per evitare blocco iOS
   let pop = null;
   try{ pop = window.open("", "_blank"); }catch(_){}
 
+  let dataUrl = null;
+
   try{
-    const dataUrl = await __domToPngDataUrl(node, 2);
-    if (pop && pop.document){
-      pop.document.open();
-      pop.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Report</title>
-      <style>body{margin:0;padding:12px;font-family:-apple-system,BlinkMacSystemFont,system-ui;} img{width:100%;height:auto;display:block;} .bar{display:flex;gap:10px;margin-top:12px;} a,button{flex:1 1 0; padding:12px 14px; border-radius:14px; border:0; font-size:16px; font-weight:700;} a{background:#2b7cb4;color:#fff;text-decoration:none;text-align:center;} button{background:#c9772b;color:#fff;}</style></head>
-      <body><img src="${dataUrl}" alt="Report"/><div class="bar"><a href="${dataUrl}" download="report-ore-lavoro.png">Scarica</a><button onclick="window.print()">Stampa</button></div></body></html>`);
-      pop.document.close();
-      return;
-    }
-
-    // fallback: modal in-page
-    if (reportImg) reportImg.src = dataUrl;
-    if (reportDl) reportDl.href = dataUrl;
-    if (reportPrint) bindFastTap(reportPrint, ()=>{ try{ window.print(); }catch(_){ } });
-    if (reportModal){
-      reportModal.hidden = false;
-      reportModal.setAttribute("aria-hidden","false");
-    }
+    dataUrl = await __domToPngDataUrl(node, 2);
   }catch(err){
-    if (pop){ try{ pop.close(); }catch(_){ } }
+    // fallback: prova con scale 1
+    try{ dataUrl = await __domToPngDataUrl(node, 1); }catch(_){}
+  }
+
+  if (!dataUrl){
+    try{ if (pop) pop.close(); }catch(_){}
     toast("Impossibile generare il report");
-    console.error(err);
+    return;
   }
-}
 
-// Converte un nodo DOM in PNG tramite SVG foreignObject (senza librerie esterne)
-async function __domToPngDataUrl(node, scale=2){
-  const rect = node.getBoundingClientRect();
-  const w = Math.max(1, Math.round(rect.width));
-  const h = Math.max(1, Math.round(rect.height));
-
-  const clone = node.cloneNode(true);
-
-  const wrap = document.createElement("div");
-  wrap.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
-  wrap.style.width = w + "px";
-  wrap.style.height = h + "px";
-  wrap.style.background = "transparent";
-  wrap.appendChild(clone);
-
-  // Inlining stili computed (necessario per avere un'immagine uguale su iOS)
-  __inlineAllStyles(node, clone);
-
-  const xhtml = new XMLSerializer().serializeToString(wrap);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject width="100%" height="100%">${xhtml}</foreignObject></svg>`;
-  const svgUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-
-  const img = await __loadImage(svgUrl);
-  const canvas = document.createElement("canvas");
-  canvas.width = w * scale;
-  canvas.height = h * scale;
-  const ctx = canvas.getContext("2d");
-  ctx.scale(scale, scale);
-  ctx.drawImage(img, 0, 0);
-
-  return canvas.toDataURL("image/png");
-}
-
-function __loadImage(src){
-  return new Promise((resolve, reject)=>{
-    const img = new Image();
-    img.onload = ()=>resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
-function __inlineAllStyles(srcRoot, dstRoot){
-  const srcEls = [srcRoot, ...srcRoot.querySelectorAll("*")];
-  const dstEls = [dstRoot, ...dstRoot.querySelectorAll("*")];
-  for (let i=0; i<dstEls.length; i++){
-    const s = srcEls[i];
-    const d = dstEls[i];
-    if (!s || !d || d.nodeType !== 1) continue;
-    const cs = window.getComputedStyle(s);
-    let style = "";
-    for (let j=0; j<cs.length; j++){
-      const prop = cs[j];
-      const val = cs.getPropertyValue(prop);
-      if (!val) continue;
-      style += `${prop}:${val};`;
+  // Se popup aperto, scrivi una pagina minimal con l'immagine (stampabile)
+  if (pop){
+    try{
+      const title = "Report ore pulizia";
+      pop.document.open();
+      pop.document.write(`<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
+<style>
+  html,body{margin:0;padding:0;background:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+  .wrap{padding:12px;}
+  img{width:100%;height:auto;display:block;border-radius:16px;box-shadow:0 14px 34px rgba(15,23,42,0.14);}
+  .actions{display:flex;gap:10px;margin-top:12px;}
+  button,a{flex:1 1 0; padding:12px 14px; border-radius:14px; border:0; font-weight:700; text-align:center; text-decoration:none;}
+  .btn-blue{background:rgba(43,124,180,0.92); color:#fff;}
+  .btn-orange{background:rgba(201,119,43,0.92); color:#fff;}
+</style></head>
+<body>
+  <div class="wrap">
+    <img src="${dataUrl}" alt="${title}">
+    <div class="actions">
+      <a class="btn-orange" download="report-ore-pulizia.png" href="${dataUrl}">Scarica</a>
+      <button class="btn-blue" onclick="window.print()">Stampa</button>
+    </div>
+  </div>
+</body></html>`);
+      pop.document.close();
+      pop.focus();
+      return;
+    }catch(_){
+      // se fallisce, ricadi sul modal in-page
+      try{ pop.close(); }catch(__){}
     }
-    d.setAttribute("style", style);
+  }
+
+  // Fallback: mostra nel modal in-page
+  const reportModal = document.getElementById("opcalReportModal");
+  const reportImg = document.getElementById("opcalReportImg");
+  const reportDl = document.getElementById("opcalReportDownload");
+
+  if (reportImg) reportImg.src = dataUrl;
+  if (reportDl) reportDl.href = dataUrl;
+
+  if (reportModal){
+    reportModal.hidden = false;
+    reportModal.setAttribute("aria-hidden","false");
+  }else{
+    // ultimissimo fallback: apri immagine in tab
+    try{ window.open(dataUrl, "_blank"); }catch(_){}
   }
 }
-
-
 
 
 (async ()=>{ try{ await init(); } catch(e){ console.error(e); try{ toast(e.message||"Errore"); }catch(_){ } } })();
@@ -4937,15 +4962,15 @@ function __renderOrePuliziaCalendar_(){
 
 async function initOrePuliziaPage(){
   const s = state.orepulizia;
-  const back = document.getElementById("opcalBack");
+
   const selMonth = document.getElementById("opcalMonthSelect");
   const selOp = document.getElementById("opcalOperatorSelect");
+
   const goPulizie = document.getElementById("opcalGoPulizie");
   const reportBtn = document.getElementById("opcalReportBtn");
+
   const reportModal = document.getElementById("opcalReportModal");
-  const reportImg = document.getElementById("opcalReportImg");
   const reportClose = document.getElementById("opcalReportClose");
-  const reportDl = document.getElementById("opcalReportDownload");
   const reportPrint = document.getElementById("opcalReportPrint");
 
   // Serve per mostrare importi in "Totali ore" e "Spese Benzina"
@@ -4954,12 +4979,22 @@ async function initOrePuliziaPage(){
   if (!s.inited){
     s.inited = true;
 
-    if (back) back.addEventListener("click", ()=>showPage("home"));
+    // Torna alla pagina Pulizie (non Home)
+    if (goPulizie){
+      bindFastTap(goPulizie, () => {
+        try{ showPage("pulizie"); }catch(_){ }
+      });
+    }
 
-    if (goPulizie) bindFastTap(goPulizie, () => {
-      try{ showPage("pulizie"); }catch(_){ }
-    });
+    // Report (immagine stampabile)
+    if (reportBtn){
+      bindFastTap(reportBtn, async () => {
+        try{ await generateOpcalReportImage(); }
+        catch(_){ toast("Impossibile generare il report"); }
+      });
+    }
 
+    // Chiusura report modal (fallback in-page)
     if (reportClose){
       bindFastTap(reportClose, () => {
         if (reportModal){
@@ -4975,6 +5010,11 @@ async function initOrePuliziaPage(){
           reportModal.setAttribute("aria-hidden","true");
         }
       });
+    }
+
+    // Stampa nel modal (fallback)
+    if (reportPrint){
+      bindFastTap(reportPrint, ()=>{ try{ window.print(); }catch(_){ } });
     }
 
     if (selMonth) selMonth.addEventListener("change", ()=>{

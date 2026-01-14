@@ -1,5 +1,5 @@
 /* dDAE - Service Worker (PWA)
- * Build: dDAE_1.221
+ * Build: dDAE_1.217
  *
  * Obiettivi:
  * - cache name cambia ad ogni build
@@ -9,8 +9,8 @@
  * - fix iOS/Safari cache aggressiva (cache:"reload"/"no-store" + query ?v)
  */
 
-const BUILD = "1.221";
-const CACHE_NAME = `dDAE-cache-${BUILD}`; // cambia ad ogni build
+const BUILD = "1.217";
+const CACHE_NAME = "dDAE_" + BUILD; // cambia ad ogni build
 
 // Asset principali (versionati per forzare il fetch anche con cache aggressiva iOS)
 const CORE_ASSETS = [

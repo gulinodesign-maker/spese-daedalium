@@ -121,7 +121,7 @@
 </button>
 
 
-<div class="build" id="buildText">1.221</div>
+<div class="build" id="buildText">1.217</div>
 <div class="home-spacer"></div>
 </div>
 </section>
@@ -677,80 +677,66 @@
 </main>
 <div class="toast" id="toast"></div>
 
-<div class="modal" id="opcalReportModal" hidden aria-hidden="true">
-  <div class="modal-card opcal-report-card" role="dialog" aria-modal="true" aria-label="Report ore lavoro">
-    <div class="modal-hd">
-      <div class="modal-title">Report</div>
-      <button class="btn ghost modal-close" id="opcalReportClose" type="button" aria-label="Chiudi">✕</button>
-    </div>
-    <div class="modal-bd opcal-report-bd">
-      <img id="opcalReportImg" alt="Report ore lavoro" />
-      <div class="opcal-report-actions">
-        <a class="btn primary opcal-report-download" id="opcalReportDownload" href="#" download="report-ore-lavoro.png">Scarica</a>
-        <button class="btn tax-calc opcal-report-print" id="opcalReportPrint" type="button">Stampa</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
 
 <section class="page" hidden id="page-orepulizia">
   <div class="opcal-wrap">
-    <div class="opcal-topbar" aria-label="Azioni ore lavoro">
+    <div class="opcal-topbar" aria-label="Azioni ore pulizia">
       <button class="opcal-topbtn opcal-topbtn--orange" id="opcalGoPulizie" type="button" aria-label="Torna a Pulizie">
         <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
           <path d="M15 18l-6-6 6-6"></path>
         </svg>
       </button>
 
-      <button class="opcal-topbtn opcal-topbtn--blue" id="opcalReportBtn" type="button" aria-label="Genera report immagine">
+      <button class="opcal-topbtn opcal-topbtn--blue" id="opcalReportBtn" type="button" aria-label="Genera report">
         <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
-          <path d="M6 9V4h12v5"></path>
+          <path d="M6 9V3h12v6"></path>
           <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-          <path d="M6 14h12v8H6z"></path>
+          <path d="M6 14h12v7H6z"></path>
         </svg>
       </button>
     </div>
 
-    <div class="opcal-filterRow" aria-label="Filtri ore pulizia">
-      <label class="opcal-filter">
-        <select id="opcalMonthSelect" aria-label="Mese"></select>
-      </label>
-      <label class="opcal-filter">
-        <select id="opcalOperatorSelect" aria-label="Operatore"></select>
-      </label>
-    </div>
-
-    <div class="opcal-group" id="opcalCapture" aria-label="Riepilogo ore pulizia">
-      <div class="opcal-group-hd">
-        <div class="opcal-titleMain" id="opcalTitleMain">—</div>
-
-        <div class="opcal-stats" aria-label="Totali ore e benzina">
-          <div class="opcal-stat opcal-stat--blue">
-            <div class="opcal-statLabel">Ore totali</div>
-            <div class="opcal-statValue" id="opcalTotalHours">—</div>
-          </div>
-          <div class="opcal-stat opcal-stat--beige">
-            <div class="opcal-statLabel">Spese Benzina</div>
-            <div class="opcal-statValue" id="opcalDaysWithHours">—</div>
-          </div>
-        </div>
+    <!-- Area catturata per il report (nome/mese + calendario) -->
+    <div id="opcalCapture">
+      <div class="opcal-filterRow" aria-label="Filtri ore pulizia">
+        <label class="opcal-filter">
+          <select id="opcalMonthSelect" aria-label="Mese"></select>
+        </label>
+        <label class="opcal-filter">
+          <select id="opcalOperatorSelect" aria-label="Operatore"></select>
+        </label>
       </div>
 
-      <div class="opcal-group-bd">
-        <div class="opcal-weekdays" aria-hidden="true">
-          <div class="opcal-weekday">L</div>
-          <div class="opcal-weekday">M</div>
-          <div class="opcal-weekday">M</div>
-          <div class="opcal-weekday">G</div>
-          <div class="opcal-weekday">V</div>
-          <div class="opcal-weekday">S</div>
-          <div class="opcal-weekday">D</div>
+      <div class="opcal-group" aria-label="Riepilogo ore pulizia">
+        <div class="opcal-group-hd">
+          <div class="opcal-titleMain" id="opcalTitleMain">—</div>
+
+          <div class="opcal-stats" aria-label="Totali ore e benzina">
+            <div class="opcal-stat opcal-stat--blue">
+              <div class="opcal-statLabel">Ore totali</div>
+              <div class="opcal-statValue" id="opcalTotalHours">—</div>
+            </div>
+            <div class="opcal-stat opcal-stat--beige">
+              <div class="opcal-statLabel">Spese Benzina</div>
+              <div class="opcal-statValue" id="opcalDaysWithHours">—</div>
+            </div>
+          </div>
         </div>
 
-        <div class="opcal-grid" id="opcalGrid" aria-label="Calendario ore pulizia"></div>
-</div>
+        <div class="opcal-group-bd">
+          <div class="opcal-weekdays" aria-hidden="true">
+            <div class="opcal-weekday">L</div>
+            <div class="opcal-weekday">M</div>
+            <div class="opcal-weekday">M</div>
+            <div class="opcal-weekday">G</div>
+            <div class="opcal-weekday">V</div>
+            <div class="opcal-weekday">S</div>
+            <div class="opcal-weekday">D</div>
+          </div>
+
+          <div class="opcal-grid" id="opcalGrid" aria-label="Calendario ore pulizia"></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -899,6 +885,21 @@
 </div>
 <script defer="" src="./config.js?v=1.221"></script>
 <script defer="" src="./app.js?v=1.221"></script>
+
+
+<!-- OPCAL REPORT MODAL -->
+<div id="opcalReportModal" hidden class="modal" aria-hidden="true">
+  <div class="modal-card opcal-report-card" role="dialog" aria-modal="true" aria-label="Report ore pulizia">
+    <div class="opcal-report-bd">
+      <img id="opcalReportImg" alt="Report ore pulizia" />
+      <div class="opcal-report-actions">
+        <a id="opcalReportDownload" class="btn warn" download="report-ore-pulizia.png" href="#">Scarica</a>
+        <button id="opcalReportPrint" class="btn primary" type="button">Stampa</button>
+        <button id="opcalReportClose" class="btn ghost" type="button">Chiudi</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- TAX REPORT MODAL -->
 <div id="taxReportModal" hidden class="modal" aria-hidden="true">
