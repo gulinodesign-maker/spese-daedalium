@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.219";
+const BUILD_VERSION = "1.225";
 
 
 
@@ -361,7 +361,7 @@ function truthy(v){
   return (s === "1" || s === "true" || s === "yes" || s === "si" || s === "on");
 }
 
-// dDAE_1.186 — error overlay: evita blocchi silenziosi su iPhone PWA
+// dDAE_1.225 — error overlay: evita blocchi silenziosi su iPhone PWA
 window.addEventListener("error", (e) => {
   try {
     const msg = (e?.message || "Errore JS") + (e?.filename ? ` @ ${e.filename.split("/").pop()}:${e.lineno||0}` : "");
@@ -1375,6 +1375,13 @@ function showPage(page){
     }
   }
 
+
+  // Top back button (solo Ore pulizia → torna a Pulizie)
+  const backBtnTop = $("#backBtnTop");
+  if (backBtnTop){
+    backBtnTop.hidden = (page !== "orepulizia");
+  }
+
   // render on demand
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
@@ -1385,7 +1392,7 @@ function showPage(page){
   if (page === "orepulizia") { initOrePuliziaPage().catch(e=>toast(e.message)); }
 
 
-  // dDAE_1.186: fallback visualizzazione Pulizie
+  // dDAE_1.225: fallback visualizzazione Pulizie
   try{
     if (page === "pulizie"){
       const el = document.getElementById("page-pulizie");
@@ -1398,6 +1405,12 @@ function showPage(page){
 function setupHeader(){
   const hb = $("#hamburgerBtn");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
+
+  // Back (solo ore pulizia)
+  const bb = $("#backBtnTop");
+  if (bb) bb.addEventListener("click", () => {
+    if (state.page === "orepulizia") { showPage("pulizie"); }
+  });
 }
 function setupHome(){
   bindLauncherDelegation();
@@ -3508,7 +3521,7 @@ if (cleanSaveHours){
 }
 
 
-// ===== CALENDARIO (dDAE_1.186) =====
+// ===== CALENDARIO (dDAE_1.225) =====
 function setupCalendario(){
   const pickBtn = document.getElementById("calPickBtn");
   const todayBtn = document.getElementById("calTodayBtn");
@@ -3864,7 +3877,7 @@ function toRoman(n){
 
 
 /* =========================
-   Lavanderia (dDAE_1.186)
+   Lavanderia (dDAE_1.225)
 ========================= */
 const LAUNDRY_COLS = ["MAT","SIN","FED","TDO","TFA","TBI","TAP","TPI"];
 const LAUNDRY_LABELS = {
@@ -4227,7 +4240,7 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
 // --- end room beds config ---
 
 
-// --- FIX dDAE_1.186: renderSpese allineato al backend ---
+// --- FIX dDAE_1.225: renderSpese allineato al backend ---
 // --- dDAE: Spese riga singola (senza IVA in visualizzazione) ---
 function renderSpese(){
   const list = document.getElementById("speseList");
@@ -4323,7 +4336,7 @@ function renderSpese(){
 
 
 
-// --- FIX dDAE_1.186: delete reale ospiti ---
+// --- FIX dDAE_1.225: delete reale ospiti ---
 function attachDeleteOspite(card, ospite){
   const btn = document.createElement("button");
   btn.className = "delbtn";
@@ -4357,7 +4370,7 @@ function attachDeleteOspite(card, ospite){
 })();
 
 
-// --- FIX dDAE_1.186: mostra nome ospite ---
+// --- FIX dDAE_1.225: mostra nome ospite ---
 (function(){
   const orig = window.renderOspiti;
   if (!orig) return;
@@ -4630,7 +4643,7 @@ function initTassaPage(){
 
 /* =========================
    Ore pulizia (Calendario ore operatori)
-   Build: dDAE_1.215
+   Build: dDAE_1.225
 ========================= */
 
 state.orepulizia = state.orepulizia || {
@@ -4844,7 +4857,14 @@ async function initOrePuliziaPage(){
   if (!s.inited){
     s.inited = true;
 
-    if (back) back.addEventListener("click", ()=>showPage("home"));
+    if (back) back.addEventListener("click", ()=>showPage("pulizie"));
+
+    // Topbar: tasto arancione "torna a Pulizie"
+    const topBack = document.getElementById("backBtnTop");
+    if (topBack && !s._topBackBound){
+      s._topBackBound = true;
+      bindFastTap(topBack, () => { try{ showPage("pulizie"); }catch(_){ } });
+    }
 
     if (selMonth) selMonth.addEventListener("change", ()=>{
       s.monthKey = selMonth.value;
