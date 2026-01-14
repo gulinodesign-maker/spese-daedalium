@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.226";
+const BUILD_VERSION = "1.227";
 
 
 
@@ -2734,7 +2734,8 @@ function setupOspite(){
       btn.classList.toggle("occupied", occ);
 
       const dis = locked || occ;
-      btn.disabled = !!dis;
+      // Nota: non usiamo "disabled" per poter intercettare il tap e mostrare i toast su iOS
+      btn.classList.toggle("is-disabled", !!dis);
       btn.setAttribute("aria-disabled", dis ? "true" : "false");
       btn.setAttribute("aria-pressed", on ? "true" : "false");
     });
@@ -2757,7 +2758,7 @@ function setupOspite(){
     }
 
     // Se occupata (rossa) => popup
-    if (b.classList.contains("occupied") || b.disabled){
+    if (b.classList.contains("occupied")){
       try{ toast("Stanza occupata"); }catch(_){}
       return;
     }

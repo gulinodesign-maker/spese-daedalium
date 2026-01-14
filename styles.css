@@ -4212,3 +4212,84 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-orepulizia .opcal-wrap{
   padding: calc(12px + var(--safe-top) - 30px) 19px 26px;
 }
+
+
+/* ===== dDAE_1.227 - Fix UI Stanze + Flat Buttons ===== */
+
+/* Picker stanze: sempre su una singola riga (incluso pallino M) */
+#roomsPicker{
+  display:flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Pallini stanze: stile flat (niente blur/gradienti) */
+.room-dot{
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(15,23,42,0.16) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* Pallino matrimonio: niente offset che può causare wrap */
+.room-dot-marriage{
+  margin-left: 0 !important;
+}
+
+/* Stanze occupate: rosso sangue pieno + testo bianco */
+.room-dot.occupied{
+  background: #8b0000 !important;
+  border-color: #8b0000 !important;
+  color: #ffffff !important;
+}
+
+/* Stato non selezionabile (es. senza date): non usiamo disabled per intercettare tap */
+.room-dot.is-disabled{
+  opacity: .55;
+}
+
+/* ===== Flat buttons: rimuove sfumature/effetti "glass" dai tasti ===== */
+button,
+.btn,
+.icon-btn,
+.tab-btn,
+.top-pill,
+.pill,
+.pill-btn,
+.action-btn,
+.kpi-btn,
+.nav-btn{
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Manteniamo un look pulito: sfondo pieno e bordo leggero sui bottoni principali */
+.btn,
+.icon-btn,
+.tab-btn,
+.top-pill,
+.pill,
+.pill-btn,
+.action-btn,
+.kpi-btn,
+.nav-btn{
+  background: #ffffff !important;
+  border: 1px solid rgba(15,23,42,0.16) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+/* Active semplice (senza gradienti) */
+.btn:active,
+.icon-btn:active,
+.tab-btn:active,
+.room-dot:active{
+  transform: translateY(1px);
+}
