@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.227";
+const BUILD_VERSION = "1.228";
 
 
 
@@ -2757,13 +2757,14 @@ function setupOspite(){
       return;
     }
 
-    // Se occupata (rossa) => popup
-    if (b.classList.contains("occupied")){
+    // Se occupata => popup (usa lo stato, non solo la classe CSS)
+    const n = parseInt(b.getAttribute("data-room"), 10);
+    const occSet = (state.occupiedRooms instanceof Set) ? state.occupiedRooms : new Set();
+    if (occSet.has(n)){
       try{ toast("Stanza occupata"); }catch(_){}
       return;
     }
 
-    const n = parseInt(b.getAttribute("data-room"), 10);
     if (state.guestRooms.has(n)) {
       state.guestRooms.delete(n);
       if (state.lettiPerStanza) delete state.lettiPerStanza[String(n)];
