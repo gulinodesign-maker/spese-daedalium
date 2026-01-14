@@ -225,6 +225,11 @@ body{
 .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 
 .btn{
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  color: rgba(15,23,42,0.92);
+  -webkit-text-fill-color: currentColor;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.78);
   backdrop-filter: blur(12px);
@@ -2453,7 +2458,7 @@ body[data-page="ospiti"] .guest-card .actions {
   --cal-cell-h: clamp(50px, 9.2vw, 82px);
   --cal-day-w:  clamp(32px, 11vw, 84px);
   --cal-room-w: clamp(34px, 10vw, 52px);
-  --cal-gap: 0px;  --room1: rgba(255, 59, 48, .80);  --room2: rgba(255, 149, 0, .80);  --room3: rgba(255, 204, 0, .80);  --room4: rgba(52, 199, 89, .80);  --room5: rgba(90, 200, 250, .80);  --room6: rgba(88, 86, 214, .80);}
+  --cal-gap: 0px;  --room1: rgba(255, 179, 186, .72);  --room2: rgba(255, 223, 186, .72);  --room3: rgba(255, 255, 186, .72);  --room4: rgba(186, 255, 201, .72);  --room5: rgba(186, 225, 255, .72);  --room6: rgba(202, 186, 255, .72);}
 
 .calendar-page .cal-nav{
   display:flex;
@@ -2511,6 +2516,7 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-nav-btn:active{ transform: scale(.98); }
 
 /* Pulsante sync (verde) all'estrema destra */
+/* dDAE_1.218: calendario leggibile + colori pastello */
 .cal-nav-btn-sync{
   position:absolute;
   right:5px;
@@ -3730,6 +3736,8 @@ grid-template-rows: 34px repeat(7, 54px);
   color: #ffffff;
   border-color: rgba(43,124,180,0.85);
   backdrop-filter: none;
+
+  -webkit-text-fill-color: currentColor;
 }
 .btn.tax-calc:active{ transform: translateY(1px); }
 
@@ -3745,11 +3753,32 @@ grid-template-rows: 34px repeat(7, 54px);
     linear-gradient(180deg, rgba(201,119,43,0.92), rgba(201,119,43,0.72));
   box-shadow: 0 12px 28px rgba(15,23,42,0.16);
   backdrop-filter: blur(16px);
+
+  -webkit-text-fill-color: currentColor;
 }
 .btn.tax-report:active{ transform: translateY(1px); }
 .btn.tax-report:disabled{
   opacity: 0.55;
   filter: grayscale(0.15);
+}
+
+
+/* dDAE_1.219 - iOS fix: su PWA Safari alcuni button perdono il colore testo */
+.btn.tax-calc,
+.btn.tax-report,
+.btn.ghost.tax-back{
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-text-fill-color: currentColor; /* forza visibilità testo */
+}
+.is-ios .btn.tax-calc,
+.is-ios .btn.tax-report{
+  -webkit-text-fill-color: rgba(255,255,255,0.98);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.18);
+  font-weight: 800;
+}
+.is-ios .btn.ghost.tax-back{
+  -webkit-text-fill-color: rgba(15,23,42,0.92);
 }
 
 /* Risultati: solo dopo Calcola, stack verticale */
@@ -3872,7 +3901,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 .opcal-group{
-  margin-top: 8px;
+  margin-top: 16px;
 
   background: transparent;
   border: 0;
@@ -3913,7 +3942,8 @@ grid-template-rows: 34px repeat(7, 54px);
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   align-items:end;
-  margin: 0 0 10px;
+  margin: 0 0 16px;
+  padding: 0 5px;
 }
 
 .opcal-filter{
@@ -4043,6 +4073,23 @@ grid-template-rows: 34px repeat(7, 54px);
   border: none;
 }
 
+
+
+.opcal-go-clean{
+  width: 100%;
+  margin: 14px 5px 0;
+  border-radius: 18px;
+  border: 1px solid rgba(201,119,43,0.55);
+  background: rgba(201,119,43,0.78);
+  color: rgba(255,255,255,0.98);
+  -webkit-text-fill-color: rgba(255,255,255,0.98);
+  box-shadow: 0 14px 34px rgba(15,23,42,0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.opcal-go-clean .ui-ico{ width: 20px; height: 20px; }
+.opcal-go-clean:active{ transform: translateY(1px); }
+
 /* Responsive */
 @media (max-width: 720px){
   /* Su smartphone: filtri e "tab" affiancati (massima densità verticale) */
@@ -4093,3 +4140,15 @@ grid-template-rows: 34px repeat(7, 54px);
   max-height: 44vh;
   overflow: auto;
 }
+/* dDAE_1.218: icone calendario più leggibili (evita bianco su bianco) */
+#page-calendario .cal-nav-btn .ui-ico{ stroke: rgba(15,23,42,0.72); }
+#page-calendario .cal-nav-btn-sync{ background: rgba(186, 255, 201, .70); border-color: rgba(15,23,42,0.10); }
+#page-calendario .cal-nav-btn-sync .ui-ico{ stroke: rgba(9, 83, 25, .92); }
+#page-calendario .cal-nav-btn.is-loading{ opacity: .75; }
+#page-calendario .cal-week-title{
+  font-size: 18px;
+  letter-spacing: .10em;
+  margin: 18px 0 14px;
+  text-align: center;
+}
+#page-calendario .calendar-page .cal-body{ margin-top: 28px; }
