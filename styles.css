@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.250"),
+    url("./assets/bg-daedalium.png?v=1.251"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -756,7 +756,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.250"),
+    url("./assets/bg-daedalium.png?v=1.251"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2918,50 +2918,68 @@ body[data-page="ospiti"] .guest-card .actions {
 
 /* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.229) ===== */
 .guest-filter-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
+  display:flex;
+  flex-direction: column;
   gap: 6px;
   margin-bottom: 10px;
 }
+
+.guest-filter-row{
+  display:grid;
+  gap: 6px;
+}
+
+.guest-filter-row-1{
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.guest-filter-row-2{
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .guest-filter-grid .gf-tile{
   position: relative;
   gap: 0;
 }
-.guest-filter-grid .gf-tile input,
-.guest-filter-grid .gf-tile select{
-  min-height: 52px;
-}
-.guest-filter-grid .gf-sort select{
-  padding-right: 56px; /* spazio per bottone direzione */
+
+/* Row 1: Oggi + Ordina per + Direzione (tutti uguali) */
+.guest-filter-row-1 .gf-tile select,
+.guest-filter-row-1 .gf-tile button{
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 14px;
 }
 
-
-/* dDAE_1.229 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
-.guest-filter-grid .gf-tile select{
+/* select stile bottone (iOS/Safari) */
+.guest-filter-row-1 .gf-tile select{
   -webkit-appearance: none;
   appearance: none;
-  background-image: none !important;
-  padding-right: 14px; /* senza spazio freccia */
+  padding-right: 14px;
 }
-/* mantiene spazio per il bottone direzione (↓) */
-.guest-filter-grid .gf-sort select{
-  padding-right: 56px;
-}
-.gf-dir{
-  position:absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
+
+/* Bottone "Oggi" coerente con i controlli */
+.gf-today-btn{
+  border: 1px solid rgba(0,0,0,0.12);
   background: rgba(255,255,255,0.78);
-  font-size: 18px;
-  font-weight: 500;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  font-size: 16px;
+  font-weight: 600;
+}
+.gf-today-btn.is-active{
+  background: rgba(255,255,255,0.92);
+}
+
+/* Row 2 (Da/A): conserva altezza comoda */
+.guest-filter-row-2 .gf-tile input,
+.guest-filter-row-2 .gf-tile select{
+  min-height: 52px;
+}
+
+/* Direzione ordinamento */
+.gf-dir{
+  width: 100%;
+  height: 44px;
+  border-radius: 14px;
 }
 
 .gf-dir-full{
@@ -2973,8 +2991,9 @@ body[data-page="ospiti"] .guest-card .actions {
   height: 44px;
   border-radius: 14px;
 }
-.sort-toggle{ min-width: 120px; }
-.gf-dir:active{ transform: translateY(-50%) scale(0.98); }
+
+.sort-toggle{ min-width: 0; }
+.gf-dir:active{ transform: scale(0.98); }
 
 .guest-insno{
   display:inline-flex;

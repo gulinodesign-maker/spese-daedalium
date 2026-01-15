@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.250";
+const BUILD_VERSION = "1.251";
 
 
 
@@ -1558,6 +1558,7 @@ if (goCalendarioTopOspiti){
 function setupGuestListControls(){
   const sortSel = $("#guestSortBy");
   const dirBtn = $("#guestSortDir");
+  const todayBtn = $("#guestToday");
   if (!sortSel) return;
 
   const savedBy = localStorage.getItem("dDAE_guestSortBy");
@@ -1574,6 +1575,26 @@ function setupGuestListControls(){
     dirBtn.setAttribute("aria-pressed", asc ? "false" : "true");
   };
   paintDir();
+  // Filtro rapido: Oggi (arrivo = oggi)
+  const savedToday = localStorage.getItem("dDAE_guestTodayOnly");
+  state.guestTodayOnly = (savedToday === "1") ? true : (savedToday === "0") ? false : (state.guestTodayOnly || false);
+
+  const paintToday = () => {
+    if (!todayBtn) return;
+    todayBtn.classList.toggle("is-active", !!state.guestTodayOnly);
+    todayBtn.setAttribute("aria-pressed", state.guestTodayOnly ? "true" : "false");
+  };
+  paintToday();
+
+  if (todayBtn){
+    todayBtn.addEventListener("click", () => {
+      state.guestTodayOnly = !state.guestTodayOnly;
+      try { localStorage.setItem("dDAE_guestTodayOnly", state.guestTodayOnly ? "1" : "0"); } catch(_){}
+      paintToday();
+      renderGuestCards();
+    });
+  }
+
 
   sortSel.addEventListener("change", () => {
     state.guestSortBy = sortSel.value;
@@ -2922,13 +2943,25 @@ function renderGuestCards(){
     ? state.ospiti
     : (Array.isArray(state.guests) ? state.guests : []);
 
+  // Filtro rapido "Oggi": mostra solo ospiti con arrivo (check_in) = oggi
+  if (state.guestTodayOnly){
+    const today = todayISO();
+    items = (items || []).filter(g => {
+      const v = (g?.check_in ?? g?.checkIn ?? g?.arrivo ?? g?.arrival ?? g?.guestCheckIn ?? "");
+      const s = String(v).trim();
+      const d = s ? s.slice(0,10) : "";
+      return d === today;
+    });
+  }
+
+
   if (!items.length){
     wrap.replaceChildren();
     const empty = document.createElement("div");
     empty.style.opacity = ".7";
     empty.style.fontSize = "14px";
     empty.style.padding = "8px";
-    empty.textContent = "Nessun ospite nel periodo.";
+    empty.textContent = state.guestTodayOnly ? "Nessun ospite per oggi." : "Nessun ospite nel periodo.";
     frag.appendChild(empty);
     wrap.appendChild(frag);
     return;
