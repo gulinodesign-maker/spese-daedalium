@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.229"),
+    url("./assets/bg-daedalium.png?v=1.234"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -68,6 +68,30 @@ body{
 .brand-right{
   display:flex;
   align-items:center;
+  gap: 6px;
+}
+
+
+/* dDAE_1.233 — Topbar: strumenti centrati (Pulizie) */
+.brand{
+  gap: 12px;
+}
+.brand-left{
+  flex: 1 1 0;
+  min-width: 0;
+}
+.brand-center{
+  flex: 0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width: 0;
+}
+.brand-right{
+  flex: 1 1 0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
   gap: 6px;
 }
 .logo{
@@ -116,6 +140,22 @@ body{
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
 }
 
+
+.topbar-tools{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+}
+
+.icon-btn.icon-btn-blue{
+  background: var(--blue);
+  border-color: rgba(255,255,255,0.28);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(15,23,42,0.14);
+}
+.icon-btn.icon-btn-blue:active{ transform: scale(0.98); }
+
 .icon-btn.icon-btn-orange{
   background: var(--orange);
   border-color: rgba(255,255,255,0.28);
@@ -125,18 +165,7 @@ body{
 .icon-btn.icon-btn-orange:active{ transform: scale(0.98); }
 
 
-/* dDAE_1.229 — Ore pulizia: back button bianco piatto con icona arancione (fix iOS) */
-.icon-btn.icon-btn-whiteblue{
-  background:#ffffff;
-  border: 1px solid rgba(15,23,42,0.10);
-  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-  -webkit-appearance:none;
-  appearance:none;
-}
-.icon-btn.icon-btn-whiteblue:active{ transform: scale(0.98); }
-
+/* dDAE_1.233 — Ore pulizia: back button bianco piatto con icona arancione (fix iOS) */
 .icon-btn.icon-btn-whiteorange{
   background: #ffffff;
   border: 1px solid rgba(15,23,42,0.14);
@@ -730,7 +759,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.229"),
+    url("./assets/bg-daedalium.png?v=1.234"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1899,7 +1928,7 @@ body::before{
 #page-home #goTassaSoggiorno .home-main-glyph{ color: rgba(201,119,43,0.92); }
 #page-home #goPulizie .home-main-glyph{ color: rgba(15,23,42,0.92); }
 #page-home #goGuadagni .home-main-glyph{ color: rgba(176,92,18,0.92); }
-/* dDAE_1.229 - Ospiti: solo consultazione (azioni nascoste per ora) */
+/* dDAE_1.233 - Ospiti: solo consultazione (azioni nascoste per ora) */
 body[data-page="ospiti"] .guest-card .actions {
   display: flex !important;
 }
@@ -2044,7 +2073,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
+/* dDAE_1.233 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
 .sr-only{
   position:absolute !important;
   width:1px !important;
@@ -2117,7 +2146,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Ospiti: stanze come pallini azzurri */
+/* dDAE_1.233 — Ospiti: stanze come pallini azzurri */
 
 .rooms-dots{
   display:flex;
@@ -2148,7 +2177,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.229 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
+/* dDAE_1.233 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
 
 .rooms-stack{
   display:flex;
@@ -2260,7 +2289,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.229 — Matrimonio: pallino verde 'M' nella riga stanze */
+/* dDAE_1.233 — Matrimonio: pallino verde 'M' nella riga stanze */
 
 #page-ospite .room-dot-marriage{
   margin-left: 6px; /* resta nella stessa riga (nowrap) */
@@ -2275,7 +2304,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Acconto: pallini C/E come stanze */
+/* dDAE_1.233 — Acconto: pallini C/E come stanze */
 
 #page-ospite .pay-dots{
   display:grid;
@@ -2303,7 +2332,7 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* dDAE_1.229 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
+/* dDAE_1.233 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
 #page-ospite .pay-dots{
   place-items: center;
 }
@@ -2313,9 +2342,9 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.229 — Pay dots: bianchi quando non selezionati + più distanziati */
+/* dDAE_1.233 — Pay dots: bianchi quando non selezionati + più distanziati */
 
-/* dDAE_1.229 — Pay dots: niente riflesso/ombra e allineamento verticale */
+/* dDAE_1.233 — Pay dots: niente riflesso/ombra e allineamento verticale */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2323,7 +2352,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Colori pallini pagamento (bianchi se off) + niente ombre */
+/* dDAE_1.233 — Colori pallini pagamento (bianchi se off) + niente ombre */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2350,7 +2379,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — iOS: evita accavallamento label/value su date/number */
+/* dDAE_1.233 — iOS: evita accavallamento label/value su date/number */
 
 .field.float input[type="date"],
 .field.float input[type="number"],
@@ -2368,7 +2397,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.229 — Fix definitivo allineamento pallini pagamento */
+/* dDAE_1.233 — Fix definitivo allineamento pallini pagamento */
 
 #page-ospite .field.two-col.payment-row{
   display: grid;
@@ -2390,7 +2419,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Override anti-vincoli: nessun offset fisso su C/E */
+/* dDAE_1.233 — Override anti-vincoli: nessun offset fisso su C/E */
 
 #page-ospite #depositType,
 #page-ospite #saldoType{
@@ -2416,7 +2445,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Eliminazione totale label tipo saldo + paywrap pulito */
+/* dDAE_1.233 — Eliminazione totale label tipo saldo + paywrap pulito */
 
 #page-ospite .subfield.paywrap::before,
 #page-ospite .subfield.paywrap::after{
@@ -2425,7 +2454,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — mini led accanto ai prezzi (Acconto/Saldo) */
+/* dDAE_1.233 — mini led accanto ai prezzi (Acconto/Saldo) */
 .guest-led.mini-led{
   width: 10px;
   height: 10px;
@@ -2440,14 +2469,14 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 /* ===== CALENDARIO ===== */
-/* dDAE_1.229 — Calendario: margini orizzontali 5px (compensa padding .wrap) */
+/* dDAE_1.233 — Calendario: margini orizzontali 5px (compensa padding .wrap) */
 #page-calendario .content.calendar-page{
   margin-left: -9px; /* 14px (wrap) - 9px = 5px */
   margin-right: -9px;
 }
 
 
-/* dDAE_1.229 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
+/* dDAE_1.233 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
 #page-calendario .cal-nav-btn{
   background: rgba(255,255,255,0.92);
   border: 1px solid rgba(15,23,42,0.14);
@@ -2590,7 +2619,7 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-nav-btn:active{ transform: scale(.98); }
 
 /* Pulsante sync (verde) all'estrema destra */
-/* dDAE_1.229: calendario leggibile + colori pastello */
+/* dDAE_1.233: calendario leggibile + colori pastello */
 .cal-nav-btn-sync{
   position:absolute;
   right:5px;
@@ -2823,7 +2852,7 @@ body[data-page="ospiti"] .guest-card .actions {
   background-image: linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40));
   border-color: rgba(255,255,255,.16);
 }
-/* ===== dDAE_1.229 FIX: HOME grid clickable (no flex override) ===== */
+/* ===== dDAE_1.233 FIX: HOME grid clickable (no flex override) ===== */
 #page-home .home-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2839,7 +2868,7 @@ body[data-page="ospiti"] .guest-card .actions {
   pointer-events: auto !important;
 }
 
-/* === dDAE_1.229 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
+/* === dDAE_1.233 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
 #page-home .home-grid{
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -2857,7 +2886,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.229) ===== */
+/* ===== OSPITI: filtri in griglia 2x2 (dDAE_1.233) ===== */
 .guest-filter-grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -2877,7 +2906,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
+/* dDAE_1.233 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
 .guest-filter-grid .gf-tile select{
   -webkit-appearance: none;
   appearance: none;
@@ -2921,7 +2950,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Ospiti: pulsante + in testata */
+/* dDAE_1.233 — Ospiti: pulsante + in testata */
 .btn-add-guest{
   width: 40px;
   height: 40px;
@@ -2945,7 +2974,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
+/* dDAE_1.233 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
 #page-ospite .field.two-col.payment-row{
   grid-template-columns: minmax(0,1fr) 170px !important;
 }
@@ -3005,7 +3034,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
+/* dDAE_1.233 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
 #page-ospite .pay-gap{
   opacity: 0;
   pointer-events: none;
@@ -3026,7 +3055,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.229 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.233 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -3144,7 +3173,7 @@ body.perf-lite *::after{
 }
 
 
-/* ===== dDAE_1.229 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
+/* ===== dDAE_1.233 FIX: bordi neri (last-day / empty-selected) sopra has-booking ===== */
 .cal-cell.last-day,
 .cal-cell.has-booking.last-day{
   border-color: rgba(0,0,0,.95) !important;
@@ -3160,7 +3189,7 @@ body.perf-lite *::after{
 }
 
 
-/* dDAE_1.229: riga spesa compatta (importo · data · motivazione) */
+/* dDAE_1.233: riga spesa compatta (importo · data · motivazione) */
 .spesa-line{
   display:flex;
   align-items:baseline;
@@ -3265,7 +3294,7 @@ body.perf-lite *::after{
 }
 
 
-/* dDAE_1.229 — Pulizie: raggruppa contenuto sotto topbar e spostalo giù di 30px */
+/* dDAE_1.233 — Pulizie: raggruppa contenuto sotto topbar e spostalo giù di 30px */
 #page-pulizie .clean-mainGroup{
   margin-top: 30px;
 }
@@ -3539,7 +3568,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 /* =========================
-   Lavanderia (dDAE_1.229)
+   Lavanderia (dDAE_1.233)
 ========================= */
 #page-lavanderia .bd{ padding-bottom: 18px; }
 .laundry-sub{ margin: 2px 0 14px 0; }
@@ -3709,7 +3738,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
 
 
-/* dDAE_1.229 — delete: stato busy + spinner (evita doppi tap) */
+/* dDAE_1.233 — delete: stato busy + spinner (evita doppi tap) */
 .laundry-del.busy{
   opacity: .70;
 }
@@ -3794,7 +3823,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* ===== Tassa di soggiorno (dDAE_1.229) ===== */
+/* ===== Tassa di soggiorno (dDAE_1.233) ===== */
 .home-main-label.small{ font-size: 14px; line-height: 1.05; text-align:center; }
 
 .tax-hd{ display:flex; align-items:center; gap:12px; }
@@ -3837,7 +3866,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.229 - iOS fix: su PWA Safari alcuni button perdono il colore testo */
+/* dDAE_1.233 - iOS fix: su PWA Safari alcuni button perdono il colore testo */
 .btn.tax-calc,
 .btn.tax-report,
 .btn.ghost.tax-back{
@@ -3961,10 +3990,10 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* =========================
    Ore pulizia (calendario ore operatori)
-   Build: dDAE_1.229
+   Build: dDAE_1.233
 ========================= */
  (calendario ore operatori)
-   Build: dDAE_1.229
+   Build: dDAE_1.233
 ========================= */
 
 .opcal-wrap{
@@ -4214,7 +4243,7 @@ grid-template-rows: 34px repeat(7, 54px);
   max-height: 44vh;
   overflow: auto;
 }
-/* dDAE_1.229: icone calendario più leggibili (evita bianco su bianco) */
+/* dDAE_1.233: icone calendario più leggibili (evita bianco su bianco) */
 #page-calendario .cal-nav-btn .ui-ico{ stroke: rgba(15,23,42,0.72); }
 #page-calendario .cal-nav-btn-sync{ background: rgba(186, 255, 201, .70); border-color: rgba(15,23,42,0.10); }
 #page-calendario .cal-nav-btn-sync .ui-ico{ stroke: rgba(9, 83, 25, .92); }
@@ -4228,13 +4257,13 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-calendario .calendar-page .cal-body{ margin-top: 28px; }
 
 
-/* dDAE_1.229: Ore Pulizia - shift up 30px */
+/* dDAE_1.233: Ore Pulizia - shift up 30px */
 #page-orepulizia .opcal-wrap{
   padding: calc(12px + var(--safe-top) - 30px) 19px 26px;
 }
 
 
-/* dDAE_1.229 — Stanze occupate: rosso pieno (tinta unita) */
+/* dDAE_1.233 — Stanze occupate: rosso pieno (tinta unita) */
 #page-ospite .room-dot.occupied{
   background: #ff0000 !important;
   background-image: none !important;
@@ -4255,38 +4284,31 @@ grid-template-rows: 34px repeat(7, 54px);
   line-height: 1.2;
 }
 
+.icon-btn.icon-btn-blue .ui-ico{ stroke:#ffffff; }
 
-/* =========================
-   Topbar tools (Pulizie) — white buttons with colored icons (iOS-safe)
-   Build: dDAE_1.234
-========================= */
-#pulizieTopTools{
+
+/* dDAE_1.234 — Pulizie: quick tools in topbar (accanto a Home) */
+.pulizie-top-tools{
   display:flex;
   align-items:center;
-  gap:10px;
-  margin-right: 10px;
+  gap:8px;
 }
-#pulizieTopTools .icon-btn{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: #ffffff !important;
-  border: 1px solid rgba(15,23,42,0.10) !important;
+.pulizie-top-tools[hidden]{ display:none !important; }
+
+/* Bottoni bianchi: icona azzurra / arancione (fix iOS appearance) */
+.icon-btn.icon-btn-whiteblue{
+  background:#ffffff;
+  border: 1px solid rgba(15,23,42,0.14);
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   -webkit-appearance: none;
   appearance: none;
 }
-#pulizieTopTools .icon-btn:active{ transform: scale(.98); }
-#pulizieTopTools .ui-ico{
-  width: 22px;
-  height: 22px;
-  stroke-width: 2.2;
-}
-.ui-ico.ink-blue{ stroke: var(--blue) !important; }
-.ui-ico.ink-orange{ stroke: var(--orange) !important; }
+.icon-btn.icon-btn-whiteblue .ui-ico{ stroke: var(--blue2) !important; }
+.icon-btn.icon-btn-whiteblue:active{ transform: scale(0.98); }
 
-/* Pulizie: nav giorno sempre centrata */
-#page-pulizie .clean-topbar{ width:100%; }
-#page-pulizie .clean-nav{ justify-content:center; }
+.icon-btn.icon-btn-whiteorange{
+  -webkit-appearance: none;
+  appearance: none;
+}
