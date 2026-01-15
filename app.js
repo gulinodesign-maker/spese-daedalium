@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.244";
+const BUILD_VERSION = "1.243";
 
 
 
@@ -4191,7 +4191,7 @@ async function loadLavanderia() {
     state.laundry.list = list;
     renderLaundryHistory_(list);
     renderLaundry_(list[0] || null);
-    if (hint) hint.textContent = "Imposta un intervallo (Da/A) e genera il report per la lavanderia.";
+    if (hint) hint.textContent = "Seleziona un intervallo (Da/A) e crea il report da consegnare alla lavanderia.";
   } catch (e) {
     if (hint) hint.textContent = "Offline o errore: non riesco a caricare lo storico.";
     throw e;
@@ -4208,7 +4208,7 @@ async function createLavanderiaReport_() {
 
   if (!startDate || !endDate) {
     if (hint) hint.textContent = "Seleziona prima l'intervallo (Da e A).";
-    toast("Compila Da e A");
+    toast("Seleziona Da e A");
     return null;
   }
   if (startDate > endDate) {
