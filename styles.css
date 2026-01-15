@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.242"),
+    url("./assets/bg-daedalium.png?v=1.243"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -732,7 +732,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.242"),
+    url("./assets/bg-daedalium.png?v=1.243"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3596,10 +3596,12 @@ grid-template-rows: 34px repeat(7, 54px);
   opacity: .78;
 }
 .laundry-grid{
-  display:flex;
-  flex-direction:column;
-  gap: 6px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
 }
+
 .laundry-tile{
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -4346,3 +4348,50 @@ grid-template-rows: 34px repeat(7, 54px);
   stroke: rgba(201,119,43,0.98);
 }
 .btn.tax-calc-whiteorange:active{ transform: translateY(1px); }
+
+
+/* --- Lavanderia: layout griglia + card senza vetro (dDAE_1.243) --- */
+#page-lavanderia .card--plain{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.laundry-gen-wrap{
+  margin: 10px 0 14px 0;
+  display:flex;
+  justify-content:center;
+}
+
+.laundry-tile{
+  border-radius: 18px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 76px;
+}
+
+.laundry-value{
+  align-self: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.laundry-tile--empty{
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Gradienti differenziati per tile (TAP più scuro di TPI) */
+.laundry-tile[data-key="MAT"]{ --tile-bg: linear-gradient(180deg, rgba(216,239,252,0.95), rgba(187,225,248,0.85)); }
+.laundry-tile[data-key="SIN"]{ --tile-bg: linear-gradient(180deg, rgba(199,230,251,0.95), rgba(165,215,246,0.85)); }
+.laundry-tile[data-key="FED"]{ --tile-bg: linear-gradient(180deg, rgba(182,221,248,0.95), rgba(144,200,238,0.85)); }
+
+.laundry-tile[data-key="TDO"]{ --tile-bg: linear-gradient(180deg, rgba(255,227,199,0.95), rgba(255,206,158,0.85)); }
+.laundry-tile[data-key="TFA"]{ --tile-bg: linear-gradient(180deg, rgba(255,216,178,0.95), rgba(255,192,130,0.85)); }
+.laundry-tile[data-key="TBI"]{ --tile-bg: linear-gradient(180deg, rgba(255,204,156,0.95), rgba(255,173,110,0.85)); }
+
+.laundry-tile[data-key="TAP"]{ --tile-bg: linear-gradient(180deg, rgba(190,196,206,0.95), rgba(146,154,168,0.90)); } /* più scuro */
+.laundry-tile[data-key="TPI"]{ --tile-bg: linear-gradient(180deg, rgba(230,232,236,0.95), rgba(195,200,210,0.88)); }
+

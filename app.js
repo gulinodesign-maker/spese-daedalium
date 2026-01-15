@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.242";
+const BUILD_VERSION = "1.243";
 
 
 
@@ -3610,11 +3610,10 @@ if (cleanSaveHours){
 
 
 // --- Lavanderia ---
-  const btnLaundryCreate = document.getElementById("btnLaundryCreate");
-  const btnLaundryPrint = document.getElementById("btnLaundryPrint");
+  const btnLaundryGenerate = document.getElementById("btnLaundryGenerate");
 
-  if (btnLaundryCreate){
-    bindFastTap(btnLaundryCreate, async () => {
+if (btnLaundryGenerate){
+    bindFastTap(btnLaundryGenerate, async () => {
       try{
         showPage("lavanderia");
         await createLavanderiaReport_();
@@ -3624,12 +3623,7 @@ if (cleanSaveHours){
       }
     });
   }
-  if (btnLaundryPrint){
-    bindFastTap(btnLaundryPrint, () => {
-      try{ window.print(); }catch(_){}
-    });
-  }
-  if (typeof btnOrePuliziaFromPulizie !== "undefined" && btnOrePuliziaFromPulizie){
+if (typeof btnOrePuliziaFromPulizie !== "undefined" && btnOrePuliziaFromPulizie){
     bindFastTap(btnOrePuliziaFromPulizie, () => {
       try{ showPage("orepulizia"); }catch(_){}
     });
