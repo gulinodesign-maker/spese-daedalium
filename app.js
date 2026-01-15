@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.231";
+const BUILD_VERSION = "1.232";
 
 
 
@@ -1382,6 +1382,12 @@ function showPage(page){
     backBtnTop.hidden = (page !== "orepulizia");
   }
 
+  // Top tools (solo Pulizie): Lavanderia + Ore di lavoro
+  const pulTools = $("#pulizieTopTools");
+  if (pulTools){
+    pulTools.hidden = (page !== "pulizie");
+  }
+
   // render on demand
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
@@ -1411,6 +1417,13 @@ function setupHeader(){
   if (bb) bb.addEventListener("click", () => {
     if (state.page === "orepulizia") { showPage("pulizie"); }
   });
+
+  // Pulizie quick tools in top bar
+  const tl = $("#topLaundryBtn");
+  if (tl) bindFastTap(tl, () => { showPage("lavanderia"); });
+
+  const tw = $("#topWorkBtn");
+  if (tw) bindFastTap(tw, () => { showPage("orepulizia"); });
 }
 function setupHome(){
   bindLauncherDelegation();
