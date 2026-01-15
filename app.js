@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.249";
+const BUILD_VERSION = "1.248";
 
 
 
@@ -1394,6 +1394,13 @@ state.page = page;
     pulizieTopTools.hidden = (page !== "pulizie");
   }
 
+
+  // Top tools (Ospiti) — nuovo ospite + calendario accanto al tasto Home
+  const ospitiTopTools = $("#ospitiTopTools");
+  if (ospitiTopTools){
+    ospitiTopTools.hidden = (page !== "ospiti");
+  }
+
   // render on demand
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
@@ -1478,6 +1485,18 @@ const btnNewGuestOspiti = $("#btnNewGuestOspiti");
 if (btnNewGuestOspiti){
   btnNewGuestOspiti.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
 }
+
+
+// OSPITI: topbar — nuovo ospite + calendario
+const btnNewGuestTop = $("#btnNewGuestTop");
+if (btnNewGuestTop){
+  btnNewGuestTop.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
+}
+const goCalendarioTopOspiti = $("#goCalendarioTopOspiti");
+if (goCalendarioTopOspiti){
+  bindFastTap(goCalendarioTopOspiti, () => showPage("calendario"));
+}
+
 
 
   // HOME: icona Impostazioni
@@ -2210,9 +2229,8 @@ function enterGuestCreateMode(){
   state.guestViewItem = null;
 
   state.guestMode = "create";
-  
-  try { updateGuestFormCardMode(); } catch (_) {}
-state.guestEditId = null;
+  try{ updateGuestFormModeClass(); }catch(_){ }
+  state.guestEditId = null;
   state.guestEditCreatedAt = null;
 
   const title = document.getElementById("ospiteFormTitle");
@@ -2267,9 +2285,8 @@ function enterGuestEditMode(ospite){
   state.guestViewItem = null;
 
   state.guestMode = "edit";
-  
-  try { updateGuestFormCardMode(); } catch (_) {}
-state.guestEditId = ospite?.id ?? null;
+  try{ updateGuestFormModeClass(); }catch(_){ }
+  state.guestEditId = ospite?.id ?? null;
   state.guestEditCreatedAt = (ospite?.created_at ?? ospite?.createdAt ?? null);
 
   const title = document.getElementById("ospiteFormTitle");
@@ -2470,16 +2487,20 @@ function updateOspiteHdActions(){
 }
 
 
-function updateGuestFormCardMode(){
-  const card = document.querySelector("#page-ospite .guest-form-card");
-  if (!card) return;
-  const mode = state.guestMode || "create"; // "create" | "edit" | "view"
-  card.classList.toggle("is-create", mode === "create");
-  card.classList.toggle("is-edit", mode === "edit");
-  card.classList.toggle("is-view", mode === "view"); // in view è già gestito anche da setGuestFormViewOnly
+function updateGuestFormModeClass(){
+  try{
+    const card = document.querySelector("#page-ospite .guest-form-card");
+    if (!card) return;
+    const mode = String(state.guestMode || "").toLowerCase();
+    const isView = (mode === "view");
+    card.classList.toggle("is-view", isView);
+    card.classList.toggle("is-create", !isView && mode === "create");
+    card.classList.toggle("is-edit", !isView && mode === "edit");
+  }catch(_){}
 }
 
 function setGuestFormViewOnly(isView, ospite){
+  try{ updateGuestFormModeClass(); }catch(_){ }
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
 
@@ -2495,8 +2516,6 @@ function setGuestFormViewOnly(isView, ospite){
     if (isView) renderRoomsReadOnly(ospite);
     else ro.innerHTML = "";
   }
-  try { updateGuestFormCardMode(); } catch (_) {}
-
 
   // Aggiorna i pallini in testata in base alla modalità corrente
   try { updateOspiteHdActions(); } catch (_) {}
@@ -2506,9 +2525,8 @@ function enterGuestViewMode(ospite){
   // Riempiamo la maschera usando la stessa logica dell'edit, poi blocchiamo tutto in sola lettura
   enterGuestEditMode(ospite);
   state.guestMode = "view";
-  
-  try { updateGuestFormCardMode(); } catch (_) {}
-state.guestViewItem = ospite || null;
+  try{ updateGuestFormModeClass(); }catch(_){ }
+  state.guestViewItem = ospite || null;
 
   const title = document.getElementById("ospiteFormTitle");
   if (title) title.textContent = "Scheda ospite";

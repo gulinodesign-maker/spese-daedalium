@@ -125,7 +125,7 @@ body{
 .icon-btn.icon-btn-orange:active{ transform: scale(0.98); }
 
 
-/* dDAE_1.249 — Ore pulizia: back button bianco piatto con icona arancione (fix iOS) */
+/* dDAE_1.229 — Ore pulizia: back button bianco piatto con icona arancione (fix iOS) */
 .icon-btn.icon-btn-whiteblue{
   background:#ffffff;
   border: 1px solid rgba(15,23,42,0.10);
@@ -150,6 +150,19 @@ body{
   stroke: var(--orange);
 }
 .icon-btn.icon-btn-whiteorange:active{ transform: scale(0.98); }
+
+
+.icon-btn.icon-btn-whiteindigo{
+  background: #ffffff;
+  border: 1px solid rgba(15,23,42,0.14);
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.icon-btn.icon-btn-whiteindigo .ui-ico{ stroke: #4f46e5; /* indaco */ }
+.icon-btn.icon-btn-whiteindigo:active{ transform: scale(0.98); }
+
+
 
 /* Icone SVG nei pulsanti in topbar */
 .icon-btn .ui-ico{
@@ -2046,7 +2059,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
+/* dDAE_1.229 — Ospiti: azioni stile Apple (pallini verde/giallo/rosso) */
 .sr-only{
   position:absolute !important;
   width:1px !important;
@@ -2119,7 +2132,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Ospiti: stanze come pallini azzurri */
+/* dDAE_1.229 — Ospiti: stanze come pallini azzurri */
 
 .rooms-dots{
   display:flex;
@@ -2150,7 +2163,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.249 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
+/* dDAE_1.229 — Ospiti: pallini letti accanto alla stanza (stack per stanza) */
 
 .rooms-stack{
   display:flex;
@@ -2262,7 +2275,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.249 — Matrimonio: pallino verde 'M' nella riga stanze */
+/* dDAE_1.229 — Matrimonio: pallino verde 'M' nella riga stanze */
 
 #page-ospite .room-dot-marriage{
   margin-left: 6px; /* resta nella stessa riga (nowrap) */
@@ -2277,7 +2290,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Acconto: pallini C/E come stanze */
+/* dDAE_1.229 — Acconto: pallini C/E come stanze */
 
 #page-ospite .pay-dots{
   display:grid;
@@ -2305,7 +2318,7 @@ body[data-page="ospiti"] .guest-card .actions {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* dDAE_1.249 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
+/* dDAE_1.229 — allineamento "pallini" Contanti/Elettronico (iOS/Safari) */
 #page-ospite .pay-dots{
   place-items: center;
 }
@@ -2315,9 +2328,9 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.249 — Pay dots: bianchi quando non selezionati + più distanziati */
+/* dDAE_1.229 — Pay dots: bianchi quando non selezionati + più distanziati */
 
-/* dDAE_1.249 — Pay dots: niente riflesso/ombra e allineamento verticale */
+/* dDAE_1.229 — Pay dots: niente riflesso/ombra e allineamento verticale */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2325,7 +2338,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Colori pallini pagamento (bianchi se off) + niente ombre */
+/* dDAE_1.229 — Colori pallini pagamento (bianchi se off) + niente ombre */
 
 #page-ospite .pay-dot,
 #page-ospite .pay-dot.selected{
@@ -2352,7 +2365,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — iOS: evita accavallamento label/value su date/number */
+/* dDAE_1.229 — iOS: evita accavallamento label/value su date/number */
 
 .field.float input[type="date"],
 .field.float input[type="number"],
@@ -2370,7 +2383,7 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 
-/* dDAE_1.249 — Fix definitivo allineamento pallini pagamento */
+/* dDAE_1.229 — Fix definitivo allineamento pallini pagamento */
 
 #page-ospite .field.two-col.payment-row{
   display: grid;
@@ -2392,7 +2405,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Override anti-vincoli: nessun offset fisso su C/E */
+/* dDAE_1.229 — Override anti-vincoli: nessun offset fisso su C/E */
 
 #page-ospite #depositType,
 #page-ospite #saldoType{
@@ -2418,7 +2431,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Eliminazione totale label tipo saldo + paywrap pulito */
+/* dDAE_1.229 — Eliminazione totale label tipo saldo + paywrap pulito */
 
 #page-ospite .subfield.paywrap::before,
 #page-ospite .subfield.paywrap::after{
@@ -2427,7 +2440,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — mini led accanto ai prezzi (Acconto/Saldo) */
+/* dDAE_1.229 — mini led accanto ai prezzi (Acconto/Saldo) */
 .guest-led.mini-led{
   width: 10px;
   height: 10px;
@@ -2442,14 +2455,14 @@ body[data-page="ospiti"] .guest-card .actions {
 
 
 /* ===== CALENDARIO ===== */
-/* dDAE_1.249 — Calendario: margini orizzontali 5px (compensa padding .wrap) */
+/* dDAE_1.229 — Calendario: margini orizzontali 5px (compensa padding .wrap) */
 #page-calendario .content.calendar-page{
   margin-left: -9px; /* 14px (wrap) - 9px = 5px */
   margin-right: -9px;
 }
 
 
-/* dDAE_1.249 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
+/* dDAE_1.229 — Calendario: grafica più simile a Pulizie (solo UI, nessuna logica) */
 #page-calendario .cal-nav-btn{
   background: rgba(255,255,255,0.92);
   border: 1px solid rgba(15,23,42,0.14);
@@ -2912,7 +2925,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
+/* dDAE_1.229 — Ospiti: rimuovi freccia nativa select (iOS/Safari) */
 .guest-filter-grid .gf-tile select{
   -webkit-appearance: none;
   appearance: none;
@@ -2956,7 +2969,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Ospiti: pulsante + in testata */
+/* dDAE_1.229 — Ospiti: pulsante + in testata */
 .btn-add-guest{
   width: 40px;
   height: 40px;
@@ -2980,7 +2993,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
+/* dDAE_1.229 — Pagamenti: pillola con 3 pallini (Contanti / Elettronico + Ricevuta) */
 #page-ospite .field.two-col.payment-row{
   grid-template-columns: minmax(0,1fr) 170px !important;
 }
@@ -3040,7 +3053,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
+/* dDAE_1.229 — Pillola registrazioni PS/ISTAT (pallini sotto Contanti/Ricevuta) */
 #page-ospite .pay-gap{
   opacity: 0;
   pointer-events: none;
@@ -3061,7 +3074,7 @@ body[data-page="ospiti"] .guest-card .actions {
 }
 
 
-/* dDAE_1.249 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
+/* dDAE_1.229 — Ospiti: riga cliccabile + LED a destra, arrivo a destra del nome */
 #page-ospiti .guest-card{
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -3300,7 +3313,7 @@ body.perf-lite *::after{
 }
 
 
-/* dDAE_1.249 — Pulizie: raggruppa contenuto sotto topbar e spostalo giù di 30px */
+/* dDAE_1.229 — Pulizie: raggruppa contenuto sotto topbar e spostalo giù di 30px */
 #page-pulizie .clean-mainGroup{
   margin-top: 30px;
 }
@@ -3746,7 +3759,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
 
 
-/* dDAE_1.249 — delete: stato busy + spinner (evita doppi tap) */
+/* dDAE_1.229 — delete: stato busy + spinner (evita doppi tap) */
 .laundry-del.busy{
   opacity: .70;
 }
@@ -4271,7 +4284,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.249 — Stanze occupate: rosso pieno (tinta unita) */
+/* dDAE_1.229 — Stanze occupate: rosso pieno (tinta unita) */
 #page-ospite .room-dot.occupied{
   background: #ff0000 !important;
   background-image: none !important;
@@ -4286,7 +4299,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.249 — iOS: più spazio sotto alle date (testo non attaccato al bordo) */
+/* dDAE_1.231 — iOS: più spazio sotto alle date (testo non attaccato al bordo) */
 #page-ospite input[type="date"]{
   padding-bottom: 18px !important;
   line-height: 1.2;
@@ -4396,7 +4409,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-tile[data-key="TPI"]{ --tile-bg: linear-gradient(180deg, rgba(230,232,236,0.95), rgba(195,200,210,0.88)); }
 
 
-/* --- Lavanderia: fix layout tasto report (dDAE_1.247) --- */
+/* --- Lavanderia: fix layout tasto report (dDAE_1.248) --- */
 #page-lavanderia .laundry-gen-wrap{
   width: 100%;
   display: flex;
@@ -4413,7 +4426,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 
-/* dDAE_1.249 — Lavanderia: titolo centrale grande + period tab centrale + bottone full-width */
+/* dDAE_1.248 — Lavanderia: titolo centrale grande + period tab centrale + bottone full-width */
 #page-lavanderia .card .hd{
   justify-content: center;
   padding-top: 10px;
@@ -4459,49 +4472,37 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.249 — Ospiti: niente vetro sotto + guest card tinta unita 50% */
-#page-ospiti .guest-cards-card,
-#page-ospiti .guest-cards-card .hd,
-#page-ospiti .guest-cards-card .bd{
+
+/* dDAE_1.248 — Ospiti: layout flat + trasparenze 20% */
+#page-ospiti .guest-cards-card{
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+#page-ospiti .guest-cards-card .hd{ background: transparent !important; }
+#page-ospiti .guest-cards-card .bd{ padding: 14px 0 !important; }
 
-/* Guest list (schede nella lista): grigio trasparente, senza sfumature */
 #page-ospiti .guest-card{
-  background: rgba(120,130,140,0.20) !important;
+  background: rgba(148,163,184,0.20) !important;
+  border: 1px solid rgba(15,23,42,0.10) !important;
+  box-shadow: 0 12px 40px rgba(15,23,42,0.08) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: 0 16px 52px rgba(15,23,42,0.10) !important;
 }
 
-/* Scheda ospite (form): tinta unita 50% in base alla modalità */
+#page-ospiti .guest-filter-grid .field input,
+#page-ospiti .guest-filter-grid .field select,
+#page-ospiti .gf-dir{
+  background: rgba(148,163,184,0.20) !important;
+}
+
 #page-ospite .guest-form-card{
-  background: rgba(120,130,140,0.20) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-#page-ospite .guest-form-card.is-create{
-  background: rgba(255,149,0,0.20) !important; /* arancione */
-}
-#page-ospite .guest-form-card.is-edit{
-  background: rgba(120,130,140,0.20) !important; /* grigio */
-}
-#page-ospite .guest-form-card.is-view{
-  background: rgba(50,173,230,0.20) !important; /* azzurro */
-}
+#page-ospite .guest-form-card.is-create{ background: rgba(201,119,43,0.20) !important; }
+#page-ospite .guest-form-card.is-edit{ background: rgba(148,163,184,0.20) !important; }
+#page-ospite .guest-form-card.is-view{ background: rgba(122,192,219,0.20) !important; }
 
-/* dDAE_1.249 — Ospiti: tab/filtri guest list più trasparenti (opacità 20%) */
-#page-ospiti .guest-filter-grid .gf-tile,
-#page-ospiti .guest-filter-grid .gf-tile select,
-#page-ospiti .guest-filter-grid .gf-tile input,
-#page-ospiti .gf-dir,
-#page-ospiti .guest-insno{
-  background: rgba(120,130,140,0.20) !important;
-  background-image: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
