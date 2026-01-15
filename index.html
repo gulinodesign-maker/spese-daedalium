@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.235" rel="stylesheet"/>
-<link href="./manifest.json?v=1.235" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.235" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.235" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.235" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.235" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.236" rel="stylesheet"/>
+<link href="./manifest.json?v=1.236" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.236" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.236" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.236" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.236" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -23,7 +23,7 @@
 <header class="topbar">
 <div class="brand">
 <div class="brand-left">
-<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.235"/>
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.236"/>
 <h1>Daedalium PMS</h1>
 </div>
 <div class="brand-right">
@@ -199,8 +199,15 @@
 <label for="taxTo">A</label>
 </div>
 </div>
-<button class="btn tax-calc" id="taxCalcBtn" type="button">Calcola</button>
-<button class="btn tax-report" id="taxReportBtn" type="button">Genera report</button>
+<button class="btn tax-calc-whiteorange" id="taxCalcBtn" type="button" aria-label="Calcola tassa di soggiorno">
+  <svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24">
+    <path d="M7 10V8.5A4.5 4.5 0 0 1 11.5 4h1A4.5 4.5 0 0 1 17 8.5V10"></path>
+    <path d="M5.5 10h13a2 2 0 0 1 2 2v6a3 3 0 0 1-3 3h-11a3 3 0 0 1-3-3v-6a2 2 0 0 1 2-2Z"></path>
+    <path d="M12 13v5"></path>
+    <path d="M10.2 14.8 12 13l1.8 1.8"></path>
+  </svg>
+  <span>Calcola</span>
+</button>
 <div class="tax-results" hidden="" id="taxResults">
 <div class="tax-result-card tax-result-paying" id="taxPayingCard">
 <div class="tax-result-top">
@@ -807,8 +814,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.235"></script>
-<script defer="" src="./app.js?v=1.235"></script>
+<script defer="" src="./config.js?v=1.236"></script>
+<script defer="" src="./app.js?v=1.236"></script>
 <!-- TAX REPORT MODAL -->
 <div aria-hidden="true" class="modal" hidden="" id="taxReportModal">
 <div aria-labelledby="taxReportTitle" aria-modal="true" class="modal-card tax-report-card" role="dialog">
