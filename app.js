@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.247";
+const BUILD_VERSION = "1.248";
 
 
 
@@ -1395,7 +1395,7 @@ state.page = page;
   }
 
 
-  // Top tools (solo Ospiti) — nuovo ospite + calendario accanto al tasto Home
+  // Top tools (Ospiti) — nuovo ospite + calendario accanto al tasto Home
   const ospitiTopTools = $("#ospitiTopTools");
   if (ospitiTopTools){
     ospitiTopTools.hidden = (page !== "ospiti");
@@ -1481,15 +1481,22 @@ function setupHome(){
 
 
 // OSPITI: pulsante + (nuovo ospite)
+const btnNewGuestOspiti = $("#btnNewGuestOspiti");
+if (btnNewGuestOspiti){
+  btnNewGuestOspiti.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
+}
+
+
+// OSPITI: topbar — nuovo ospite + calendario
 const btnNewGuestTop = $("#btnNewGuestTop");
 if (btnNewGuestTop){
   btnNewGuestTop.addEventListener("click", () => { enterGuestCreateMode(); showPage("ospite"); });
 }
-
-const btnCalendarioTop = $("#btnCalendarioTop");
-if (btnCalendarioTop){
-  btnCalendarioTop.addEventListener("click", () => showPage("calendario"));
+const goCalendarioTopOspiti = $("#goCalendarioTopOspiti");
+if (goCalendarioTopOspiti){
+  bindFastTap(goCalendarioTopOspiti, () => showPage("calendario"));
 }
+
 
 
   // HOME: icona Impostazioni
@@ -2222,6 +2229,7 @@ function enterGuestCreateMode(){
   state.guestViewItem = null;
 
   state.guestMode = "create";
+  try{ updateGuestFormModeClass(); }catch(_){ }
   state.guestEditId = null;
   state.guestEditCreatedAt = null;
 
@@ -2277,6 +2285,7 @@ function enterGuestEditMode(ospite){
   state.guestViewItem = null;
 
   state.guestMode = "edit";
+  try{ updateGuestFormModeClass(); }catch(_){ }
   state.guestEditId = ospite?.id ?? null;
   state.guestEditCreatedAt = (ospite?.created_at ?? ospite?.createdAt ?? null);
 
@@ -2477,7 +2486,21 @@ function updateOspiteHdActions(){
   if (btnDel) btnDel.hidden = !(mode === "view" || mode === "edit");
 }
 
+
+function updateGuestFormModeClass(){
+  try{
+    const card = document.querySelector("#page-ospite .guest-form-card");
+    if (!card) return;
+    const mode = String(state.guestMode || "").toLowerCase();
+    const isView = (mode === "view");
+    card.classList.toggle("is-view", isView);
+    card.classList.toggle("is-create", !isView && mode === "create");
+    card.classList.toggle("is-edit", !isView && mode === "edit");
+  }catch(_){}
+}
+
 function setGuestFormViewOnly(isView, ospite){
+  try{ updateGuestFormModeClass(); }catch(_){ }
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
 
@@ -2502,6 +2525,7 @@ function enterGuestViewMode(ospite){
   // Riempiamo la maschera usando la stessa logica dell'edit, poi blocchiamo tutto in sola lettura
   enterGuestEditMode(ospite);
   state.guestMode = "view";
+  try{ updateGuestFormModeClass(); }catch(_){ }
   state.guestViewItem = ospite || null;
 
   const title = document.getElementById("ospiteFormTitle");
