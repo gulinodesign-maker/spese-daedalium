@@ -3772,11 +3772,19 @@ grid-template-rows: 34px repeat(7, 54px);
 /* Range date + report (Da/A + Genera) */
 .laundry-range{
   display:flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
   margin: 10px 0 12px 0;
   align-items: stretch;
-  flex-wrap: nowrap;
 }
+
+.laundry-range-dates{
+  display:grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 6px;
+  align-items: stretch;
+}
+
 .laundry-range-field{
   flex:1;
   display:flex;
@@ -3796,8 +3804,7 @@ grid-template-rows: 34px repeat(7, 54px);
   min-width: 22px;
   flex: 0 0 auto;
 }
-.laundry-range-field input[type="date"],
-.laundry-range-field input[type="text"]{
+.laundry-range-field input[type="date"]{
   width: 100%;
   border: 0;
   background: transparent;
@@ -3806,27 +3813,15 @@ grid-template-rows: 34px repeat(7, 54px);
   color: inherit;
   outline: none;
   min-width: 0;
-  white-space: nowrap;
 }
 
-/* Tab report lavanderia: solo range, una riga */
-.laundry-report-range{
-  font-weight: 950;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: left;
-  max-width: 100%;
-}
-
-/* Bottone nella stessa riga dei tab (stessa dimensione) */
+/* Bottone: full width sotto le date */
 .laundry-range-btn{
-  flex:1;
+  width: 100%;
   min-height: 48px;
   border-radius: 16px;
   padding: 12px 16px;
   white-space: nowrap;
-  min-width: 0;
 }
 @media (max-width: 420px){
   .laundry-range-btn{ padding: 12px 10px; font-size: 14px; }
@@ -3843,6 +3838,15 @@ grid-template-rows: 34px repeat(7, 54px);
   display:grid;
   place-items:center;
   flex: 0 0 auto;
+}
+.laundry-tab-left{
+  font-weight: 950;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .laundry-del .x{ font-weight: 950; font-size: 16px; line-height: 1; }
@@ -4656,7 +4660,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.257 — Pagine senza vetro (Tassa/Impostazioni) */
+/* dDAE_1.258 — Pagine senza vetro (Tassa/Impostazioni) */
 #page-tassa .card,
 #page-impostazioni .card{
   background: transparent !important;
@@ -4681,7 +4685,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.257 — Pagine senza vetro (Tassa / Impostazioni) */
+/* dDAE_1.258 — Pagine senza vetro (Tassa / Impostazioni) */
 #page-tassa .card,
 #page-impostazioni .card{
   background: transparent !important;

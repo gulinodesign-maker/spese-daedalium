@@ -600,7 +600,11 @@ function formatISODateLocal(value){
   const s = String(value);
 
   // Already YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (/^// Tab report: mostra SOLO il range date (richiesta UI)
+    const startLblFull = it.startDate ? formatLongDateIT(it.startDate) : "";
+    const endLblFull = it.endDate ? formatLongDateIT(it.endDate) : "";
+    const rangeText = (startLblFull && endLblFull) ? `${startLblFull} - ${endLblFull}` : (startLblFull || endLblFull || "—");
+    left.innerHTML = `<div class="laundry-tab-range">${rangeText}</div>`;d{4}-\d{2}-\d{2}$/.test(s)) return s;
 
   // ISO datetime -> local date
   if (s.includes("T")) {
@@ -613,9 +617,7 @@ function formatISODateLocal(value){
   if (s.includes("/")) {
     const parts = s.split("/").map(x=>parseInt(x,10));
     if (parts.length === 3 && parts.every(n=>isFinite(n))) {
-      let [dd,mm,yy] = parts;
-      // Supporto formato breve DD/MM/YY (es: 24/01/26)
-      if (yy < 100) yy = 2000 + yy;
+      const [dd,mm,yy] = parts;
       const dt = new Date(yy, mm-1, dd);
       return toISO(dt);
     }
@@ -4118,9 +4120,7 @@ function setLaundryLabels_(){
 function renderLaundry_(item){
   item = item ? sanitizeLaundryItem_(item) : null;
   state.laundry.current = item;
-
   const printRangeEl = document.getElementById("laundryPrintRange");
-
   if (!item){
     if (printRangeEl) printRangeEl.textContent = "";
     for (const k of LAUNDRY_COLS){
@@ -4134,7 +4134,8 @@ function renderLaundry_(item){
 
   const startLbl = item.startDate ? formatLongDateIT(item.startDate) : "";
   const endLbl = item.endDate ? formatLongDateIT(item.endDate) : "";
-  const rangeText = (startLbl && endLbl) ? `${startLbl} - ${endLbl}` : (startLbl || endLbl || "—");
+  const rangeText = (startLbl && endLbl) ? `${startLbl} → ${endLbl}` : (startLbl || endLbl || "—");
+  if (rangeEl) rangeEl.textContent = rangeText;
   if (printRangeEl) printRangeEl.textContent = rangeText;
 
   for (const k of LAUNDRY_COLS){
@@ -4180,14 +4181,17 @@ function renderLaundryHistory_(list){
     btn.style.gap = "10px";
 
     const left = document.createElement("div");
-    // Tab report: solo range date (niente conteggi)
-    // Formato richiesto: "1 Gennaio 2026 - 14 Gennaio 2026"
+    left.style.flex = "1";
+    left.style.minWidth = "0";
+    left.style.display = "flex";
+    left.style.alignItems = "center";
     const startLbl = it.startDate ? formatLongDateIT(it.startDate) : "";
     const endLbl = it.endDate ? formatLongDateIT(it.endDate) : "";
-    left.innerHTML = `<div class="laundry-report-range">${startLbl} - ${endLbl}</div>`;
+    const rangeText = (startLbl && endLbl) ? `${startLbl} - ${endLbl}` : (startLbl || endLbl || "—");
 
-
-    const del = document.createElement("button");
+    left.className = "laundry-tab-left";
+    left.textContent = rangeText;
+const del = document.createElement("button");
     del.type = "button";
     del.className = "laundry-del";
     del.setAttribute("aria-label", "Elimina report");
@@ -4280,11 +4284,8 @@ async function createLavanderiaReport_() {
   const fromEl = document.getElementById("laundryFrom");
   const toEl = document.getElementById("laundryTo");
 
-  // Supporto input DD/MM/YY (es: 24/01/26) oppure ISO (YYYY-MM-DD)
-  const startRaw = (fromEl && fromEl.value) ? String(fromEl.value).trim() : "";
-  const endRaw = (toEl && toEl.value) ? String(toEl.value).trim() : "";
-  const startDate = startRaw ? formatISODateLocal(startRaw) : "";
-  const endDate = endRaw ? formatISODateLocal(endRaw) : "";
+  const startDate = (fromEl && fromEl.value) ? String(fromEl.value).trim() : "";
+  const endDate = (toEl && toEl.value) ? String(toEl.value).trim() : "";
 
   if (!startDate || !endDate) {
     if (hint) hint.textContent = "";

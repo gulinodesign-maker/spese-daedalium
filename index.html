@@ -154,7 +154,7 @@
 </svg></div>
 <div class="home-main-label">Impostazioni</div>
 </button>
-<div class="build" id="buildText">1.258</div>
+<div class="build" id="buildText">1.257</div>
 <div class="home-spacer"></div>
 </div>
 </div></section>
@@ -677,19 +677,20 @@
 </div>
 </div>
 <div class="bd">
-<div class="laundry-sub">
-<div class="laundry-hint" id="laundryHint"></div>
+<div class="laundry-sub"><div class="laundry-hint" id="laundryHint"></div>
 </div>
 <div aria-label="Intervallo report lavanderia" class="laundry-range">
-<label class="laundry-range-field">
-<span>Da</span>
-<input autocomplete="off" id="laundryFrom" inputmode="numeric" placeholder="24/01/26" type="text"/>
-</label>
-<label class="laundry-range-field">
-<span>A</span>
-<input autocomplete="off" id="laundryTo" inputmode="numeric" placeholder="24/01/26" type="text"/>
-</label>
-<button aria-label="Genera report lavanderia" class="btn primary laundry-range-btn" id="btnLaundryGenerate" type="button">Genera report</button>
+  <div class="laundry-range-dates">
+    <label class="laundry-range-field">
+      <span>Da</span>
+      <input id="laundryFrom" type="date"/>
+    </label>
+    <label class="laundry-range-field">
+      <span>A</span>
+      <input id="laundryTo" type="date"/>
+    </label>
+  </div>
+  <button aria-label="Genera report lavanderia" class="btn primary laundry-range-btn" id="btnLaundryGenerate" type="button">Genera report</button>
 </div>
 <div aria-label="Totali lavanderia" class="laundry-grid" id="laundryGrid">
 <div class="laundry-tile" data-key="MAT">
