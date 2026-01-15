@@ -2997,6 +2997,22 @@ body[data-page="ospiti"] .guest-card .actions {
 .sort-toggle{ min-width: 0; }
 .gf-dir:active{ transform: scale(0.98); }
 
+/* OSPITI — 3 tasti ricerca: sfondo azzurro + testo nero in grassetto */
+#page-ospiti .guest-filter-row-2 button,
+#page-ospiti .guest-search-btn,
+#page-ospiti .guest-searches button{
+  background: rgba(122,192,219,0.20) !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+#page-ospiti .guest-filter-row-2 button:active,
+#page-ospiti .guest-search-btn:active,
+#page-ospiti .guest-searches button:active{
+  transform: scale(0.98);
+}
+
+
 .guest-insno{
   display:inline-flex;
   align-items:center;
@@ -4551,19 +4567,34 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 
-/* ===== dDAE_1.254 UI fixes ===== */
+/* ===== dDAE_1.255 UI fixes ===== */
 
-/* OSPITI – tasti ricerca: azzurri 20% opacità + testo bold */
-.guest-filter-grid button{
-  background: rgba(43, 124, 180, 0.20) !important;
-  border: 1px solid rgba(43, 124, 180, 0.22) !important;
-  color: rgba(8, 64, 120, 0.98) !important;
+/* OSPITI – tasti riordino (Oggi / Ordina per / Freccia):
+   sfondo azzurro 20% opacità, testo nero bold e centrato */
+#page-ospiti #guestToday,
+#page-ospiti #guestSortBy,
+#page-ospiti #guestSortDir{
+  background: rgba(45, 153, 255, 0.20) !important;
+  border: 1px solid rgba(45, 153, 255, 0.22) !important;
+  color: #000 !important;
   font-weight: 800 !important;
+}
+
+/* Centro testo (bottoni) */
+#page-ospiti #guestToday,
+#page-ospiti #guestSortDir{
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
 }
+
+/* Centro testo (select) – compatibilità iOS/Safari */
+#page-ospiti #guestSortBy{
+  text-align: center !important;
+  text-align-last: center !important;
+}
+#page-ospiti #guestSortBy option{ color:#000; }
 
 
 /* SPESE – niente “vetro”: elementi direttamente sullo sfondo */
