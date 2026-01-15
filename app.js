@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.251";
+const BUILD_VERSION = "1.252";
 
 
 
@@ -1401,7 +1401,14 @@ state.page = page;
     ospitiTopTools.hidden = (page !== "ospiti");
   }
 
-  // render on demand
+  
+  // Top tools (Spese) — + e grafico accanto al tasto Home
+  const speseTopTools = $("#speseTopTools");
+  if (speseTopTools){
+    speseTopTools.hidden = (page !== "spese");
+  }
+
+// render on demand
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
