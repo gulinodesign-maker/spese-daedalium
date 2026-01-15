@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.240";
+const BUILD_VERSION = "1.241";
 
 
 
@@ -3763,7 +3763,7 @@ function renderCalendario(){
   for (let i = 0; i < 7; i++) {
     const d = days[i];
     const dayPill = document.createElement("div");
-    dayPill.className = "cal-pill day";
+    dayPill.className = "cal-cell cal-head";
 
     // Abbreviazione (LUN, MAR...) sopra, numero giorno sotto
     const ab = document.createElement("div");
