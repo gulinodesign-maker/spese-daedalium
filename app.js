@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.258";
+const BUILD_VERSION = "1.257";
 
 
 
@@ -600,11 +600,7 @@ function formatISODateLocal(value){
   const s = String(value);
 
   // Already YYYY-MM-DD
-  if (/^// Tab report: mostra SOLO il range date (richiesta UI)
-    const startLblFull = it.startDate ? formatLongDateIT(it.startDate) : "";
-    const endLblFull = it.endDate ? formatLongDateIT(it.endDate) : "";
-    const rangeText = (startLblFull && endLblFull) ? `${startLblFull} - ${endLblFull}` : (startLblFull || endLblFull || "—");
-    left.innerHTML = `<div class="laundry-tab-range">${rangeText}</div>`;d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
 
   // ISO datetime -> local date
   if (s.includes("T")) {
@@ -4120,8 +4116,12 @@ function setLaundryLabels_(){
 function renderLaundry_(item){
   item = item ? sanitizeLaundryItem_(item) : null;
   state.laundry.current = item;
+
+  const rangeEl = document.getElementById("laundryPeriodLabel");
   const printRangeEl = document.getElementById("laundryPrintRange");
+
   if (!item){
+    if (rangeEl) rangeEl.textContent = "Nessun foglio ancora";
     if (printRangeEl) printRangeEl.textContent = "";
     for (const k of LAUNDRY_COLS){
       const v = document.getElementById("laundryVal"+k);
@@ -4181,17 +4181,12 @@ function renderLaundryHistory_(list){
     btn.style.gap = "10px";
 
     const left = document.createElement("div");
-    left.style.flex = "1";
-    left.style.minWidth = "0";
-    left.style.display = "flex";
-    left.style.alignItems = "center";
-    const startLbl = it.startDate ? formatLongDateIT(it.startDate) : "";
-    const endLbl = it.endDate ? formatLongDateIT(it.endDate) : "";
-    const rangeText = (startLbl && endLbl) ? `${startLbl} - ${endLbl}` : (startLbl || endLbl || "—");
+    const startLbl = it.startDate ? formatShortDateIT(it.startDate) : "";
+    const endLbl = it.endDate ? formatShortDateIT(it.endDate) : "";
+    left.innerHTML = `<div style="font-weight:950">${startLbl} → ${endLbl}</div><div style="font-size:12px;opacity:.75">${LAUNDRY_COLS.map(k=>`${k}:${it[k]||0}`).join(" · ")}</div>`;
 
-    left.className = "laundry-tab-left";
-    left.textContent = rangeText;
-const del = document.createElement("button");
+
+    const del = document.createElement("button");
     del.type = "button";
     del.className = "laundry-del";
     del.setAttribute("aria-label", "Elimina report");
