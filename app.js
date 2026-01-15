@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.233";
+const BUILD_VERSION = "1.234";
 
 
 
@@ -4282,7 +4282,14 @@ registerSW();
 
 
 
-try{ hardUpdateCheck(); }catch(_){}
+try{ 
+  hardUpdateCheck();
+  // Ricontrollo periodico: se la PWA resta aperta, prende comunque la nuova build
+  setInterval(() => { try{ hardUpdateCheck(); }catch(_){ } }, 30000);
+  document.addEventListener("visibilitychange", () => {
+    try{ if (!document.hidden) hardUpdateCheck(); }catch(_){ }
+  });
+}catch(_){}
 // ---  helpers (sheet "stanze") ---
 function buildArrayFromState(){
   const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
