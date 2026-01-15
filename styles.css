@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.257"),
+    url("./assets/bg-daedalium.png?v=1.258"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -758,7 +758,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.257"),
+    url("./assets/bg-daedalium.png?v=1.258"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3796,7 +3796,8 @@ grid-template-rows: 34px repeat(7, 54px);
   min-width: 22px;
   flex: 0 0 auto;
 }
-.laundry-range-field input[type="date"]{
+.laundry-range-field input[type="date"],
+.laundry-range-field input[type="text"]{
   width: 100%;
   border: 0;
   background: transparent;
@@ -3805,6 +3806,17 @@ grid-template-rows: 34px repeat(7, 54px);
   color: inherit;
   outline: none;
   min-width: 0;
+  white-space: nowrap;
+}
+
+/* Tab report lavanderia: solo range, una riga */
+.laundry-report-range{
+  font-weight: 950;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  max-width: 100%;
 }
 
 /* Bottone nella stessa riga dei tab (stessa dimensione) */
