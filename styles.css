@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.253"),
+    url("./assets/bg-daedalium.png?v=1.254"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -758,7 +758,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.253"),
+    url("./assets/bg-daedalium.png?v=1.254"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -4551,19 +4551,20 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 
-/* ===== dDAE_1.253 UI fixes ===== */
+/* ===== dDAE_1.254 UI fixes ===== */
 
-/* OSPITI – tasti ricerca: stessi colori (azzurro 20% opacità), testo bold e centrato */
+/* OSPITI – tasti ricerca: azzurri 20% opacità + testo bold */
 .guest-filter-grid button{
-  background: rgba(45, 153, 255, 0.20) !important;
-  border: 1px solid rgba(45, 153, 255, 0.22) !important;
+  background: rgba(43, 124, 180, 0.20) !important;
+  border: 1px solid rgba(43, 124, 180, 0.22) !important;
   color: rgba(8, 64, 120, 0.98) !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
 }
+
 
 /* SPESE – niente “vetro”: elementi direttamente sullo sfondo */
 #page-spese .card,
