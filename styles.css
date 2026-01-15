@@ -4692,3 +4692,22 @@ grid-template-rows: 34px repeat(7, 54px);
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
+
+
+/* --- Inserisci: card senza vetro (dDAE_1.258) --- */
+#page-inserisci .card--plain{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+#page-inserisci .card--plain .hd{
+  border-bottom: 0 !important;
+  padding-left: 0;
+  padding-right: 0;
+}
+#page-inserisci .card--plain .bd{
+  padding-left: 0;
+  padding-right: 0;
+}

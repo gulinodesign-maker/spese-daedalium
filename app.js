@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.257";
+const BUILD_VERSION = "1.258";
 
 
 
@@ -1933,6 +1933,12 @@ async function saveSpesa(){
     if (state.page === "riepilogo") renderRiepilogo();
     if (state.page === "grafico") renderGrafico();
   } catch(_) {}
+
+
+  // Dopo salvataggio: torna alla pagina Spese
+  try { setSpeseView("list"); } catch (_) {}
+  try { showPage("spese"); } catch (_) {}
+
 }
 
 /* 2) SPESE */
