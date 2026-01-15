@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.234";
+const BUILD_VERSION = "1.235";
 
 
 
@@ -4282,14 +4282,15 @@ registerSW();
 
 
 
-try{ 
-  hardUpdateCheck();
-  // Ricontrollo periodico: se la PWA resta aperta, prende comunque la nuova build
-  setInterval(() => { try{ hardUpdateCheck(); }catch(_){ } }, 30000);
-  document.addEventListener("visibilitychange", () => {
-    try{ if (!document.hidden) hardUpdateCheck(); }catch(_){ }
+try{ hardUpdateCheck(); }catch(_){}
+try{
+  // dDAE_1.235 — iOS/PWA: re-check update in foreground + interval
+  const __ddae_update_timer = setInterval(() => { try{ hardUpdateCheck(); }catch(_){} }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) { try{ hardUpdateCheck(); }catch(_){} }
   });
-}catch(_){}
+}catch(_){ }
+
 // ---  helpers (sheet "stanze") ---
 function buildArrayFromState(){
   const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
