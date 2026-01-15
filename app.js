@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.244";
+const BUILD_VERSION = "1.246";
 
 
 
@@ -4191,9 +4191,9 @@ async function loadLavanderia() {
     state.laundry.list = list;
     renderLaundryHistory_(list);
     renderLaundry_(list[0] || null);
-    if (hint) hint.textContent = "Imposta un intervallo (Da/A) e genera il report per la lavanderia.";
+    if (hint) hint.textContent = "";
   } catch (e) {
-    if (hint) hint.textContent = "Offline o errore: non riesco a caricare lo storico.";
+    if (hint) hint.textContent = "";
     throw e;
   }
 }
@@ -4207,24 +4207,24 @@ async function createLavanderiaReport_() {
   const endDate = (toEl && toEl.value) ? String(toEl.value).trim() : "";
 
   if (!startDate || !endDate) {
-    if (hint) hint.textContent = "Seleziona prima l'intervallo (Da e A).";
-    toast("Compila Da e A");
+    if (hint) hint.textContent = "";
+    toast("Seleziona Da e A");
     return null;
   }
   if (startDate > endDate) {
-    if (hint) hint.textContent = "Intervallo non valido: 'Da' non può essere dopo 'A'.";
+    if (hint) hint.textContent = "";
     toast("Intervallo non valido");
     return null;
   }
 
-  if (hint) hint.textContent = "Sto creando il report…";
+  if (hint) hint.textContent = "";
   const res = await api("lavanderia", { method:"POST", body: { startDate, endDate }, showLoader:true });
   const item = sanitizeLaundryItem_(res && res.data ? res.data : res);
 
   await loadLavanderia();
   renderLaundry_(item);
 
-  if (hint) hint.textContent = "Report creato e salvato.";
+  if (hint) hint.textContent = "";
   return item;
 }
 
