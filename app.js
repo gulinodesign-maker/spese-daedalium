@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.234";
+const BUILD_VERSION = "1.235";
 
 
 
@@ -1271,10 +1271,10 @@ function bindHomeDelegation(){
     }
     const pul = e.target.closest && e.target.closest("#goPulizie");
     if (pul){ hideLauncher(); showPage("pulizie"); return; }
-        const opcal = e.target.closest && e.target.closest("#goOrePulizia");
+        const opcal = e.target.closest && e.target.closest("#goOrePulizia") || e.target.closest("#goOrePuliziaTop");
     if (opcal){ hideLauncher(); showPage("orepulizia"); return; }
 
-const lav = e.target.closest && e.target.closest("#goLavanderia");
+const lav = e.target.closest && e.target.closest("#goLavanderia") || e.target.closest("#goLavanderiaTop");
     if (lav){ hideLauncher(); showPage("lavanderia"); return; }
 
     const imp = e.target.closest && e.target.closest("#goImpostazioni");

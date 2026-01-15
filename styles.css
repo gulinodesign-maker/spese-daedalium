@@ -137,6 +137,8 @@ body{
 }
 .icon-btn.icon-btn-whiteblue:active{ transform: scale(0.98); }
 
+.icon-btn.icon-btn-whiteblue .ui-ico{ stroke: var(--blue2); }
+
 .icon-btn.icon-btn-whiteorange{
   background: #ffffff;
   border: 1px solid rgba(15,23,42,0.14);
@@ -4258,7 +4260,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* =========================
    Topbar tools (Pulizie) — white buttons with colored icons (iOS-safe)
-   Build: dDAE_1.234
+   Build: dDAE_1.235
 ========================= */
 #pulizieTopTools{
   display:flex;
