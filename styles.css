@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.254"),
+    url("./assets/bg-daedalium.png?v=1.256"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -758,7 +758,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.254"),
+    url("./assets/bg-daedalium.png?v=1.256"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3769,27 +3769,32 @@ grid-template-rows: 34px repeat(7, 54px);
 /* Nascondi vecchie iconcine se rimangono da qualche parte */
 .laundry-tile-icon{ display:none !important; }
 
-/* Range date (Da/A) */
+/* Range date + report (Da/A + Genera) */
 .laundry-range{
   display:flex;
   gap: 6px;
   margin: 10px 0 12px 0;
+  align-items: stretch;
+  flex-wrap: nowrap;
 }
 .laundry-range-field{
   flex:1;
   display:flex;
   align-items:center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 12px 16px;
+  min-height: 48px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   background: rgba(255,255,255,0.6);
   backdrop-filter: blur(12px);
+  min-width: 0;
 }
 .laundry-range-field span{
   font-weight: 500;
   opacity: .8;
   min-width: 22px;
+  flex: 0 0 auto;
 }
 .laundry-range-field input[type="date"]{
   width: 100%;
@@ -3799,8 +3804,21 @@ grid-template-rows: 34px repeat(7, 54px);
   font-weight: 500;
   color: inherit;
   outline: none;
+  min-width: 0;
 }
 
+/* Bottone nella stessa riga dei tab (stessa dimensione) */
+.laundry-range-btn{
+  flex:1;
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 12px 16px;
+  white-space: nowrap;
+  min-width: 0;
+}
+@media (max-width: 420px){
+  .laundry-range-btn{ padding: 12px 10px; font-size: 14px; }
+}
 /* Pulsante elimina report (pallino rosso con X bianca) */
 .laundry-del{
   width: 28px;
@@ -4475,8 +4493,9 @@ grid-template-rows: 34px repeat(7, 54px);
   justify-content: center;
 }
 #page-lavanderia #btnLaundryGenerate{
+  flex: 1;
   width: 100%;
-  display: block;
+  display: inline-flex;
 }
 /* richiesto: rimuovere testi guida sotto il periodo */
 #page-lavanderia .laundry-hint{ display:none !important; }
@@ -4527,6 +4546,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 #page-lavanderia #btnLaundryGenerate{
+  flex: 1;
   width: 100%;
 }
 
