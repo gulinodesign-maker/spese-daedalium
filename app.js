@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.258";
+const BUILD_VERSION = "1.259";
 
 
 
@@ -2768,7 +2768,14 @@ function setupOspite(){
 
     const occ = new Set();
 
+    // FIX EDIT: non considerare come 'occupate' le stanze dell'ospite che sto modificando
+    const _editId = (state.guestEditId != null && state.guestEditId !== '') ? String(state.guestEditId) : null;
+
     for (const g of rows){
+      if (_editId && String(g.id ?? "") === _editId) {
+        // MODIFICA OSPITE: ignora il record corrente nel calcolo occupazione
+        continue;
+      }
       const gi = String(g.check_in ?? g.checkIn ?? g.checkin ?? "").slice(0,10);
       const go = String(g.check_out ?? g.checkOut ?? g.checkout ?? "").slice(0,10);
       if (!gi || !go) continue;
