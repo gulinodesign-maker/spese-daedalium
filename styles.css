@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.236"),
+    url("./assets/bg-daedalium.png?v=1.237"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -732,7 +732,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.236"),
+    url("./assets/bg-daedalium.png?v=1.237"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3799,7 +3799,7 @@ grid-template-rows: 34px repeat(7, 54px);
 /* ===== Tassa di soggiorno (dDAE_1.229) ===== */
 .home-main-label.small{ font-size: 14px; line-height: 1.05; text-align:center; }
 
-.tax-hd{ display:flex; align-items:center; gap:12px; }
+.tax-hd{ display:flex; align-items:center; justify-content:center; gap:12px; }
 .tax-back{ padding: 10px 14px; min-height: 44px; border-radius: 16px; }
 .tax-period{ display:flex; gap:12px; justify-content: space-between; align-items: stretch; }
 .tax-period .field{ flex:1; margin-top: 0; }
@@ -4260,7 +4260,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* =========================
    Topbar tools (Pulizie) — white buttons with colored icons (iOS-safe)
-   Build: dDAE_1.236
+   Build: dDAE_1.237
 ========================= */
 #pulizieTopTools{
   display:flex;

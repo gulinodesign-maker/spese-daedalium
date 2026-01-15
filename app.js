@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.236";
+const BUILD_VERSION = "1.237";
 
 
 
@@ -4724,11 +4724,6 @@ function initTassaPage(){
   if (__tassaBound) return;
   __tassaBound = true;
 
-  const back = $("#taxBackBtn");
-  if (back){
-    bindFastTap(back, () => { showPage("home"); showLauncher(); });
-  }
-
   const from = $("#taxFrom");
   const to = $("#taxTo");
   if (from) from.addEventListener("change", resetTassaUI);
@@ -4743,21 +4738,7 @@ function initTassaPage(){
   }
 
 
-  const reportBtn = $("#taxReportBtn");
-  if (reportBtn){
-    bindFastTap(reportBtn, async () => {
-      try{
-        // se non hai ancora calcolato, prova a calcolare
-        if (!state._taxLast) await calcTassa();
-        const txt = buildTaxReportText();
-        openTaxReportModal(txt);
-      }catch(err){
-        toast(String(err && err.message || err || "Errore"));
-      }
-    });
-  }
-
-  // Stato iniziale: risultati nascosti finché non premi "Calcola"
+// Stato iniziale: risultati nascosti finché non premi "Calcola"
   resetTassaUI();
 }
 
