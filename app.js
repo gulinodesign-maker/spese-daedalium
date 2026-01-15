@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.239";
+const BUILD_VERSION = "1.240";
 
 
 
@@ -1422,7 +1422,7 @@ function setupHeader(){
   const bb = $("#backBtnTop");
   if (bb) bb.addEventListener("click", () => {
     if (state.page === "orepulizia") { showPage("pulizie"); return; }
-    if (state.page === "calendario") { showPage(state._calendarPrev || "home"); return; }
+    if (state.page === "calendario") { showPage("ospiti"); return; }
     showPage("home");
   });
 }
