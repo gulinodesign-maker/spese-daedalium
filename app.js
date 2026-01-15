@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.237";
+const BUILD_VERSION = "1.238";
 
 
 
@@ -1351,7 +1351,12 @@ function showPage(page){
   }
   if (page === "spese" && !state.speseView) state.speseView = "list";
 
-  state.page = page;
+  const prevPage = state.page;
+  if (page === "calendario" && prevPage && prevPage !== "calendario") {
+    state._calendarPrev = prevPage;
+  }
+
+state.page = page;
   document.body.dataset.page = page;
 
   try { __rememberPage(page); } catch (_) {}
@@ -1376,10 +1381,10 @@ function showPage(page){
   }
 
 
-  // Top back button (solo Ore pulizia → torna a Pulizie)
+  // Top back button (Ore pulizia + Calendario)
   const backBtnTop = $("#backBtnTop");
   if (backBtnTop){
-    backBtnTop.hidden = (page !== "orepulizia");
+    backBtnTop.hidden = !(page === "orepulizia" || page === "calendario");
   }
 
 
@@ -1413,10 +1418,12 @@ function setupHeader(){
   const hb = $("#hamburgerBtn");
   if (hb) hb.addEventListener("click", () => { hideLauncher(); showPage("home"); });
 
-  // Back (solo ore pulizia)
+  // Back (ore pulizia + calendario)
   const bb = $("#backBtnTop");
   if (bb) bb.addEventListener("click", () => {
-    if (state.page === "orepulizia") { showPage("pulizie"); }
+    if (state.page === "orepulizia") { showPage("pulizie"); return; }
+    if (state.page === "calendario") { showPage(state._calendarPrev || "home"); return; }
+    showPage("home");
   });
 }
 function setupHome(){
