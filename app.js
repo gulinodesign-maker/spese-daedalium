@@ -1382,10 +1382,11 @@ function showPage(page){
     backBtnTop.hidden = (page !== "orepulizia");
   }
 
-  // Top tools (solo Pulizie): Lavanderia + Ore di lavoro
-  const pulTools = $("#pulizieTopTools");
-  if (pulTools){
-    pulTools.hidden = (page !== "pulizie");
+
+  // Top tools (solo Pulizie) — lavanderia + ore lavoro accanto al tasto Home
+  const pulizieTopTools = $("#pulizieTopTools");
+  if (pulizieTopTools){
+    pulizieTopTools.hidden = (page !== "pulizie");
   }
 
   // render on demand
@@ -1417,13 +1418,6 @@ function setupHeader(){
   if (bb) bb.addEventListener("click", () => {
     if (state.page === "orepulizia") { showPage("pulizie"); }
   });
-
-  // Pulizie quick tools in top bar
-  const tl = $("#topLaundryBtn");
-  if (tl) bindFastTap(tl, () => { showPage("lavanderia"); });
-
-  const tw = $("#topWorkBtn");
-  if (tw) bindFastTap(tw, () => { showPage("orepulizia"); });
 }
 function setupHome(){
   bindLauncherDelegation();
@@ -3118,8 +3112,8 @@ async function init(){
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSaveLaundry = document.getElementById("cleanSaveLaundry");
   const cleanSaveHours = document.getElementById("cleanSaveHours");
-  const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
-  const btnOrePuliziaFromPulizie = document.getElementById("btnOrePuliziaFromPulizie");
+  const btnLaundryFromPulizie = document.getElementById("topLaundryBtn");
+  const btnOrePuliziaFromPulizie = document.getElementById("topWorkBtn");
 
   // --- Pulizie: popup descrizioni intestazioni (MAT/SIN/...) ---
   const cleanHeaderModal = document.getElementById("cleanHeaderModal");
