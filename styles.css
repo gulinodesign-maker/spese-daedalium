@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.248"),
+    url("./assets/bg-daedalium.png?v=1.243"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -732,7 +732,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.248"),
+    url("./assets/bg-daedalium.png?v=1.243"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -4458,4 +4458,38 @@ grid-template-rows: 34px repeat(7, 54px);
   width: 100%;
 }
 
-test
+
+/* dDAE_1.248 — Ospiti: niente vetro sotto + guest card tinta unita 50% */
+#page-ospiti .guest-cards-card,
+#page-ospiti .guest-cards-card .hd,
+#page-ospiti .guest-cards-card .bd{
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Guest list (schede nella lista): grigio trasparente, senza sfumature */
+#page-ospiti .guest-card{
+  background: rgba(120,130,140,0.50) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 16px 52px rgba(15,23,42,0.10) !important;
+}
+
+/* Scheda ospite (form): tinta unita 50% in base alla modalità */
+#page-ospite .guest-form-card{
+  background: rgba(120,130,140,0.50) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#page-ospite .guest-form-card.is-create{
+  background: rgba(255,149,0,0.50) !important; /* arancione */
+}
+#page-ospite .guest-form-card.is-edit{
+  background: rgba(120,130,140,0.50) !important; /* grigio */
+}
+#page-ospite .guest-form-card.is-view{
+  background: rgba(50,173,230,0.50) !important; /* azzurro */
+}

@@ -2210,7 +2210,9 @@ function enterGuestCreateMode(){
   state.guestViewItem = null;
 
   state.guestMode = "create";
-  state.guestEditId = null;
+  
+  try { updateGuestFormCardMode(); } catch (_) {}
+state.guestEditId = null;
   state.guestEditCreatedAt = null;
 
   const title = document.getElementById("ospiteFormTitle");
@@ -2265,7 +2267,9 @@ function enterGuestEditMode(ospite){
   state.guestViewItem = null;
 
   state.guestMode = "edit";
-  state.guestEditId = ospite?.id ?? null;
+  
+  try { updateGuestFormCardMode(); } catch (_) {}
+state.guestEditId = ospite?.id ?? null;
   state.guestEditCreatedAt = (ospite?.created_at ?? ospite?.createdAt ?? null);
 
   const title = document.getElementById("ospiteFormTitle");
@@ -2465,6 +2469,16 @@ function updateOspiteHdActions(){
   if (btnDel) btnDel.hidden = !(mode === "view" || mode === "edit");
 }
 
+
+function updateGuestFormCardMode(){
+  const card = document.querySelector("#page-ospite .guest-form-card");
+  if (!card) return;
+  const mode = state.guestMode || "create"; // "create" | "edit" | "view"
+  card.classList.toggle("is-create", mode === "create");
+  card.classList.toggle("is-edit", mode === "edit");
+  card.classList.toggle("is-view", mode === "view"); // in view è già gestito anche da setGuestFormViewOnly
+}
+
 function setGuestFormViewOnly(isView, ospite){
   const card = document.querySelector("#page-ospite .guest-form-card");
   if (card) card.classList.toggle("is-view", !!isView);
@@ -2481,6 +2495,8 @@ function setGuestFormViewOnly(isView, ospite){
     if (isView) renderRoomsReadOnly(ospite);
     else ro.innerHTML = "";
   }
+  try { updateGuestFormCardMode(); } catch (_) {}
+
 
   // Aggiorna i pallini in testata in base alla modalità corrente
   try { updateOspiteHdActions(); } catch (_) {}
@@ -2490,7 +2506,9 @@ function enterGuestViewMode(ospite){
   // Riempiamo la maschera usando la stessa logica dell'edit, poi blocchiamo tutto in sola lettura
   enterGuestEditMode(ospite);
   state.guestMode = "view";
-  state.guestViewItem = ospite || null;
+  
+  try { updateGuestFormCardMode(); } catch (_) {}
+state.guestViewItem = ospite || null;
 
   const title = document.getElementById("ospiteFormTitle");
   if (title) title.textContent = "Scheda ospite";

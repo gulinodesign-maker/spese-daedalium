@@ -1,5 +1,5 @@
 /* dDAE - Service Worker (PWA)
- * Build: dDAE_1.247
+ * Build: dDAE_1.248
  *
  * Obiettivi:
  * - cache name cambia ad ogni build
