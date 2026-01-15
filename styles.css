@@ -4396,7 +4396,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-tile[data-key="TPI"]{ --tile-bg: linear-gradient(180deg, rgba(230,232,236,0.95), rgba(195,200,210,0.88)); }
 
 
-/* --- Lavanderia: fix layout tasto report (dDAE_1.246) --- */
+/* --- Lavanderia: fix layout tasto report (dDAE_1.247) --- */
 #page-lavanderia .laundry-gen-wrap{
   width: 100%;
   display: flex;
@@ -4411,3 +4411,49 @@ grid-template-rows: 34px repeat(7, 54px);
 /* richiesto: rimuovere titolo Storico */
 #page-lavanderia .laundry-history-wrap .section-title{ display:none !important; }
 
+
+
+/* dDAE_1.247 — Lavanderia: titolo centrale grande + period tab centrale + bottone full-width */
+#page-lavanderia .card .hd{
+  justify-content: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+#page-lavanderia .card .hd-actions{ display:none !important; }
+
+#page-lavanderia .card .hd h2{
+  width: 100%;
+  text-align: center;
+  font-size: clamp(30px, 7.2vw, 40px); /* ~2.5x rispetto a h2 base */
+  font-weight: 950;
+  color: var(--blue);
+  letter-spacing: 0.2px;
+}
+
+#page-lavanderia .laundry-sub{
+  margin: 0 0 12px 0;
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#page-lavanderia .laundry-period{
+  justify-content: center;
+  text-align: center;
+  color: var(--blue);
+}
+
+#page-lavanderia .laundry-hint{ display:none !important; }
+
+#page-lavanderia .laundry-gen-wrap{
+  width: 100%;
+  margin: 10px 0 14px 0;
+  display:flex;
+  justify-content:center;
+}
+
+#page-lavanderia #btnLaundryGenerate{
+  width: 100%;
+}
