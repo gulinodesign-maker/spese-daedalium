@@ -8,12 +8,12 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<link href="./styles.css?v=1.235" rel="stylesheet"/>
-<link href="./manifest.json?v=1.235" rel="manifest"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.235" rel="apple-touch-icon" sizes="180x180"/>
-<link href="./assets/icons/apple-touch-icon.png?v=1.235" rel="apple-touch-icon-precomposed" sizes="180x180"/>
-<link href="./assets/icons/favicon-32.png?v=1.235" rel="icon" sizes="32x32" type="image/png"/>
-<link href="./assets/icons/favicon-16.png?v=1.235" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./styles.css?v=1.234" rel="stylesheet"/>
+<link href="./manifest.json?v=1.229" rel="manifest"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.234" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./assets/icons/apple-touch-icon.png?v=1.234" rel="apple-touch-icon-precomposed" sizes="180x180"/>
+<link href="./assets/icons/favicon-32.png?v=1.234" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/icons/favicon-16.png?v=1.234" rel="icon" sizes="16x16" type="image/png"/>
 <meta content="#ffffff" name="theme-color"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="Daedalium PMS" name="apple-mobile-web-app-title"/>
@@ -21,29 +21,18 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">
-    <div class="brand-left">
-      <img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.235"/>
-      <h1>Daedalium PMS</h1>
-    </div>
+<div class="brand">
+<div class="brand-left">
+<img alt="Daedalium logo" class="logo" src="./assets/logo.jpg?v=1.234"/>
+<h1>Daedalium PMS</h1>
+</div>
+<div class="brand-right">
 
-    <!-- Center tools: sempre centrati (solo in pagina Pulizie) -->
-    <div class="brand-center">
-      <div class="topbar-tools" id="pulizieTopTools" hidden>
-        <button aria-label="Lavanderia" class="icon-btn icon-btn-blue" id="topLaundryBtn" type="button"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path><path d="M7 7h.01"></path><path d="M10 7h.01"></path><path d="M13 7h6"></path><circle cx="12" cy="14" r="4"></circle></svg></button>
-        <button aria-label="Ore di lavoro" class="icon-btn icon-btn-orange" id="topWorkBtn" type="button"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M12 8v5l3 2"></path><path d="M12 22a10 10 0 1 0-10-10 10 10 0 0 0 10 10Z"></path></svg></button>
-      </div>
-    </div>
-
-    <div class="brand-right">
-      <button aria-label="Indietro" class="icon-btn icon-btn-whiteorange" hidden id="backBtnTop" type="button">
-        <span aria-hidden="true" class="backchev"><svg aria-hidden="true" class="ui-ico" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path><path d="M9 12h12"></path></svg></span>
-      </button>
-      <button aria-label="Home" class="icon-btn" id="hamburgerBtn" type="button">
-        <span aria-hidden="true" class="hamburger"></span>
-      </button>
-    </div>
-  </div>
+<button aria-label="Indietro" class="icon-btn icon-btn-whiteorange" hidden="" id="backBtnTop" type="button"><span aria-hidden="true" class="backchev"><svg aria-hidden="true" class="ui-ico" viewbox="0 0 24 24"><path d="M15 18l-6-6 6-6"></path><path d="M9 12h12"></path></svg></span></button><button aria-label="Home" class="icon-btn" id="hamburgerBtn">
+<span aria-hidden="true" class="hamburger"></span>
+</button>
+</div>
+</div>
 </header>
 <main class="wrap">
 <!-- HOME (launcher) -->
@@ -130,7 +119,7 @@
 </svg></div>
 <div class="home-main-label">Impostazioni</div>
 </button>
-<div class="build" id="buildText">1.235</div>
+<div class="build" id="buildText">1.231</div>
 <div class="home-spacer"></div>
 </div>
 </div></section>
@@ -500,18 +489,15 @@
 </div>
 <div class="bd">
 <div class="clean-topbar">
-<div class="clean-top-left"></div>
-</button>
+  <div class="clean-top-left"></div>
+  <div class="clean-nav" role="group" aria-label="Navigazione giorno">
+    <button class="btn ghost" id="cleanPrev" type="button" aria-label="Giorno precedente">←</button>
+    <button class="btn" id="cleanToday" type="button" aria-label="Oggi">Oggi</button>
+    <button class="btn ghost" id="cleanNext" type="button" aria-label="Giorno successivo">→</button>
+  </div>
+  <div class="clean-top-actions"></div>
 </div>
-<div class="clean-nav">
-<button class="btn ghost" id="cleanPrev" type="button">←</button>
-<button class="btn" id="cleanToday" type="button">Oggi</button>
-<button class="btn ghost" id="cleanNext" type="button">→</button>
-</div>
-<div class="clean-top-actions"></div>
-</button>
-</div>
-</div>
+
 <div class="clean-mainGroup">
 <div class="clean-date" id="cleanDateLabel">1 Gennaio 2026</div>
 <!-- Griglia: riga header (MAT..TAP) + 6 righe stanze (1..6) = 7 righe totali.
@@ -803,8 +789,8 @@
 </div>
 </div>
 </div>
-<script defer="" src="./config.js?v=1.235"></script>
-<script defer="" src="./app.js?v=1.235"></script>
+<script defer="" src="./config.js?v=1.234"></script>
+<script defer="" src="./app.js?v=1.234"></script>
 <!-- TAX REPORT MODAL -->
 <div aria-hidden="true" class="modal" hidden="" id="taxReportModal">
 <div aria-labelledby="taxReportTitle" aria-modal="true" class="modal-card tax-report-card" role="dialog">

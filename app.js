@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.235";
+const BUILD_VERSION = "1.234";
 
 
 
@@ -1382,10 +1382,11 @@ function showPage(page){
     backBtnTop.hidden = (page !== "orepulizia");
   }
 
-  // Top tools (solo Pulizie): Lavanderia + Ore di lavoro
-  const pulTools = $("#pulizieTopTools");
-  if (pulTools){
-    pulTools.hidden = (page !== "pulizie");
+
+  // Top tools (solo Pulizie) — lavanderia + ore lavoro accanto al tasto Home
+  const pulizieTopTools = $("#pulizieTopTools");
+  if (pulizieTopTools){
+    pulizieTopTools.hidden = (page !== "pulizie");
   }
 
   // render on demand
@@ -1417,13 +1418,6 @@ function setupHeader(){
   if (bb) bb.addEventListener("click", () => {
     if (state.page === "orepulizia") { showPage("pulizie"); }
   });
-
-  // Pulizie quick tools in top bar
-  const tl = $("#topLaundryBtn");
-  if (tl) bindFastTap(tl, () => { showPage("lavanderia"); });
-
-  const tw = $("#topWorkBtn");
-  if (tw) bindFastTap(tw, () => { showPage("orepulizia"); });
 }
 function setupHome(){
   bindLauncherDelegation();
@@ -3118,8 +3112,8 @@ async function init(){
   const cleanGrid = document.getElementById("cleanGrid");
   const cleanSaveLaundry = document.getElementById("cleanSaveLaundry");
   const cleanSaveHours = document.getElementById("cleanSaveHours");
-  const btnLaundryFromPulizie = document.getElementById("btnLaundryFromPulizie");
-  const btnOrePuliziaFromPulizie = document.getElementById("btnOrePuliziaFromPulizie");
+  const btnLaundryFromPulizie = document.getElementById("topLaundryBtn");
+  const btnOrePuliziaFromPulizie = document.getElementById("topWorkBtn");
 
   // --- Pulizie: popup descrizioni intestazioni (MAT/SIN/...) ---
   const cleanHeaderModal = document.getElementById("cleanHeaderModal");
@@ -4283,14 +4277,6 @@ registerSW();
 
 
 try{ hardUpdateCheck(); }catch(_){}
-try{
-  // dDAE_1.235 — iOS/PWA: re-check update in foreground + interval
-  const __ddae_update_timer = setInterval(() => { try{ hardUpdateCheck(); }catch(_){} }, 30000);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) { try{ hardUpdateCheck(); }catch(_){} }
-  });
-}catch(_){ }
-
 // ---  helpers (sheet "stanze") ---
 function buildArrayFromState(){
   const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
