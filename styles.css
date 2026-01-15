@@ -151,18 +151,18 @@ body{
 }
 .icon-btn.icon-btn-whiteorange:active{ transform: scale(0.98); }
 
-
+/* OSPITI top tools: bottone bianco con icona indaco */
 .icon-btn.icon-btn-whiteindigo{
-  background: #ffffff;
+  background:#ffffff;
   border: 1px solid rgba(15,23,42,0.14);
   box-shadow: 0 10px 26px rgba(15,23,42,0.10);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
-.icon-btn.icon-btn-whiteindigo .ui-ico{ stroke: #4f46e5; /* indaco */ }
+.icon-btn.icon-btn-whiteindigo .ui-ico{
+  stroke: #4f46e5; /* indaco */
+}
 .icon-btn.icon-btn-whiteindigo:active{ transform: scale(0.98); }
-
-
 
 /* Icone SVG nei pulsanti in topbar */
 .icon-btn .ui-ico{
@@ -4409,7 +4409,7 @@ grid-template-rows: 34px repeat(7, 54px);
 .laundry-tile[data-key="TPI"]{ --tile-bg: linear-gradient(180deg, rgba(230,232,236,0.95), rgba(195,200,210,0.88)); }
 
 
-/* --- Lavanderia: fix layout tasto report (dDAE_1.248) --- */
+/* --- Lavanderia: fix layout tasto report (dDAE_1.247) --- */
 #page-lavanderia .laundry-gen-wrap{
   width: 100%;
   display: flex;
@@ -4426,7 +4426,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 
 
-/* dDAE_1.248 — Lavanderia: titolo centrale grande + period tab centrale + bottone full-width */
+/* dDAE_1.247 — Lavanderia: titolo centrale grande + period tab centrale + bottone full-width */
 #page-lavanderia .card .hd{
   justify-content: center;
   padding-top: 10px;
@@ -4470,39 +4470,3 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-lavanderia #btnLaundryGenerate{
   width: 100%;
 }
-
-
-
-/* dDAE_1.248 — Ospiti: layout flat + trasparenze 20% */
-#page-ospiti .guest-cards-card{
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-#page-ospiti .guest-cards-card .hd{ background: transparent !important; }
-#page-ospiti .guest-cards-card .bd{ padding: 14px 0 !important; }
-
-#page-ospiti .guest-card{
-  background: rgba(148,163,184,0.20) !important;
-  border: 1px solid rgba(15,23,42,0.10) !important;
-  box-shadow: 0 12px 40px rgba(15,23,42,0.08) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-#page-ospiti .guest-filter-grid .field input,
-#page-ospiti .guest-filter-grid .field select,
-#page-ospiti .gf-dir{
-  background: rgba(148,163,184,0.20) !important;
-}
-
-#page-ospite .guest-form-card{
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-#page-ospite .guest-form-card.is-create{ background: rgba(201,119,43,0.20) !important; }
-#page-ospite .guest-form-card.is-edit{ background: rgba(148,163,184,0.20) !important; }
-#page-ospite .guest-form-card.is-view{ background: rgba(122,192,219,0.20) !important; }
-
