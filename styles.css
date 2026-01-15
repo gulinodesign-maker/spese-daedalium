@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.241"),
+    url("./assets/bg-daedalium.png?v=1.242"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -732,7 +732,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.241"),
+    url("./assets/bg-daedalium.png?v=1.242"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2496,8 +2496,7 @@ body[data-page="ospiti"] .guest-card .actions {
 #page-calendario .cal-pill.corner{
   background: rgba(255,255,255,0.82);
   color: rgba(15,23,42,0.70);
-  margin-bottom: 8px;
-}
+  }
 #page-calendario .cal-cell{
   border-radius: 13px;
   border: 0.5px solid rgba(15,23,42,0.12);
@@ -2515,6 +2514,18 @@ body[data-page="ospiti"] .guest-card .actions {
   justify-content: center;
   gap: 2px;
   padding: 6px 4px;
+}
+
+#page-calendario .cal-cell.cal-corner{
+  /* stessa griglia e dimensioni delle altre celle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#page-calendario .cal-corner-text{
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: rgba(15,23,42,0.72);
 }
 #page-calendario .cal-cell::before{
   content:"";

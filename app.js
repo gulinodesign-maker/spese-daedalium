@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.241";
+const BUILD_VERSION = "1.242";
 
 
 
@@ -3755,11 +3755,11 @@ function renderCalendario(){
 
   // Angolo alto-sinistra: etichetta "ST" (sopra la colonna stanze, a sinistra dei giorni)
   const corner = document.createElement("div");
-  corner.className = "cal-pill corner";
-  corner.textContent = "ST";
+  corner.className = "cal-cell cal-head cal-corner";
+  corner.innerHTML = `<div class="cal-corner-text">ST</div>`;
   frag.appendChild(corner);
 
-  // Prima riga: giorni (colonne)
+// Prima riga: giorni (colonne)
   for (let i = 0; i < 7; i++) {
     const d = days[i];
     const dayPill = document.createElement("div");
