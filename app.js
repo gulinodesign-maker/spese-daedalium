@@ -2666,9 +2666,11 @@ if (!name) return toast("Inserisci il nome");
   await loadOspiti({ ...(state.period || {}), force:true });
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
 
-  // Dopo salvataggio: torna sempre alla lista ospiti
-  try { enterGuestCreateMode(); } catch (_) {}
-  showPage("ospiti");
+  if (isEdit){
+    showPage("ospiti");
+  } else {
+    enterGuestCreateMode();
+  }
 }
 
 function setupOspite(){

@@ -4222,8 +4222,8 @@ grid-template-rows: 34px repeat(7, 54px);
 
 .opcal-stat{
   border-radius: 18px;
-  padding: 11px 13px;
-  min-height: 57px;
+  padding: 16px 18px;
+  min-height: 82px;
   border: 1px solid rgba(15,23,42,0.10);
   box-shadow: 0 14px 34px rgba(15,23,42,0.08);
   backdrop-filter: blur(10px);
@@ -4231,7 +4231,7 @@ grid-template-rows: 34px repeat(7, 54px);
   display:flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
 }
 .opcal-stat--blue{
   background: rgba(43,124,180,0.18);
@@ -4276,7 +4276,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .opcal-cell{
   position: relative;
-  min-height: 69px;
+  min-height: 60px;
   border-radius: 18px;
   background: rgba(235,235,235,0.74);
   box-shadow: 0 10px 22px rgba(15,23,42,0.08), inset 0 0 0 1px rgba(15,23,42,0.06);
@@ -4286,9 +4286,9 @@ grid-template-rows: 34px repeat(7, 54px);
   position:absolute;
   top: 10px;
   left: 12px;
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(43,124,180,0.95);
-  font-weight: 400;
+  font-weight: 500;
 }
 .opcal-hours{
   position:absolute;
@@ -4297,7 +4297,7 @@ grid-template-rows: 34px repeat(7, 54px);
   top: 52%;
   transform: translateY(-40%);
   text-align:center;
-  font-weight: 800;
+  font-weight: 500;
   color: rgba(201,119,43,1);
   font-size: 22px;
 }
@@ -4342,7 +4342,7 @@ grid-template-rows: 34px repeat(7, 54px);
   .opcal-stats{ grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 0; }
   .opcal-statLabel{ font-size: 13px; }
   .opcal-statValue{
-    font-size: 13px;
+    font-size: 18px;
     line-height: 1.12;
     white-space: nowrap;
     overflow: hidden;
@@ -4351,7 +4351,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
   .opcal-weekdays{ gap: 6px; }
   .opcal-grid{ gap: 6px; }
-  .opcal-cell{ min-height: 67px; border-radius: 16px; }
+  .opcal-cell{ min-height: 58px; border-radius: 16px; }
   .opcal-hours{ font-size: 20px; }
 }
 
