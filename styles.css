@@ -4755,7 +4755,7 @@ grid-template-rows: 34px repeat(7, 54px);
   padding-right: 0 !important;
 }
 
-/* dDAE_1.279 — Impostazioni: titolo a sinistra (come altre pagine) + underline */
+/* dDAE_1.280 — Impostazioni: titolo a sinistra + underline full-width (nero, sottile) */
 #page-impostazioni .card .hd{
   justify-content: flex-start !important;
 }
@@ -4764,6 +4764,8 @@ grid-template-rows: 34px repeat(7, 54px);
   font-weight: 800;
   letter-spacing: 0.2px;
   position: relative;
+  display: block;
+  width: 100%;
   padding-bottom: 10px;
   margin: 0;
 }
@@ -4771,12 +4773,12 @@ grid-template-rows: 34px repeat(7, 54px);
   content: "";
   position: absolute;
   left: 0;
-  bottom: 2px;
-  width: 64px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--blue);
-  opacity: 0.9;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  border-radius: 0;
+  background: #000;
+  opacity: 0.85;
 }
 
 
