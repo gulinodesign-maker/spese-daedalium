@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.262";
+const BUILD_VERSION = "1.263";
 
 
 
@@ -2755,6 +2755,8 @@ function setupOspite(){
     // Regola: nessuna stanza selezionabile senza intervallo date valido
     const range = _getGuestDateRange();
 
+    const editId = String(state.guestEditId || "").trim();
+
     // reset/lock
     if (!range){
       state.occupiedRooms = new Set();
@@ -2768,7 +2770,7 @@ function setupOspite(){
       return;
     }
 
-    const key = `${range.ci}|${range.co}`;
+    const key = `${range.ci}|${range.co}|${editId}`;
     if (state._roomsAvailKey === key && state.occupiedRooms instanceof Set) {
       renderRooms();
       return;
@@ -2784,6 +2786,12 @@ function setupOspite(){
     const occ = new Set();
 
     for (const g of rows){
+      // In MODIFICA: ignora l'ospite corrente (altrimenti le sue stanze risultano occupate e diventano rosse)
+      if (editId){
+        const gid = guestIdOf(g);
+        if (gid && gid === editId) continue;
+      }
+
       const gi = String(g.check_in ?? g.checkIn ?? g.checkin ?? "").slice(0,10);
       const go = String(g.check_out ?? g.checkOut ?? g.checkout ?? "").slice(0,10);
       if (!gi || !go) continue;
