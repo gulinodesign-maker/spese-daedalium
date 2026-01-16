@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.267"),
+    url("./assets/bg-daedalium.png?v=1.270"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -759,7 +759,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.267"),
+    url("./assets/bg-daedalium.png?v=1.270"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -2595,7 +2595,7 @@ body[data-page="ospiti"] .guest-card .actions {
   --cal-cell-h: clamp(85px, 15.6vw, 140px);
   --cal-day-w:  clamp(32px, 11vw, 84px);
   --cal-room-w: clamp(34px, 10vw, 52px);
-  --cal-gap: 2px;
+  --cal-gap: 4px;
   /* Palette stanze: rosso → indaco in versione pastello */
   --room1: rgba(255, 163, 173, .55); /* rosso pastello */
   --room2: rgba(255, 204, 153, .55); /* arancio pastello */
@@ -2732,7 +2732,7 @@ body[data-page="ospiti"] .guest-card .actions {
   padding-left:12px;
   font-size:11px;
   letter-spacing:.10em;
-  opacity:.92;
+  opacity: 1;
 }
 
 .cal-cell{
@@ -2828,7 +2828,7 @@ body[data-page="ospiti"] .guest-card .actions {
 .cal-legend-dot{ width:8px; height:8px; }
 
 @media (max-width: 360px){
-  :root{ --cal-day-w: clamp(28px, 10.5vw, 72px); --cal-room-w: clamp(34px, 10vw, 52px); --cal-gap: 2px; }
+  :root{ --cal-day-w: clamp(28px, 10.5vw, 72px); --cal-room-w: clamp(34px, 10vw, 52px); --cal-gap: 4px; }
 }
 
 .cal-controls-row{ margin-bottom: 20px; }
@@ -4762,7 +4762,7 @@ grid-template-rows: 34px repeat(7, 54px);
   color: rgba(15,23,42,0.92) !important;
 }
 
-/* dDAE_1.267 — Lavanderia UI fixes */
+/* dDAE_1.268 — Lavanderia UI fixes */
 #page-lavanderia #btnLaundryGenerate{
   background-color: rgba(155,92,32,0.40) !important; /* arancione tinta unita 40% */
   background-image: none !important;
@@ -4779,7 +4779,7 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 
 
-/* dDAE_1.267 Lavanderia */
+/* dDAE_1.268 Lavanderia */
 #page-lavanderia #btnLaundryGenerate{
   background-color: rgba(155,92,32,0.40) !important;
   background-image: none !important;
@@ -4794,4 +4794,77 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-lavanderia #laundryPrintRange{
   color: #4aa3df !important;
   font-weight: 800;
+}
+
+/* ============================
+   dDAE_1.270 — FIX UI mirati (richiesta utente)
+   - Spese > Inserisci spesa: senza vetro sotto (elementi sullo sfondo)
+   - Pulsante Salva: arancione 40% opacita
+   - Popup tipologia letti: Annulla/Conferma identici, centrati; rosso/verde 40%
+============================ */
+
+/* Spese: pagina "Inserisci spesa" senza card glass */
+body[data-page="inserisci"] #page-inserisci .card{
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-page="inserisci"] #page-inserisci .card .hd{
+  border-bottom: none !important;
+  background: transparent !important;
+}
+
+/* ============================
+   dDAE_1.270 — FIX UI mirati (richiesta utente)
+   - Spese > Inserisci spesa: senza vetro sotto (elementi sullo sfondo)
+   - Pulsante Salva: arancione 40% opacita
+   - Popup tipologia letti: Annulla/Conferma identici, centrati; rosso/verde 40%
+============================ */
+
+/* Spese: pagina "Inserisci spesa" senza card glass */
+body[data-page="inserisci"] #page-inserisci .card{
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body[data-page="inserisci"] #page-inserisci .card .hd{
+  border-bottom: none !important;
+  background: transparent !important;
+}
+
+/* Spese: pulsante Salva arancione 40% */
+#page-inserisci #btnSaveSpesa{
+  background: rgba(201,119,43,0.40) !important;
+  border: 1px solid rgba(201,119,43,0.35) !important;
+  color: rgba(255,255,255,0.96) !important;
+}
+
+/* Popup tipologia letti: tasti centrati e identici */
+#roomConfigModal .modal-card > .row:last-of-type{
+  justify-content: center !important;
+  gap: 12px !important;
+}
+#roomConfigModal #rc_cancel,
+#roomConfigModal #rc_save{
+  min-width: 140px;
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#roomConfigModal #rc_cancel{
+  background: rgba(255,59,48,0.40) !important;
+  border: 1px solid rgba(255,59,48,0.35) !important;
+  color: rgba(255,255,255,0.96) !important;
+}
+#roomConfigModal #rc_save{
+  background: rgba(52,199,89,0.40) !important;
+  border: 1px solid rgba(52,199,89,0.35) !important;
+  color: rgba(255,255,255,0.96) !important;
 }
