@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.271";
+const BUILD_VERSION = "1.273";
 
 
 
@@ -2666,11 +2666,9 @@ if (!name) return toast("Inserisci il nome");
   await loadOspiti({ ...(state.period || {}), force:true });
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
 
-  if (isEdit){
-    showPage("ospiti");
-  } else {
-    enterGuestCreateMode();
-  }
+  // Dopo salvataggio: torna sempre alla lista ospiti
+  try { enterGuestCreateMode(); } catch (_) {}
+  showPage("ospiti");
 }
 
 function setupOspite(){
