@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.261";
+const BUILD_VERSION = "1.259";
 
 
 
@@ -2311,7 +2311,6 @@ function enterGuestCreateMode(){
     });
   } catch (_) {}
   try { updateOspiteHdActions(); } catch (_) {}
-
 }
 
 function enterGuestEditMode(ospite){
@@ -2410,17 +2409,6 @@ function enterGuestEditMode(ospite){
   } catch (_) {}
 
   try { updateOspiteHdActions(); } catch (_) {}
-
-  // ✅ FIX (dDAE): entrando in modifica con date gia valorizzate, forza il ricalcolo delle stanze occupate
-  // senza obbligare l'utente a "togliere e rimettere" le date.
-  // Nota: su iOS/Safari gli eventi sintetici sui campi date possono non scattare se il form e appena aperto.
-  // Quindi: invalida la cache e richiama direttamente refreshRoomsAvailability dopo che il DOM e pronto.
-  try {
-    state._roomsAvailKey = "";
-    const run = () => { try { refreshRoomsAvailability(); } catch (_) {} };
-    setTimeout(() => { try { renderRooms(); } catch (_) {} run(); }, 60);
-    setTimeout(() => { state._roomsAvailKey = ""; run(); }, 180);
-  } catch (_) {}
 }
 
 function _guestIdOf(item){
@@ -2765,9 +2753,7 @@ function setupOspite(){
       return;
     }
 
-    // Key include anche l'ID in modifica: altrimenti, passando in EDIT con date invariate,
-    // il ricalcolo potrebbe essere saltato e le stanze restare bloccate.
-    const key = `${range.ci}|${range.co}|${(state.guestEditId != null ? String(state.guestEditId) : '')}`;
+    const key = `${range.ci}|${range.co}`;
     if (state._roomsAvailKey === key && state.occupiedRooms instanceof Set) {
       renderRooms();
       return;
