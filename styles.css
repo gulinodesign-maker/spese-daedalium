@@ -331,6 +331,7 @@ body{
 }
 
 
+
 /* iOS date input overflow fix */
 input[type="date"]{
   display:block;
@@ -4710,4 +4711,19 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-inserisci .card--plain .bd{
   padding-left: 0;
   padding-right: 0;
+}
+
+/* dDAE_1.264 — OSPITE: pulsante azione tinta unita (no gradient)
+   - Crea (Inserisci): arancione 40%
+   - Salva modifiche: azzurro 40%
+*/
+.guest-form-card.is-create #createGuestCard{
+  background: rgba(201,119,43,0.40) !important; /* arancione */
+  border-color: rgba(201,119,43,0.55) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+.guest-form-card.is-edit #createGuestCard{
+  background: rgba(43,124,180,0.40) !important; /* azzurro */
+  border-color: rgba(43,124,180,0.55) !important;
+  color: rgba(15,23,42,0.92) !important;
 }
