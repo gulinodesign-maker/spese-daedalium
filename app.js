@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.264";
+const BUILD_VERSION = "1.265";
 
 
 
@@ -4470,6 +4470,12 @@ document.getElementById('rc_save')?.addEventListener('click', ()=>{
   state.lettiPerStanza[__rc_room] = {matrimoniale, singoli, culla};
   state.bedsDirty = true;
   document.getElementById('roomConfigModal').hidden = true;
+});
+
+// Popup letti: Annulla (chiudi senza salvare)
+document.getElementById('rc_cancel')?.addEventListener('click', ()=>{
+  const m = document.getElementById('roomConfigModal');
+  if (m) m.hidden = true;
 });
 // --- end room beds config ---
 
