@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.275";
+const BUILD_VERSION = "1.274";
 
 
 
@@ -384,7 +384,6 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 
 const state = {
-  navId: 0,
   cleanDay: null,
 
   motivazioni: [],
@@ -1254,15 +1253,10 @@ function bindFastTap(el, fn){
     try{ e.stopPropagation(); }catch(_){ }
     fn();
   };
-
-  // In PWA iOS/Safari: evita doppi trigger (touch/pointer/click)
-  const usePointer = (typeof window !== "undefined") && ("PointerEvent" in window);
-  const events = usePointer ? ["pointerup", "click"] : ["touchend", "click"];
-
-  for (const evt of events){
+  ["click","touchstart","touchend","pointerdown","pointerup"].forEach(evt=>{
     try{ el.addEventListener(evt, handler, { passive:false }); }
     catch(_){ el.addEventListener(evt, handler); }
-  }
+  });
 }
 
 let launcherDelegationBound = false;
@@ -1363,10 +1357,6 @@ function showPage(page){
   }
   if (page === "spese" && !state.speseView) state.speseView = "list";
 
-
-  // Token navigazione: impedisce render/loader fuori contesto quando cambi pagina durante fetch
-  const navId = ++state.navId;
-
   const prevPage = state.page;
   if (page === "calendario" && prevPage && prevPage !== "calendario") {
     state._calendarPrev = prevPage;
@@ -1425,32 +1415,14 @@ state.page = page;
   }
 
 // render on demand
-  if (page === "spese") {
-    const _nav = navId;
-    ensurePeriodData({ showLoader:true })
-      .then(()=>{ if (state.navId !== _nav || state.page !== "spese") return; renderSpese(); })
-      .catch(e=>toast(e.message));
-  }
-  if (page === "riepilogo") {
-    const _nav = navId;
-    ensurePeriodData({ showLoader:true })
-      .then(()=>{ if (state.navId !== _nav || state.page !== "riepilogo") return; renderRiepilogo(); })
-      .catch(e=>toast(e.message));
-  }
-  if (page === "grafico") {
-    const _nav = navId;
-    ensurePeriodData({ showLoader:true })
-      .then(()=>{ if (state.navId !== _nav || state.page !== "grafico") return; renderGrafico(); })
-      .catch(e=>toast(e.message));
-  }
+  if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
+  if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
+  if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
   if (page === "calendario") {
-    const _nav = navId;
     // Entrando in Calendario vogliamo SEMPRE dati freschi.
     // 1) invalida lo stato "ready" e bypassa la cache in-memory (ttl) con force:true.
     try{ if (state.calendar) state.calendar.ready = false; }catch(_){ }
-    ensureCalendarData({ force:true })
-      .then(()=>{ if (state.navId !== _nav || state.page !== "calendario") return; renderCalendario(); })
-      .catch(e=>toast(e.message));
+    ensureCalendarData({ force:true }).then(()=>renderCalendario()).catch(e=>toast(e.message));
   }
   if (page === "ospiti") {
     // Difesa anti-stato sporco: quando torno alla lista, la scheda ospite NON deve restare in "view"
@@ -1486,6 +1458,7 @@ function setupHeader(){
 }
 function setupHome(){
   bindLauncherDelegation();
+  bindHomeDelegation();
   // stampa build
   const build = $("#buildText");
   if (build) build.textContent = `${BUILD_VERSION}`;
@@ -1521,12 +1494,12 @@ function setupHome(){
   // HOME: icona Ospite va alla pagina ospite
   const goO = $("#goOspite");
   if (goO){
-    bindFastTap(goO, () => { hideLauncher(); showPage("ospiti"); });
+    goO.addEventListener("click", () => { showPage("ospiti"); });
   }
   // HOME: icona Ospiti va alla pagina elenco ospiti
   const goOs = $("#goOspiti");
   if (goOs){
-    bindFastTap(goOs, () => { hideLauncher(); showPage("ospiti"); });
+    goOs.addEventListener("click", () => showPage("ospiti"));
   }
 
 
@@ -1555,15 +1528,50 @@ if (goCalendarioTopOspiti){
     bindFastTap(goImp, () => showPage("impostazioni"));
   }
 
-  // HOME: icona Calendario (tap-safe su iOS PWA)
+  // HOME: icona Calendario (attiva e “tap-safe” su iOS PWA)
   const goCal = $("#goCalendario");
   if (goCal){
     goCal.disabled = false;
     goCal.removeAttribute("aria-disabled");
-    bindFastTap(goCal, () => { hideLauncher(); showPage("calendario"); });
+    bindFastTap(goCal, () => showPage("calendario"));
+
+    // HARD FIX iOS PWA: alcuni tap finiscono su SVG/path e non generano click affidabile
+    let __calTapLock = 0;
+    const __go = (e)=>{
+      const now = Date.now();
+      if (now - __calTapLock < 450) return;
+      __calTapLock = now;
+      try{ e.preventDefault(); }catch(_){}
+      try{ e.stopPropagation(); }catch(_){}
+      showPage("calendario");
+    };
+    ["touchend","pointerup"].forEach(evt=>{
+      try{ goCal.addEventListener(evt, __go, { passive:false, capture:true }); }
+      catch(_){ goCal.addEventListener(evt, __go, true); }
+    });
   }
 
-  // Escape chiude il launcher
+
+  // launcher: icone interne navigano alle pagine
+  document.querySelectorAll("#launcherModal [data-go]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const page = btn.getAttribute("data-go");
+      hideLauncher();
+      showPage(page);
+    });
+  });
+
+  // chiusura launcher
+  const closeBtn = $("#closeLauncher");
+  if (closeBtn) closeBtn.addEventListener("click", hideLauncher);
+
+  const modal = $("#launcherModal");
+  if (modal){
+    modal.querySelectorAll("[data-close]").forEach(el => {
+      el.addEventListener("click", hideLauncher);
+    });
+  }
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") hideLauncher();
   });
