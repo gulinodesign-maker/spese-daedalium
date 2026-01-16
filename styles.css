@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.281"),
+    url("./assets/bg-daedalium.png?v=1.282"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -759,7 +759,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.281"),
+    url("./assets/bg-daedalium.png?v=1.282"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -3749,14 +3749,14 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* Range date + report (Da/A + Genera) */
 .laundry-range{
-  display:flex;
-  gap: 6px;
+  /* allinea i controlli (Da/A + Genera report) alla griglia biancheria */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px; /* stesso gap della .laundry-grid */
   margin: 10px 0 12px 0;
   align-items: stretch;
-  flex-wrap: nowrap;
 }
 .laundry-range-field{
-  flex:1;
   position: relative;
   display:flex;
   align-items:center;
@@ -3812,12 +3812,13 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* Bottone nella stessa riga dei tab (stessa dimensione) */
 .laundry-range-btn{
-  flex:1;
   min-height: 48px;
   border-radius: 16px;
   padding: 12px 16px;
   white-space: nowrap;
   min-width: 0;
+
+  width: 100%;
 }
 @media (max-width: 420px){
   .laundry-range-btn{ padding: 12px 10px; font-size: 14px; }
