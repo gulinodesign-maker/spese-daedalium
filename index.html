@@ -678,20 +678,23 @@
 </div>
 <div class="bd">
 <div class="laundry-sub">
-<div class="laundry-period" id="laundryPeriodLabel">—</div>
-<div class="laundry-hint" id="laundryHint"></div>
+  <div class="laundry-hint" id="laundryHint"></div>
 </div>
+
 <div aria-label="Intervallo report lavanderia" class="laundry-range">
-<label class="laundry-range-field">
-<span>Da</span>
-<input id="laundryFrom" type="date"/>
-</label>
-<label class="laundry-range-field">
-<span>A</span>
-<input id="laundryTo" type="date"/>
-</label>
-<button aria-label="Genera report lavanderia" class="btn primary laundry-range-btn" id="btnLaundryGenerate" type="button">Genera report</button>
+  <label class="laundry-range-field" aria-label="Data inizio">
+    <span class="laundry-dateText" id="laundryFromText">--/--/--</span>
+    <input id="laundryFrom" type="date" aria-label="Da"/>
+  </label>
+  <label class="laundry-range-field" aria-label="Data fine">
+    <span class="laundry-dateText" id="laundryToText">--/--/--</span>
+    <input id="laundryTo" type="date" aria-label="A"/>
+  </label>
+  <button aria-label="Genera report lavanderia" class="btn primary laundry-range-btn" id="btnLaundryGenerate" type="button">Genera report</button>
 </div>
+
+<!-- Tab report: mostra SOLO il periodo selezionato (bold) -->
+<div class="laundry-reportChip" id="laundryPeriodLabel" hidden>—</div>
 <div aria-label="Totali lavanderia" class="laundry-grid" id="laundryGrid">
 <div class="laundry-tile" data-key="MAT">
 <div class="laundry-tile-top">
@@ -804,9 +807,9 @@
 <div class="row"><span>Matrimoniale</span><div class="dots" id="rc_matrimoniale"></div></div>
 <div class="row"><span>Letti singoli</span><div class="dots" id="rc_singoli"></div></div>
 <div class="row"><span>Culla</span><div class="dots" id="rc_culla"></div></div>
-<div class="row roomcfg-actions">
-<button class="btn roomcfg-btn roomcfg-cancel" id="rc_cancel" type="button">Annulla</button>
-<button class="btn roomcfg-btn roomcfg-confirm" id="rc_save" type="button">Conferma</button>
+<div class="row" style="justify-content:flex-end; gap:10px; margin-top:12px;">
+<button class="btn ghost" id="rc_cancel" type="button">Annulla</button>
+<button class="btn primary" id="rc_save" type="button">Conferma</button>
 </div>
 </div>
 </div>

@@ -1935,50 +1935,6 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999}
 .modal-card{background:#fff;margin:12vh auto;padding:16px;border-radius:16px;width:min(420px,92vw)}
-
-/* Popup selezione letti stanza: tasti simmetrici, centrati, tinta unita (40%) */
-#roomConfigModal .roomcfg-actions{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap: 12px;
-  margin-top: 14px;
-}
-#roomConfigModal .roomcfg-btn{
-  /* identici per forma e dimensioni */
-  width: 148px;
-  height: 48px;
-  min-height: 48px;
-  padding: 0;
-  border-radius: 16px;
-  font-weight: 850;
-  letter-spacing: 0.2px;
-  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
-
-  /* niente sfumature / glass */
-  background: rgba(15,23,42,0.10);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-#roomConfigModal .roomcfg-btn:active{ transform: scale(0.98); }
-
-/* Annulla: arancio tinta unita al 40% */
-#roomConfigModal .roomcfg-cancel{
-  background: rgba(201,119,43,0.40) !important;
-  border: 1px solid rgba(201,119,43,0.40) !important;
-  color: rgba(15,23,42,0.92) !important;
-}
-/* Conferma: blu tinta unita al 40% */
-#roomConfigModal .roomcfg-confirm{
-  background: rgba(43,124,180,0.40) !important;
-  border: 1px solid rgba(43,124,180,0.40) !important;
-  color: rgba(15,23,42,0.92) !important;
-}
-
-@media (max-width: 380px){
-  /* su schermi piccoli, mantieni simmetria senza andare a capo */
-  #roomConfigModal .roomcfg-btn{ width: 140px; }
-}
 /* Centered modal (used for Pulizie header info) */
 .modal.modal-center{
   display:flex;
@@ -3833,10 +3789,12 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .laundry-range-field{
   flex:1;
+  position: relative;
   display:flex;
   align-items:center;
-  gap: 8px;
-  padding: 12px 16px;
+  justify-content:center;
+  gap: 0;
+  padding: 12px 10px;
   min-height: 48px;
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -3844,21 +3802,44 @@ grid-template-rows: 34px repeat(7, 54px);
   backdrop-filter: blur(12px);
   min-width: 0;
 }
-.laundry-range-field span{
-  font-weight: 500;
-  opacity: .8;
-  min-width: 22px;
-  flex: 0 0 auto;
+
+.laundry-dateText{
+  font-weight: 950;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  opacity: .92;
 }
+
+/* Chip periodo report (sotto la riga date + Genera) */
+.laundry-reportChip{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin: 8px 0 14px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.62);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+  text-align: center;
+}
+.laundry-reportChip b{ font-weight: 950; }
+.laundry-reportChip[hidden]{ display:none !important; }
 .laundry-range-field input[type="date"]{
-  width: 100%;
-  border: 0;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  border:0;
   background: transparent;
   font: inherit;
-  font-weight: 500;
-  color: inherit;
   outline: none;
-  min-width: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 /* Bottone nella stessa riga dei tab (stessa dimensione) */
@@ -3961,7 +3942,7 @@ grid-template-rows: 34px repeat(7, 54px);
 
 @media print {
   body{ background:#fff !important; }
-  .toast, .loading-overlay, #launcher, #periodChip, .hamburger, .home-page, .hd-actions, .clean-topbar, .laundry-history-wrap{ display:none !important; }
+  .toast, .loading-overlay, #launcher, #periodChip, .hamburger, .home-page, .hd-actions, .clean-topbar, .laundry-history-wrap, .laundry-reportChip{ display:none !important; }
   .page{ display:none !important; }
   #page-lavanderia{ display:block !important; }
   #page-lavanderia .card{ box-shadow:none !important; border: 0 !important; background:#fff !important; }

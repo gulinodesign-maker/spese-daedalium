@@ -3723,6 +3723,13 @@ if (cleanSaveHours){
 
 // --- Lavanderia ---
   const btnLaundryGenerate = document.getElementById("btnLaundryGenerate");
+  try{
+    const fromEl = document.getElementById("laundryFrom");
+    const toEl   = document.getElementById("laundryTo");
+    if (fromEl){ fromEl.addEventListener("change", syncLaundryDateText_); fromEl.addEventListener("input", syncLaundryDateText_); }
+    if (toEl){ toEl.addEventListener("change", syncLaundryDateText_); toEl.addEventListener("input", syncLaundryDateText_); }
+    syncLaundryDateText_();
+  }catch(_){ }
 
 if (btnLaundryGenerate){
     bindFastTap(btnLaundryGenerate, async () => {
@@ -4157,7 +4164,7 @@ function renderLaundry_(item){
   const printRangeEl = document.getElementById("laundryPrintRange");
 
   if (!item){
-    if (rangeEl) rangeEl.textContent = "Nessun foglio ancora";
+    if (rangeEl){ rangeEl.hidden = true; rangeEl.textContent = ""; }
     if (printRangeEl) printRangeEl.textContent = "";
     for (const k of LAUNDRY_COLS){
       const v = document.getElementById("laundryVal"+k);
@@ -4170,8 +4177,8 @@ function renderLaundry_(item){
 
   const startLbl = item.startDate ? formatLongDateIT(item.startDate) : "";
   const endLbl = item.endDate ? formatLongDateIT(item.endDate) : "";
-  const rangeText = (startLbl && endLbl) ? `${startLbl} → ${endLbl}` : (startLbl || endLbl || "—");
-  if (rangeEl) rangeEl.textContent = rangeText;
+  const rangeText = (startLbl && endLbl) ? `${startLbl} – ${endLbl}` : (startLbl || endLbl || "—");
+  if (rangeEl){ rangeEl.hidden = false; rangeEl.innerHTML = `<b>${rangeText}</b>`; }
   if (printRangeEl) printRangeEl.textContent = rangeText;
 
   for (const k of LAUNDRY_COLS){
@@ -4289,6 +4296,17 @@ function renderLaundryHistory_(list){
   });
 }
 
+function syncLaundryDateText_(){
+  try{
+    const fromEl = document.getElementById("laundryFrom");
+    const toEl = document.getElementById("laundryTo");
+    const fromTxt = document.getElementById("laundryFromText");
+    const toTxt = document.getElementById("laundryToText");
+    if (fromTxt) fromTxt.textContent = fromEl && fromEl.value ? formatShortDateIT(fromEl.value) : "--/--/--";
+    if (toTxt) toTxt.textContent = toEl && toEl.value ? formatShortDateIT(toEl.value) : "--/--/--";
+  }catch(_){ }
+}
+
 async function loadLavanderia() {
   setLaundryLabels_();
   const hint = document.getElementById("laundryHint");
@@ -4317,10 +4335,11 @@ async function createLavanderiaReport_() {
 
   const startDate = (fromEl && fromEl.value) ? String(fromEl.value).trim() : "";
   const endDate = (toEl && toEl.value) ? String(toEl.value).trim() : "";
+  try{ if (typeof __laundrySyncDateText === "function") __laundrySyncDateText(); }catch(_){ }
 
   if (!startDate || !endDate) {
     if (hint) hint.textContent = "";
-    toast("Seleziona Da e A");
+    toast("Seleziona le date");
     return null;
   }
   if (startDate > endDate) {
