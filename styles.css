@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.265"),
+    url("./assets/bg-daedalium.png?v=1.266"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -759,7 +759,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.265"),
+    url("./assets/bg-daedalium.png?v=1.266"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -1935,6 +1935,50 @@ body[data-page="ospiti"] .guest-card .actions {
 
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999}
 .modal-card{background:#fff;margin:12vh auto;padding:16px;border-radius:16px;width:min(420px,92vw)}
+
+/* Popup selezione letti stanza: tasti simmetrici, centrati, tinta unita (40%) */
+#roomConfigModal .roomcfg-actions{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap: 12px;
+  margin-top: 14px;
+}
+#roomConfigModal .roomcfg-btn{
+  /* identici per forma e dimensioni */
+  width: 148px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 16px;
+  font-weight: 850;
+  letter-spacing: 0.2px;
+  box-shadow: 0 10px 26px rgba(15,23,42,0.10);
+
+  /* niente sfumature / glass */
+  background: rgba(15,23,42,0.10);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#roomConfigModal .roomcfg-btn:active{ transform: scale(0.98); }
+
+/* Annulla: arancio tinta unita al 40% */
+#roomConfigModal .roomcfg-cancel{
+  background: rgba(201,119,43,0.40) !important;
+  border: 1px solid rgba(201,119,43,0.40) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+/* Conferma: blu tinta unita al 40% */
+#roomConfigModal .roomcfg-confirm{
+  background: rgba(43,124,180,0.40) !important;
+  border: 1px solid rgba(43,124,180,0.40) !important;
+  color: rgba(15,23,42,0.92) !important;
+}
+
+@media (max-width: 380px){
+  /* su schermi piccoli, mantieni simmetria senza andare a capo */
+  #roomConfigModal .roomcfg-btn{ width: 140px; }
+}
 /* Centered modal (used for Pulizie header info) */
 .modal.modal-center{
   display:flex;
