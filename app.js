@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.261";
+const BUILD_VERSION = "1.262";
 
 
 
@@ -2312,6 +2312,7 @@ function enterGuestCreateMode(){
   } catch (_) {}
   try { updateOspiteHdActions(); } catch (_) {}
 
+  // (Create mode) nulla da fare sulle stanze: la disponibilita' si aggiorna quando l'utente inserisce le date.
 }
 
 function enterGuestEditMode(ospite){
@@ -2411,15 +2412,17 @@ function enterGuestEditMode(ospite){
 
   try { updateOspiteHdActions(); } catch (_) {}
 
-  // ✅ FIX (dDAE): entrando in modifica con date gia valorizzate, forza il ricalcolo delle stanze occupate
-  // senza obbligare l'utente a "togliere e rimettere" le date.
-  // Nota: su iOS/Safari gli eventi sintetici sui campi date possono non scattare se il form e appena aperto.
-  // Quindi: invalida la cache e richiama direttamente refreshRoomsAvailability dopo che il DOM e pronto.
+  // ✅ FIX dDAE: entrando in modifica con date gia' valorizzate, ricalcola subito disponibilita' stanze.
+  // In iOS/Safari PWA gli handler input/change dei campi date possono non partire finche' l'utente non li tocca.
+  // refreshRoomsAvailability/renderRooms sono definiti in setupOspite: li esponiamo su window e li richiamiamo qui.
   try {
     state._roomsAvailKey = "";
-    const run = () => { try { refreshRoomsAvailability(); } catch (_) {} };
-    setTimeout(() => { try { renderRooms(); } catch (_) {} run(); }, 60);
-    setTimeout(() => { state._roomsAvailKey = ""; run(); }, 180);
+    const run = () => {
+      try { window.__ddae_renderRooms && window.__ddae_renderRooms(); } catch (_) {}
+      try { window.__ddae_refreshRoomsAvailability && window.__ddae_refreshRoomsAvailability(); } catch (_) {}
+    };
+    setTimeout(run, 50);
+    setTimeout(run, 180);
   } catch (_) {}
 }
 
@@ -2765,9 +2768,7 @@ function setupOspite(){
       return;
     }
 
-    // Key include anche l'ID in modifica: altrimenti, passando in EDIT con date invariate,
-    // il ricalcolo potrebbe essere saltato e le stanze restare bloccate.
-    const key = `${range.ci}|${range.co}|${(state.guestEditId != null ? String(state.guestEditId) : '')}`;
+    const key = `${range.ci}|${range.co}`;
     if (state._roomsAvailKey === key && state.occupiedRooms instanceof Set) {
       renderRooms();
       return;
@@ -2782,14 +2783,7 @@ function setupOspite(){
 
     const occ = new Set();
 
-    // FIX EDIT: non considerare come 'occupate' le stanze dell'ospite che sto modificando
-    const _editId = (state.guestEditId != null && state.guestEditId !== '') ? String(state.guestEditId) : null;
-
     for (const g of rows){
-      if (_editId && String(g.id ?? "") === _editId) {
-        // MODIFICA OSPITE: ignora il record corrente nel calcolo occupazione
-        continue;
-      }
       const gi = String(g.check_in ?? g.checkIn ?? g.checkin ?? "").slice(0,10);
       const go = String(g.check_out ?? g.checkOut ?? g.checkout ?? "").slice(0,10);
       if (!gi || !go) continue;
@@ -2847,6 +2841,13 @@ function setupOspite(){
     // matrimonio dot (rimane gestibile come flag)
     setMarriage(state.guestMarriage);
   }
+
+  // Espone le funzioni (scope setupOspite) per poterle richiamare da enterGuestEditMode
+  // senza dipendere dall'evento input/change dei campi date (iOS/Safari PWA).
+  try {
+    window.__ddae_refreshRoomsAvailability = refreshRoomsAvailability;
+    window.__ddae_renderRooms = renderRooms;
+  } catch (_) {}
 
   roomsWrap?.addEventListener("click", (e) => {
     const b = e.target.closest(".room-dot");
