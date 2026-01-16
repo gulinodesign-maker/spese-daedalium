@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.280";
+const BUILD_VERSION = "1.281";
 
 
 
@@ -990,7 +990,7 @@ try {
 
 if (!json.ok) throw new Error(json.error || "API error");
 return json.data;
-  } finally { if (showLoader) if (showLoader) endRequest(); }
+  } finally { if (showLoader) endRequest(); }
 }
 
 

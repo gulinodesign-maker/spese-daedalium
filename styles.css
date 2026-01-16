@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.271"),
+    url("./assets/bg-daedalium.png?v=1.281"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -759,7 +759,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.271"),
+    url("./assets/bg-daedalium.png?v=1.281"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -881,7 +881,6 @@ body[data-page="home"]{
   padding: 10px 6px 8px !important;
   min-height: unset !important;
 }
-.home-icon::after{ display:none !important; }
 .home-icon:active{ transform: scale(0.98); box-shadow: none !important; }
 .home-icon .glyph{
   box-shadow: 0 14px 38px rgba(15,23,42,0.12);
@@ -896,23 +895,13 @@ body[data-page="home"]{
   border-radius: 28px !important;
   font-size: 42px !important;
 }
-.home-icon .label{
-  font-size: 16px !important;
-}
-
 /* Alza il gruppo (card) più in alto */
 .home-page .home-spacer:first-of-type{ flex: 0.35 !important; }
-.home-page .home-spacer:last-of-type{ flex: 1.15 !important; }
-
 /* Card un filo più compatta con icone grandi */
 .home-card{
   width: min(460px, 94vw) !important;
   padding: 14px !important;
 }
-.home-grid{ gap: 12px !important; }
-
-
-
 /* HOME: Build visibile su iPhone (spostata più in alto) */
 #page-home .build{
   padding-bottom: 0 !important;
@@ -1717,17 +1706,6 @@ body::before{
   border: 2px solid rgba(43,124,180,0.55);
   background: rgba(255,255,255,0.8);
 }
-#page-ospite .toggle-check:checked + .pill-toggle{
-  border-color: rgba(43,124,180,0.45);
-  background: rgba(43,124,180,0.10);
-}
-#page-ospite .toggle-check:checked + .pill-toggle .dot{
-  background: var(--blue);
-  border-color: var(--blue);
-}
-
-
-
 /* ============================
    No overlap: hide placeholders in floating fields
 ============================ */
@@ -2904,12 +2882,6 @@ body[data-page="ospiti"] .guest-card .actions {
   width: min(460px, 94vw) !important;
   padding: 14px !important;
 }
-#page-home .home-main{
-  width: 100% !important;
-  max-width: none !important;
-  pointer-events: auto !important;
-}
-
 /* === dDAE_1.229 FIX: Home grid reale (icone non sovrapposte / tappabili) === */
 #page-home .home-grid{
   display: grid !important;
@@ -3740,16 +3712,6 @@ grid-template-rows: 34px repeat(7, 54px);
 
 /* Lavanderia: colori logici (flat, chiari) */
 .laundry-tile[data-key="MAT"]{ --tile-bg: rgba(216,239,252,0.40); }
-.laundry-tile[data-key="SIN"]{ --tile-bg: rgba(199,230,251,0.40); }
-.laundry-tile[data-key="FED"]{ --tile-bg: rgba(182,221,248,0.40); }
-
-.laundry-tile[data-key="TDO"]{ --tile-bg: rgba(255,227,199,0.40); }
-.laundry-tile[data-key="TFA"]{ --tile-bg: rgba(255,216,178,0.40); }
-.laundry-tile[data-key="TBI"]{ --tile-bg: rgba(255,204,156,0.40); }
-
-.laundry-tile[data-key="TPI"]{ --tile-bg: rgba(230,232,236,0.40); }
-.laundry-tile[data-key="TAP"]{ --tile-bg: rgba(190,196,206,0.40); }
-
 /* Nuovo layout tile (pillole verticali) */
 .laundry-tile-top{
   display:flex;
@@ -4755,7 +4717,7 @@ grid-template-rows: 34px repeat(7, 54px);
   padding-right: 0 !important;
 }
 
-/* dDAE_1.280 — Impostazioni: titolo a sinistra + underline full-width (nero, sottile) */
+/* dDAE_1.281 — Impostazioni: titolo a sinistra + underline full-width (nero, sottile) */
 #page-impostazioni .card .hd{
   justify-content: flex-start !important;
 }
@@ -4847,26 +4809,6 @@ grid-template-rows: 34px repeat(7, 54px);
 #page-lavanderia #laundryPrintRange{
   color: #4aa3df !important;
   font-weight: 800;
-}
-
-/* ============================
-   dDAE_1.270 — FIX UI mirati (richiesta utente)
-   - Spese > Inserisci spesa: senza vetro sotto (elementi sullo sfondo)
-   - Pulsante Salva: arancione 40% opacita
-   - Popup tipologia letti: Annulla/Conferma identici, centrati; rosso/verde 40%
-============================ */
-
-/* Spese: pagina "Inserisci spesa" senza card glass */
-body[data-page="inserisci"] #page-inserisci .card{
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body[data-page="inserisci"] #page-inserisci .card .hd{
-  border-bottom: none !important;
-  background: transparent !important;
 }
 
 /* ============================
