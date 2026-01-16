@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.276";
+const BUILD_VERSION = "1.277";
 
 
 
@@ -3385,8 +3385,8 @@ async function init(){
       longFired = false;
     };
 
-    const onLong = () => writeHourDot(el, 0);
-    const onTap = () => writeHourDot(el, readHourDot(el) + 1);
+    const onLong = () => { el.classList.remove("is-saved"); writeHourDot(el, 0); };
+    const onTap = () => { el.classList.remove("is-saved"); writeHourDot(el, readHourDot(el) + 1); };
 
     el.addEventListener("touchstart", (e) => {
       lastTouchAt = Date.now();
@@ -3502,7 +3502,7 @@ async function init(){
 
   
   const clearAllSlots = () => {
-    document.querySelectorAll(".clean-grid .cell.slot").forEach(el => { el.textContent = ""; });
+    document.querySelectorAll(".clean-grid .cell.slot").forEach(el => { el.textContent = ""; el.classList.remove("is-saved"); });
   };
 
   const applyPulizieRows = (rows) => {
@@ -3516,6 +3516,7 @@ async function init(){
         if (!cell) return;
         const n = parseInt(r[c] ?? 0, 10);
         cell.textContent = (!isNaN(n) && n>0) ? String(n) : "";
+        cell.classList.toggle("is-saved", (!isNaN(n) && n>0));
       });
     });
   };
@@ -3538,6 +3539,7 @@ async function init(){
       if (!name) return; // non configurato (riga nascosta)
       const v = map.get(_normOpName(name)) || 0;
       writeHourDot(r.hours, v);
+      r.hours.classList.toggle("is-saved", v > 0);
     });
   };
 
@@ -3549,6 +3551,7 @@ async function init(){
         const name = String(names[idx] || "").trim();
         if (!name) return;
         writeHourDot(r.hours, 0);
+        r.hours.classList.remove("is-saved");
       });
     }
     try{
@@ -3620,11 +3623,13 @@ const buildPuliziePayload = () => {
     pressTarget = slot;
     pressTimer = setTimeout(() => {
       longFired = true;
+      slot.classList.remove("is-saved");
       writeCell(slot, 0);
     }, 500);
   };
 
   const tapSlot = (slot) => {
+    slot.classList.remove("is-saved");
     writeCell(slot, readCell(slot) + 1);
   };
 

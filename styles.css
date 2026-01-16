@@ -3511,6 +3511,12 @@ grid-template-rows: 34px repeat(7, 54px);
   border-color: rgba(0,0,0,.16);
 }
 
+/* Pulizie: indicatore "SALVATO" (cerchio rosso) sulle celle che arrivano dal DB per quel giorno */
+.clean-grid .cell.slot.is-saved{
+  background-image: radial-gradient(circle at center, rgba(255,255,255,0) 58%, rgba(220,0,0,.92) 59%, rgba(220,0,0,.92) 67%, rgba(255,255,255,0) 68%);
+  background-repeat: no-repeat;
+}
+
 
 /* Pulizie: responsive fit smartphone (griglia sempre tutta visibile) */
 #page-pulizie .clean-grid-wrap{
@@ -4113,6 +4119,12 @@ grid-template-rows: 34px repeat(7, 54px);
 }
 .clean-hour-dot:active{
   transform: scale(0.96);
+}
+
+/* Pulizie: indicatore "SALVATO" (cerchio rosso) sui pallini ore operatori */
+.clean-hour-dot.is-saved{
+  outline: 3px solid rgba(220,0,0,.85);
+  outline-offset: 2px;
 }
 .clean-op-hint{
   font-size: 12px;
