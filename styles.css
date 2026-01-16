@@ -29,7 +29,7 @@ html,body{ margin:0; padding:0; overflow-x:hidden; font-family: system-ui, -appl
 body{
   min-height: 100vh;
   background-image:
-    url("./assets/bg-daedalium.png?v=1.266"),
+    url("./assets/bg-daedalium.png?v=1.267"),
     radial-gradient(900px 600px at 10% 0%, rgba(43,124,180,0.10), transparent 62%),
     radial-gradient(800px 520px at 90% 8%, rgba(201,119,43,0.10), transparent 64%),
     radial-gradient(900px 700px at 20% 100%, rgba(122,192,219,0.10), transparent 62%),
@@ -759,7 +759,7 @@ input[type="date"]{
 /* HOME più accattivante (sempre minimal: solo icone + build) */
 body[data-page="home"]{
   background-image:
-    url("./assets/bg-daedalium.png?v=1.266"),
+    url("./assets/bg-daedalium.png?v=1.267"),
     radial-gradient(900px 650px at 12% 8%, rgba(43,124,180,0.18), transparent 62%),
     radial-gradient(820px 560px at 92% 14%, rgba(201,119,43,0.16), transparent 62%),
     radial-gradient(900px 700px at 18% 96%, rgba(122,192,219,0.16), transparent 62%),
@@ -4760,4 +4760,38 @@ grid-template-rows: 34px repeat(7, 54px);
   background: rgba(43,124,180,0.40) !important; /* azzurro */
   border-color: rgba(43,124,180,0.55) !important;
   color: rgba(15,23,42,0.92) !important;
+}
+
+/* dDAE_1.267 — Lavanderia UI fixes */
+#page-lavanderia #btnLaundryGenerate{
+  background-color: rgba(155,92,32,0.40) !important; /* arancione tinta unita 40% */
+  background-image: none !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+#page-lavanderia .laundry-history-wrap .item > div:first-child{
+  font-weight: 700;
+}
+
+#page-lavanderia #laundryPrintRange{
+  color: #4aa3df !important; /* azzurro */
+}
+
+
+/* dDAE_1.267 Lavanderia */
+#page-lavanderia #btnLaundryGenerate{
+  background-color: rgba(155,92,32,0.40) !important;
+  background-image: none !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+#page-lavanderia .laundry-reportChip{
+  font-weight: 700;
+}
+
+#page-lavanderia #laundryPrintRange{
+  color: #4aa3df !important;
+  font-weight: 800;
 }

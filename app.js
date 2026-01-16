@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.266";
+const BUILD_VERSION = "1.267";
 
 
 
@@ -4226,7 +4226,7 @@ function renderLaundryHistory_(list){
     const left = document.createElement("div");
     const startLbl = it.startDate ? formatShortDateIT(it.startDate) : "";
     const endLbl = it.endDate ? formatShortDateIT(it.endDate) : "";
-    left.innerHTML = `<div style="font-weight:950">${startLbl} → ${endLbl}</div><div style="font-size:12px;opacity:.75">${LAUNDRY_COLS.map(k=>`${k}:${it[k]||0}`).join(" · ")}</div>`;
+    left.innerHTML = `<div style="font-weight:950">${startLbl} – ${endLbl}</div>`;
 
 
     const del = document.createElement("button");
