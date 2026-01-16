@@ -3,7 +3,7 @@
 /**
  * Build: incrementa questa stringa alla prossima modifica (es. 1.001)
  */
-const BUILD_VERSION = "1.273";
+const BUILD_VERSION = "1.274";
 
 
 
@@ -198,11 +198,17 @@ function __applyFormValue(id, v){
 }
 
 function __captureUiState(){
+  // IMPORTANT:
+  // Salviamo lo stato della scheda ospite SOLO se l'utente e' davvero nella pagina "ospite".
+  // Su iOS/PWA un reload/restore puo' riportare in primo piano una scheda vecchia (mode/view + layout diverso)
+  // anche se non e' stata richiamata.
+  const shouldPersistGuest = (state.page === "ospite");
+
   const out = {
     page: state.page || "home",
     period: state.period || { from:"", to:"" },
     preset: state.periodPreset || "this_month",
-    guest: {
+    guest: shouldPersistGuest ? {
       mode: state.guestMode || "create",
       editId: state.guestEditId || null,
       depositType: state.guestDepositType || "contante",
@@ -223,7 +229,7 @@ function __captureUiState(){
         guestDeposit: __captureFormValue("guestDeposit"),
         guestSaldo: __captureFormValue("guestSaldo"),
       }
-    },
+    } : null,
     calendar: {
       anchor: (state.calendar && state.calendar.anchor) ? toISO(state.calendar.anchor) : ""
     }
@@ -1412,8 +1418,18 @@ state.page = page;
   if (page === "spese") { ensurePeriodData({ showLoader:true }).then(()=>renderSpese()).catch(e=>toast(e.message)); }
   if (page === "riepilogo") { ensurePeriodData({ showLoader:true }).then(()=>renderRiepilogo()).catch(e=>toast(e.message)); }
   if (page === "grafico") { ensurePeriodData({ showLoader:true }).then(()=>renderGrafico()).catch(e=>toast(e.message)); }
-  if (page === "calendario") { ensureCalendarData().then(()=>renderCalendario()).catch(e=>toast(e.message)); }
-  if (page === "ospiti") loadOspiti(state.period || {}).catch(e => toast(e.message));
+  if (page === "calendario") {
+    // Entrando in Calendario vogliamo SEMPRE dati freschi.
+    // 1) invalida lo stato "ready" e bypassa la cache in-memory (ttl) con force:true.
+    try{ if (state.calendar) state.calendar.ready = false; }catch(_){ }
+    ensureCalendarData({ force:true }).then(()=>renderCalendario()).catch(e=>toast(e.message));
+  }
+  if (page === "ospiti") {
+    // Difesa anti-stato sporco: quando torno alla lista, la scheda ospite NON deve restare in "view"
+    // (layout diverso) o con valori vecchi.
+    try { enterGuestCreateMode(); } catch (_) {}
+    loadOspiti(state.period || {}).catch(e => toast(e.message));
+  }
   if (page === "lavanderia") loadLavanderia().catch(e => toast(e.message));
   if (page === "orepulizia") { initOrePuliziaPage().catch(e=>toast(e.message)); }
 
@@ -2663,6 +2679,12 @@ if (!name) return toast("Inserisci il nome");
     try { await api("stanze", { method:"POST", body: { ospite_id: ospiteId, stanze } }); } catch (_) {}
   }
 
+  // Invalida cache in-memory (ospiti/stanze) e forza refresh Calendario.
+  // Questo evita che il calendario rimanga "stale" finche' non riavvii la PWA.
+  try{ invalidateApiCache("ospiti|"); }catch(_){ }
+  try{ invalidateApiCache("stanze|"); }catch(_){ }
+  try{ if (state.calendar){ state.calendar.ready = false; state.calendar.rangeKey = ""; } }catch(_){ }
+
   await loadOspiti({ ...(state.period || {}), force:true });
   toast(isEdit ? "Modifiche salvate" : "Ospite creato");
 
@@ -2725,6 +2747,7 @@ function setupOspite(){
           toast("Ospite eliminato");
           invalidateApiCache("ospiti|");
           invalidateApiCache("stanze|");
+          try{ if (state.calendar){ state.calendar.ready = false; state.calendar.rangeKey = ""; } }catch(_){ }
           await loadOspiti({ ...(state.period || {}), force:true });
           showPage("ospiti");
         } catch (err) {
@@ -4407,6 +4430,28 @@ registerSW();
 
 
 try{ hardUpdateCheck(); }catch(_){}
+
+// iOS/PWA: quando l'app torna in foreground (senza un vero reload), alcune viste possono restare "stale".
+// Forziamo un refresh mirato del Calendario se e' la pagina attiva.
+async function __onAppResume(){
+  // Se nel frattempo e' stata deployata una nuova build, hardUpdateCheck fara' reload.
+  try{ await hardUpdateCheck(); }catch(_){ }
+
+  try{
+    if (state.page === "calendario") {
+      if (state.calendar){ state.calendar.ready = false; }
+      await ensureCalendarData({ force:true });
+      renderCalendario();
+    }
+  }catch(_){ }
+}
+
+try{
+  window.addEventListener("focus", () => { __onAppResume(); });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) __onAppResume();
+  });
+}catch(_){ }
 // ---  helpers (sheet "stanze") ---
 function buildArrayFromState(){
   const rooms = Array.from(state.guestRooms || []).map(n=>parseInt(n,10)).filter(n=>isFinite(n)).sort((a,b)=>a-b);
@@ -4604,6 +4649,7 @@ function attachDeleteOspite(card, ospite){
     toast("Ospite eliminato");
     invalidateApiCache("ospiti|");
     invalidateApiCache("stanze|");
+    try{ if (state.calendar){ state.calendar.ready = false; state.calendar.rangeKey = ""; } }catch(_){ }
     await loadOspiti({ ...(state.period || {}), force:true });
   });
   const actions = card.querySelector(".actions") || card;
